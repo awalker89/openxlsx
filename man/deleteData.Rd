@@ -1,0 +1,40 @@
+\name{deleteData}
+\alias{deleteData}
+\title{Delete cell data}
+\usage{
+deleteData(wb, sheet, cols, rows, gridExpand = FALSE)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{rows}{Rows to delete data from.}
+
+  \item{cols}{columns to delete data from.}
+
+  \item{gridExpand}{If TRUE, all data in rectangle
+  min(rows):max(rows) X min(cols):max(cols) will be
+  removed.}
+}
+\description{
+Remove contents and styling from a cell.
+}
+\examples{
+## load a workbook
+wb <- createWorkbook("Alex")
+addWorksheet(wb, "Worksheet 1")
+x <- data.frame(matrix(runif(200), ncol = 10))
+names(x) <- paste("Variable", 1:10)
+writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = TRUE)
+
+## delete cell contents
+deleteData(wb, sheet = 1, cols = 3:5, rows = 5:7, gridExpand = TRUE)
+deleteData(wb, sheet = 1, cols = 7:9, rows = 5:7, gridExpand = TRUE)
+
+saveWorkbook(wb, "deleteDataExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+

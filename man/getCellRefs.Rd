@@ -1,0 +1,20 @@
+\name{getCellRefs}
+\alias{getCellRefs}
+\title{Return excel cell coordinates from (x,y) coordinates}
+\usage{
+getCellRefs(cellCoords)
+}
+\arguments{
+  \item{cellCoords}{A data.frame with two columns
+  coordinate pairs.}
+}
+\value{
+Excel alphanumeric cell reference
+}
+\description{
+Return excel cell coordinates from (x,y) coordinates
+}
+\author{
+Alexander Walker
+}
+

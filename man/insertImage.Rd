@@ -1,0 +1,59 @@
+\name{insertImage}
+\alias{insertImage}
+\title{Insert an image into a worksheet}
+\usage{
+insertImage(wb, sheet, file, width = 6, height = 3, startRow = 1,
+  startCol = 1, units = "in", dpi = 300)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{file}{An image file. Valid file types are: jpeg,
+  png, bhp}
+
+  \item{width}{Width of figure.}
+
+  \item{height}{Height of figure.}
+
+  \item{startRow}{Row coordinate of upper left corner of
+  the image}
+
+  \item{startCol}{Column coordinate of upper left corner of
+  the image}
+
+  \item{units}{Units of width and height. Can be "in", "cm"
+  or "px"}
+
+  \item{dpi}{Image resolution used for conversion between
+  units.}
+}
+\description{
+Insert an image into a worksheet
+}
+\examples{
+## Create a new workbook
+wb <- createWorkbook("Ayanami")
+
+## Add some worksheets
+addWorksheet(wb, "Sheet 1")
+addWorksheet(wb, "Sheet 2")
+addWorksheet(wb, "Sheet 3")
+
+## Insert images
+img <- system.file("einstein.jpg", package = "openxlsx")
+insertImage(wb, "Sheet 1", img, startRow = 5,  startCol = 3, width = 6, height = 5)
+insertImage(wb, 2, img, startRow = 2,  startCol = 2)
+insertImage(wb, 3 , img, width = 15, height = 12, startRow = 3, startCol = "G", units = "cm")
+
+## Save workbook
+saveWorkbook(wb, "insertImageExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{insertPlot}}
+}
+

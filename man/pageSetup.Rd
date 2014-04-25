@@ -1,0 +1,52 @@
+\name{pageSetup}
+\alias{pageSetup}
+\title{Set page margins, orientation and print scaling}
+\usage{
+pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
+  right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{orientation}{Page orientation. One of "portrait" or
+  "landscape"}
+
+  \item{scale}{Print scaling. Numeric value between 10 and
+  400}
+
+  \item{left}{left page margin in inches}
+
+  \item{right}{right page margin in inches}
+
+  \item{top}{top page margin in inches}
+
+  \item{bottom}{bottom page margin in inches}
+
+  \item{header}{header margin in inches}
+
+  \item{footer}{footer margin in inches}
+}
+\description{
+Set page margins, orientation and print scaling
+}
+\examples{
+wb <- createWorkbook()
+addWorksheet(wb, "S1")
+addWorksheet(wb, "S2")
+writeDataTable(wb, 1, x = iris[1:30,])
+writeDataTable(wb, 2, x = iris[1:30,], xy = c("C", 5))
+
+## landscape page scaled to 50\%
+pageSetup(wb, sheet = 1, orientation = "landscape", scale = 50)
+
+## portrait page scales to 300\% with 0.5in left and right margins
+pageSetup(wb, sheet = 2, orientation = "portrait", scale = 300, left= 0.5, right = 0.5)
+
+saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+

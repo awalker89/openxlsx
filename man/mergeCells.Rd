@@ -1,0 +1,56 @@
+\name{mergeCells}
+\alias{mergeCells}
+\title{Merge cells within a worksheet}
+\usage{
+mergeCells(wb, sheet, cols, rows)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{cols}{Columns to merge}
+
+  \item{rows}{corresponding rows to merge}
+}
+\description{
+Merge cells within a worksheet
+}
+\details{
+As merged region must be rectangular, only min and max of
+cols and rows are used.
+}
+\examples{
+## Create a new workbook
+wb <- createWorkbook()
+
+## Add a worksheet
+addWorksheet(wb, "Sheet 1")
+addWorksheet(wb, "Sheet 2")
+
+## Merge cells: Row 2 column C to F (3:6)
+mergeCells(wb, "Sheet 1", cols = 2, rows = 3:6)
+
+## Merge cells:Rows 10 to 20 columns A to J (1:10)
+mergeCells(wb, 1, cols = 1:10, rows = 10:20)
+
+## Intersecting merges
+mergeCells(wb, 2, cols = 1:10, rows = 1)
+mergeCells(wb, 2, cols = 5:10, rows = 2)
+mergeCells(wb, 2, cols = c(1,10), rows = 12) ## equivalent to 1:10 as only min/max are used
+#mergeCells(wb, 2, cols = 1, rows = c(1,10)) # Throws error because intersects existing merge
+
+## remove merged cells
+removeCellMerge(wb, 2, cols = 1, rows = 1) # removes any intersecting merges
+mergeCells(wb, 2, cols = 1, rows = 1:10) # Now this works
+
+## Save workbook
+saveWorkbook(wb, "mergeCellsExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{removeCellMerge}}
+}
+

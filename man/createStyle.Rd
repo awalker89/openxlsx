@@ -1,0 +1,97 @@
+\name{createStyle}
+\alias{createStyle}
+\title{Create a cell style}
+\usage{
+createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
+  numFmt = "GENERAL", border = NULL, borderColour = "#000000",
+  bgFill = NULL, fgFill = NULL, halign = NULL, valign = NULL,
+  textDecoration = NULL, wrapText = FALSE)
+}
+\arguments{
+  \item{fontName}{A name of a font. Note the font name is
+  not validated.}
+
+  \item{fontColour}{Colour of text in cell.  A valid hex
+  colour beginning with "#"}
+
+  \item{fontSize}{Font size. A numeric greater than 0.}
+
+  \item{numFmt}{Cell formatting \itemize{
+  \item{\bold{GENERAL}} \item{\bold{NUMBER}}
+  \item{\bold{CURRENCY}} \item{\bold{ACCOUNTING}}
+  \item{\bold{DATE}} \item{\bold{TIME}}
+  \item{\bold{PERCENTAGE}} \item{\bold{FRACTION}}
+  \item{\bold{SCIENTIFIC}} }}
+
+  \item{border}{Cell border (Any combination of "Top",
+  "Bottom", "Left", "Right"). \itemize{ \item{\bold{Top}}{
+  Top border} \item{\bold{Bottom}}{ Bottom border}
+  \item{\bold{Left}}{ Left border} \item{\bold{Right}}{
+  Right border} \item{\bold{TopBottom}}{ Top and bottom
+  border} \item{\bold{LeftRight}}{ Left and right border}
+  \item{\bold{TopLeftRight}}{ Top and Left border}
+  \item{\bold{TopBottomLeftRight}}{ All borders} }}
+
+  \item{borderColour}{Border colour.  A valid hex colour
+  beginning with "#"}
+
+  \item{bgFill}{Cell background fill colour. A valid hex
+  colour beginning with "#"}
+
+  \item{fgFill}{Cell foreground fill colour. A valid hex
+  colour beginning with "#"}
+
+  \item{halign}{Horizontal alignment of cell contents
+  \itemize{ \item{\bold{left}}{ Left horizontal align cell
+  contents} \item{\bold{right}}{ Right horizontal align
+  cell contents} \item{\bold{center}}{ Center horizontal
+  align cell contents} }}
+
+  \item{valign}{A name Vertical alignment of cell contents
+  \itemize{ \item{\bold{top}}{ Top vertical align cell
+  contents} \item{\bold{center}}{ Center vertical align
+  cell contents} \item{\bold{bottom}}{ Bottom vertical
+  align cell contents} }}
+
+  \item{textDecoration}{Text styling. \itemize{
+  \item{\bold{bold}}{ Bold cell contents}
+  \item{\bold{strikeout}}{ Strikeout cell contents}
+  \item{\bold{italic}}{ Italicise cell contents}
+  \item{\bold{underline}}{ Underline cell contents}
+  \item{\bold{underline2}}{ Double underline cell contents}
+  }}
+
+  \item{wrapText}{Logical. If TRUE cell contents will wrap
+  to fit in column.}
+}
+\value{
+A style object
+}
+\description{
+Create a new style to apply to worksheet cells
+}
+\examples{
+## Size 18 Arial, Bold, left horz. aligned, fill colour #1A33CC, all borders,
+style <- createStyle(fontSize = 18, fontName = "Arial",
+  textDecoration = "bold", halign = "left", fgFill = "#1A33CC", border= "TopBottomLeftRight")
+
+## Red, size 24, Bold, italic, underline, center aligned Font, bottom border
+style <- createStyle(fontSize = 24, fontColour = rgb(1,0,0),
+   textDecoration = c("bold", "italic", "underline"),
+   halign = "center", valign = "center", border = "Bottom")
+
+# borderColour is recycled for each border or all colours can be supplied
+
+# colour is recycled 3 times for "Top", "Bottom" & "Right" sides.
+createStyle(border = "TopBottomRight", borderColour = "#FF0000")
+
+# supply all colours
+createStyle(border = "TopBottomLeft", borderColour = c("#FF0000","#00FF00", "#0000FF"))
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{addStyle}}
+}
+

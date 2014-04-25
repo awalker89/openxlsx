@@ -1,0 +1,42 @@
+\name{setColWidths}
+\alias{setColWidths}
+\title{Set worksheet column widths}
+\usage{
+setColWidths(wb, sheet, cols, widths)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{cols}{Indices of cols to set width}
+
+  \item{widths}{widths to set rows to specified in Excel
+  column width units.}
+}
+\description{
+Set worksheet column widths
+}
+\examples{
+## Create a new workbook
+wb <- createWorkbook()
+
+## Add a worksheet
+addWorksheet(wb, "Sheet 1")
+
+## set col widths
+setColWidths(wb, 1, cols = c(1,4,6,7,9), widths = c(16,15,12,18,33))
+
+## overwrite col 1 to auto width ("auto" defaults to 8.43 (excel default) if column is empty)
+setColWidths(wb, 1, "A", "auto")
+
+## Save workbook
+saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{removeColWidths}}
+}
+

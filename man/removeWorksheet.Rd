@@ -1,0 +1,28 @@
+\name{removeWorksheet}
+\alias{removeWorksheet}
+\title{Remove a worksheet from a workbook}
+\usage{
+removeWorksheet(wb, sheet)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+}
+\description{
+Remove a worksheet from a workbook
+}
+\examples{
+## load a workbook
+wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+
+## Remove sheet 2
+removeWorksheet(wb, 2)
+
+## save the modified workbook
+saveWorkbook(wb, "removeWorksheetExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+

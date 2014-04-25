@@ -1,0 +1,42 @@
+\name{setRowHeights}
+\alias{setRowHeights}
+\title{Set worksheet row heights}
+\usage{
+setRowHeights(wb, sheet, rows, heights)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{rows}{Indices of rows to set height}
+
+  \item{heights}{Heights to set rows to specified in Excel
+  column height units.}
+}
+\description{
+Set worksheet row heights
+}
+\examples{
+## Create a new workbook
+wb <- createWorkbook()
+
+## Add a worksheet
+addWorksheet(wb, "Sheet 1")
+
+## set row heights
+setRowHeights(wb, 1, rows = c(1,4,22,2,19), heights = c(24,28,32,42,33))
+
+## overwrite row 1 height
+setRowHeights(wb, 1, rows = 1, heights = 40)
+
+## Save workbook
+saveWorkbook(wb, "setRowHeightsExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{removeRowHeights}}
+}
+

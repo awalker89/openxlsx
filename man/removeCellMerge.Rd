@@ -1,0 +1,26 @@
+\name{removeCellMerge}
+\alias{removeCellMerge}
+\title{Create a new Workbook object}
+\usage{
+removeCellMerge(wb, sheet, cols, rows)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{cols}{vector of column indices}
+
+  \item{rows}{vector of row indices}
+}
+\description{
+Unmerges any merged cells that intersect with the region
+specified by, min(cols):max(cols) X min(rows):max(rows)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{mergeCells}}
+}
+

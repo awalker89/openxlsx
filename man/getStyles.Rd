@@ -1,0 +1,24 @@
+\name{getStyles}
+\alias{getStyles}
+\title{Returns a list of all styles in the workbook}
+\usage{
+getStyles(wb)
+}
+\arguments{
+  \item{wb}{A workbook object}
+}
+\description{
+Returns a list of all styles in the workbook
+}
+\examples{
+## load a workbook
+wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+getStyles(wb)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{replaceStyle}}
+}
+

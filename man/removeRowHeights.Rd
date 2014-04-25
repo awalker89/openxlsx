@@ -1,0 +1,32 @@
+\name{removeRowHeights}
+\alias{removeRowHeights}
+\title{Remove custom row heights from a worksheet}
+\usage{
+removeRowHeights(wb, sheet, rows)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{rows}{Indices of rows to remove custom height (if
+  any) from.}
+}
+\description{
+Remove custom row heights from a worksheet
+}
+\examples{
+## Create a new workbook
+wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+
+## remove any custom row heights in rows 1 to 10
+removeRowHeights(wb, 1, rows = 1:10)
+saveWorkbook(wb, "removeRowHeightsExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{setRowHeights}}
+}
+

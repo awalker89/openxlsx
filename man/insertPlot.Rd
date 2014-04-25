@@ -1,0 +1,71 @@
+\name{insertPlot}
+\alias{insertPlot}
+\title{Insert the current plot into a worksheet}
+\usage{
+insertPlot(wb, sheet, width = 6, height = 4, xy = NULL, startRow = 1,
+  startCol = 1, fileType = "png", units = "in", dpi = 300)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{startRow}{Row coordinate of upper left corner of
+  figure. xy[[2]] when xy is given.}
+
+  \item{startCol}{Column coordinate of upper left corner of
+  figure. xy[[1]] when xy is given.}
+
+  \item{xy}{Alternate way to specify startRow and startCol.
+  A vector of length 2 of form (startcol, startRow)}
+
+  \item{width}{Width of figure. Defaults to 6in.}
+
+  \item{height}{Height of figure . Defaults to 4in.}
+
+  \item{fileType}{File type of image}
+
+  \item{units}{Units of width and height. Can be "in", "cm"
+  or "px"}
+
+  \item{dpi}{Image resolution}
+}
+\description{
+The current plot is saved to a temporary image file using
+dev.copy. This file is then written to the workbook using
+insertImage.
+}
+\examples{
+\dontrun{
+## Create a new workbook
+wb <- createWorkbook()
+
+## Add a worksheet
+addWorksheet(wb, "Sheet 1")
+
+## create a plots
+require(ggplot2)
+p1 <- ggplot2::qplot(mpg, data=mtcars, geom="density",
+  fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Milage")
+p2 <- ggplot2::qplot(age, circumference,
+  data = Orange, geom = c("point", "line"), colour = Tree)
+
+## Insert currently displayed plot to sheet 1, row 1, column 1
+ p1 #plot needs to be showing
+insertPlot(wb, 1, width = 5, height = 3.5, fileType = "png", units = "in")
+
+##
+p2
+insertPlot(wb, 1, xy = c("J", 2), width = 16, height = 10,  fileType = "png", units = "cm")
+
+## Save workbook
+saveWorkbook(wb, "insertPlotExample.xlsx", overwrite = TRUE)
+}
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{insertImage}}
+}
+

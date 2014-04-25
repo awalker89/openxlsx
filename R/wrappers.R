@@ -1,0 +1,1496 @@
+
+
+#' @useDynLib openxlsx
+#' @importFrom Rcpp sourceCpp 
+
+
+#' @name createWorkbook
+#' @title Create a new Workbook object
+#' @param creator Creator of the workbook (your name). Defaults to login username
+#' @author Alexander Walker
+#' @return Workbook object
+#' @export
+#' @seealso \code{\link{loadWorkbook}}
+#' @seealso \code{\link{saveWorkbook}}
+#' @import methods
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("Alex")
+#' 
+#' ## Save workbook to working directory
+#' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
+createWorkbook <- function(creator = Sys.getenv("USERNAME")){
+  
+  if(class(creator) != "character")
+    creator <- ""
+  
+  if(length(creator) > 1)
+    creator <- creator[[1]]
+  
+  zip <- Sys.getenv("R_ZIPCMD", "zip")
+  if(nchar(zip[[1]]) == 0)
+    stop("No zip application found. Please install Rtools.")  
+  
+  invisible(Workbook$new(creator))
+}
+
+
+#' @name saveWorkbook
+#' @title save Workbook to file
+#' @author Alexander Walker
+#' @param wb A Workbook object to write to file
+#' @param file A character string naming an xlsx file
+#' @param overwrite If TRUE, overwrite any existing file.
+#' @seealso \code{\link{createWorkbook}}
+#' @seealso \code{\link{addWorksheet}}
+#' @seealso \code{\link{loadWorkbook}}
+#' @seealso \code{\link{writeData}}
+#' @seealso \code{\link{writeDataTable}}
+#' @export
+#' @examples
+#' ## Create a new workbook and add a worksheet
+#' wb <- createWorkbook("Creator of workbook")
+#' addWorksheet(wb, sheetName = "My first worksheet")
+#' 
+#' ## Save workbook to working directory
+#' saveWorkbook(wb, file = "saveWorkbookExample.xlsx", overwrite = TRUE) 
+saveWorkbook <- function(wb, file, overwrite = FALSE){
+  
+  wd <- getwd()
+  on.exit(setwd(wd), add = TRUE)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!grepl("\\.xlsx", file))
+    stop("File name must end with '.xlsx'")
+  
+  if(!is.logical(overwrite))
+    overwrite = FALSE
+  
+  file <- gsub("\\\\", "\\/", file)
+  slashPos <- unlist(gregexpr("\\/", file))
+  
+  if(grepl("\\/", file)){
+    path <- substr(file, 1, tail(slashPos,1))
+    fileName <- substring(file, tail(slashPos,1)+1)
+  }else{
+    path <- getwd()
+    fileName <- file
+  }
+  
+  if(file.exists(file.path(path, fileName)) & !overwrite)
+    stop("File already exists!")
+  
+  wb$saveWorkbook(path = path, fileName = fileName, overwrite = overwrite)
+  
+  invisible(1)
+}
+
+
+#' @name mergeCells
+#' @title Merge cells within a worksheet
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to merge
+#' @param rows corresponding rows to merge
+#' @details As merged region must be rectangular, only min and max of cols and rows are used.
+#' @author Alexander Walker
+#' @seealso \code{\link{removeCellMerge}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook()
+#' 
+#' ## Add a worksheet
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#'
+#' ## Merge cells: Row 2 column C to F (3:6)
+#' mergeCells(wb, "Sheet 1", cols = 2, rows = 3:6)
+#' 
+#' ## Merge cells:Rows 10 to 20 columns A to J (1:10)
+#' mergeCells(wb, 1, cols = 1:10, rows = 10:20)
+#'
+#' ## Intersecting merges
+#' mergeCells(wb, 2, cols = 1:10, rows = 1)
+#' mergeCells(wb, 2, cols = 5:10, rows = 2)
+#' mergeCells(wb, 2, cols = c(1,10), rows = 12) ## equivalent to 1:10 as only min/max are used
+#' #mergeCells(wb, 2, cols = 1, rows = c(1,10)) # Throws error because intersects existing merge
+#' 
+#' ## remove merged cells
+#' removeCellMerge(wb, 2, cols = 1, rows = 1) # removes any intersecting merges
+#' mergeCells(wb, 2, cols = 1, rows = 1:10) # Now this works
+#'
+#' ## Save workbook
+#' saveWorkbook(wb, "mergeCellsExample.xlsx", overwrite = TRUE)
+mergeCells <- function(wb, sheet, cols, rows){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)
+  
+  wb$mergeCells(sheet, startRow = min(rows), endRow = max(rows), startCol = min(cols), endCol = max(cols))
+  
+}
+
+
+#' @name removeCellMerge
+#' @title Create a new Workbook object
+#' @description Unmerges any merged cells that intersect
+#' with the region specified by, min(cols):max(cols) X min(rows):max(rows)
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols vector of column indices
+#' @param rows vector of row indices
+#' @author Alexander Walker
+#' @export
+#' @seealso \code{\link{mergeCells}}
+removeCellMerge <- function(wb, sheet, cols, rows){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  cols <- convertFromExcelRef(cols)
+  rows <- as.numeric(rows)
+  
+  wb$removeCellMerge(sheet, startRow = min(rows), endRow = max(rows), startCol = min(cols), endCol = max(cols))
+
+}
+
+
+#' @name sheets
+#' @title Returns names of worksheets.
+#' @param wb A workbook object
+#' @return Name of worksheet(s) for a given index
+#' @author Alexander Walker
+#' @seealso \code{\link{renameWorksheet}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook()
+#' 
+#' ## Add some worksheets
+#' addWorksheet(wb, "Worksheet Name")
+#' addWorksheet(wb, "This is worksheet 2")
+#' addWorksheet(wb, "The third worksheet")
+#' 
+#' ## Return names of sheets, can not be used for assignment.
+#' sheets(wb)
+sheets <- function(wb){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+ 
+  
+  nms <- names(wb$worksheets)
+  
+  ## Invalid XML characters
+  nms <- gsub("&quot;", '"', nms)
+  nms <- gsub("&amp;", '&', nms)
+  nms <- gsub("&apos;", "'", nms)
+  nms <- gsub("&lt;", '<', nms)
+  nms <- gsub("&gt;", '>', nms)
+  
+ return(nms)
+}
+
+
+
+#' @name addWorksheet
+#' @title Add a worksheet to a workbook
+#' @author Alexander Walker
+#' @param wb A Workbook object to attach the new worksheet
+#' @param sheetName A name for the new worksheet
+#' @param gridLines A logical. If TRUE, the worksheet grid lines will be
+#' shows, else they will be hidden.
+#' or hidden.
+#' @return XML tree
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("Fred")
+#' 
+#' ## Add 3 worksheets
+#' addWorksheet(wb, "Worksheet Name")
+#' addWorksheet(wb, "This is worksheet 2")
+#' addWorksheet(wb, "The third worksheet")
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "addWorksheetExample.xlsx", overwrite = TRUE)
+addWorksheet <- function(wb, sheetName, gridLines = TRUE){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(sheetName %in% names(wb$worksheets))
+    stop("A worksheet by that name already exists!")
+  
+  if(!is.logical(gridLines) | length(gridLines) > 1)
+    stop("gridLines must be a logical of length 1.")
+  
+  if(nchar(sheetName) > 29)
+    stop("sheetName too long! Max length is 28 characters.")
+  
+  ## Invalid XML characters
+  sheetName <- gsub('"', "&quot;", sheetName)
+  sheetName <- gsub('&', "&amp;", sheetName)
+  sheetName <- gsub("'", "&apos;", sheetName)
+  sheetName <- gsub('<', "&lt;", sheetName)
+  sheetName <- gsub('>', "&gt;", sheetName)
+  
+  invisible(wb$addWorksheet(sheetName, gridLines))
+} 
+
+
+#' @name renameWorksheet
+#' @title Rename an exisiting worksheet
+#' @author Alexander Walker
+#' @param wb A Workbook object containing a worksheet
+#' @param sheet The name or index of the worksheet to rename
+#' @param newName The new name of the worksheet. No longer than 28 chars.
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("CREATOR")
+#' 
+#' ## Add 3 worksheets
+#' addWorksheet(wb, "Worksheet Name")
+#' addWorksheet(wb, "This is worksheet 2")
+#' addWorksheet(wb, "Not the best name")
+#' 
+#' ## Rename worksheet 1
+#' renameWorksheet(wb, 1, "New name for sheet 1")
+#' 
+#' ## Rename worksheet 3
+#' renameWorksheet(wb, "Not the best name", "A better name")
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "renameWorksheetExample.xlsx", overwrite = TRUE)
+renameWorksheet <- function(wb, sheet, newName){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!"characrter" %in% class(newName))
+    newName <- as.character(newName)
+  
+  invisible(wb$setSheetName(sheet, newName))
+}
+
+
+#' @name convertFromExcelRef
+#' @author Alexander Walker
+#' @title Convert excel column name to integer index
+#' @param col An excel column reference
+#' @export
+#' @examples
+#' convertFromExcelRef("DOG")
+#' convertFromExcelRef("COW")
+#' 
+#' ## numbers will be removed
+#' convertFromExcelRef("R22")
+convertFromExcelRef <- function(col){
+  
+  col <- toupper(col)
+  charFlag <- grepl("[A-Z]", col)
+  if(any(charFlag)){
+    col[charFlag] <- gsub("[0-9]", "", col[charFlag])
+    d <- lapply(strsplit(col[charFlag], split = ""), function(x) match(rev(x), LETTERS))
+    col[charFlag] <- unlist(lapply(1:length(d), function(i) sum(d[[i]]*(26^(0:(length(d[[i]])-1)))) ))
+  }
+  
+  col[!charFlag] <- as.numeric(col[!charFlag])
+  
+  return(as.numeric(col))
+}
+
+
+
+#' @name createStyle 
+#' @title Create a cell style
+#' @description Create a new style to apply to worksheet cells
+#' @author Alexander Walker
+#' @seealso \code{\link{addStyle}}
+#' @param fontName A name of a font. Note the font name is not validated.
+#' @param fontColour Colour of text in cell.  A valid hex colour beginning with "#"  
+#' @param fontSize Font size. A numeric greater than 0.
+#' @param numFmt Cell formatting
+#' \itemize{
+#'   \item{\bold{GENERAL}}
+#'   \item{\bold{NUMBER}}
+#'   \item{\bold{CURRENCY}}
+#'   \item{\bold{ACCOUNTING}}
+#'   \item{\bold{DATE}}
+#'   \item{\bold{TIME}}
+#'   \item{\bold{PERCENTAGE}}
+#'   \item{\bold{FRACTION}}
+#'   \item{\bold{SCIENTIFIC}}
+#' }
+#' 
+#' @param border Cell border 
+#' (Any combination of "Top", "Bottom", "Left", "Right").
+#' \itemize{
+#'    \item{\bold{Top}}{ Top border}
+#'    \item{\bold{Bottom}}{ Bottom border}
+#'    \item{\bold{Left}}{ Left border}
+#'    \item{\bold{Right}}{ Right border}
+#'    \item{\bold{TopBottom}}{ Top and bottom border}
+#'    \item{\bold{LeftRight}}{ Left and right border}
+#'    \item{\bold{TopLeftRight}}{ Top and Left border}
+#'    \item{\bold{TopBottomLeftRight}}{ All borders}
+#'   }
+#'   
+#' @param borderColour Border colour.  A valid hex colour beginning with "#"   
+#' @param bgFill Cell background fill colour. A valid hex colour beginning with "#"  
+#' @param fgFill Cell foreground fill colour. A valid hex colour beginning with "#"  
+
+#'   
+#' @param halign
+#' Horizontal alignment of cell contents
+#' \itemize{
+#'    \item{\bold{left}}{ Left horizontal align cell contents}
+#'    \item{\bold{right}}{ Right horizontal align cell contents}
+#'    \item{\bold{center}}{ Center horizontal align cell contents}
+#'   }   
+#'   
+#' @param valign A name
+#' Vertical alignment of cell contents
+#' \itemize{
+#'    \item{\bold{top}}{ Top vertical align cell contents}
+#'    \item{\bold{center}}{ Center vertical align cell contents}
+#'    \item{\bold{bottom}}{ Bottom vertical align cell contents}
+#'   } 
+#'   
+#' @param textDecoration
+#' Text styling.
+#' \itemize{
+#'    \item{\bold{bold}}{ Bold cell contents}
+#'    \item{\bold{strikeout}}{ Strikeout cell contents}
+#'    \item{\bold{italic}}{ Italicise cell contents}
+#'    \item{\bold{underline}}{ Underline cell contents}
+#'    \item{\bold{underline2}}{ Double underline cell contents}
+#'   } 
+#'   
+#' @param wrapText Logical. If TRUE cell contents will wrap to fit in column.  
+#' @return A style object
+#' @export
+#' @examples
+#' 
+#' ## Size 18 Arial, Bold, left horz. aligned, fill colour #1A33CC, all borders,
+#' style <- createStyle(fontSize = 18, fontName = "Arial",
+#'   textDecoration = "bold", halign = "left", fgFill = "#1A33CC", border= "TopBottomLeftRight")
+#' 
+#' ## Red, size 24, Bold, italic, underline, center aligned Font, bottom border
+#' style <- createStyle(fontSize = 24, fontColour = rgb(1,0,0),
+#'    textDecoration = c("bold", "italic", "underline"), 
+#'    halign = "center", valign = "center", border = "Bottom")
+#'  
+#' # borderColour is recycled for each border or all colours can be supplied
+#' 
+#' # colour is recycled 3 times for "Top", "Bottom" & "Right" sides.
+#' createStyle(border = "TopBottomRight", borderColour = "#FF0000") 
+#' 
+#' # supply all colours
+#' createStyle(border = "TopBottomLeft", borderColour = c("#FF0000","#00FF00", "#0000FF"))
+#' 
+createStyle <- function(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
+                        numFmt = "GENERAL",
+                        border = NULL, borderColour = "#000000",
+                        bgFill = NULL, fgFill = NULL,
+                        halign = NULL, valign = NULL, 
+                        textDecoration = NULL, wrapText = FALSE){
+  
+  ### Error checking
+  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNT", "DATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT")
+  numFmt <- toupper(numFmt)
+  if(!numFmt %in% validNumFmt)
+    stop("Invalid numFmt")
+     
+  numFmtMapping <- list(list("numFmtId" = 0),
+                        list("numFmtId" = 2),
+                        list("numFmtId" = 164, formatCode = "&quot;$&quot;#,##0.00"),
+                        list("numFmtId" = 44),
+                        list("numFmtId" = 14),
+                        list("numFmtId" = 167),
+                        list("numFmtId" = 10),
+                        list("numFmtId" = 11),
+                        list("numFmtId" = 49))
+  
+  if(!is.null(halign)){
+    halign <- tolower(halign[[1]])
+    if(!halign %in% c("left", "right", "center"))
+      stop("Invalid halign argument!")
+  }
+  
+  if(!is.null(valign)){
+    valign <- tolower(valign[[1]])
+    if(!valign %in% c("top", "bottom", "center"))
+      stop("Invalid valign argument!")
+  }
+    
+  if(!is.logical(wrapText))
+    stop("Invalid wrapText")
+  
+  textDecoration <- tolower(textDecoration)
+  if(!is.null(textDecoration)){
+    if(!all(textDecoration %in% c("bold", "strikeout", "italic", "underline", "underline2", "")))
+       stop("Invalid textDecoration!")
+  }
+  
+  
+  if(!is.null(bgFill)){
+    bgFill <- toupper(bgFill)
+    if(!grepl("#[0-9A-F]{6}", bgFill))
+      stop("Invalid hex code for bgFill")
+  }
+  
+  if(!is.null(fgFill)){
+    fgFill <- toupper(fgFill)
+    if(!grepl("#[0-9A-F]{6}", fgFill))
+      stop("Invalid hex code for fgFill")
+  }
+  
+  fontColour <- toupper(fontColour)
+  borderColour <- toupper(borderColour)
+  if(length(fontName) == 0) stop("Invalid font name!")
+  if(fontSize < 1) stop("Font size must be greater than 0!")
+  if(!grepl("#[A-F0-9]{6}", fontColour)) stop("Invalid fontColour!")
+  if(!all(grepl("#[A-F0-9]{6}", borderColour))) stop("Invalid borderColour!")
+  
+  
+  ######################### error checking complete #############################
+  style <- Style$new()
+  
+  style$fontName <- list(val = fontName)
+  style$fontSize <- list(val = fontSize)
+  style$fontColour <- list(rgb =  gsub("#", "FF", fontColour))
+    
+  style$fontDecoration <- toupper(textDecoration)
+  
+    
+   ## fill    
+   if(is.null(bgFill)){
+     bgFillList <- NULL
+   }else if(grepl("#[A-F0-9]{6}", bgFill)){
+     bgFillList <- list(rgb = gsub("#", "FF", bgFill))
+   }else{
+     bgFillList <- bgFill
+   }
+    
+   style$fill <- list(fillBg = bgFillList)
+   if(is.null(fgFill)){
+     fgFillList <- NULL
+   }else if(grepl("#[A-F0-9]{6}", fgFill)){
+     style$fill <- append(style$fill, list(fillFg = list(rgb = gsub("#", "FF", fgFill))))
+   }else{
+     
+     style$fill <- append(style$fill, list(fillFg = fgFill))
+   }
+  
+  ## border
+  if(!is.null(border)){
+    border <- toupper(border)
+    
+    ## find position of each side in string
+    sides <- c("LEFT", "RIGHT", "TOP", "BOTTOM")
+    pos <- sapply(sides, function(x) regexpr(x, border))
+    pos <- pos[order(pos, decreasing = FALSE)]
+    nSides <- sum(pos > 0)
+    
+    borderColour <- gsub("#", "FF", borderColour)
+    borderColour <- rep(borderColour, length.out = nSides)
+    
+    pos <- pos[pos > 0]
+    
+    if(length(pos) == 0)
+      stop("Unknown border argument")
+    
+    names(borderColour) <- names(pos)
+         
+    if("LEFT" %in% names(pos)){
+      style$borderLeft <- "thin"
+      style$borderLeftColour <- list(rgb = borderColour[["LEFT"]])
+    }
+    
+    if("RIGHT" %in% names(pos)){
+      style$borderRight <- "thin"
+      style$borderRightColour <- list(rgb = borderColour[["RIGHT"]])
+    }
+    
+    if("TOP" %in% names(pos)){
+      style$borderTop <- "thin"
+      style$borderTopColour <- list(rgb = borderColour[["TOP"]])
+    }
+    
+    if("BOTTOM" %in% names(pos)){
+      style$borderBottom <- "thin"
+      style$borderBottomColour <- list(rgb = borderColour[["BOTTOM"]])
+    }
+
+  }
+  
+   ## other fields
+   style$halign <- halign
+   style$valign <- valign
+   style$wrapText <- wrapText[[1]]
+   style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
+     
+
+  return(style)
+} 
+
+
+
+#' @name addStyle 
+#' @title Add a style to a set of cells
+#' @description Function adds a style to a specified set of cells.
+#' @author Alexander Walker
+#' @param wb A Workbook object containing a worksheet.
+#' @param sheet A worksheet to apply the style to.
+#' @param style A style object returned from createStyle()
+#' @param rows Rows to apply style to.
+#' @param cols columns to apply style to.
+#' @param gridExpand If TRUE, style will be applied to all combinations of rows and cols.
+#' @seealso \code{\link{createStyle}}
+#' @seealso expand.grid
+#' @export
+#' @examples
+#' ## See package vignette for more examples.
+#' 
+#' ## Create a new workbook
+#' wb <- createWorkbook("My name here")
+#' 
+#' ## Add a worksheets
+#' addWorksheet(wb, "Expenditure", gridLines = FALSE) 
+#' addWorksheet(wb, "A Sheet to style") 
+#' 
+#' ##write data to worksheet 1
+#' writeData(wb, sheet = 1, USPersonalExpenditure, rowNames = TRUE)
+#' 
+#' ## create and add a style to the column headers
+#' headerStyle <- createStyle(fontSize = 14, fontColour = "#FFFFFF", halign = "center",
+#'                         fgFill = "#4F81BD", border="TopBottom", borderColour = "#4F81BD")
+#' 
+#' addStyle(wb, sheet = 1, headerStyle, rows = 1, cols = 1:6, gridExpand = TRUE)
+#' 
+#' ## style for body 
+#' bodyStyle <- createStyle(border="TopBottom", borderColour = "#4F81BD")
+#' addStyle(wb, sheet = 1, bodyStyle, rows = 2:6, cols = 1:6, gridExpand = TRUE)
+#' setColWidths(wb, 1, cols=1, widths = 21) ## set column width for row names column
+#' 
+#' saveWorkbook(wb, "addStyleExample.xlsx", overwrite = TRUE)
+addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
+  
+  sheet = wb$validateSheet(sheet)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  cols <- convertFromExcelRef(cols)
+  rows <- as.numeric(rows)
+  
+  ## rows and cols need to be the same length
+  if(gridExpand){
+    combs <- expand.grid(rows, cols) 
+    rows <- combs[,1]
+    cols <- combs[,2]
+  }
+  
+  if(length(rows) != length(cols)){
+    stop("Length of rows and cols must be equal.")
+  }
+  
+  styleElements <- list(style = style,
+                        cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                     rows = rows,
+                                     cols = cols)))
+  
+  invisible(wb$styleObjects <- append(wb$styleObjects, list(styleElements)))
+  
+}
+
+
+#' @name getCellRefs
+#' @title Return excel cell coordinates from (x,y) coordinates
+#' @author Alexander Walker
+#' @param cellCoords A data.frame with two columns coordinate pairs. 
+#' @return Excel alphanumeric cell reference
+getCellRefs <- function(cellCoords){
+  l <- .Call("openxlsx_convert2ExcelRef", unlist(cellCoords[,2]), LETTERS, PACKAGE="openxlsx")
+  paste0(l, cellCoords[,1])
+}
+
+
+#' @name conditionalFormat
+#' @title Add conditional formatting to cells
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to apply conditional formattiong
+#' @param rows Rows to apply conditional formattiong
+#' @param rule The condition under which to apply the formatting.  See details.
+#' @param style A Style to apply to those cells that satisify the rule. A Style object returned from createStyle()
+#' @details Conditional format will be applied to all cells within region specified by rows X cols.
+#' valid operators are "<", "<=", ">", ">=", "==", "!=".
+#' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' @seealso \code{\link{createStyle}}
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' 
+#' ## Add a worksheet and data
+#' addWorksheet(wb, "Worksheet Name")
+#' writeData(wb, 1, matrix(runif(100), ncol = 10), xy = c(1,1), colNames=FALSE)
+#' writeData(wb, 1, matrix(sample(LETTERS, 100, rep = TRUE), ncol = 10), xy = c(1, 11), colNames=FALSE)
+#' 
+#' ## Create a style
+#' conditionalStyle <- createStyle(bgFill = "#FFFF00")
+#' 
+#' ## Conditionally format cells:Rows 10 to 20 columns A to J (1:10)
+#' conditionalFormat(wb, 1, cols = 1:10, rows = 1:10, rule = "< 0.5", style = conditionalStyle)
+#' conditionalFormat(wb, 1, cols = 1:10, rows = 11:20, rule = '== "A"')  # default style
+#'
+#' ## Save workbook
+#' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
+conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL){
+  
+  ruleVals <- c('beginsWith', 'between', 'endsWith', 'equal', 'greaterThan',
+                'greaterThanOrEqual', "lessThan", 'lessThanOrEqual', 'notBetween',
+                'notContains', 'notEqual')
+  
+  operator <- NULL  
+  
+  if(grepl("<=", rule)){
+    operator <- "lessThanOrEqual"    
+    foundFlag <- TRUE
+  }else if(grepl(">=", rule)){
+    operator <- "greaterThanOrEqual"
+    foundFlag <- TRUE
+  } else if(grepl("!=", rule)){
+    operator <- "notEqual"
+    foundFlag <- TRUE
+  } else if(grepl("==", rule)){
+    operator <- "equal"
+    foundFlag <- TRUE
+  }else if(grepl(">", rule)){
+    operator <- "greaterThan"
+    foundFlag <- TRUE
+  } else if(grepl("<", rule)){
+    operator <- "lessThan"
+    foundFlag <- TRUE
+  }
+  
+  msg <- c(ruleVals, "<", ">", "!=", "==")
+  if(!toupper(rule) %in% ruleVals & !foundFlag)
+    stop(sprintf("Cannot find specified rule.  Specify one of: \n%s", paste(msg, collapse = "\n")))
+  
+  if(is.null(operator))
+    operator <- ruleVals[toupper(rule) %in% toupper(ruleVals)]
+  
+  value <- gsub('[^0-9//.]', '', rule)
+  if(value == ""){
+    value <- regmatches(rule, regexpr('".*"', rule, perl = TRUE))
+    if(length(value) == 0)
+      value <- ""
+  }
+  
+  if(value == "")
+    stop('Cannot find value part of condition.  Format of rule is "operator value".  Place value in double quotes if character.') 
+  
+  
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)  
+  rows <- as.numeric(rows)
+      
+  if(is.null(style))
+    style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+  invisible(dxfId <- wb$addDXFS(style))
+  invisible(wb$conditionalFormatCell(sheet,
+                                     startRow = min(rows),
+                                     endRow = max(rows),
+                                     startCol = min(cols),
+                                     endCol = max(cols),
+                                     dxfId, operator = operator, value = value))
+  
+}
+
+
+
+#' @name freezePane
+#' @title Freeze a worksheet pane
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param firstActiveRow Top row of active region
+#' @param firstActiveCol Furthest left column of active region
+#' @param firstRow If TRUE, freezes the first row (equivalent to firstActiveRow = 2)
+#' @param firstCol If TRUE, freezes the first column (equivalent to firstActiveCol = 2)
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("Kenshin")
+#' 
+#' ## Add some worksheets
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' addWorksheet(wb, "Sheet 3")
+#' addWorksheet(wb, "Sheet 4")
+#'
+#' ## Freeze Panes
+#' freezePane(wb, "Sheet 1" ,  firstActiveRow = 5,  firstActiveCol = 3)
+#' freezePane(wb, "Sheet 2", firstCol = TRUE)  ## shortcut to firstActiveCol = 2
+#' freezePane(wb, 3, firstRow = TRUE)  ## shortcut to firstActiveRow = 2
+#' freezePane(wb, 4, firstActiveRow = 1, firstActiveCol = "D")
+#'  
+#' ## Save workbook
+#' saveWorkbook(wb, "freezePaneExample.xlsx", overwrite = TRUE)
+freezePane <- function(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL, firstRow = FALSE, firstCol = FALSE){
+  
+  
+  ## Convert to numeric if column letter given
+  firstActiveRow <- convertFromExcelRef(firstActiveRow)
+  firstActiveCol <- convertFromExcelRef(firstActiveCol)
+  
+  if(is.null(firstActiveRow)) firstActiveRow <- 1
+  if(is.null(firstActiveCol)) firstActiveCol <- 1
+  if(!is.logical(firstRow)) firstRow <- FALSE
+  if(!is.logical(firstCol)) firstCol <- FALSE
+  
+  if(firstRow & !firstCol){
+    invisible(wb$freezePanes(sheet, firstRow = firstRow))
+  }else if(firstCol &! firstRow){
+    invisible(wb$freezePanes(sheet, firstCol = firstCol))
+  }else if(firstRow & firstCol){
+    invisible(wb$freezePanes(sheet, firstActiveRow = 2, firstActiveCol = 2))
+  }else{ 
+    
+    if(!is.numeric(firstActiveRow))
+      stop("firstActiveRow must be numeric.")
+    
+    invisible(wb$freezePanes(sheet, firstActiveRow = firstActiveRow, firstActiveCol = firstActiveCol, firstRow = firstRow, firstCol = firstCol)  )
+  }
+  
+}
+
+
+convert2EMU <- function(d, units){
+  
+  if(grepl("in", units))
+    d <- d*2.54
+  
+  if(grepl("mm|milli", units))
+    d <- d/10
+  
+  d*360000
+  
+}
+
+
+
+
+#' @name insertImage
+#' @title Insert an image into a worksheet 
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param file An image file. Valid file types are: jpeg, png, bhp
+#' @param width Width of figure.
+#' @param height Height of figure.
+#' @param startRow Row coordinate of upper left corner of the image
+#' @param startCol Column coordinate of upper left corner of the image
+#' @param units Units of width and height. Can be "in", "cm" or "px"
+#' @param dpi Image resolution used for conversion between units.
+#' @seealso \code{\link{insertPlot}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("Ayanami")
+#' 
+#' ## Add some worksheets
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' addWorksheet(wb, "Sheet 3")
+#'
+#' ## Insert images
+#' img <- system.file("einstein.jpg", package = "openxlsx")
+#' insertImage(wb, "Sheet 1", img, startRow = 5,  startCol = 3, width = 6, height = 5)
+#' insertImage(wb, 2, img, startRow = 2,  startCol = 2)
+#' insertImage(wb, 3 , img, width = 15, height = 12, startRow = 3, startCol = "G", units = "cm")
+#'  
+#' ## Save workbook
+#' saveWorkbook(wb, "insertImageExample.xlsx", overwrite = TRUE)
+insertImage <- function(wb, sheet, file, width = 6, height = 3, startRow = 1, startCol = 1, units = "in", dpi = 300){
+  
+  if(!file.exists(file))
+    stop("File does not exist.")
+  
+  if(!grepl("\\\\|\\/", file))
+    file <- file.path(getwd(), file, fsep = .Platform$file.sep)
+  
+  units <- tolower(units)
+  
+  if(!units %in% c("cm", "in", "px"))
+    stop("Invalid units.\nunits must be one of: cm, in, px")
+  
+  startCol <- convertFromExcelRef(startCol)
+  startRow <- as.numeric(startRow)
+  
+  ##convert to inches
+  if(units == "px"){
+    width <- width/dpi
+    height <- height/dpi
+  }else if(units == "cm"){
+    width <- width/2.54
+    height <- height/2.54
+  }
+  
+  ## Convert to EMUs
+  widthEMU <- width * 914400 #(EMUs per inch)
+  heightEMU <- height * 914400 #(EMUs per inch)
+  
+  wb$insertImage(sheet, file = file, startRow = startRow, startCol = startCol, width = widthEMU, height = heightEMU)
+  
+}
+
+pixels2ExcelColWidth <- function(pixels){
+  
+  if(any(!is.numeric(pixels)))
+    stop("All elements of pixels must be numeric")
+  
+  pixels[pixels == 0] <- 8.43
+  pixels[pixels != 0] <- (pixels[pixels != 0] - 12) / 7 +  1
+  
+  pixels
+}
+
+
+#' @name setRowHeights
+#' @title Set worksheet row heights
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param rows Indices of rows to set height
+#' @param heights Heights to set rows to specified in Excel column height units.
+#' @seealso \code{\link{removeRowHeights}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook()
+#' 
+#' ## Add a worksheet
+#' addWorksheet(wb, "Sheet 1") 
+#'
+#' ## set row heights
+#' setRowHeights(wb, 1, rows = c(1,4,22,2,19), heights = c(24,28,32,42,33))
+#' 
+#' ## overwrite row 1 height
+#' setRowHeights(wb, 1, rows = 1, heights = 40)
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "setRowHeightsExample.xlsx", overwrite = TRUE)
+setRowHeights <- function(wb, sheet, rows, heights){
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(length(rows) > length(heights))
+    heights <- rep(heights, length.out = length(rows))
+  
+  if(length(heights) > length(rows))
+    stop("Greater number of height values than rows.")
+  
+  ## Remove duplicates
+  heights <- heights[!duplicated(rows)]
+  rows <- rows[!duplicated(rows)]
+  
+  
+  heights <- as.list(as.character(as.numeric(heights)))
+  names(heights) <- rows
+  
+  wb$setRowHeights(sheet, rows, heights)
+  
+}
+
+#' @name setColWidths
+#' @title Set worksheet column widths
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Indices of cols to set width
+#' @param widths widths to set rows to specified in Excel column width units.
+#' @seealso \code{\link{removeColWidths}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook()
+#' 
+#' ## Add a worksheet
+#' addWorksheet(wb, "Sheet 1") 
+#'
+#' ## set col widths
+#' setColWidths(wb, 1, cols = c(1,4,6,7,9), widths = c(16,15,12,18,33))
+#' 
+#' ## overwrite col 1 to auto width ("auto" defaults to 8.43 (excel default) if column is empty)
+#' setColWidths(wb, 1, "A", "auto")
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
+setColWidths <- function(wb, sheet, cols, widths){
+
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  widths <- tolower(widths)  ## possibly "auto"
+  
+  if(length(widths) > length(cols))
+    stop("More widths than columns supplied.")
+  
+  if(length(widths) < length(cols))
+    widths <- rep(widths, length.out = length(cols))
+  
+  ## check for existing custom widths
+  exColsWidths <- unlist(lapply(wb$colWidths[[sheet]], "[[", "col"))
+  flag <- exColsWidths %in% cols
+  if(any(flag))
+    wb$colWidths[[sheet]] <- wb$colWidths[[sheet]][!flag]
+  
+  cols <- convertFromExcelRef(cols)
+  
+  ## Remove duplicates
+  widths <- widths[!duplicated(cols)]
+  cols <- cols[!duplicated(cols)]
+  
+  allWidths <- append(wb$colWidths[[sheet]], lapply(1:length(cols), function(i) c('col' = cols[[i]], 'width' = widths[[i]])))
+  allWidths <- allWidths[order(as.numeric(sapply(allWidths, "[[", "col")))]
+  
+  wb$colWidths[[sheet]] <- allWidths
+}
+
+
+#' @name removeColWidths
+#' @title Remove custom column widths from a worksheet
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Indices of colunss to remove custom width (if any) from.
+#' @seealso \code{\link{setColWidths}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' 
+#' ## remove column widths in columns 1 to 10
+#' removeColWidths(wb, 1, cols = 1:10)
+#' saveWorkbook(wb, "removeColWidthsExample.xlsx", overwrite = TRUE)
+removeColWidths <- function(wb, sheet, cols){
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)
+  
+  customCols <- as.numeric(unlist(lapply(wb$colWidths[[sheet]], "[[", "col")))
+  removeInds <- which(customCols %in% cols)
+  if(length(removeInds) > 0)
+    wb$colWidths[[sheet]] <- wb$colWidths[[sheet]][-removeInds]
+  
+}
+
+
+
+#' @name removeRowHeights
+#' @title Remove custom row heights from a worksheet
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param rows Indices of rows to remove custom height (if any) from.
+#' @seealso \code{\link{setRowHeights}}
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#'
+#' ## remove any custom row heights in rows 1 to 10
+#' removeRowHeights(wb, 1, rows = 1:10)
+#' saveWorkbook(wb, "removeRowHeightsExample.xlsx", overwrite = TRUE)
+removeRowHeights <- function(wb, sheet, rows){
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!is.numeric(rows))
+    rows <- as.numeric(rows)
+    
+  customRows <- as.numeric(names(wb$rowHeights[[sheet]]))
+  removeInds <- which(customRows %in% rows)
+  if(length(removeInds) > 0)
+    wb$rowHeights[[sheet]] <- wb$rowHeights[[sheet]][-removeInds]
+  
+}
+
+
+
+
+#' @name orderCellRef
+#' @title Returns ordering of sorted cell references 
+#' @param x vector of cell references
+#' @return Ordering of sorted cell references 
+#' @export
+orderCellRef <- function(x){
+  order(nchar(x), x) - 1
+}
+
+
+#' @name insertPlot
+#' @title Insert the current plot into a worksheet
+#' @author Alexander Walker
+#' @description The current plot is saved to a temporary image file using dev.copy.  
+#' This file is then written to the workbook using insertImage.
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param startRow Row coordinate of upper left corner of figure. xy[[2]] when xy is given.
+#' @param startCol Column coordinate of upper left corner of figure. xy[[1]] when xy is given.
+#' @param xy Alternate way to specify startRow and startCol.  A vector of length 2 of form (startcol, startRow)
+#' @param width Width of figure. Defaults to 6in.
+#' @param height Height of figure . Defaults to 4in.
+#' @param fileType File type of image
+#' @param units Units of width and height. Can be "in", "cm" or "px"
+#' @param dpi Image resolution
+#' @seealso \code{\link{insertImage}}
+#' @export
+#' @examples
+#' \dontrun{
+#' ## Create a new workbook
+#' wb <- createWorkbook()
+#' 
+#' ## Add a worksheet
+#' addWorksheet(wb, "Sheet 1") 
+#'
+#' ## create a plots
+#' require(ggplot2)
+#' p1 <- ggplot2::qplot(mpg, data=mtcars, geom="density",
+#'   fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Milage")
+#' p2 <- ggplot2::qplot(age, circumference,
+#'   data = Orange, geom = c("point", "line"), colour = Tree)
+#' 
+#' ## Insert currently displayed plot to sheet 1, row 1, column 1
+#'  p1 #plot needs to be showing
+#' insertPlot(wb, 1, width = 5, height = 3.5, fileType = "png", units = "in")
+#' 
+#' ##
+#' p2
+#' insertPlot(wb, 1, xy = c("J", 2), width = 16, height = 10,  fileType = "png", units = "cm")
+#'
+#' ## Save workbook
+#' saveWorkbook(wb, "insertPlotExample.xlsx", overwrite = TRUE)
+#' }
+insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
+                       startRow = 1, startCol = 1, fileType = "png", units = "in", dpi = 300){
+  
+  
+  if(is.null(dev.list()[[1]])){
+    warning("No plot to insert.")
+    return()
+  }
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!is.null(xy)){
+    startCol <- xy[[1]]
+    startRow <- xy[[2]]
+  }
+  
+  fileType <- tolower(fileType)
+  units <- tolower(units)
+  
+  if(fileType == "jpg")
+    fileType = "jpeg"
+  
+  if(!fileType %in% c("png", "jpeg", "tiff", "bmp"))
+    stop("Invalid file type.\nfileType must be one of: png, jpeg, tiff, bmp")
+  
+  if(!units %in% c("cm", "in", "px"))
+    stop("Invalid units.\nunits must be one of: cm, in, px")
+  
+  fileName <- tempfile(pattern = "figureImage", fileext= paste0(".", fileType))
+  
+  if(fileType == "bmp"){
+    dev.copy(bmp, filename = fileName, width = width, height = height, units = units, res = dpi)
+  }else if(fileType == "jpeg"){
+    dev.copy(jpeg, filename = fileName, width = width, height = height, units = units, quality = 100, res = dpi)
+  }else if(fileType == "png"){
+    dev.copy(png, filename = fileName, width = width, height = height, units = units, res = dpi)
+  }else if(fileType == "tiff"){
+    dev.copy(tiff, filename = fileName, width = width, height = height, units = units, compression = "none")
+  }
+  
+  ## write image
+  invisible(dev.off())
+  
+  insertImage(wb = wb, sheet = sheet, file = fileName, width = width, height = height, startRow = startRow, startCol = startCol, units = units, dpi = dpi)
+  
+}
+
+
+
+#' @name replaceStyle
+#' @title Replace an existing cell style
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param index Index of style object to replace
+#' @param newStyle A style to replace the exising style as position index
+#' @description Replace a style object
+#' @export
+#' @seealso \code{\link{getStyles}}
+#' @examples
+#' ## load a workbook 
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' 
+#' ## create a new style and replace style 2
+#' 
+#' newStyle <- createStyle(fgFill = "#00FF00")
+#'  
+#' ## replace style 2
+#' getStyles(wb) ## prints styles
+#' replaceStyle(wb, 2, newStyle = newStyle)
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "replaceStyleExample.xlsx", overwrite = TRUE)
+replaceStyle <- function(wb, index, newStyle){
+  
+  nStyles <- length(wb$styleObjects)
+  
+  if(nStyles == 0)
+    stop("Workbook has no existing styles.")
+  
+  if(index > nStyles)
+    stop(sprintf("Invalid index. Workbook only has %s styles.", nStyles))
+  
+  if(!all("Style" %in% class(newStyle)))
+    stop("Invalid style object.")
+  
+  wb$styleObjects[[index]]$style <- newStyle
+  
+}
+
+
+#' @name getStyles
+#' @title Returns a list of all styles in the workbook
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @export
+#' @seealso \code{\link{replaceStyle}}
+#' @examples
+#' ## load a workbook 
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' getStyles(wb)
+getStyles <- function(wb){
+  
+  nStyles <- length(wb$styleObjects)
+  
+  if(nStyles == 0)
+    stop("Workbook has no existing styles.")
+  
+  styles <- lapply(wb$styleObjects, "[[", "style")
+  
+  return(styles)
+}
+
+
+
+#' @name removeWorksheet
+#' @title Remove a worksheet from a workbook
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @description Remove a worksheet from a workbook
+#' @export
+#' @examples
+#' ## load a workbook 
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' 
+#' ## Remove sheet 2
+#' removeWorksheet(wb, 2)
+#' 
+#' ## save the modified workbook
+#' saveWorkbook(wb, "removeWorksheetExample.xlsx", overwrite = TRUE)
+removeWorksheet <- function(wb, sheet){
+  
+  if(class(wb) != "Workbook")
+    stop("wb must be a Workbook object!")
+  
+  wb$deleteWorksheet(sheet)
+  invisible(NULL)
+}
+
+
+#' @name deleteData
+#' @title Delete cell data
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param rows Rows to delete data from.
+#' @param cols columns to delete data from.
+#' @param gridExpand If TRUE, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
+#' will be removed.
+#' @description Remove contents and styling from a cell.
+#' @export
+#' @examples
+#' ## load a workbook 
+#' wb <- createWorkbook("Alex")
+#' addWorksheet(wb, "Worksheet 1")
+#' x <- data.frame(matrix(runif(200), ncol = 10)) 
+#' names(x) <- paste("Variable", 1:10)
+#' writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = TRUE)
+#' 
+#' ## delete cell contents
+#' deleteData(wb, sheet = 1, cols = 3:5, rows = 5:7, gridExpand = TRUE)
+#' deleteData(wb, sheet = 1, cols = 7:9, rows = 5:7, gridExpand = TRUE)
+#' 
+#' saveWorkbook(wb, "deleteDataExample.xlsx", overwrite = TRUE)
+deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
+    
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  cols <- convertFromExcelRef(cols)
+  rows <- as.numeric(rows)
+  
+  ## rows and cols need to be the same length
+  if(gridExpand){
+    combs <- expand.grid(rows, cols) 
+    rows <- combs[,1]
+    cols <- combs[,2]
+  }
+  
+  if(length(rows) != length(cols)){
+    stop("Length of rows and cols must be equal.")
+  }
+  
+  comb <- paste0(.Call('openxlsx_convert2ExcelRef', cols, LETTERS, PACKAGE="openxlsx"), rows)
+  
+  cellRefs <- sapply(wb$sheetData[[sheet]], "[[", "r")  
+  wb$sheetData[[sheet]] <- wb$sheetData[[sheet]][!cellRefs %in% comb]
+  
+  invisible(1)
+}
+
+
+#' @name modifyBaseFont
+#' @title Modify the default font
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param fontSize font size
+#' @param fontColour font colour
+#' @param fontName Name of a font
+#' @description Base font is black, size 11, Calibri
+#' @details  The font name is not validated in anyway.  Excel replaces unknown font names
+#' with Arial.
+#' @export
+#' @examples
+#' ## create a workbook
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' ## modify base font to size 10 Arial Narrow in red
+#' modifyBaseFont(wb, fontSize = 10, fontColour = "#FF0000", fontName = "Arial Narrow")
+#' 
+#' writeData(wb, "S1", iris)
+#' writeDataTable(wb, "S1", x = iris, startCol = 10) ## font colour does not affect tables
+#' saveWorkbook(wb, "modifyBaseFontExample.xlsx", overwrite = TRUE)
+modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName = "Calibri"){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  
+  if(fontSize < 0) stop("Invalid fontSize")
+  if(!grepl("#[0-9A-F]{6}", fontColour)) stop("Invalid hex code for fontColour")
+  
+  fontColour <- gsub("#", "FF", toupper(fontColour))
+      
+  wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/><family val="2"/></font>', fontSize, fontColour, fontName)
+  
+}
+
+
+
+#' @name setHeader
+#' @title Set header for all worksheets
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param text header text. A character vector of length 1.
+#' @param position Postion of text in header. One of "left", "center" or "right"
+#' @export
+#' @examples
+#' wb <- createWorkbook("Edgar Anderson")
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
+#' 
+#' ## set all headers
+#' setHeader(wb, "This is a header", position="center")
+#' setHeader(wb, "To the left", position="left")
+#' setHeader(wb, "On the right", position="right")
+#' 
+#' ## set all footers
+#' setFooter(wb, "Center Footer Here", position="center")
+#' setFooter(wb, "Bottom left", position="left")
+#' setFooter(wb, Sys.Date(), position="right")
+#' 
+#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+setHeader <- function(wb, text, position = "center"){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  position <- tolower(position)
+  if(!position %in% c("left", "center", "right")) 
+    stop("Invalid position.")
+  
+  if(length(text) != 1)
+    stop("Text argument must be a character vector of length 1")
+    
+  sheet <- wb$validateSheet(1)
+  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "head"] <- as.character(text)
+  
+}
+
+
+#' @name setFooter
+#' @title Set footer for all worksheets
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param text footer text. A character vector of length 1.
+#' @param position Postion of text in footer. One of "left", "center" or "right"
+#' @export
+#' @examples
+#' wb <- createWorkbook("Edgar Anderson")
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
+#' 
+#' ## set all headers
+#' setHeader(wb, "This is a header", position="center")
+#' setHeader(wb, "To the left", position="left")
+#' setHeader(wb, "On the right", position="right")
+#' 
+#' ## set all footers
+#' setFooter(wb, "Center Footer Here", position="center")
+#' setFooter(wb, "Bottom left", position="left")
+#' setFooter(wb, Sys.Date(), position="right")
+#' 
+#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+setFooter <- function(wb, text, position = "center"){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  position <- tolower(position)
+  if(!position %in% c("left", "center", "right")) 
+    stop("Invalid position.")
+  
+  if(length(text) != 1)
+    stop("Text argument must be a character vector of length 1")
+  
+  sheet <- wb$validateSheet(1)
+  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "foot"] <- as.character(text)
+  
+}
+
+
+
+
+
+#' @name pageSetup
+#' @title Set page margins, orientation and print scaling
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param orientation Page orientation. One of "portrait" or "landscape"
+#' @param scale Print scaling. Numeric value between 10 and 400
+#' @param left left page margin in inches
+#' @param right right page margin in inches
+#' @param top top page margin in inches
+#' @param bottom bottom page margin in inches
+#' @param header header margin in inches
+#' @param footer footer margin in inches
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' addWorksheet(wb, "S2")
+#' writeDataTable(wb, 1, x = iris[1:30,])
+#' writeDataTable(wb, 2, x = iris[1:30,], xy = c("C", 5))
+#' 
+#' ## landscape page scaled to 50%
+#' pageSetup(wb, sheet = 1, orientation = "landscape", scale = 50)
+#' 
+#' ## portrait page scales to 300% with 0.5in left and right margins
+#' pageSetup(wb, sheet = 2, orientation = "portrait", scale = 300, left= 0.5, right = 0.5)
+#' 
+#' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
+pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100, left = 0.7, right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  orientation <- tolower(orientation)
+  if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+    
+  if(scale < 10 | scale > 400)
+    stop("Scale must be between 10 and 400.")
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
+                                              orientation, scale)
+  
+  wb$worksheets[[sheet]]$pageMargins <- 
+    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+  
+}
+
+
+
+
+#' @name showGridLines
+#' @title Set worksheet gridlines to show or hide.
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param showGridLines A logical. If TRUE, grid lines are hidden.
+#' @export
+#' @examples
+#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' sheets(wb) ## list worksheets in workbook
+#' showGridLines(wb, 1, showGridLines = FALSE)
+#' showGridLines(wb, "Empty sheet", showGridLines = FALSE)
+#' saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
+showGridLines <- function(wb, sheet, showGridLines = FALSE){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!is.logical(showGridLines)) stop("showGridLines must be a logical")
+  
+
+  sv <- wb$worksheets[[sheet]]$sheetViews
+  showGridLines <- as.numeric(showGridLines)
+  ## If attribute exists gsub
+  if(grepl("showGridLines", sv)){
+    sv <- gsub('showGridLines=".?[^"]', sprintf('showGridLines="%s', showGridLines), sv, perl = TRUE)
+  }else{
+    sv <- gsub('<sheetView ', sprintf('<sheetView showGridLines="%s" ', showGridLines), sv)
+  }
+  
+  wb$worksheets[[sheet]]$sheetViews <- sv
+  
+}
+

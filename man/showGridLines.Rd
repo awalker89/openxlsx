@@ -1,0 +1,28 @@
+\name{showGridLines}
+\alias{showGridLines}
+\title{Set worksheet gridlines to show or hide.}
+\usage{
+showGridLines(wb, sheet, showGridLines = FALSE)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{sheet}{A name or index of a worksheet}
+
+  \item{showGridLines}{A logical. If TRUE, grid lines are
+  hidden.}
+}
+\description{
+Set worksheet gridlines to show or hide.
+}
+\examples{
+wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+sheets(wb) ## list worksheets in workbook
+showGridLines(wb, 1, showGridLines = FALSE)
+showGridLines(wb, "Empty sheet", showGridLines = FALSE)
+saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+

@@ -1,0 +1,39 @@
+\name{replaceStyle}
+\alias{replaceStyle}
+\title{Replace an existing cell style}
+\usage{
+replaceStyle(wb, index, newStyle)
+}
+\arguments{
+  \item{wb}{A workbook object}
+
+  \item{index}{Index of style object to replace}
+
+  \item{newStyle}{A style to replace the exising style as
+  position index}
+}
+\description{
+Replace a style object
+}
+\examples{
+## load a workbook
+wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+
+## create a new style and replace style 2
+
+newStyle <- createStyle(fgFill = "#00FF00")
+
+## replace style 2
+getStyles(wb) ## prints styles
+replaceStyle(wb, 2, newStyle = newStyle)
+
+## Save workbook
+saveWorkbook(wb, "replaceStyleExample.xlsx", overwrite = TRUE)
+}
+\author{
+Alexander Walker
+}
+\seealso{
+\code{\link{getStyles}}
+}
+
