@@ -82,7 +82,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   if(file.exists(file.path(path, fileName)) & !overwrite)
     stop("File already exists!")
   
-  wb$saveWorkbook(path = path, fileName = fileName, overwrite = overwrite)
+  wb$saveWorkbook(path = path, fileName = fileName, overwrite = overwrite, quiet = TRUE)
   
   invisible(1)
 }
