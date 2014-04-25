@@ -22,7 +22,7 @@ Remove contents and styling from a cell.
 }
 \examples{
 ## load a workbook
-wb <- createWorkbook("Alex")
+wb <- createWorkbook()
 addWorksheet(wb, "Worksheet 1")
 x <- data.frame(matrix(runif(200), ncol = 10))
 names(x) <- paste("Variable", 1:10)
