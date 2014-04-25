@@ -4,6 +4,7 @@ Title: .xlsx reading, writing and editing.
 Version: 1.0.4
 Date: 2014-02-06
 Author: Alexander Walker
+Website: https://github.com/awalker89/openxlsx
 Maintainer: Alexander Walker <Alexander.Walker1989@gmail.com>
 Description: This package simplifies the creation of .xlsx files by providing a
     high level interface to writing, styling and editing worksheets. Through
