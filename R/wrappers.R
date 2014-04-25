@@ -15,7 +15,7 @@
 #' @import methods
 #' @examples
 #' ## Create a new workbook
-#' wb <- createWorkbook("Alex")
+#' wb <- createWorkbook()
 #' 
 #' ## Save workbook to working directory
 #' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
@@ -1242,7 +1242,7 @@ removeWorksheet <- function(wb, sheet){
 #' @export
 #' @examples
 #' ## load a workbook 
-#' wb <- createWorkbook("Alex")
+#' wb <- createWorkbook()
 #' addWorksheet(wb, "Worksheet 1")
 #' x <- data.frame(matrix(runif(200), ncol = 10)) 
 #' names(x) <- paste("Variable", 1:10)
