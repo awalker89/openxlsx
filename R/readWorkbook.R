@@ -71,7 +71,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   r <- r_v[[1]]
   v <- r_v[[2]]
     
-  nRows <- length(unique(gsub("[A-Z]+", "", r)))
+  nRows <- .Call("openxlsx_calcNRows", r, PACKAGE = "openxlsx")
   
   if(nRows == 0 | length(r) == 0){
     warning("No data found on worksheet.")

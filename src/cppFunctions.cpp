@@ -979,7 +979,7 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
 
     }else{
 
-      IntegerVector ntmp(nRows);
+      NumericVector ntmp(nRows);
       for(int j=0; j < nRows; ++j)
         ntmp[j] = atof(m(j,i));   
         
