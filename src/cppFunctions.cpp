@@ -946,6 +946,7 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
     m(rowInd[i], colInd[i]) = v[i];
 
   List dfList(nCols);
+  std::string e;
   for(int i=0; i < nCols; i++){
     
     // if i in charCols
@@ -953,7 +954,9 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
      
       bool logCol = true;
       for(int ri = 0; ri < nRows; ri++){
-        if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
+        e = m(ri, i);
+        std::transform(e.begin(), e.end(), e.begin(), ::toupper);
+        if((e != "TRUE") & (e != "FALSE")){
           logCol = false;
           break;
          }
