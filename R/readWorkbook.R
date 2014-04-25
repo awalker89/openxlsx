@@ -76,6 +76,15 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     sharedStrings[grepl("true", sharedStrings, ignore.case = TRUE)] <- "TRUE"
     sharedStrings[grepl("false", sharedStrings, ignore.case = TRUE)] <- "FALSE"
     
+    ###  invalid xml character replacements
+    ## XML replacements
+    sharedStrings <- gsub("&amp;", '&', sharedStrings)
+    sharedStrings <- gsub("&lt;", '<', sharedStrings)
+    sharedStrings <- gsub("&gt;", '>', sharedStrings)
+    
+#     sharedStrings <- gsub("&quot;", '"', sharedStrings)
+#     sharedStrings <- gsub("&apos;", "'", sharedStrings)
+    
   }else{
     sharedStrings <- NULL
   }
@@ -112,7 +121,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   
   ## get Refs for boolean 
   tB <- .Call("openxlsx_getRefs", ws[which(grepl('t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
-  if(length(tB) > 0){
+  if(length(tB) > 0 & tB[[1]] != -1){
     
     fInd <- which(sharedStrings == "FALSE") - 1
     if(length(fInd) == 0){
@@ -188,8 +197,11 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   ## Build data.frame
   m = .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, PACKAGE = "openxlsx")
   
-  if(length(colnames(m)) > 0)
+  if(length(colnames(m)) > 0){
+    colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
     colnames(m) <- gsub("[[:space:]]+", ".", colnames(m))
+  }
+
   
   return(m)
   
