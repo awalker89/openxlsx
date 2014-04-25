@@ -1110,6 +1110,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     
     // remove elements that are now being used as colNames (there are int pos many of these)    
     //check we have some r left if not return a data.frame with zero rows
+     r.erase(r.begin(), r.begin() +  pos); 
     if(r.size() == 0){
       List dfList(nCols);
       IntegerVector rowNames(0);
@@ -1120,6 +1121,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
       return wrap(dfList);
     }
     
+    colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
     nRows--; // decrement number of rows as first row is now being used as colNames
     nCells = nCells - pos;
     
@@ -1160,31 +1162,15 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
   if(allNumeric){
     
     
-    if(hasColNames){ // remove elements that have been "used"
+    if(hasColNames) // remove elements that have been "used"
       vn.erase(vn.begin(), vn.begin() + pos);
-      r.erase(r.begin(), r.begin() +  pos); 
-      colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
-    }
-    
-/*    List d(7);
-    d[0] = vn;
-    d[1] = rowNumbers;
-    d[2] = colNumbers;
-    d[3] = colNames;
-    d[4] = nRows;
-    d[5] = nCols;
-    d[6] = pos;
-    return wrap(d);*/
-    
+
     m = buildMatrixNumeric(vn, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
         
-    if(hasColNames){
+    if(hasColNames)// remove elements that have been "used"
       v.erase(v.begin(), v.begin() + pos);
-      r.erase(r.begin(), r.begin() +  pos); // remove elements that have been "used"
-      colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
-    }
 
     IntegerVector charCols = match(tR, r);    
     
@@ -1741,3 +1727,30 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   return wrap(newSheetData);
 
 }
+
+
+// [[Rcpp::export]]  
+SEXP calcNRows(CharacterVector x){
+ 
+  int n = x.size();
+   
+  CharacterVector res(n);
+  std::string r;
+  for(int i = 0; i < n; i++){
+    r = x[i];
+    r.erase(std::remove_if(r.begin(), r.end(), ::isalpha), r.end());
+    res[i] = r;
+  }
+   
+  CharacterVector uRes = unique(res);
+  int uN = uRes.size();
+   
+  return wrap( uN );
+}
+
+
+
+
+
+
+
