@@ -346,10 +346,11 @@ writeDataTable <- function(wb, sheet, x,
   startCol <- convertFromExcelRef(startCol)
   startRow <- as.numeric(startRow)
   
-  
   ##Coordinates for each section
   if(rowNames)
     x <- cbind(data.frame("row names" = rownames(x)), x)
+  
+  ## If 0 rows append a blank row  
 
   validNames <- c(paste0("TableStyleLight", 1:21), paste0("TableStyleMedium", 1:28), paste0("TableStyleDark", 1:11))
   if(!tolower(tableStyle) %in% tolower(validNames)){
@@ -368,6 +369,12 @@ writeDataTable <- function(wb, sheet, x,
     colNames <- colnames(x)
   else
     colNames <- paste0("Column", 1:ncol(x))
+  
+  ## If zero rows append an empty row (prevent XML from corrupting)
+  if(nrow(x) == 0){
+    x <- rbind(x, matrix("", nrow = 1, ncol = ncol(x)))
+    names(x) <- colNames
+  }
 
   ref1 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol, LETTERS, PACKAGE="openxlsx"), startRow)
   ref2 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow+nrow(x)-1 + showColNames)
@@ -393,7 +400,7 @@ writeDataTable <- function(wb, sheet, x,
           
     
   }
-  
+    
   ## write data to sheetData
   wb$writeData(df = x,
                colNames = showColNames,
