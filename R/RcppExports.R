@@ -137,3 +137,7 @@ writeCellStyles <- function(sheetData, rows, cols, styleId, LETTERS) {
     .Call('openxlsx_writeCellStyles', PACKAGE = 'openxlsx', sheetData, rows, cols, styleId, LETTERS)
 }
 
+calcNRows <- function(x) {
+    .Call('openxlsx_calcNRows', PACKAGE = 'openxlsx', x)
+}
+

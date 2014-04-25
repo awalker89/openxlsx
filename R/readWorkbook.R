@@ -73,6 +73,9 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx')
     emptyStrs <- attr(sharedStrings, "empty")
     
+    sharedStrings[grepl("true", sharedStrings, ignore.case = TRUE)] <- "TRUE"
+    sharedStrings[grepl("false", sharedStrings, ignore.case = TRUE)] <- "FALSE"
+    
   }else{
     sharedStrings <- NULL
   }
@@ -101,11 +104,35 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     warning("No data found on worksheet.")
     return(NULL)
   }
-    
+      
   ## get references for string cells
-  tR <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
+  tR <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"|t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
   if(length(tR) == 0)
     tR <- -1
+  
+  ## get Refs for boolean 
+  tB <- .Call("openxlsx_getRefs", ws[which(grepl('t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
+  if(length(tB) > 0){
+    
+    fInd <- which(sharedStrings == "FALSE") - 1
+    if(length(fInd) == 0){
+      fInd <- length(sharedStrings) 
+      sharedStrings <- c(sharedStrings, "FALSE")
+    }
+    
+    tInd <- which(sharedStrings == "TRUE") - 1
+    if(length(tInd) == 0){
+      tInd <- length(sharedStrings) 
+      sharedStrings <- c(sharedStrings, "TRUE")
+    }
+    
+    boolInds <- match(tB, r)
+    logicalVals <- v[boolInds]
+    logicalVals[logicalVals == "0"] <- fInd
+    logicalVals[logicalVals == "1"] <- tInd
+    v[boolInds] <- logicalVals
+    
+  }
   
   if(tR[[1]] == -1){
     stringInds <- NULL

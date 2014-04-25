@@ -577,3 +577,18 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// calcNRows
+SEXP calcNRows(CharacterVector x);
+RcppExport SEXP openxlsx_calcNRows(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        SEXP __result = calcNRows(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
