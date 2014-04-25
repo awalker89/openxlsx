@@ -401,15 +401,15 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// matrixInds
-IntegerVector matrixInds(IntegerVector indices);
-RcppExport SEXP openxlsx_matrixInds(SEXP indicesSEXP) {
+// matrixRowInds
+IntegerVector matrixRowInds(IntegerVector indices);
+RcppExport SEXP openxlsx_matrixRowInds(SEXP indicesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< IntegerVector >::type indices(indicesSEXP );
-        IntegerVector __result = matrixInds(indices);
+        IntegerVector __result = matrixRowInds(indices);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

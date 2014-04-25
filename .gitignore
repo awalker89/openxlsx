@@ -4,3 +4,4 @@
 src/*.o
 src/*.so
 src/*.dll
+Rprof.out

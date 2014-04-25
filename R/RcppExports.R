@@ -97,8 +97,8 @@ buildMatrixMixed <- function(v, rowInd, colInd, colNames, nRows, nCols, charCols
     .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols, charCols)
 }
 
-matrixInds <- function(indices) {
-    .Call('openxlsx_matrixInds', PACKAGE = 'openxlsx', indices)
+matrixRowInds <- function(indices) {
+    .Call('openxlsx_matrixRowInds', PACKAGE = 'openxlsx', indices)
 }
 
 buildCellMerges <- function(comps) {

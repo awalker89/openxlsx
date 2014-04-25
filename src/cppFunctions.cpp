@@ -1022,19 +1022,21 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
 }
 
 
-
 // [[Rcpp::export]]
-IntegerVector matrixInds(IntegerVector indices) {
+IntegerVector matrixRowInds(IntegerVector indices) {
     
-  IntegerVector uRows = sort_unique(indices);
+  int n = indices.size();
+  LogicalVector notDup = !duplicated(indices);
+  IntegerVector res(n);
   
-  std::vector<int> vo = as< std::vector<int> > (uRows);
-  int k = uRows.size();
-        
-  for(int i = 0; i < k; i++)
-    std::replace(indices.begin(), indices.end(), vo[i], i);
+  int j = -1;
+  for(int i =0; i < n; i ++){
+    if(notDup[i])
+      j++;
+    res[i] = j;
+  }
   
-  return indices;
+  return wrap(res);
   
 }
 
@@ -1095,7 +1097,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
   // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
   int nCells = r.size();
   IntegerVector colNumbers = RcppConvertFromExcelRef(r); 
-  colNumbers = matrixInds(colNumbers);
+  colNumbers = match(colNumbers, sort_unique(colNumbers)) - 1;
   int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
     
   // Check if first row are all strings
@@ -1174,10 +1176,11 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
       a.erase(std::remove_if(a.begin(), a.end(), ::isalpha), a.end());
       rowNumbers[i] = atoi(a.c_str()) - 1; 
     }
-    rowNumbers = matrixInds(rowNumbers);
+    
+    rowNumbers = matrixRowInds(rowNumbers);
     uRows = unique(rowNumbers);
   }
-  
+
   SEXP m;
   if(allNumeric){
     
@@ -1528,41 +1531,46 @@ IntegerVector WhichMatch( IntegerVector a, int b ){
 // [[Rcpp::export]]
 CharacterVector getCellsWithChildren(std::string xmlFile){
 
-  //read in file without spaces
+ //read in file without spaces
   std::string xml = cppReadFile(xmlFile);
 
-  std::vector<std::string> r;
   size_t pos = 0;
-  size_t endPos1 = 0;
-  size_t endPos2 = 0;
+  size_t endPos = 0;
   
   std::string tag = "<c ";
   std::string tagEnd1 = ">";
   std::string tagEnd2 = "</c>";
 
-  size_t k = tag.length();
-  size_t l = tagEnd1.length();
+  size_t k = 3;
+  size_t l = 1;
+
+  // count cells
+  int occurrences = 0;
+  string::size_type start = 0;
+  while ((start = xml.find("</c", start)) != string::npos) {
+      ++occurrences;
+      start += 6; // see the note
+  }
+
+  CharacterVector cells(occurrences);
 
   //find "<c""
   //find ">" after "<c"
   //If char before > is / break else look for </c
-  
-  while(1){
+  for(int i = 0; i < occurrences; i ++){
     
-    pos = xml.find(tag, pos+2);
-    endPos1 = xml.find(tagEnd1, pos+k);
+    pos = xml.find(tag, pos+2);  
+    endPos = xml.find(tagEnd1, pos+k);
     
-    if((pos == std::string::npos) | (endPos1 == std::string::npos))
-      break;
-    
-    if(xml[endPos1-1] != '/'){
-      endPos2 = xml.find(tagEnd2, pos+k);
-      r.push_back(xml.substr(pos, endPos2-pos+l).c_str());
+    if(xml[endPos-1] != '/'){
+      endPos = xml.find(tagEnd2, pos+k);
+      cells[i] = xml.substr(pos, endPos-pos+l);
     }
         
   }  
 
-  return wrap(r) ;  
+  return wrap(cells) ;  
+
 
 }
 
@@ -1587,7 +1595,6 @@ CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::
       table += " totalsRowShown=\"0\"><autoFilter ref=\"" + ref + "\"/>";
   }
     
-
       
   for(int i = 0; i < n; i ++){
     tableCols += "<tableColumn id=\"" + itos(i+1) + "\" name=\"" + colNames[i] + "\"/>";
@@ -1768,6 +1775,17 @@ SEXP calcNRows(CharacterVector x){
    
   return wrap( uN );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
