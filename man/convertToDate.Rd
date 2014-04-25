@@ -1,0 +1,25 @@
+\name{convertToDate}
+\alias{convertToDate}
+\title{Convert from excel date number to R Date type}
+\usage{
+convertToDate(x, origin = "1970-1-1")
+}
+\arguments{
+  \item{x}{A vector of integers}
+
+  \item{origin}{date. Default value is for Windows Excel
+  2010}
+}
+\description{
+Convert from excel date number to R Date type
+}
+\details{
+Excel stores dates as number of days from some origin day
+(this origin is "1970-1-1" for Excel 2010).
+}
+\examples{
+##2014 April 21st to 25th
+x <- c(41750, 41751, 41752, 41753, 41754)
+convertToDate(x)
+}
+

@@ -77,7 +77,7 @@ pxml <- function(x){
 }
 
 
-Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
+Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1SMM", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
     ## code from utils::zip function (modified to not print)
     args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
