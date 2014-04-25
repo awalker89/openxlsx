@@ -516,24 +516,33 @@ CharacterVector getSharedStrings(CharacterVector x){
   std::string tag = ">";
   std::string tagEnd = "<";
 
-  CharacterVector s(n);
+  CharacterVector strs(n);
+  std::fill(strs.begin(), strs.end(), NA_STRING);
+  
+  IntegerVector emptyStrs;
+  
   for(int i = 0; i < n; i++){ 
     
     // find opening tag     
     xml = x[i];
-    pos = xml.find(ttag, 0);
+    pos = xml.find(ttag, 0); // find ttag      
+  
     if(pos != std::string::npos){
-      pos = xml.find(tag, pos+1);
-      endPos = xml.find(tagEnd, pos+2);
-      s[i] = xml.substr(pos+1, endPos-pos - 1).c_str();
-    }else{
-      s[i] = NA_STRING;
+      
+      if(xml[pos+2] == '/'){
+        emptyStrs.push_back(i);
+      }else{
+        pos = xml.find(tag, pos+1); // find where opening ttag ends
+        endPos = xml.find(tagEnd, pos+2); // find where the node ends </t> (closing tag)
+        strs[i] = xml.substr(pos+1, endPos-pos - 1).c_str();
+      }
     }
+    
   }
 
-
-//  s = na_omit(s);
-  return wrap(s) ;  
+  strs.attr("empty") = emptyStrs;
+  
+  return wrap(strs) ;  
 
 }
 
@@ -946,17 +955,14 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
     m(rowInd[i], colInd[i]) = v[i];
 
   List dfList(nCols);
-  std::string e;
   for(int i=0; i < nCols; i++){
     
     // if i in charCols
     if (std::find(charCols.begin(), charCols.end(), i) != charCols.end()){ 
-     
+          
       bool logCol = true;
       for(int ri = 0; ri < nRows; ri++){
-        e = m(ri, i);
-        std::transform(e.begin(), e.end(), e.begin(), ::toupper);
-        if((e != "TRUE") & (e != "FALSE")){
+        if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
           logCol = false;
           break;
          }
@@ -967,7 +973,7 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
       
         LogicalVector logtmp(nRows);
         for(int j=0; j < nRows; ++j)
-          logtmp[j] = m(j,i) == "TRUE";
+          logtmp[j] = m(j,i) == "TRUE"; //IF TRUE, TRUE else FALSE
       
         dfList[i] = logtmp;
         
@@ -982,10 +988,21 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
 
     }else{
 
+      LogicalVector isNotNA(nRows);
+      CharacterVector thisCol(nRows);
+      for(int j =0; j < nRows; j++)
+        thisCol[j] = m(j,i);
+      
+      isNotNA = !is_na(thisCol);
+            
       NumericVector ntmp(nRows);
-      for(int j=0; j < nRows; ++j)
-        ntmp[j] = atof(m(j,i));   
-        
+      std::fill(ntmp.begin(), ntmp.end(), NA_REAL);
+
+      for(int j=0; j < nRows; j++){
+        if(isNotNA[j])
+          ntmp[j] = atof(thisCol[j]);  
+      }
+                
       dfList[i] = ntmp;
         
     }
@@ -1175,6 +1192,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     if(hasColNames)// remove elements that have been "used"
       v.erase(v.begin(), v.begin() + pos);
 
+    // If it contains any strings it will be a character column
     IntegerVector charCols = match(tR, r);    
     
     int tRSize = tR.size();

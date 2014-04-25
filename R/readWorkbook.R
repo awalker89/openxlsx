@@ -62,17 +62,41 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
       stop(sprintf("sheet %s does not exist.", sheet))
   }
   
+  
+  
+  ## read in sharedStrings
+  if(length(sharedStringsFile) > 0){
+    
+    ## read in, get si tags, get t tag value
+    ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
+    sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")
+    sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx')
+    emptyStrs <- attr(sharedStrings, "empty")
+    
+  }else{
+    sharedStrings <- NULL
+  }
+  
   ## get cells from worksheet
   worksheetFile <- sort(worksheets)[[sheetInd]]  
   ws <- .Call("openxlsx_getCellsWithChildren", worksheetFile, PACKAGE = "openxlsx")
   ws <- ws[grepl("<v>", ws)]
   
+  ## remove cells with the empty str references
+  if(length(emptyStrs) > 0){ 
+    toKeep <- rep.int(TRUE, length(ws))
+    for(e in emptyStrs){
+      tmp <- grepl(sprintf("<v>%s</v>", e), ws) & grepl('t="s"', ws)
+      toKeep[tmp] <- FALSE
+    }
+    ws <- ws[toKeep]
+  }
+
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
   v <- r_v[[2]]
     
   nRows <- .Call("openxlsx_calcNRows", r, PACKAGE = "openxlsx")
-  
   if(nRows == 0 | length(r) == 0){
     warning("No data found on worksheet.")
     return(NULL)
@@ -89,17 +113,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     stringInds <- na.omit(match(tR, r))
   }
     
-  ## read in sharedStrings
-  if(!is.null(stringInds)){
-  
-    ## read in, get si tags, get t tag value
-    ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
-    sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")
-    sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx')
 
-  }else{
-    sharedStrings <- NULL
-  }
 
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
   wsStrInds <- which(grepl('t="str"|t="e"', ws, perl = TRUE))
