@@ -16,7 +16,7 @@ Create a new Workbook object
 }
 \examples{
 ## Create a new workbook
-wb <- createWorkbook("Alex")
+wb <- createWorkbook()
 
 ## Save workbook to working directory
 saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
