@@ -48,7 +48,7 @@ require(openxlsx)
 require(ggplot2)
 
 wb <- createWorkbook()
-addWorksheet(wb, sheetName = "Motor Trend Car Road Tests", showGridLines = FALSE)
+addWorksheet(wb, sheetName = "Motor Trend Car Road Tests", gridLines = FALSE)
 addWorksheet(wb, sheetName = "Iris")
 addWorksheet(wb, sheetName = "Conditional Formatting")
 
