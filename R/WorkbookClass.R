@@ -77,12 +77,19 @@ pxml <- function(x){
 }
 
 
-Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip")){ 
+Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
     ## code from utils::zip function (modified to not print)
     args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
-    invisible(system2(zip, args, stdout = NULL))
-
+    
+    if(quiet){
+      invisible(system2(zip, args, stdout = NULL))
+    }else{
+      if (.Platform$OS.type == "windows") 
+        invisible(system2(zip, args, invisible = TRUE))
+      else invisible(system2(zip, args))
+    }
+    
     invisible(0)
 })
 
@@ -125,7 +132,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
   
 })
 
-Workbook$methods(saveWorkbook = function(path, fileName, overwrite){
+Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE, cleanUp = TRUE){
   
   ## temp directory to save XML files prior to compressing
   tmpDir <- file.path(tempfile(pattern="workbookTemp_"))
@@ -138,7 +145,8 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite){
     stop(sprintf("Failed to create temporary directory '%s'", tmpDir))
   
   ## delete temporary dir on exit
-  on.exit(unlink(tmpDir, force = TRUE, recursive= TRUE), add = TRUE)
+  if(cleanUp)
+    on.exit(unlink(tmpDir, force = TRUE, recursive= TRUE), add = TRUE)
   
   .self$preSaveCleanUp()
     
@@ -340,8 +348,9 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite){
   
   ## compress to xlsx
   setwd(tmpDir)
-  zipWorkbook(file.path(path, fileName), list.files(tmpDir, recursive = TRUE, include.dirs = TRUE))
+  zipWorkbook(file.path(path, fileName), list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
   
+  invisible(tmpDir)
   
 })
 
