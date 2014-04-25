@@ -1221,7 +1221,7 @@ Workbook$methods(preSaveCleanUp = function(){
   
   ## add a worksheet if none added
   if(nSheets == 0){
-    warning("Workbook done not contain any worksheets. A worksheet will be added.")
+    warning("Workbook does not contain any worksheets. A worksheet will be added.")
     .self$addWorksheet("Sheet 1")
     nSheets <- 1  
   }
