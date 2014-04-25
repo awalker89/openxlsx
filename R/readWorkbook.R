@@ -102,7 +102,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   }
 
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
-  wsStrInds <- which(grepl('t="str"', ws, perl = TRUE))
+  wsStrInds <- which(grepl('t="str"|t="e"', ws, perl = TRUE))
   if(length(wsStrInds) > 0){
     
     ws_str <- ws[wsStrInds]
