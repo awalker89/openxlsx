@@ -1,7 +1,6 @@
 
 
 
-
 #' @name writeData
 #' @title Write to a worksheet
 #' @author Alexander Walker
@@ -386,6 +385,9 @@ writeDataTable <- function(wb, sheet, x,
   ## convert any Dates to integers and create date style object
   if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
       
+    dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
+    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
+
     addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = unlist(c(dInds, pInds) + startCol + rowNames - 1), gridExpand = TRUE)
