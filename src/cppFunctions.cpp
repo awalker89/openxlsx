@@ -530,7 +530,7 @@ CharacterVector getSharedStrings(CharacterVector x){
     if(pos != std::string::npos){
       
       if(xml[pos+2] == '/'){
-        emptyStrs.push_back(i);
+        emptyStrs.push_back(i); //this should only ever grow to length 1
       }else{
         pos = xml.find(tag, pos+1); // find where opening ttag ends
         endPos = xml.find(tagEnd, pos+2); // find where the node ends </t> (closing tag)
@@ -880,13 +880,14 @@ SEXP convert2ExcelRef(IntegerVector cols, std::vector<std::string> LETTERS){
 // [[Rcpp::export]]
 SEXP ExcelConvertExpand(IntegerVector cols, std::vector<std::string> LETTERS, std::vector<std::string> rows){
   
-  size_t n = cols.size();  
-  size_t nRows = rows.size();
+  int n = cols.size();  
+  int nRows = rows.size();
   std::vector<std::string> res(n);
   
+  //Convert col number to excel col letters
   size_t x;
   size_t modulo;
-  for(size_t i = 0; i < n; i++){
+  for(int i = 0; i < n; i++){
     x = cols[i];
     string columnName;
     
@@ -901,8 +902,8 @@ SEXP ExcelConvertExpand(IntegerVector cols, std::vector<std::string> LETTERS, st
   CharacterVector r(n*nRows);
   CharacterVector names(n*nRows);
   size_t c = 0;
-  for(size_t i=0; i < nRows; i++)
-    for(size_t j=0; j < n; j++){
+  for(int i=0; i < nRows; i++)
+    for(int j=0; j < n; j++){
     r[c] = res[j] + rows[i];
     names[c] = rows[i];
     c++;
@@ -1778,8 +1779,30 @@ SEXP calcNRows(CharacterVector x){
 
 
 
-
-
+// [[Rcpp::export]]  
+CharacterVector buildCellTypes(CharacterVector classes, int nRows){
+  
+  
+  int nCols = classes.size();
+  CharacterVector colLabels(nCols);
+  for(int i=0; i < nCols; i++){
+    
+    if((classes[i] == "numeric") | (classes[i] == "integer")){
+     colLabels[i] = "n"; 
+    }else if(classes[i] == "logical"){
+      colLabels[i] = "b";
+    }else{
+      colLabels[i] = "s";
+    }
+        
+  }
+  
+  CharacterVector cellTypes = rep(colLabels, nRows); 
+  
+  return wrap(cellTypes);
+  
+  
+}
 
 
 

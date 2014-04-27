@@ -141,3 +141,7 @@ calcNRows <- function(x) {
     .Call('openxlsx_calcNRows', PACKAGE = 'openxlsx', x)
 }
 
+buildCellTypes <- function(classes, nRows) {
+    .Call('openxlsx_buildCellTypes', PACKAGE = 'openxlsx', classes, nRows)
+}
+

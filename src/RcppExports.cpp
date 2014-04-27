@@ -592,3 +592,19 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// buildCellTypes
+CharacterVector buildCellTypes(CharacterVector classes, int nRows);
+RcppExport SEXP openxlsx_buildCellTypes(SEXP classesSEXP, SEXP nRowsSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type classes(classesSEXP );
+        Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
+        CharacterVector __result = buildCellTypes(classes, nRows);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

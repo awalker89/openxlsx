@@ -441,13 +441,21 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   
   sheet = validateSheet(sheet)
-  
+
   nCols <- ncol(df)
   nRows <- nrow(df)  
   df[is.na(df)] <- ""
-    
-  t <- rep.int(ifelse(unlist(lapply(df, function(x) class(x)[[1]])) %in% c('numeric', 'integer'), 'n', 's'), times = nRows)
+  
+  colClasses <- sapply(df, function(x) class(x)[[1]])
+  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
+  
+  if("logical" %in% colClasses){
+    df[df == TRUE] <- "1"
+    df[df == FALSE] <- "0"
+  }
+  
   v <- as.character(t(as.matrix(df)))
+  
   v[is.na(v)] <- as.character(NA)
   t[is.na(v)] <- as.character(NA)
   
@@ -475,7 +483,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     .self$updateSharedStrings(uNewStr)  
     v[tFlag] <- match(newStrs, sharedStrings) - 1
   }
-
+ 
   ## Create cell list of lists
   r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1), LETTERS, as.character(startRow:(startRow+nRows-1)))
   cells <- .Call("openxlsx_buildCellList", r , t ,v , PACKAGE="openxlsx")
