@@ -1548,9 +1548,9 @@ CharacterVector getCellsWithChildren(std::string xmlFile){
   // count cells
   int occurrences = 0;
   string::size_type start = 0;
-  while ((start = xml.find("</c", start)) != string::npos) {
+  while ((start = xml.find("</c>", start)) != string::npos) {
       ++occurrences;
-      start += 6; // see the note
+      start += 6;
   }
 
   CharacterVector cells(occurrences);
@@ -1562,12 +1562,12 @@ CharacterVector getCellsWithChildren(std::string xmlFile){
     
     pos = xml.find(tag, pos+2);  
     endPos = xml.find(tagEnd1, pos+k);
-    
+      
     if(xml[endPos-1] != '/'){
       endPos = xml.find(tagEnd2, pos+k);
       cells[i] = xml.substr(pos, endPos-pos+l);
     }
-        
+     
   }  
 
   return wrap(cells) ;  
@@ -1803,13 +1803,6 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
   
   
 }
-
-
-
-
-
-
-
 
 
 
