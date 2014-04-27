@@ -454,6 +454,20 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     df[df == FALSE] <- "0"
   }
   
+  ## convert any Dates to integers and create date style object
+  if(any(c("Date", "POSIXct", "POSIXt") %in% colClasses)){
+    
+    dInds <- which(sapply(colClasses, function(x) "Date" %in% x))
+    for(i in dInds)
+      df[,i] <- as.integer(df[,i]) + 25569
+    
+    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
+    for(i in pInds)
+      df[,i] <- as.integer(df[,i])/86400 + 25569
+    
+    
+  }
+  
   v <- as.character(t(as.matrix(df)))
   
   v[is.na(v)] <- as.character(NA)
