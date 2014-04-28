@@ -1,4 +1,3 @@
-
 #include <Rcpp.h>
 #include <iostream>
 #include <fstream>
@@ -1777,7 +1776,7 @@ CharacterVector getCellsWithChildren(std::string xmlFile){
   size_t k = 3;
   size_t l = 1;
 
-  // count cells
+  // count cells with children
   int occurrences = 0;
   string::size_type start = 0;
   while ((start = xml.find("</c>", start)) != string::npos) {
@@ -1789,24 +1788,27 @@ CharacterVector getCellsWithChildren(std::string xmlFile){
   std::fill(cells.begin(), cells.end(), NA_STRING);
   std::string sub;
 
-  //find "<c""
+  //find "<c"
   //find ">" after "<c"
   //If char before > is / break else look for </c
-  for(int i = 0; i < occurrences; i ++){
+  int i = 0;
+  while(i < occurrences){
     
-    pos = xml.find(tag, pos+2);  
+    pos = xml.find(tag, pos+2); 
     endPos = xml.find(tagEnd1, pos+k);
       
     if(xml[endPos-1] != '/'){
       endPos = xml.find(tagEnd2, pos+k);
       sub = xml.substr(pos, endPos-pos+l);
       
-      if(sub.find("<v>", 5) != std::string::npos)
+      if(sub.find("<v>", 5) != std::string::npos){
         cells[i] = sub;
+        i++;
+      }
     }
   } 
   
-  cells = na_omit(cells);
+//  cells = na_omit(cells);
 
   return wrap(cells) ;  
 
