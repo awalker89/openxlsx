@@ -22,6 +22,8 @@
 #' df6 <- read.xlsx(xlsxFile = xlsxFile, sheet = 6) ## NULL
 #' df7 <- read.xlsx(xlsxFile = xlsxFile, sheet = 7)
 #' df8 <- read.xlsx(xlsxFile = xlsxFile, sheet = 8)
+#' df8$Date <- convertToDate(df8$Date)
+#' sapply(df8, class)
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
 
