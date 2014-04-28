@@ -28,7 +28,7 @@
 #'
 #' ## Add worksheets
 #' addWorksheet(wb, "Cars")
-#'
+#' 
 #' x <- mtcars[1:6,]
 #' writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
 #' writeData(wb, "Cars", x, rowNames = TRUE, startCol = "O", startRow = 3, 
@@ -123,20 +123,7 @@ writeData <- function(wb,
   ## checking for dates of POSIXts
   ## column class
   colClasses <- lapply(x, class)
-  
-  ## convert any Dates to integers and create date style object
-  if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
-    
-    dInds <- which(sapply(colClasses, function(x) "Date" %in% x))
-    for(i in dInds)
-      x[,i] <- as.integer(x[,i]) + 25569
-    
-    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
-    for(i in pInds)
-      x[,i] <- as.integer(x[,i])/86400 + 25569
-    
-  }
-         
+           
   ## Get coordinated of each header row and data.frame cells
   headerCoords <- list("row" = startRow, "col" = 0:(nCol-1) + startCol)
   
@@ -179,7 +166,13 @@ writeData <- function(wb,
 
 surroundingBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
   
-  if(nRow == 1){
+  
+  if(nRow == 1 & nCol == 1){
+  
+    ## single cell
+    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
+    
+  }else if(nRow == 1){
     
     ## left
     addStyle(wb, sheet, createStyle(border="TopBottomLeft", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
@@ -189,6 +182,18 @@ surroundingBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, border
     
     ## middle
     addStyle(wb, sheet, createStyle(border="TopBottom", borderColour=borderColour), rows= startRow, cols = (startCol+1):(startCol + nCol - 2), TRUE)   
+    
+  }else if(nCol == 1){
+    
+    ## top
+    addStyle(wb, sheet, createStyle(border="TopLeftRight", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
+    
+    ## bottom
+    addStyle(wb, sheet, createStyle(border="BottomLeftRight", borderColour=borderColour), rows= startRow+nRow-1, cols=startCol, TRUE)
+    
+    ## middle
+    addStyle(wb, sheet, createStyle(border="LeftRight", borderColour=borderColour), rows= (startRow+1):(startRow+nRow-2), cols = startCol, TRUE)  
+    
     
   }else{
     
@@ -223,7 +228,12 @@ surroundingBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, border
 
 rowBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
   
-  if(nRow == 1){
+  if(nRow == 1 & nCol == 1){
+  
+    ## single cell
+    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
+    
+  }else if(nRow == 1){
     
     ## left
     addStyle(wb, sheet, createStyle(border="TopBottomLeft", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
@@ -233,6 +243,11 @@ rowBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
     
     ## middle
     addStyle(wb, sheet, createStyle(border="TopBottom", borderColour=borderColour), rows= startRow, cols = (startCol+1):(startCol + nCol - 2), TRUE)   
+    
+  }else if(nCol == 1){
+    
+    ## single column
+    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows= startRow:(startRow + nRow -1), cols=startCol, TRUE)
     
   }else{
     
@@ -251,10 +266,27 @@ rowBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
 
 colBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
   
-  if(nRow == 1){
+  if(nCol == 1 & nRow == 1){
+    
+    ## single cell
+    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows=startRow, cols=startCol, TRUE)
+    
+  }else if(nRow == 1){
     
     ## all
-    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows=startRow, cols=startCol + nCol - 1, TRUE)
+    addStyle(wb, sheet, createStyle(border="TopBottomLeftRight", borderColour=borderColour), rows=startRow, cols=startCol:(startCol + nCol - 1), TRUE)
+    
+  }else if(nCol == 1){
+    
+    ## top
+    addStyle(wb, sheet, createStyle(border="TopLeftRight", borderColour=borderColour), rows= startRow, cols=startCol, TRUE)
+    
+    ## bottom
+    addStyle(wb, sheet, createStyle(border="BottomLeftRight", borderColour=borderColour), rows= startRow+nRow-1, cols=startCol, TRUE)
+    
+    ## middle
+    addStyle(wb, sheet, createStyle(border="LeftRight", borderColour=borderColour), rows= (startRow+1):(startRow+nRow-2), cols = startCol, TRUE)  
+    
     
   }else{
     
@@ -310,7 +342,9 @@ colBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
 #' 
 #' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 #' 
-#' writeDataTable(wb, "S3", x = mtcars, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium17")
+#' df <- data.frame("Date" = Sys.Date-0:20, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-1:20*60*60)
+#' 
+#' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium17")
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,
@@ -384,13 +418,13 @@ writeDataTable <- function(wb, sheet, x,
 
   ## convert any Dates to integers and create date style object
   if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
-      
+    
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
     pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
 
     addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
-             cols = unlist(c(dInds, pInds) + startCol + rowNames - 1), gridExpand = TRUE)
+             cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
   }
     
   ## write data to sheetData

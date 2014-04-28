@@ -116,11 +116,11 @@ SEXP getChildlessNode(std::string xml, std::string tag){
 
   while(1){
     
-    pos = xml.find(tag, pos+1);
-    endPos = xml.find(tagEnd, pos+k);
-    
+    pos = xml.find(tag, pos+1);    
     if(pos == std::string::npos)
       break;
+      
+    endPos = xml.find(tagEnd, pos+k);
     
     r.push_back(xml.substr(pos, endPos-pos+2).c_str());
     
@@ -1375,7 +1375,7 @@ CharacterVector buildCellXML(std::string prior, std::string post, List sheetData
   CharacterVector charRows(rows);
   
   IntegerVector colNames(n) ;
-  CharacterVector cols(n) ; 
+  std::vector<std::string> cols(n) ; 
   for(size_t i = 0; i < n; i++){
     colNames[i] = atoi(colNamesTemp[i]);
     CharacterVector temp = sheetData[i] ;
@@ -1386,8 +1386,8 @@ CharacterVector buildCellXML(std::string prior, std::string post, List sheetData
   for(size_t i = 0; i < k; i++){ 
     
     int r = rows[i]; // used to subset cells
-    CharacterVector cellRef; // required for ordering
-    IntegerVector cellInd;
+    std::vector<std::string> cellRef; // required for ordering
+    std::vector<int> cellInd;
     IntegerVector orderInds;
 
     for(size_t j = 0; j < n; j++){
@@ -1516,13 +1516,13 @@ IntegerVector WhichMatch( IntegerVector a, int b ){
 
   int n = a.size();
 
-  IntegerVector res;
+  std::vector<int> res;
   for(int i =0; i < n; i ++){
     if(a[i] == b)
       res.push_back(i);
   }
 
-  return res ;
+  return wrap(res) ;
 
 }
 
@@ -1787,8 +1787,10 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
   CharacterVector colLabels(nCols);
   for(int i=0; i < nCols; i++){
     
-    if((classes[i] == "numeric") | (classes[i] == "integer")){
+    if((classes[i] == "numeric") | (classes[i] == "integer") | (classes[i] == "Date") | (classes[i] == "POSIXct") | (classes[i] == "POSIXt") ){
      colLabels[i] = "n"; 
+    }else if(classes[i] == "character"){
+      colLabels[i] = "s"; 
     }else if(classes[i] == "logical"){
       colLabels[i] = "b";
     }else{
