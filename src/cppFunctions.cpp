@@ -1528,56 +1528,6 @@ IntegerVector WhichMatch( IntegerVector a, int b ){
 
 
 
-
-// [[Rcpp::export]]
-CharacterVector getCellsWithChildren(std::string xmlFile){
-
- //read in file without spaces
-  std::string xml = cppReadFile(xmlFile);
-
-  size_t pos = 0;
-  size_t endPos = 0;
-  
-  std::string tag = "<c ";
-  std::string tagEnd1 = ">";
-  std::string tagEnd2 = "</c>";
-
-  size_t k = 3;
-  size_t l = 1;
-
-  // count cells
-  int occurrences = 0;
-  string::size_type start = 0;
-  while ((start = xml.find("</c>", start)) != string::npos) {
-      ++occurrences;
-      start += 6;
-  }
-
-  CharacterVector cells(occurrences);
-
-  //find "<c""
-  //find ">" after "<c"
-  //If char before > is / break else look for </c
-  for(int i = 0; i < occurrences; i ++){
-    
-    pos = xml.find(tag, pos+2);  
-    endPos = xml.find(tagEnd1, pos+k);
-      
-    if(xml[endPos-1] != '/'){
-      endPos = xml.find(tagEnd2, pos+k);
-      cells[i] = xml.substr(pos, endPos-pos+l);
-    }
-     
-  }  
-
-  return wrap(cells) ;  
-
-
-}
-
-
-
-
 // [[Rcpp::export]]
 CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle){
   
@@ -1806,6 +1756,61 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
   
 }
 
+
+
+
+
+
+// [[Rcpp::export]]
+CharacterVector getCellsWithChildren(std::string xmlFile){
+
+ //read in file without spaces
+  std::string xml = cppReadFile(xmlFile);
+      
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  std::string tag = "<c ";
+  std::string tagEnd1 = ">";
+  std::string tagEnd2 = "</c>";
+
+  size_t k = 3;
+  size_t l = 1;
+
+  // count cells
+  int occurrences = 0;
+  string::size_type start = 0;
+  while ((start = xml.find("</c>", start)) != string::npos) {
+      ++occurrences;
+      start += 6;
+  }
+
+  CharacterVector cells(occurrences);
+  std::fill(cells.begin(), cells.end(), NA_STRING);
+  std::string sub;
+
+  //find "<c""
+  //find ">" after "<c"
+  //If char before > is / break else look for </c
+  for(int i = 0; i < occurrences; i ++){
+    
+    pos = xml.find(tag, pos+2);  
+    endPos = xml.find(tagEnd1, pos+k);
+      
+    if(xml[endPos-1] != '/'){
+      endPos = xml.find(tagEnd2, pos+k);
+      sub = xml.substr(pos, endPos-pos+l);
+      
+      if(sub.find("<v>", 5) != std::string::npos)
+        cells[i] = sub;
+    }
+  } 
+  
+  cells = na_omit(cells);
+
+  return wrap(cells) ;  
+
+}
 
 
 

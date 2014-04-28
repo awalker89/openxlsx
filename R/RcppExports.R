@@ -121,10 +121,6 @@ WhichMatch <- function(a, b) {
     .Call('openxlsx_WhichMatch', PACKAGE = 'openxlsx', a, b)
 }
 
-getCellsWithChildren <- function(xmlFile) {
-    .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile)
-}
-
 buildTableXML <- function(id, ref, colNames, showColNames, tableStyle) {
     .Call('openxlsx_buildTableXML', PACKAGE = 'openxlsx', id, ref, colNames, showColNames, tableStyle)
 }
@@ -143,5 +139,9 @@ calcNRows <- function(x) {
 
 buildCellTypes <- function(classes, nRows) {
     .Call('openxlsx_buildCellTypes', PACKAGE = 'openxlsx', classes, nRows)
+}
+
+getCellsWithChildren <- function(xmlFile) {
+    .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile)
 }
 

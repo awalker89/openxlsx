@@ -342,9 +342,9 @@ colBorders <- function(wb, sheet, startRow, startCol, nRow, nCol, borderColour){
 #' 
 #' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 #' 
-#' df <- data.frame("Date" = Sys.Date-0:20, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-1:20*60*60)
+#' df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60)
 #' 
-#' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium17")
+#' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,

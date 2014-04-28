@@ -89,9 +89,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     sharedStrings <- NULL
   }
   
-  ## get cells from worksheet
-  worksheetFile <- sort(worksheets)[[sheetInd]]  
-  ws <- .Call("openxlsx_getCellsWithChildren", worksheetFile, PACKAGE = "openxlsx")
+  ## read in worksheet and get cells with a value node, skip emptyStrs cells
+  ws <- .Call("openxlsx_getCellsWithChildren", sort(worksheets)[[sheetInd]], emptyStrs, PACKAGE = "openxlsx")
   ws <- ws[grepl("<v>", ws)]
   
   ## remove cells with the empty str references

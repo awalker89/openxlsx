@@ -507,21 +507,6 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// getCellsWithChildren
-CharacterVector getCellsWithChildren(std::string xmlFile);
-RcppExport SEXP openxlsx_getCellsWithChildren(SEXP xmlFileSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
-        CharacterVector __result = getCellsWithChildren(xmlFile);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
 // buildTableXML
 CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle);
 RcppExport SEXP openxlsx_buildTableXML(SEXP idSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP tableStyleSEXP) {
@@ -602,6 +587,21 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< CharacterVector >::type classes(classesSEXP );
         Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
         CharacterVector __result = buildCellTypes(classes, nRows);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// getCellsWithChildren
+CharacterVector getCellsWithChildren(std::string xmlFile);
+RcppExport SEXP openxlsx_getCellsWithChildren(SEXP xmlFileSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
+        CharacterVector __result = getCellsWithChildren(xmlFile);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
