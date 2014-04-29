@@ -52,7 +52,9 @@ writeDataTable(wb, "S1", x = iris)
 
 writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 
-writeDataTable(wb, "S3", x = mtcars, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium17")
+df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60)
+
+writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 }

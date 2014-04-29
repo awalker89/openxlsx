@@ -37,6 +37,8 @@ df5 <- read.xlsx(xlsxFile = xlsxFile, sheet = 5, startRow = 2)
 df6 <- read.xlsx(xlsxFile = xlsxFile, sheet = 6) ## NULL
 df7 <- read.xlsx(xlsxFile = xlsxFile, sheet = 7)
 df8 <- read.xlsx(xlsxFile = xlsxFile, sheet = 8)
+df8$Date <- convertToDate(df8$Date)
+sapply(df8, class)
 }
 \author{
 Alexander Walker
