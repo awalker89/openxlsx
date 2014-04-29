@@ -1757,64 +1757,88 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
 
 
 
+// [[Rcpp::export]]
+CharacterVector removeEmptyNodes(CharacterVector x, CharacterVector emptyNodes){
+
+  int n = x.size();
+  int nEmpty = emptyNodes.size();
+  
+  std::string cell;
+  std::string emptyNode;
+  
+  
+  for(int e = 0; e < nEmpty; e++){
+    
+    emptyNode = emptyNodes[e];
+  
+    for(int i =0; i<n;i++){
+      cell = x[i];
+    
+      if(cell.find(emptyNode, 0) != std::string::npos){
+        if(cell.find("t=\"s\"", 0) != std::string::npos){
+          x[i] = NA_STRING;
+        }
+      }
+    }   
+  }
+  
+  x = na_omit(x);
+
+  return wrap(x);
+  
+}
 
 
 
 // [[Rcpp::export]]
-CharacterVector getCellsWithChildren(std::string xmlFile){
+CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyNodes){
 
  //read in file without spaces
   std::string xml = cppReadFile(xmlFile);
       
-  size_t pos = 0;
-  size_t endPos = 0;
-  
-  std::string tag = "<c ";
-  std::string tagEnd1 = ">";
-  std::string tagEnd2 = "</c>";
-
-  size_t k = 3;
-  size_t l = 1;
+ // std::string tag = "<c ";
+//  std::string tagEnd1 = ">";
+//  std::string tagEnd2 = "</c>";
 
   // count cells with children
   int occurrences = 0;
   string::size_type start = 0;
-  while ((start = xml.find("</c>", start)) != string::npos) {
+  while ((start = xml.find("</v>", start)) != string::npos) {
       ++occurrences;
-      start += 6;
+      start += 4;
   }
-
+  
   CharacterVector cells(occurrences);
   std::fill(cells.begin(), cells.end(), NA_STRING);
-  std::string sub;
 
   //find "<c"
   //find ">" after "<c"
   //If char before > is / break else look for </c
   int i = 0;
+  size_t pos = 0;
+  size_t nextPos = 3;
+  size_t vPos = 2;
+  std::string sub;
+  
   while(i < occurrences){
     
-    pos = xml.find(tag, pos+2); 
-    endPos = xml.find(tagEnd1, pos+k);
+    pos = xml.find("<c ", pos+3); 
+    
+    if(pos != std::string::npos){
+      nextPos = xml.find("<c ", pos+10);
+      vPos = xml.find("</v>", pos+8); // have to atleast pass <c r="XX">
       
-    if(xml[endPos-1] != '/'){
-      endPos = xml.find(tagEnd2, pos+k);
-      sub = xml.substr(pos, endPos-pos+l);
-      
-      if(sub.find("<v>", 5) != std::string::npos){
-        cells[i] = sub;
+      if(vPos < nextPos){
+        cells[i] = xml.substr(pos, nextPos-pos);
         i++;
       }
     }
-  } 
-  
-//  cells = na_omit(cells);
-
+  }
+     
+  if(emptyNodes[0] != "")
+    cells = removeEmptyNodes(cells, emptyNodes);
+     
   return wrap(cells) ;  
 
 }
-
-
-
-
 

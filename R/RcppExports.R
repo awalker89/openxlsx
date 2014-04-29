@@ -141,7 +141,11 @@ buildCellTypes <- function(classes, nRows) {
     .Call('openxlsx_buildCellTypes', PACKAGE = 'openxlsx', classes, nRows)
 }
 
-getCellsWithChildren <- function(xmlFile) {
-    .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile)
+removeEmptyNodes <- function(x, emptyNodes) {
+    .Call('openxlsx_removeEmptyNodes', PACKAGE = 'openxlsx', x, emptyNodes)
+}
+
+getCellsWithChildren <- function(xmlFile, emptyNodes) {
+    .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
 }
 

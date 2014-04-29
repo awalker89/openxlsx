@@ -593,15 +593,32 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// removeEmptyNodes
+CharacterVector removeEmptyNodes(CharacterVector x, CharacterVector emptyNodes);
+RcppExport SEXP openxlsx_removeEmptyNodes(SEXP xSEXP, SEXP emptyNodesSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type emptyNodes(emptyNodesSEXP );
+        CharacterVector __result = removeEmptyNodes(x, emptyNodes);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getCellsWithChildren
-CharacterVector getCellsWithChildren(std::string xmlFile);
-RcppExport SEXP openxlsx_getCellsWithChildren(SEXP xmlFileSEXP) {
+CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyNodes);
+RcppExport SEXP openxlsx_getCellsWithChildren(SEXP xmlFileSEXP, SEXP emptyNodesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
-        CharacterVector __result = getCellsWithChildren(xmlFile);
+        Rcpp::traits::input_parameter< CharacterVector >::type emptyNodes(emptyNodesSEXP );
+        CharacterVector __result = getCellsWithChildren(xmlFile, emptyNodes);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

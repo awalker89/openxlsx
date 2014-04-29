@@ -36,6 +36,9 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
   
+  if(startRow < 1)
+    startRow <- 1
+  
   ## create temp dir and unzip
   xmlDir <- paste0(tempdir(), "_excelXMLRead")
   xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
@@ -90,21 +93,15 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   }else{
     sharedStrings <- NULL
   }
-  
-  ## read in worksheet and get cells with a value node, skip emptyStrs cells
-  ws <- .Call("openxlsx_getCellsWithChildren", sort(worksheets)[[sheetInd]], emptyStrs, PACKAGE = "openxlsx")
-  ws <- ws[grepl("<v>", ws)]
-  
-  ## remove cells with the empty str references
-  if(length(emptyStrs) > 0){ 
-    toKeep <- rep.int(TRUE, length(ws))
-    for(e in emptyStrs){
-      tmp <- grepl(sprintf("<v>%s</v>", e), ws) & grepl('t="s"', ws)
-      toKeep[tmp] <- FALSE
-    }
-    ws <- ws[toKeep]
-  }
 
+  if(length(emptyStrs) == 0)
+    emptyStrs <- ""
+  
+  ## 0.75s
+
+  ## read in worksheet and get cells with a value node, skip emptyStrs cells
+  ws <- .Call("openxlsx_getCellsWithChildren", sort(worksheets)[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
+  
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
   v <- r_v[[2]]
@@ -149,15 +146,12 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   }else{
     stringInds <- na.omit(match(tR, r))
   }
-    
-
 
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
   wsStrInds <- which(grepl('t="str"|t="e"', ws, perl = TRUE))
   if(length(wsStrInds) > 0){
     
-    ws_str <- ws[wsStrInds]
-    strRV <- .Call("openxlsx_getRefsVals", ws_str, startRow, PACKAGE = "openxlsx")
+    strRV <- .Call("openxlsx_getRefsVals",  ws[wsStrInds], startRow, PACKAGE = "openxlsx")
     uStrs <- unique(strRV[[2]])
     
     ## Match references of "str" cells to r, append these to stringInds
