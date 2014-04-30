@@ -68,7 +68,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   }
   
   
-  
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){
     
@@ -92,6 +91,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     
   }else{
     sharedStrings <- NULL
+    emptyStrs <- NULL
   }
 
   if(length(emptyStrs) == 0)
