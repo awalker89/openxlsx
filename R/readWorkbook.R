@@ -135,8 +135,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
     
     boolInds <- match(tB, r)
     logicalVals <- v[boolInds]
-    logicalVals[logicalVals == "0"] <- fInd
-    logicalVals[logicalVals == "1"] <- tInd
+    logicalVals[logicalVals == "0"] <- fInd[[1]]
+    logicalVals[logicalVals == "1"] <- tInd[[1]]
     v[boolInds] <- logicalVals
     
   }
