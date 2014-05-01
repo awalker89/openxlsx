@@ -1,0 +1,35 @@
+openxlsx 1.0.4
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* write.xlsx function to write data directly to file via the writeData function
+allowing optional basic cell styling.
+
+* writeDataTable now styles columns of class 'Date', 'POSIXct', 'POSIXt', 'currency', 'accounting'
+ as Excel formats Date, Date, Date, Currency, accounting respectively.
+
+* Data of class 'Date', 'POSIXct', 'POSIXt', 'currency', 'accounting' are converted to integers
+ upon writing (as opposed to characters).
+
+
+BUG FIXES
+
+* conversion of numeric data to integer in read.xlsx fixed.
+
+* readWorkbook/read.xlsx should work now. Empty values are 
+  now padded with NA. Many other bugs fixed.
+
+* borders on single row and/or column data.frames now work.
+
+* readWorkbook/read.xlsx check for TRUE/FALSE values is now case-insensitive.
+
+* sheet names containing invalid xml charcters (&, <, >, ', ") now work when referencing
+  by name and will not result in a corrupt workbook.
+
+
+VIGNETTE
+
+* Instructions for installing Rtools and adding Rtools/bin directory to system PATH variable
+
+* Extra bracket in example and addWorksheet gridLines parameter corrected.
