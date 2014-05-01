@@ -227,6 +227,7 @@ writeData <- function(wb,
 #' test.n <- "glm"
 #' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
 #'            binomial())
+#'            
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData2(wb = wb, sheet = test.n, x = fm3)
 #' ## Save workbook
@@ -243,16 +244,9 @@ writeData2 <- function(wb,
                        borders = c("none","surrounding","rows","columns"),
                        borderColour = getOption("openxlsx.borderColour", "black"),
                        ...){
+  
     ## NOTE: WriteData2 is the first piece of writeData
     ## NOTE: WriteData2.default is the second piece of writeData
-
-    ## set scientific notation penalty
-    scipen <- unname(unlist(options("scipen")))
-
-    ## TODO check on.exit with UseMethod (does it work properly?)
-    on.exit(options('scipen' = scipen), add = TRUE)
-    options('scipen' = 10000)           # otherwise rownumbers over 10000
-                                        # are in scientific notation 
 
     ## Call <- match.call(expand.dots = TRUE)
     ## Call$startCol
@@ -279,7 +273,7 @@ writeData2 <- function(wb,
     ColNames <- colNames
     RowNames <- rowNames
 
-    ## borders is resetted to defaults every time a method is
+    ## borders is reset to defaults every time a method is
     ## dispatched, therefore i save it in a new variable (available
     ## when the method is called. The same for BorderColour
     Borders <- match.arg(borders)
@@ -313,6 +307,7 @@ writeData2 <- function(wb,
     ## check input
     if (is.null(borderColour) & (Borders != "none")) stop("NULL borderColour")
     if (!(borderColour %in% colours()))  stop("Invalid borderColour!")
+    
     ## color helper function: eg col2hex(colors())
     col2hex <- function(my.col) {
         rgb(t(col2rgb(my.col))/255)
@@ -1050,6 +1045,7 @@ write.xlsx <- function(x, file, ...){
     }
   }
   
+  ## to be consistent with write.csv
   if("col.names" %in% names(params)){
     if(is.logical(params$col.names)){
       colNames <- params$col.names
@@ -1068,6 +1064,7 @@ write.xlsx <- function(x, file, ...){
     }
   }
   
+  ## to be consistent with write.csv
   if("row.names" %in% names(params)){
     if(is.logical(params$row.names)){
       rowNames <- params$row.names
@@ -1116,7 +1113,7 @@ write.xlsx <- function(x, file, ...){
   wb$addWorksheet(sheetName, showGridLines = gridLines)
   
   writeData(wb = wb, 
-            sheet = sheet,
+            sheet = 1,
             x = x,
             startCol = startCol,
             startRow = startRow, 
@@ -1130,6 +1127,7 @@ write.xlsx <- function(x, file, ...){
   
   saveWorkbook(wb = wb, file = file, overwrite = overwrite)
   
+  return(wb)
 
 }
 
