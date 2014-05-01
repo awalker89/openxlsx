@@ -9,9 +9,8 @@ addWorksheet(wb, sheetName, gridLines = TRUE)
 
   \item{sheetName}{A name for the new worksheet}
 
-  \item{gridLines}{A logical. If TRUE, the worksheet grid
-  lines will be shows, else they will be hidden. or
-  hidden.}
+  \item{gridLines}{A logical. If FALSE, the worksheet grid
+  lines will be hidden.}
 }
 \value{
 XML tree
