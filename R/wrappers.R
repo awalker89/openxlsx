@@ -26,11 +26,7 @@ createWorkbook <- function(creator = Sys.getenv("USERNAME")){
   
   if(length(creator) > 1)
     creator <- creator[[1]]
-  
-  zip <- Sys.getenv("R_ZIPCMD", "zip")
-  if(nchar(zip[[1]]) == 0)
-    stop("No zip application found. Please install Rtools.")  
-  
+    
   invisible(Workbook$new(creator))
 }
 
@@ -69,16 +65,17 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
     overwrite = FALSE
   
   file <- gsub("\\\\", "\\/", file)
-  slashPos <- unlist(gregexpr("\\/", file))
+  file <- gsub("\\/+", "\\/", file)
   
-  if(grepl("\\/", file)){
-    path <- substr(file, 1, tail(slashPos,1))
-    fileName <- substring(file, tail(slashPos,1)+1)
-  }else{
+  file <- unlist(strsplit(file, split = "/"))
+  fileName <- tail(file, 1)
+  
+  if(length(file) == 1){
     path <- getwd()
-    fileName <- file
+  }else{
+    path <- paste(file[1:(length(file) - 1)], collapse = "/")
   }
-  
+
   if(file.exists(file.path(path, fileName)) & !overwrite)
     stop("File already exists!")
   
@@ -204,9 +201,7 @@ sheets <- function(wb){
 #' @author Alexander Walker
 #' @param wb A Workbook object to attach the new worksheet
 #' @param sheetName A name for the new worksheet
-#' @param gridLines A logical. If TRUE, the worksheet grid lines will be
-#' shows, else they will be hidden.
-#' or hidden.
+#' @param gridLines A logical. If FALSE, the worksheet grid lines will be hidden.
 #' @return XML tree
 #' @export
 #' @examples
@@ -324,6 +319,7 @@ convertFromExcelRef <- function(col){
 #'   \item{\bold{CURRENCY}}
 #'   \item{\bold{ACCOUNTING}}
 #'   \item{\bold{DATE}}
+#'   \item{\bold{LONGDATE}}
 #'   \item{\bold{TIME}}
 #'   \item{\bold{PERCENTAGE}}
 #'   \item{\bold{FRACTION}}
@@ -398,27 +394,28 @@ convertFromExcelRef <- function(col){
 #' 
 createStyle <- function(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
                         numFmt = "GENERAL",
-                        border = NULL, borderColour = "#000000",
+                        border = NULL, borderColour = "#4F81BD",
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE){
   
   ### Error checking
-  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNT", "DATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT")
+  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNTING", "DATE", "LONGDATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT")
   numFmt <- toupper(numFmt)
   if(!numFmt %in% validNumFmt)
     stop("Invalid numFmt")
      
-  numFmtMapping <- list(list("numFmtId" = 0),
-                        list("numFmtId" = 2),
-                        list("numFmtId" = 164, formatCode = "&quot;$&quot;#,##0.00"),
-                        list("numFmtId" = 44),
-                        list("numFmtId" = 14),
-                        list("numFmtId" = 167),
-                        list("numFmtId" = 10),
-                        list("numFmtId" = 11),
-                        list("numFmtId" = 49))
-  
+  numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
+                        list("numFmtId" = 2),  # NUMBER
+                        list("numFmtId" = 164, formatCode = "&quot;$&quot;#,##0.00"), ## CURRENCY
+                        list("numFmtId" = 44), # ACCOUNTING
+                        list("numFmtId" = 14), # DATE
+                        list("numFmtId" = 166, formatCode = "[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy"), #LONGDATE
+                        list("numFmtId" = 167), # TIME
+                        list("numFmtId" = 10),  # PERCENTAGE
+                        list("numFmtId" = 11),  # SCIENTIFIC
+                        list("numFmtId" = 49))  # TEXT
+    
   if(!is.null(halign)){
     halign <- tolower(halign[[1]])
     if(!halign %in% c("left", "right", "center"))
@@ -588,6 +585,9 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
+  
+  if(!"Style" %in% class(wb))
+    stop("style argument must be a Style object.")
   
   cols <- convertFromExcelRef(cols)
   rows <- as.numeric(rows)
