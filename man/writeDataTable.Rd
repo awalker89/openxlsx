@@ -25,8 +25,7 @@ writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 
   \item{colNames}{If TRUE, column names of x are written.}
 
-  \item{rowNames}{If TRUE, data.frame row names of x are
-  written.}
+  \item{rowNames}{If TRUE, row names of x are written.}
 
   \item{tableStyle}{Any excel table style name.}
 }
@@ -52,7 +51,11 @@ writeDataTable(wb, "S1", x = iris)
 
 writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 
-df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60)
+df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
+                 "Cash" = 1:20, "Cash2" = 31:50)
+
+class(df$Cash) <- "currency"
+class(df$Cash2) <- "accounting"
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 

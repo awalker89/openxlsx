@@ -1736,7 +1736,7 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
   CharacterVector colLabels(nCols);
   for(int i=0; i < nCols; i++){
     
-    if((classes[i] == "numeric") | (classes[i] == "integer") | (classes[i] == "Date") | (classes[i] == "POSIXct") | (classes[i] == "POSIXt") ){
+    if((classes[i] == "numeric") | (classes[i] == "integer") ){
      colLabels[i] = "n"; 
     }else if(classes[i] == "character"){
       colLabels[i] = "s"; 

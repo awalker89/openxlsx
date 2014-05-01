@@ -447,16 +447,9 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   df[is.na(df)] <- ""
   
   colClasses <- sapply(df, function(x) class(x)[[1]])
-  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-  
-  if("logical" %in% colClasses){
-    df[df == TRUE] <- "1"
-    df[df == FALSE] <- "0"
-  }
   
   ## convert any Dates to integers and create date style object
   if(any(c("Date", "POSIXct", "POSIXt") %in% colClasses)){
-    
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))
     for(i in dInds)
       df[,i] <- as.integer(df[,i]) + 25569
@@ -464,9 +457,25 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
     for(i in pInds)
       df[,i] <- as.integer(df[,i])/86400 + 25569
-    
-    
   }
+  
+  ## convert any Dates to integers and create date style object
+  if(any(c("currency", "accounting") %in% tolower(colClasses))){
+    cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency") %in% tolower(x))))
+    for(i in cInds)
+      df[,i] <- as.numeric(gsub("[^0-9\\.]", "", df[,i]))
+  }
+  
+  colClasses <- sapply(df, function(x) class(x)[[1]])
+  
+  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
+  
+  if("logical" %in% colClasses){
+    df[df == TRUE] <- "1"
+    df[df == FALSE] <- "0"
+  }
+  
+
   
   v <- as.character(t(as.matrix(df)))
   

@@ -3,7 +3,7 @@
 \title{Create a cell style}
 \usage{
 createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
-  numFmt = "GENERAL", border = NULL, borderColour = "#000000",
+  numFmt = "GENERAL", border = NULL, borderColour = "#4F81BD",
   bgFill = NULL, fgFill = NULL, halign = NULL, valign = NULL,
   textDecoration = NULL, wrapText = FALSE)
 }
@@ -19,9 +19,9 @@ createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
   \item{numFmt}{Cell formatting \itemize{
   \item{\bold{GENERAL}} \item{\bold{NUMBER}}
   \item{\bold{CURRENCY}} \item{\bold{ACCOUNTING}}
-  \item{\bold{DATE}} \item{\bold{TIME}}
-  \item{\bold{PERCENTAGE}} \item{\bold{FRACTION}}
-  \item{\bold{SCIENTIFIC}} }}
+  \item{\bold{DATE}} \item{\bold{LONGDATE}}
+  \item{\bold{TIME}} \item{\bold{PERCENTAGE}}
+  \item{\bold{FRACTION}} \item{\bold{SCIENTIFIC}} }}
 
   \item{border}{Cell border (Any combination of "Top",
   "Bottom", "Left", "Right"). \itemize{ \item{\bold{Top}}{

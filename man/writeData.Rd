@@ -26,8 +26,7 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 
   \item{colNames}{If TRUE, column names of x are written.}
 
-  \item{rowNames}{If TRUE, data.frame row names of x are
-  written.}
+  \item{rowNames}{If TRUE, row names of x are written.}
 
   \item{headerStyle}{Custom style to apply to column
   names.}
@@ -39,7 +38,8 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   drawn with a border between each column.}
 
   \item{borderColour}{Colour of cell border.  A valid hex
-  colour beginning with "#"}
+  colour beginning with "#".  NULL will set borders to
+  black.}
 }
 \description{
 Write data to worksheet with optional styling.
