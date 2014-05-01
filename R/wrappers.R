@@ -340,8 +340,12 @@ convertFromExcelRef <- function(col){
 #'   }
 #'   
 #' @param borderColour Border colour.  A valid hex colour beginning with "#"   
-#' @param bgFill Cell background fill colour. A valid hex colour beginning with "#"  
-#' @param fgFill Cell foreground fill colour. A valid hex colour beginning with "#"  
+#' @param borderColour  Colour of cell border.  
+#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
+#' @param bgFill Cell background fill colour. 
+#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
+#' @param fgFill Cell foreground fill colour.
+#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
 
 #'   
 #' @param halign
@@ -391,10 +395,12 @@ convertFromExcelRef <- function(col){
 #' 
 #' # supply all colours
 #' createStyle(border = "TopBottomLeft", borderColour = c("#FF0000","#00FF00", "#0000FF"))
-#' 
-createStyle <- function(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
+createStyle <- function(fontName = "Calibri",
+                        fontSize = 11,
+                        fontColour = "#000000",
                         numFmt = "GENERAL",
-                        border = NULL, borderColour = "#4F81BD",
+                        border = NULL,
+                        borderColour = "#4F81BD",
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE){
@@ -586,7 +592,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  if(!"Style" %in% class(wb))
+  if(!"Style" %in% class(style))
     stop("style argument must be a Style object.")
   
   cols <- convertFromExcelRef(cols)
