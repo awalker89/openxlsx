@@ -3,9 +3,10 @@
 \title{Create a cell style}
 \usage{
 createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
-  numFmt = "GENERAL", border = NULL, borderColour = "#4F81BD",
-  bgFill = NULL, fgFill = NULL, halign = NULL, valign = NULL,
-  textDecoration = NULL, wrapText = FALSE)
+  numFmt = "GENERAL", border = NULL,
+  borderColour = getOption("openxlsx.borderColour", "black"), bgFill = NULL,
+  fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
+  wrapText = FALSE)
 }
 \arguments{
   \item{fontName}{A name of a font. Note the font name is
@@ -32,14 +33,17 @@ createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
   \item{\bold{TopLeftRight}}{ Top and Left border}
   \item{\bold{TopBottomLeftRight}}{ All borders} }}
 
-  \item{borderColour}{Border colour.  A valid hex colour
-  beginning with "#"}
+  \item{borderColour}{Colour of cell border. A valid colour
+  (belonging to colours()) or a valid hex colour beginning
+  with "#"}
 
-  \item{bgFill}{Cell background fill colour. A valid hex
-  colour beginning with "#"}
+  \item{bgFill}{Cell background fill colour. A valid colour
+  (belonging to colours()) or a valid hex colour beginning
+  with "#"}
 
-  \item{fgFill}{Cell foreground fill colour. A valid hex
-  colour beginning with "#"}
+  \item{fgFill}{Cell foreground fill colour. A valid colour
+  (belonging to colours()) or a valid hex colour beginning
+  with "#"}
 
   \item{halign}{Horizontal alignment of cell contents
   \itemize{ \item{\bold{left}}{ Left horizontal align cell
@@ -83,10 +87,10 @@ style <- createStyle(fontSize = 24, fontColour = rgb(1,0,0),
 # borderColour is recycled for each border or all colours can be supplied
 
 # colour is recycled 3 times for "Top", "Bottom" & "Right" sides.
-createStyle(border = "TopBottomRight", borderColour = "#FF0000")
+createStyle(border = "TopBottomRight", borderColour = "red")
 
 # supply all colours
-createStyle(border = "TopBottomLeft", borderColour = c("#FF0000","#00FF00", "#0000FF"))
+createStyle(border = "TopBottomLeft", borderColour = c("red","yellow", "green"))
 }
 \author{
 Alexander Walker

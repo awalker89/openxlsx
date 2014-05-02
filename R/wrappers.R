@@ -391,16 +391,16 @@ convertFromExcelRef <- function(col){
 #' # borderColour is recycled for each border or all colours can be supplied
 #' 
 #' # colour is recycled 3 times for "Top", "Bottom" & "Right" sides.
-#' createStyle(border = "TopBottomRight", borderColour = "#FF0000") 
+#' createStyle(border = "TopBottomRight", borderColour = "red") 
 #' 
 #' # supply all colours
-#' createStyle(border = "TopBottomLeft", borderColour = c("#FF0000","#00FF00", "#0000FF"))
+#' createStyle(border = "TopBottomLeft", borderColour = c("red","yellow", "green"))
 createStyle <- function(fontName = "Calibri",
                         fontSize = 11,
                         fontColour = "#000000",
                         numFmt = "GENERAL",
                         border = NULL,
-                        borderColour = "#4F81BD",
+                        borderColour = getOption("openxlsx.borderColour", "black"),
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE){
@@ -457,11 +457,11 @@ createStyle <- function(fontName = "Calibri",
   }
   
   fontColour <- toupper(fontColour)
-  borderColour <- toupper(borderColour)
+  borderColour <- validateBorderColour(borderColour)
+  
   if(length(fontName) == 0) stop("Invalid font name!")
   if(fontSize < 1) stop("Font size must be greater than 0!")
   if(!grepl("#[A-F0-9]{6}", fontColour)) stop("Invalid fontColour!")
-  if(!all(grepl("#[A-F0-9]{6}", borderColour))) stop("Invalid borderColour!")
   
   
   ######################### error checking complete #############################

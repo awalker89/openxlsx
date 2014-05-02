@@ -49,6 +49,7 @@ writeData2(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 Write an object to worksheet with optional styling.
 }
 \examples{
+\dontrun{
 ## inspired by xtable gallery
 ## http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
 ## Create a new workbook and delete old file, if existing
@@ -91,10 +92,12 @@ writeData2(wb = wb, sheet = test.n, x = my.anova2)
 test.n <- "glm"
 fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
            binomial())
+
 addWorksheet(wb = wb, sheetName = test.n)
 writeData2(wb = wb, sheet = test.n, x = fm3)
 ## Save workbook
 saveWorkbook(wb, my.file,  overwrite = TRUE)
+}
 }
 \author{
 Alexander Walker
