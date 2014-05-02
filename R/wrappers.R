@@ -230,6 +230,7 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
     stop("sheetName too long! Max length is 28 characters.")
   
   ## Invalid XML characters
+  sheetName <- iconv(sheetName, to = "UTF-8")
   sheetName <- gsub('"', "&quot;", sheetName)
   sheetName <- gsub('&', "&amp;", sheetName)
   sheetName <- gsub("'", "&apos;", sheetName)
@@ -339,7 +340,6 @@ convertFromExcelRef <- function(col){
 #'    \item{\bold{TopBottomLeftRight}}{ All borders}
 #'   }
 #'   
-#' @param borderColour Border colour.  A valid hex colour beginning with "#"   
 #' @param borderColour  Colour of cell border.  
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
 #' @param bgFill Cell background fill colour. 
