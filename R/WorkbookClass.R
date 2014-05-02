@@ -336,8 +336,6 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
         '</styleSheet>',
         file.path(xlDir,"styles.xml"))
   
-  rm(styleXML)
- 
   ## write workbook.xml
   workbookXML <- workbook
   workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
@@ -373,14 +371,8 @@ Workbook$methods(validateSheet = function(sheetName){
   
   exSheets <- names(worksheets)
   
-  if(!is.numeric(sheetName)){
-    sheetName <- gsub('&', "&amp;", sheetName)
-    sheetName <- gsub('"', "&quot;", sheetName)
-    sheetName <- gsub("'", "&apos;", sheetName)
-    sheetName <- gsub('<', "&lt;", sheetName)
-    sheetName <- gsub('>', "&gt;", sheetName)
-  }
-  
+  if(!is.numeric(sheetName))
+    sheetName <- replaceIllegalCharacters(sheetName)
   
   if(is.null(exSheets))
     stop("Workbook does not contain any worksheets.", call.=FALSE)
@@ -494,11 +486,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   newStrs <- iconv(as.character(v[tFlag]), to = "UTF-8")
   if(length(newStrs) > 0){
   
-    newStrs <- gsub('&', "&amp;", newStrs)
-    newStrs <- gsub('"', "&quot;", newStrs)
-    newStrs <- gsub("'", "&apos;", newStrs)
-    newStrs <- gsub('<', "&lt;", newStrs)
-    newStrs <- gsub('>', "&gt;", newStrs)
+    newStrs <- replaceIllegalCharacters(newStrs)
     newStrs <- paste0("<si><t>", newStrs, "</t></si>")
     
     uNewStr <- unique(newStrs)
@@ -586,11 +574,6 @@ Workbook$methods(updateStyles = function(style){
     if(as.numeric(numFmtId) > 163){
       
       tmp <- style$numFmt$formatCode
-#       tmp <- gsub("&", "&amp;", tmp)
-#       tmp <- gsub('"', "&quot;", tmp)
-#       tmp <- gsub("'", "&apos;", tmp)
-#       tmp <- gsub("<", "&lt;", tmp)
-#       tmp <- gsub(">", "&gt;", tmp)
       
       styles$numFmts <<- unique(c(styles$numFmts,
                               sprintf('<numFmt numFmtId="%s" formatCode="%s"/>', numFmtId, tmp)
@@ -1403,13 +1386,7 @@ Workbook$methods(show = function(){
   nCharts <- length(charts)
   nStyles <- length(styleObjects)
   
-  exSheets <- gsub("&amp;", "&", exSheets)
-  exSheets <- gsub("&quot;", '"', exSheets)
-  exSheets <- gsub("&apos;", "'", exSheets)
-  exSheets <- gsub("&lt;", "<", exSheets)
-  exSheets <- gsub("&gt;", ">", exSheets)
-  
-  
+  exSheets <- replaceXMLEntities(exSheets)
   showText <- "A Workbook object.\n"
   
   ## worksheets

@@ -51,3 +51,30 @@ doBorders <- function(borders, wb, sheet, srow, scol, nrow,
   
 }
 
+
+
+replaceIllegalCharacters <- function(v){
+  
+  v <- gsub('&', "&amp;", v)
+  v <- gsub('"', "&quot;", v)
+  v <- gsub("'", "&apos;", v)
+  v <- gsub('<', "&lt;", v)
+  v <- gsub('>', "&gt;", v)
+  
+  return(v)
+}
+
+
+replaceXMLEntities <- function(v){
+  
+  v <- gsub("&amp;", "&", v)
+  v <- gsub("&quot;", '"', v)
+  v <- gsub("&apos;", "'", v)
+  v <- gsub("&lt;", "<", v)
+  v <- gsub("&gt;", ">", v)
+  
+  return(v)
+}
+
+
+

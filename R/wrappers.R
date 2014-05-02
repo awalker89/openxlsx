@@ -183,13 +183,7 @@ sheets <- function(wb){
  
   
   nms <- names(wb$worksheets)
-  
-  ## Invalid XML characters
-  nms <- gsub("&quot;", '"', nms)
-  nms <- gsub("&amp;", '&', nms)
-  nms <- gsub("&apos;", "'", nms)
-  nms <- gsub("&lt;", '<', nms)
-  nms <- gsub("&gt;", '>', nms)
+  nms <- replaceXMLEntities(nms)
   
  return(nms)
 }
@@ -231,11 +225,7 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
   
   ## Invalid XML characters
   sheetName <- iconv(sheetName, to = "UTF-8")
-  sheetName <- gsub('"', "&quot;", sheetName)
-  sheetName <- gsub('&', "&amp;", sheetName)
-  sheetName <- gsub("'", "&apos;", sheetName)
-  sheetName <- gsub('<', "&lt;", sheetName)
-  sheetName <- gsub('>', "&gt;", sheetName)
+  sheetName <- replaceIllegalCharacters(sheetName)
   
   invisible(wb$addWorksheet(sheetName, gridLines))
 } 
