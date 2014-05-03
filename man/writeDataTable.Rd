@@ -52,10 +52,12 @@ writeDataTable(wb, "S1", x = iris)
 writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 
 df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
-                 "Cash" = 1:20, "Cash2" = 31:50)
+                 "Cash" = paste("$",1:20), "Cash2" = 31:50,
+                 "hLink" = "http://cran.r-project.org/", stringsAsFactors = FALSE)
 
 class(df$Cash) <- "currency"
 class(df$Cash2) <- "accounting"
+class(df$hLink) <- "hyperlink"
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 

@@ -32,10 +32,12 @@
 #' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
 #' 
 #' df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
-#'                  "Cash" = 1:20, "Cash2" = 31:50)
-#'
+#'                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
+#'                  "hLink" = "http://cran.r-project.org/", stringsAsFactors = FALSE)
+#' 
 #' class(df$Cash) <- "currency"
 #' class(df$Cash2) <- "accounting"
+#' class(df$hLink) <- "hyperlink"
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
@@ -104,7 +106,7 @@ writeDataTable <- function(wb, sheet, x,
   ## column class
   colClasses <- lapply(x, class)
   
-  ## convert any Dates to integers and create date style object
+  ## Style Dates as DATE
   if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
     
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
@@ -116,23 +118,31 @@ writeDataTable <- function(wb, sheet, x,
   }
   
   
-  ## convert any Dates to integers and create date style object
+  ## style currency as CURRENCY
   if("currency" %in% tolower(colClasses)){
-    cInds <- which(sapply(colClasses, function(x) "currency" %in% tolower(x)))
+    inds <- which(sapply(colClasses, function(x) "currency" %in% tolower(x)))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "CURRENCY"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
-             cols = cInds + startCol - 1, gridExpand = TRUE)
+             cols = inds + startCol - 1, gridExpand = TRUE)
   }
   
+  ## style accounting as ACCOUNTING
   if("accounting" %in% tolower(colClasses)){
-    aInds <- which(sapply(colClasses, function(x) "accounting" %in% tolower(x)))
+    inds <- which(sapply(colClasses, function(x) "accounting" %in% tolower(x)))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "ACCOUNTING"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
-             cols = aInds + startCol - 1, gridExpand = TRUE)  
+             cols = inds + startCol - 1, gridExpand = TRUE)  
   }
   
+  ## style hyperlinks
+  if("hyperlink" %in% tolower(colClasses)){
+    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% tolower(x)))
+    addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
+             rows= 1:nrow(x) + startRow + showColNames - 1,
+             cols = inds + startCol - 1, gridExpand = TRUE)  
+  }
   
-  
+    
   ## write data to sheetData
   wb$writeData(df = x,
                colNames = showColNames,

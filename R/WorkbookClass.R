@@ -15,6 +15,7 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "externalLinksRels",
                                                "freezePane",
                                                "headFoot",
+                                               "hyperlinks",
                                                "media",
                                                "printerSettings",
                                                "queryTables",
@@ -67,6 +68,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   externalLinksRels <<- NULL
   headFoot <<- data.frame("text" = rep(NA, 6), "pos" = c("left", "center", "right"), "head" = c("head", "head", "head", "foot", "foot", "foot"), stringsAsFactors = FALSE)
   printerSettings <<- list()
+  hyperlinks <<- list()
   
   attr(sharedStrings, "uniqueCount") <<- 0
   
@@ -125,7 +127,8 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
   printerSettings[[newSheetIndex]] <<- genPrinterSettings()
-
+  hyperlinks[[newSheetIndex]] <<- ""
+  
   dataCount[[newSheetIndex]] <<- 0
   
   invisible(newSheetIndex)
@@ -380,7 +383,9 @@ Workbook$methods(validateSheet = function(sheetName){
   if(is.numeric(sheetName)){
     if(sheetName > length(exSheets))
       stop(sprintf("This Workbook only has %s sheets.", length(exSheets)), call.=FALSE)
+    
   return(sheetName)
+  
   }else if(!sheetName %in% exSheets){
     stop(sprintf("Sheet '%s' does not exist.", sheetName), call.=FALSE)
   }
@@ -458,6 +463,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
       df[,i] <- as.numeric(gsub("[^0-9\\.]", "", df[,i]))
   }
   
+  
   colClasses <- sapply(df, function(x) class(x)[[1]])
   
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
@@ -467,10 +473,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     df[df == FALSE] <- "0"
   }
   
-
-  
   v <- as.character(t(as.matrix(df)))
-  
   v[is.na(v)] <- as.character(NA)
   t[is.na(v)] <- as.character(NA)
   
@@ -481,9 +484,36 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     nRows <- nRows + 1
   }
   
+  ## create references
+  r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1), LETTERS, as.character(startRow:(startRow+nRows-1)))
+
+  
+  ##Append hyperlinks, convert h to s in cell type
+  if("hyperlink" %in% tolower(colClasses)){
+    
+    hInds <- which(t == "h")
+    t[hInds] <- "s"
+    
+    exHlinks <- hyperlinks[[sheet]]
+    exhlinkRefs <- names(hyperlinks[[sheet]])
+    
+    newHlinks <- r[hInds]
+    names(newHlinks) <- v[hInds]
+    
+    if(exHlinks[[1]] == ""){
+      hyperlinks[[sheet]] <<- newHlinks
+    }else{
+      allHlinks <- c(exHlinks, newHlinks)
+      allHlinks <- allHlinks[!duplicated(allHlinks, fromLast = TRUE)]
+      allHlinks <- allHlinks[order(nchar(allHlinks), allHlinks)]
+      hyperlinks[[sheet]] <<- allHlinks
+    }
+    
+  }
+  
   ## convert all strings to references in sharedStrings and update values (v)
-  tFlag <- which(t == "s")
-  newStrs <- iconv(as.character(v[tFlag]), to = "UTF-8")
+  strFlag <- which(t == "s")
+  newStrs <- v[strFlag]
   if(length(newStrs) > 0){
   
     newStrs <- replaceIllegalCharacters(newStrs)
@@ -492,11 +522,14 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     uNewStr <- unique(newStrs)
     
     .self$updateSharedStrings(uNewStr)  
-    v[tFlag] <- match(newStrs, sharedStrings) - 1
+    v[strFlag] <- match(newStrs, sharedStrings) - 1
   }
+  
+
+  
  
   ## Create cell list of lists
-  r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1), LETTERS, as.character(startRow:(startRow+nRows-1)))
+
   cells <- .Call("openxlsx_buildCellList", r , t ,v , PACKAGE="openxlsx")
   names(cells) <- as.integer(names(r))
 
@@ -525,7 +558,7 @@ Workbook$methods(updateCellStyles = function(sheet, rows, cols, styleId){
     return(NULL)
 
   ## convert sheet name to index
-  sheet <- validateSheet(sheet)
+  sheet <- which(names(worksheets) == sheet)
   sheetData[[sheet]] <<- .Call("openxlsx_writeCellStyles", sheetData[[sheet]], as.character(rows), cols, as.character(styleId), LETTERS)
 
 })
@@ -808,7 +841,14 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
-    
+        
+    if(hyperlinks[[i]][[1]] != ""){
+      nTables <- length(tables)
+      nHLinks <- length(hyperlinks[[i]])
+      hInds <- 1:nHLinks + 3 + nTables-1
+      ws$hyperlinks <- paste0('<hyperlinks>', paste(sprintf('<hyperlink ref="%s" r:id="rId%s"/>', hyperlinks[[i]], hInds), collapse = ""), '</hyperlinks>')  
+    }
+  
     sheetDataInd <- which(names(ws) == "sheetData")
     prior <- paste0(header, pxml(ws[1:(sheetDataInd-1)]))
     post <- paste0(pxml(ws[(sheetDataInd+1):length(ws)]), "</worksheet>")
@@ -841,8 +881,14 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     
     ## write worksheet rels
     if(length(worksheets_rels[[i]]) > 0 ){
+      
+      ws_rels <- worksheets_rels[[i]]
+      
+      if(hyperlinks[[i]][[1]] != "")
+        ws_rels <- c(ws_rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="%s" TargetMode="External"/>', hInds, iconv(names(hyperlinks[[i]]), to = "UTF-8")))
+          
       .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
-            pxml(worksheets_rels[[i]]),
+            pxml(ws_rels),
             '</Relationships>',
             file.path(xlworksheetsRelsDir, sprintf("sheet%s.xml.rels", i))
           )
@@ -1237,7 +1283,11 @@ Workbook$methods(preSaveCleanUp = function(){
   ## drawings will always be r:id1 on worksheet
   ## tables will always have r:id equal to table xml file number tables/table(i).xml
   
-  ## drawings and tables will be correct, every worksheet has a drawing, every drawing as worksheet r:id 1
+  ## Every worksheet has a drawingXML as r:id 1
+  ## Every worksheet has a printerSettings as r:id 2
+  ## Tables from r:id 3 to nTables+3 - 1
+  ## HyperLinks from nTables+3 to nTables+3+nHyperLinks-1
+  
   nSheets <- length(worksheets)
   nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
@@ -1293,7 +1343,7 @@ Workbook$methods(preSaveCleanUp = function(){
                                    paste0(sprintf('<externalReference r:id=\"rId%s\"/>', newInds), collapse = ""),
                                    "</externalReferences>")
   }
-    
+
   ## styles
   for(x in styleObjects){
     if(length(x$cells) > 0){
@@ -1457,5 +1507,7 @@ Workbook$methods(show = function(){
   cat(unlist(showText))
   
 })
+
+
 
 

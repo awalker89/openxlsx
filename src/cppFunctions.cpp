@@ -1742,6 +1742,8 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
       colLabels[i] = "s"; 
     }else if(classes[i] == "logical"){
       colLabels[i] = "b";
+    }else if(classes[i] == "hyperlink"){
+      colLabels[i] = "h";
     }else{
       colLabels[i] = "s";
     }
