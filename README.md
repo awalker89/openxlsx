@@ -1,6 +1,6 @@
 openxlsx
 ========
-This [R](http://http://www.r-project.org/) package simplifies the
+This [R](http://www.r-project.org/) package simplifies the
 creation of `.xlsx` files by providing 
 a high level interface to writing, styling and editing
 worksheets. Through the use of [Rcpp](http://www.rcpp.org/),
@@ -11,16 +11,19 @@ and
 packages with the added benefit of removing the dependency on
 Java. 
 
-Install (stable version)
+Install
 ------------------------
+
+Stable version
+- - - - - - - 
 Current stable version is available on CRAN, therefore from
 inside R
 ```r
 install.packages("openxlsx", dependencies=TRUE)
 ```
 
-Install (development version)
------------------------------
+Development version
+- - - - - - - - - -
 Development version is available via GitHub. You need to have
 
 - `Rcpp`
