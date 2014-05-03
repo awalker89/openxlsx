@@ -15,30 +15,29 @@ Java.
 
 
 ### Stable version
-Current stable version is available on CRAN, therefore from
+Current stable version is available on
+[CRAN](http://cran.r-project.org/), therefore from 
 inside R
 ```r
 install.packages("openxlsx", dependencies=TRUE)
 ```
 
 ### Development version
-Development version can be installed via GitHub. Before, you need to install
+Development version can be installed via GitHub. Before that, you
+need to setup:
 
-- `Rcpp` ```R
-install.packages("Rcpp", dependencies=TRUE)
-```
-- Rtools (Windows only), available
+1. Rtools (Windows only), available
 [here](http://cran.r-project.org/bin/windows/Rtools/). In the
 installation process, set up `PATH` to include Rtools directories.
-- `devtools` ```r
-install.packages("devtools", dependencies=TRUE)
-```
+2. `Rcpp` and `devtools` 
+```R
+install.packages(c("Rcpp", "devtools"), dependencies=TRUE)
 
 Then:
 ```r
 install_github("openxlsx", "awalker89")
 ```
-On some Unix platform `install_github` has been [reported](https://github.com/hadley/devtools/issues/467) not to
+On *some Unix platform* `install_github` has been [reported](https://github.com/hadley/devtools/issues/467) not to
 work as expected. A handy workaround, in the meantime, could be the following
 simple bash script (eg named `r_install_github`):
 
@@ -60,7 +59,7 @@ rm -rf R_install_github
 ```
 
 and to install `openxlsx` (after giving execution permissions and
-putting in a `PATH` directory):
+putting it in a `PATH` directory):
 ```bash
 r_install_github openxlsx awalker89
 ```
@@ -68,6 +67,8 @@ r_install_github openxlsx awalker89
 ## Bug/feature request
 Thanks, [here](https://github.com/awalker89/openxlsx/issues). 
 
+## News
+[Here](https://raw.githubusercontent.com/awalker89/openxlsx/master/NEWS). 
 
 ## Authors and Contributors
 A list is automagically maintained
