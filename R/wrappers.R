@@ -26,6 +26,9 @@ createWorkbook <- function(creator = Sys.getenv("USERNAME")){
   
   if(length(creator) > 1)
     creator <- creator[[1]]
+  
+  ## remove any illegal XML characters
+  creator <- replaceIllegalCharacters(creator)
     
   invisible(Workbook$new(creator))
 }
@@ -224,7 +227,6 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
     stop("sheetName too long! Max length is 28 characters.")
   
   ## Invalid XML characters
-  sheetName <- iconv(sheetName, to = "UTF-8")
   sheetName <- replaceIllegalCharacters(sheetName)
   
   invisible(wb$addWorksheet(sheetName, gridLines))

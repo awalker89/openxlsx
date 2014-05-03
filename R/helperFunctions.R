@@ -55,6 +55,7 @@ doBorders <- function(borders, wb, sheet, srow, scol, nrow,
 
 replaceIllegalCharacters <- function(v){
   
+  v <- iconv(as.character(v), to = "UTF-8")
   v <- gsub('&', "&amp;", v)
   v <- gsub('"', "&quot;", v)
   v <- gsub("'", "&apos;", v)
