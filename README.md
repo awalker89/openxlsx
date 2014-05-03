@@ -3,7 +3,8 @@ openxlsx
 This [R](http://www.r-project.org/) package simplifies the
 creation of `.xlsx` files by providing 
 a high level interface to writing, styling and editing
-worksheets. Through the use of [Rcpp](http://www.rcpp.org/),
+worksheets. Through the use of
+[`Rcpp`](http://cran.r-project.org/web/packages/Rcpp/), 
 read/write times are comparable to the
 [`xlsx`](http://cran.r-project.org/web/packages/xlsx/index.html)
 and
@@ -32,6 +33,7 @@ installation process, set up `PATH` to include Rtools directories.
 2. `Rcpp` and `devtools` 
 ```R
 install.packages(c("Rcpp", "devtools"), dependencies=TRUE)
+```
 
 Then:
 ```r
