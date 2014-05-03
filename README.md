@@ -22,21 +22,19 @@ install.packages("openxlsx", dependencies=TRUE)
 ```
 
 ### Development version
-Development version is available via GitHub. You need to have
+Development version can be installed via GitHub. Before, you need to install
 
-- `Rcpp`
-```r
+- `Rcpp` ```R
 install.packages("Rcpp", dependencies=TRUE)
 ```
 - Rtools (Windows only), available
 [here](http://cran.r-project.org/bin/windows/Rtools/). In the
 installation process, set up `PATH` to include Rtools directories.
-- `devtools`
-```r
+- `devtools` ```r
 install.packages("devtools", dependencies=TRUE)
 ```
 
-installed. Then:
+Then:
 ```r
 install_github("openxlsx", "awalker89")
 ```
@@ -61,13 +59,13 @@ cd /tmp && \
 rm -rf R_install_github
 ```
 
-and to install `openxlsx` usage is:
+and to install `openxlsx` (after giving execution permissions and
+putting in a `PATH` directory):
 ```bash
-chmod +x r_install_github
-./r_install_github openxlsx awalker89
+r_install_github openxlsx awalker89
 ```
 
-## Bug/feature request?
+## Bug/feature request
 Thanks, [here](https://github.com/awalker89/openxlsx/issues). 
 
 
