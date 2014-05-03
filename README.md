@@ -11,19 +11,17 @@ and
 packages with the added benefit of removing the dependency on
 Java. 
 
-Install
-------------------------
+## Install
 
-Stable version
-- - - - - - - 
+
+### Stable version
 Current stable version is available on CRAN, therefore from
 inside R
 ```r
 install.packages("openxlsx", dependencies=TRUE)
 ```
 
-Development version
-- - - - - - - - - -
+### Development version
 Development version is available via GitHub. You need to have
 
 - `Rcpp`
@@ -69,12 +67,10 @@ chmod +x r_install_github
 ./r_install_github openxlsx awalker89
 ```
 
-Bug and/or feature request?
----------------------------
+## Bug/feature request?
 Thanks, [here](https://github.com/awalker89/openxlsx/issues). 
 
 
-Authors and Contributors
-------------------------
+## Authors and Contributors
 A list is automagically maintained
 [here](https://github.com/awalker89/openxlsx/graphs/contributors). 
