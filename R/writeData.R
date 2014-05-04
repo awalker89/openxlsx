@@ -21,12 +21,13 @@
 #' a surrounding border is drawn a border around each row. If
 #' "columns", a surrounding border is drawn with a border between
 #' each column.
-#' @param borderColour Colour of cell border.  A valid colour (belonging to colours())
+#' @param borderColour Colour of cell border.  A valid colour (belonging to colours() or a hex colour code.)
 #' @param ...  Further arguments (for future use)
 #' @seealso \code{\link{writeData}}
 #' @export writeData
 #' @rdname writeData
 #' @examples
+#' 
 #' \dontrun{
 #' ## inspired by xtable gallery
 #' ## http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
@@ -89,11 +90,6 @@ writeData <- function(wb,
                        borderColour = getOption("openxlsx.borderColour", "black"),
                        ...){
   
-  ## NOTE: writeData is the first piece of writeData
-  ## NOTE: writeData.default is the second piece of writeData
-  
-  ## Call <- match.call(expand.dots = TRUE)
-  ## Call$startCol
   
   ## Input validating
   if(!is.null(xy)){
@@ -135,6 +131,12 @@ writeData.default <- function(wb,
                                borders = c("none","surrounding","rows","columns"),
                                borderColour = getOption("openxlsx.borderColour", "black"),
                                ...){
+  
+  ## classes that can be handeld by default method:
+  # data.frame, data.table
+  # matrix
+  # numeric, integer, character, logical, complex, Date, POSIXct, POSIXlt, factors
+  # 
   
   borders <- match.arg(borders)
   
