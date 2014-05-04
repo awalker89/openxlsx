@@ -96,20 +96,19 @@
 #' saveWorkbook(wb, my.file,  overwrite = TRUE)
 #' }
 writeData <- function(wb, 
-                       sheet,
-                       x,
-                       startCol = 1,
-                       startRow = 1, 
-                       xy = NULL,
-                       colNames = TRUE,
-                       rowNames = FALSE,
-                       headerStyle = NULL,
-                       borders = c("none","surrounding","rows","columns"),
-                       borderColour = getOption("openxlsx.borderColour", "black"),
-                       ...){
+                      sheet,
+                      x,
+                      startCol = 1,
+                      startRow = 1, 
+                      xy = NULL,
+                      colNames = TRUE,
+                      rowNames = FALSE,
+                      headerStyle = NULL,
+                      borders = c("none","surrounding","rows","columns"),
+                      borderColour = getOption("openxlsx.borderColour", "black"),
+                      ...){
   
-  
-  ## Input validating
+  ## All input conversions/validations
   if(!is.null(xy)){
     if(length(xy) != 2)
       stop("xy parameter must have length 2")
@@ -120,53 +119,72 @@ writeData <- function(wb,
   ## convert startRow and startCol
   startCol <- convertFromExcelRef(startCol)
   startRow <- as.integer(startRow)
-
+  
   if(!"Workbook" %in% class(wb)) stop("First argument must be a Workbook.")
   if(!is.logical(colNames)) stop("colNames must be a logical.")
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
   if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
+  
+  borders <- match.arg(borders)
   if(length(borders) != 1) stop("borders argument must be length 1.")    
   
   ## borderColours validation
   borderColour <- validateBorderColour(borderColour)
   
-  ## Method dispatch
-  UseMethod(generic = "writeData", object = x)
+  ## Have decided to not use S3 as too much code duplication with input checking/converting
+  ## given that everything has to fit into a grid.
   
-}
-
-
-#' @method writeData default
-#' @S3method writeData default
-writeData.default <- function(wb, 
-                               sheet,
-                               x,
-                               startCol = 1,
-                               startRow = 1, 
-                               xy = NULL,
-                               colNames = TRUE,
-                               rowNames = FALSE,
-                               headerStyle = NULL,
-                               borders = c("none","surrounding","rows","columns"),
-                               borderColour = getOption("openxlsx.borderColour", "black"),
-                               ...){
-  
-  ## classes that can be handled by default method:
-  # data.frame, data.table
-  # matrix
-  # numeric, integer, character, logical, complex, Date, POSIXct, POSIXlt, factors, raw
-
-  ## borders needs to be matches in every method
-  borders <- match.arg(borders)
-  
-  if(!any(c("matrix", "data.frame", "data.table") %in% class(x))){
+  if(any(c("data.frame", "data.table") %in% class(x))){
+    ## Do nothing
+    
+  }else if("matrix" %in% class(x)){
+    x <- as.data.frame(x, stringsAsFactors = FALSE)
+    
+  }else if("array" %in% class(x)){
+    stop("array in writeData : currently not supported")
+    
+  }else if("aov" %in% class(x)){
+    
+    x <- summary(x)
+    x <- cbind(x[[1]])
+    x <- cbind(data.frame("row name" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE 
+    
+  }else if("lm" %in% class(x)){
+    
+    x <- as.data.frame(summary(x)[["coefficients"]])
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+        
+  }else if("anova" %in% class(x)){
+    
+    x <- cbind(x)
+    x <- cbind(data.frame("row name" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+    
+  }else if("glm" %in% class(x)){
+    
+    x <- as.data.frame(summary(x)[["coefficients"]])
+    x <- cbind(data.frame("row name" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+    
+  }else if("table" %in% class()){
+    
+    x <- as.data.frame(unclass(x))
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+    
+  }else{
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     colNames <- FALSE
     rowNames <- FALSE
   }
   
-  if("matrix" %in% class(x))
-    x <- as.data.frame(x, stringsAsFactors = FALSE)
   
   ## cbind rownames to x
   if(rowNames){
@@ -176,7 +194,21 @@ writeData.default <- function(wb,
   
   nCol <- ncol(x)
   nRow <- nrow(x)
-    
+  
+  ## write data.frame
+  wb$writeData(df = x,
+               colNames = colNames,
+               sheet = sheet,
+               startCol = startCol,
+               startRow = startRow)
+  
+  ## header style  
+  if(!is.null(headerStyle))
+    addStyle(wb = wb, sheet = sheet, style=headerStyle,
+             rows = startRow,
+             cols = 0:(nCol-1) + startCol,
+             gridExpand = TRUE)
+  
   ## draw borders
   if( "none" != borders )
     doBorders(borders = borders, wb = wb,
@@ -184,264 +216,8 @@ writeData.default <- function(wb,
               startCol = startCol, nrow = nrow(x), ncol = ncol(x),
               borderColour = borderColour)
   
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
 }
 
 
 
 
-writeData.array <- function(wb, 
-                             sheet,
-                             x,
-                             startCol = 1,
-                             startRow = 1, 
-                             xy = NULL,
-                             colNames = TRUE,
-                             rowNames = FALSE,
-                             headerStyle = NULL,
-                             borders = c("none","surrounding","rows","columns"),
-                             borderColour = getOption("openxlsx.borderColour", "black"),
-                             ...){
-  
-  
-  borders <- match.arg(borders)
-  ## TODO: writeData.array
-  stop("array in writeData : currently not supported")
-}
-
-
-#' @method writeData lm
-#' @S3method writeData lm
-writeData.lm <- function(wb, 
-                          sheet,
-                          x,
-                          startCol = 1,
-                          startRow = 1, 
-                          xy = NULL,
-                          colNames = TRUE,
-                          rowNames = FALSE,
-                          headerStyle = NULL,
-                          borders = c("none","surrounding","rows","columns"), 
-                          borderColour = getOption("openxlsx.borderColour", "black"),
-                          ...){
-  
-  ## borders needs to be matches in every method
-  borders <- match.arg(borders)
-  
-  ## 
-  x <- as.data.frame(summary(x)[["coefficients"]])
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
-  names(x)[1] <- ""
-  
-  nCol <- ncol(x)
-  nRow <- nrow(x)
-    
-  ## draw borders
-  if( "none" != borders )
-    doBorders(borders = borders, wb = wb,
-              sheet = sheet, startRow = startRow + colNames,
-              startCol = startCol, nrow = nrow(x), ncol = ncol(x),
-              borderColour = borderColour)
-  
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
-}
-
-
-#' @method writeData aov
-#' @S3method writeData aov
-writeData.aov <- function(wb, 
-                           sheet,
-                           x,
-                           startCol = 1,
-                           startRow = 1, 
-                           xy = NULL,
-                           colNames = TRUE,
-                           rowNames = FALSE,
-                           headerStyle = NULL,
-                           borders = c("none","surrounding","rows","columns"), 
-                           borderColour = getOption("openxlsx.borderColour", "black"),
-                           ...){
-
-  ## borders needs to be matches in every method
-  borders <- match.arg(borders)
-  
-  x <- summary(x)
-  x <- cbind(x[[1]])
-  x <- cbind(data.frame("row name" = rownames(x)), x)
-  names(x)[1] <- ""
-  
-  nCol <- ncol(x)
-  nRow <- nrow(x)
-  
-  ## Write data and styling
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
-}
-
-
-#' @method writeData anova
-#' @S3method writeData anova
-writeData.anova <- function(wb, 
-                             sheet,
-                             x,
-                             startCol = 1,
-                             startRow = 1, 
-                             xy = NULL,
-                             colNames = TRUE,
-                             rowNames = FALSE,
-                             headerStyle = NULL,
-                             borders = c("none","surrounding","rows","columns"), 
-                             borderColour = getOption("openxlsx.borderColour", "black"),
-                             ...){
-
-  ## borders needs to be matches in every method
-  borders <- match.arg(borders)
-  
-  x <- cbind(x)
-  x <- cbind(data.frame("row name" = rownames(x)), x)
-  names(x)[1] <- ""
-  
-  nCol <- ncol(x)
-  nRow <- nrow(x)
-  
-  ## Get coordinated of each header row and data.frame cells
-  headerCoords <- list("row" = startRow, "col" = 0:(nCol-1) + startCol)
-  
-  ## Write data and styling
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
-}
-
-
-#' @method writeData glm
-#' @S3method writeData glm
-writeData.glm <- function(wb, 
-                           sheet,
-                           x,
-                           startCol = 1,
-                           startRow = 1, 
-                           xy = NULL,
-                           colNames = TRUE,
-                           rowNames = FALSE,
-                           headerStyle = NULL,
-                           borders = c("none","surrounding","rows","columns"), 
-                           borderColour = getOption("openxlsx.borderColour", "black"),
-                           ...){
-  
-  ## borders needs to be matches in every method
-  borders <- match.arg(borders)
-  
-  
-  x <- as.data.frame(summary(x)[["coefficients"]])
-  x <- cbind(data.frame("row name" = rownames(x)), x)
-  names(x)[1] <- ""
-  
-  nCol <- ncol(x)
-  nRow <- nrow(x)
-    
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
-}
-
-
-#' @method writeData table
-#' @S3method writeData table
-writeData.table <- function(wb, 
-                          sheet,
-                          x,
-                          startCol = 1,
-                          startRow = 1, 
-                          xy = NULL,
-                          colNames = TRUE,
-                          rowNames = FALSE,
-                          headerStyle = NULL,
-                          borders = c("none","surrounding","rows","columns"), 
-                          borderColour = getOption("openxlsx.borderColour", "black"),
-                          ...){
-  
-  borders <- match.arg(borders)
-  x <- as.data.frame(unclass(x))
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
-  names(x)[1] <- ""
-  
-  nCol <- ncol(x)
-  nRow <- nrow(x)
-    
-  ## Write data and styling
-  ## write data.frame
-  wb$writeData(df = x,
-               colNames = colNames,
-               sheet = sheet,
-               startCol = startCol,
-               startRow = startRow)
-  
-  ## header style  
-  if(!is.null(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             row = startRow,
-             col = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
-  
-}
