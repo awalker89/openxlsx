@@ -27,24 +27,24 @@ col2hex <- function(my.col) {
 
 
 ## border helper function
-doBorders <- function(borders, wb, sheet, srow, scol, nrow,
+doBorders <- function(borders, wb, sheet, startRow, startCol, nrow,
                       ncol, borderColour) {
   
   if("surrounding" == borders ){
     surroundingBorders(wb = wb, sheet = sheet,
-                       startRow = srow, startCol = scol,
+                       startRow = startRow, startCol = startCol,
                        nRow = nrow, nCol = ncol,
                        borderColour = borderColour)
     
   }else if("rows" == borders ){
     rowBorders(wb = wb, sheet = sheet,
-               startRow = srow, startCol = scol,
+               startRow = startRow, startCol = startCol,
                nRow = nrow, nCol = ncol,
                borderColour = borderColour)
     
   }else if("columns" == borders ){
     colBorders(wb = wb, sheet = sheet,
-               startRow = srow, startCol = scol,
+               startRow = startRow, startCol = startCol,
                nRow = nrow, nCol = ncol,
                borderColour = borderColour)
   }
@@ -77,5 +77,22 @@ replaceXMLEntities <- function(v){
   return(v)
 }
 
+
+pxml <- function(x){
+  paste(unique(unlist(x)), collapse = "")
+}
+
+
+removeHeadTag <- function(x){
+  
+  x <- paste(x, collapse = "")
+  
+  if(any(grepl("<\\?", x)))
+    x <- gsub("<\\?xml [^>]+", "", x)
+  
+  x <- gsub("^>", "", x)
+  x
+  
+}
 
 

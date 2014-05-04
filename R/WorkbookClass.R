@@ -74,11 +74,6 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   
 })
 
-pxml <- function(x){
-  paste(unique(unlist(x)), collapse = "")
-}
-
-
 Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
     ## code from utils::zip function (modified to not print)
@@ -231,7 +226,7 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
                             pxml(workbook.xml.rels),
                             '</Relationships>',
                             file.path(xlrelsDir, "workbook.xml.rels"))
-  
+
   ## write tables
   if(length(unlist(tables)) > 0){
     for(i in 1:length(unlist(tables)))
@@ -270,7 +265,6 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
     for(i in 1:length(externalLinksRels))
       .Call("openxlsx_writeFile", '', externalLinksRels[[i]], '', file.path(externalLinksRelsDir, sprintf("externalLink%s.xml.rels", i)))
   } 
-  
   
   # printerSettings
   for(i in 1:nSheets)
@@ -629,9 +623,9 @@ Workbook$methods(updateStyles = function(style){
     xfNode$fillId <- fillId
     xfNode <- append(xfNode, list("applyFill" = 1))
   }
-  
+ 
   ## Border
-  if(!all(is.null(style$borderLeft) | is.null(style$borderRight) | is.null(style$borderTop) | is.null(style$borderBottom))){
+  if(!all(is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
 
     borderNode <- .self$createBorderNode(style)
     borderId <- which(styles$borders == borderNode)-1
@@ -839,7 +833,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
-        
+       
     if(hyperlinks[[i]][[1]] != ""){
       nTables <- length(tables)
       nHLinks <- length(hyperlinks[[i]])
@@ -910,7 +904,7 @@ Workbook$methods(setColWidths = function(sheet){
   autoColsInds <- which(widths == "auto")
   autoCols <- cols[autoColsInds]
   if(any(widths != "auto"))
-    widths[widths != "auto"] <- as.numeric(widths[widths != "auto"])
+    widths[widths != "auto"] <- as.numeric(widths[widths != "auto"]) + 0.71
   
   
   if(length(autoCols) > 0){
@@ -1000,6 +994,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove element from worksheets_rels
   # Remove Freeze Pane
   # Remove dataCount
+  # Remove hyperlinks
   # Reduce calcChain i attributes & remove calcs on sheet
 
   sheet <- validateSheet(sheet)
@@ -1019,6 +1014,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   drawings_rels[[sheet]] <<- NULL
   rowHeights[[sheet]] <<- NULL
   sheetData[[sheet]] <<- NULL
+  hyperlinks[[sheet]] <<- NULL
 
   ## remove styleObjects
   if(length(styleObjects) > 0){
@@ -1232,8 +1228,7 @@ Workbook$methods(insertImage = function(sheet, file, startRow, startCol, width, 
     Content_Types <<- unique(c(sprintf('<Default Extension="%s" ContentType="image/%s"/>', imageType, imageType), Content_Types))
       
   ## drawings rels (Reference from drawings.xml to image file in media folder)
-  drawings_rels[[sheet]] <<- 
-  c(drawings_rels[[sheet]], 
+  drawings_rels[[sheet]] <<- c(drawings_rels[[sheet]], 
    sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image%s.%s"/>', imageNo, mediaNo, imageType))
                 
   ## write file path to media slot to copy across on save
