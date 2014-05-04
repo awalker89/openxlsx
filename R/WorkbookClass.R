@@ -438,10 +438,8 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   
   sheet = validateSheet(sheet)
-
   nCols <- ncol(df)
   nRows <- nrow(df)  
-  df[is.na(df)] <- ""
   
   colClasses <- sapply(df, function(x) class(x)[[1]])
   

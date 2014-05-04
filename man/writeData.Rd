@@ -41,7 +41,7 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   with a border between each column.}
 
   \item{borderColour}{Colour of cell border.  A valid
-  colour (belonging to colours())}
+  colour (belonging to colours() or a hex colour code.)}
 
   \item{...}{Further arguments (for future use)}
 }

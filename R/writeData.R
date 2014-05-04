@@ -154,8 +154,7 @@ writeData.default <- function(wb,
   # data.frame, data.table
   # matrix
   # numeric, integer, character, logical, complex, Date, POSIXct, POSIXlt, factors
-  # 
-  
+
   borders <- match.arg(borders)
   
   if(!any(c("matrix", "data.frame", "data.table") %in% class(x))){
