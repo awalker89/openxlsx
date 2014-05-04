@@ -36,10 +36,10 @@ Style$methods(initialize = function(){
   fontScheme <<- NULL
   fontDecoration <<- NULL
   
-  borderTop <<- FALSE
-  borderLeft <<- FALSE
-  borderRight <<- FALSE
-  borderBottom <<- FALSE
+  borderTop <<- NULL
+  borderLeft <<- NULL
+  borderRight <<- NULL
+  borderBottom <<- NULL
   borderTopColour <<- NULL
   borderLeftColour <<- NULL
   borderRightColour <<- NULL
