@@ -1,6 +1,3 @@
-
-
-
 #' @name writeData
 #' @title Write an object to a worksheet
 #' @author Alexander Walker
@@ -30,50 +27,71 @@
 #' 
 #' \dontrun{
 #' ## inspired by xtable gallery
-#' ## http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+#' ##' http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+#' 
 #' ## Create a new workbook and delete old file, if existing
 #' wb <- createWorkbook()
 #' my.file <- "test.xlsx"
 #' unlink(my.file)
 #' data(tli, package = "xtable")
+#' 
 #' ## TEST 1 - data.frame
 #' test.n <- "data.frame"
 #' my.df <- tli[1:10, ]
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
+#' 
 #' ## TEST 2 - matrix
 #' test.n <- "matrix"
 #' design.matrix <- model.matrix(~ sex * grade, data = my.df)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = design.matrix)
+#' 
 #' ## TEST 3 - aov
 #' test.n <- "aov"
 #' fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm1)
+#' 
 #' ## TEST 4 - lm
 #' test.n <- "lm"
 #' fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm2)
+#' 
 #' ## TEST 5 - anova 1 
 #' test.n <- "anova"
 #' my.anova <- anova(fm2)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova)
+#' 
 #' ## TEST 6 - anova 2
 #' test.n <- "anova2"
 #' fm2b <- lm(tlimth ~ ethnicty, data = tli)
 #' my.anova2 <- anova(fm2b, fm2)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova2)
+#' 
 #' ## TEST 7 - GLM
 #' test.n <- "glm"
 #' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
 #'            binomial())
-#'            
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
+#'
+#' ## TEST 8 - simple table
+#' test.n <- "table"
+#' data(airquality)
+#' airquality$OzoneG80 <- factor(airquality$Ozone > 80,
+#'                               levels = c(FALSE, TRUE),
+#'                               labels = c("Oz <= 80", "Oz > 80"))
+#' airquality$Month <- factor(airquality$Month,
+#'                            levels = 5:9,
+#'                            labels = month.abb[5:9])
+#' my.table <- with(airquality, table(OzoneG80,Month) )
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = my.table)
+#' 
 #' ## Save workbook
 #' saveWorkbook(wb, my.file,  overwrite = TRUE)
 #' }
@@ -352,6 +370,48 @@ writeData.glm <- function(wb,
   borders <- match.arg(borders)
   x <- as.data.frame(summary(x)[["coefficients"]])
   x <- cbind(data.frame("row name" = rownames(x)), x)
+  names(x)[1] <- ""
+  
+  nCol <- ncol(x)
+  nRow <- nrow(x)
+  
+  ## Get coordinated of each header row and data.frame cells
+  headerCoords <- list("row" = startRow, "col" = 0:(nCol-1) + startCol)
+  
+  ## Write data and styling
+  ## write data.frame
+  wb$writeData(df = x,
+               colNames = colNames,
+               sheet = sheet,
+               startCol = startCol,
+               startRow = startRow)
+  
+  ## header style and default
+  if(!is.null(headerStyle))
+    addStyle(wb = wb, sheet = sheet, style=headerStyle,
+             headerCoords$row, headerCoords$col, gridExpand = TRUE)
+  
+}
+
+
+#' @method writeData table
+#' @S3method writeData table
+writeData.table <- function(wb, 
+                          sheet,
+                          x,
+                          startCol = 1,
+                          startRow = 1, 
+                          xy = NULL,
+                          colNames = TRUE,
+                          rowNames = FALSE,
+                          headerStyle = NULL,
+                          borders = c("none","surrounding","rows","columns"), 
+                          borderColour = getOption("openxlsx.borderColour", "black"),
+                          ...){
+  
+  borders <- match.arg(borders)
+  x <- as.data.frame(unclass(x))
+  x <- cbind(data.frame("Variable" = rownames(x)), x)
   names(x)[1] <- ""
   
   nCol <- ncol(x)
