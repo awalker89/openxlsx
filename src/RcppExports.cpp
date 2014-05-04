@@ -625,3 +625,18 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// getHyperlinkRefs
+SEXP getHyperlinkRefs(CharacterVector x);
+RcppExport SEXP openxlsx_getHyperlinkRefs(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        SEXP __result = getHyperlinkRefs(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

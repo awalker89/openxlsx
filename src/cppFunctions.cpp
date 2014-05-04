@@ -1736,7 +1736,7 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
   CharacterVector colLabels(nCols);
   for(int i=0; i < nCols; i++){
     
-    if((classes[i] == "numeric") | (classes[i] == "integer") ){
+    if((classes[i] == "numeric") | (classes[i] == "integer") | (classes[i] == "raw") ){
      colLabels[i] = "n"; 
     }else if(classes[i] == "character"){
       colLabels[i] = "s"; 
@@ -1843,4 +1843,33 @@ CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyN
   return wrap(cells) ;  
 
 }
+
+
+// [[Rcpp::export]]
+SEXP getHyperlinkRefs(CharacterVector x){
+
+  int n = x.size();
+    
+  std::string xml;
+  CharacterVector r(n);
+  size_t pos = 0;
+  size_t endPos = 0;
+
+  std::string rtag = "ref=";
+  std::string rtagEnd = "\"";
+
+  for(int i = 0; i < n; i++){ 
+      
+    // find opening tag     
+    xml = x[i];
+    pos = xml.find(rtag, 0);
+    endPos = xml.find(rtagEnd, pos+5);
+    r[i] = xml.substr(pos+5, endPos-pos-5).c_str();
+      
+  }
+  
+  return wrap(r) ;  
+
+}
+
 

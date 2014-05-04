@@ -149,3 +149,7 @@ getCellsWithChildren <- function(xmlFile, emptyNodes) {
     .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
 }
 
+getHyperlinkRefs <- function(x) {
+    .Call('openxlsx_getHyperlinkRefs', PACKAGE = 'openxlsx', x)
+}
+
