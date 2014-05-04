@@ -51,50 +51,71 @@ Write an object to worksheet with optional styling.
 \examples{
 \dontrun{
 ## inspired by xtable gallery
-## http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+##' http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+
 ## Create a new workbook and delete old file, if existing
 wb <- createWorkbook()
 my.file <- "test.xlsx"
 unlink(my.file)
 data(tli, package = "xtable")
+
 ## TEST 1 - data.frame
 test.n <- "data.frame"
 my.df <- tli[1:10, ]
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
+
 ## TEST 2 - matrix
 test.n <- "matrix"
 design.matrix <- model.matrix(~ sex * grade, data = my.df)
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = design.matrix)
+
 ## TEST 3 - aov
 test.n <- "aov"
 fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm1)
+
 ## TEST 4 - lm
 test.n <- "lm"
 fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm2)
+
 ## TEST 5 - anova 1
 test.n <- "anova"
 my.anova <- anova(fm2)
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.anova)
+
 ## TEST 6 - anova 2
 test.n <- "anova2"
 fm2b <- lm(tlimth ~ ethnicty, data = tli)
 my.anova2 <- anova(fm2b, fm2)
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.anova2)
+
 ## TEST 7 - GLM
 test.n <- "glm"
 fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
            binomial())
-
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm3)
+
+## TEST 8 - simple table
+test.n <- "table"
+data(airquality)
+airquality$OzoneG80 <- factor(airquality$Ozone > 80,
+                              levels = c(FALSE, TRUE),
+                              labels = c("Oz <= 80", "Oz > 80"))
+airquality$Month <- factor(airquality$Month,
+                           levels = 5:9,
+                           labels = month.abb[5:9])
+my.table <- with(airquality, table(OzoneG80,Month) )
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = my.table)
+
 ## Save workbook
 saveWorkbook(wb, my.file,  overwrite = TRUE)
 }
