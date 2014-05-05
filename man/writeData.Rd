@@ -49,14 +49,46 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 Write an object to worksheet with optional styling.
 }
 \examples{
+wb <- createWorkbook()
+
+## Add worksheets
+addWorksheet(wb, "Cars")
+
+x <- mtcars[1:6,]
+writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
+writeData(wb, "Cars", x, rowNames = TRUE, startCol = "O", startRow = 3,
+         borders="surrounding", borderColour = NULL) ## black border
+
+writeData(wb, "Cars", x, rowNames = TRUE,
+         startCol = 2, startRow = 12, borders="columns")
+
+writeData(wb, "Cars", x, rowNames = TRUE,
+         startCol="O", startRow = 12, borders="rows", borderColour = "#4F81BD")
+
+## header styles
+hs1 <- createStyle(fgFill = "#DCE6F1", halign = "CENTER", textDecoration = "Italic",
+                   border = "Bottom", borderColour = "green")
+
+writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
+          startCol="B", startRow = 23, borders="rows", headerStyle = hs1)
+
+hs2 <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
+                   halign = "center", valign = "center", textDecoration = "Bold",
+                   border = "TopBottomLeftRight", borderColour = "#4F81BD")
+
+writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
+          startCol="O", startRow = 23, borders="columns", headerStyle = hs2)
+
+## Save workbook
+saveWorkbook(wb, "writeDataExample.xlsx", overwrite = TRUE)
+
 \dontrun{
+
 ## inspired by xtable gallery
 ##' http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
 
 ## Create a new workbook and delete old file, if existing
 wb <- createWorkbook()
-my.file <- "test.xlsx"
-unlink(my.file)
 data(tli, package = "xtable")
 
 ## TEST 1 - data.frame
@@ -117,7 +149,7 @@ addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.table)
 
 ## Save workbook
-saveWorkbook(wb, my.file,  overwrite = TRUE)
+saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
 }
 }
 \author{
