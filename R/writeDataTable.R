@@ -106,11 +106,7 @@ writeDataTable <- function(wb, sheet, x,
   ## column class
   colClasses <- lapply(x, class)
   
-  ## Style Dates as DATE
-  if(any(c("Date", "POSIXct", "POSIXt", "currency", "accounting", "hyperlink") %in% unlist(colClasses)))
-    baseFont <- getBaseFont(wb)
-  
-  
+  ## Style Dates as DATE  
   if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
     
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    

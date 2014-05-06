@@ -1,21 +1,21 @@
 
 
 
-validateBorderColour <- function(borderColour){
+validateColour <- function(colour){
   
   ## check if
-  if(is.null(borderColour))
-    borderColour = "black"
+  if(is.null(colour))
+    colour = "black"
   
   validColours <- colours()
   
-  if(any(borderColour %in% validColours))
-    borderColour[borderColour %in% validColours] <- col2hex(borderColour[borderColour %in% validColours])
+  if(any(colour %in% validColours))
+    colour[colour %in% validColours] <- col2hex(colour[colour %in% validColours])
   
-  if(any(!grepl("^#[A-Fa-f0-9]{6}$", borderColour)))
-    stop("Invalid borderColour!", call.=FALSE)
+  if(any(!grepl("^#[A-Fa-f0-9]{6}$", colour)))
+    stop("Invalid colour!", call.=FALSE)
   
-  return(toupper(borderColour))
+  return(toupper(colour))
   
 }
 

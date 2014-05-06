@@ -345,6 +345,11 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
   setwd(tmpDir)
   zipWorkbook(file.path(path, fileName), list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
   
+  ## reset styles
+  baseFont <- styles$fonts[[1]]
+  styles <<- genBaseStyleSheet()
+  styles$fonts[[1]] <<- baseFont
+
   invisible(tmpDir)
   
 })
@@ -576,11 +581,11 @@ Workbook$methods(updateStyles = function(style){
   alignmentFlag <- FALSE
   
   ## Font
-  if(!is.null(style$fontName)){
+  if(!is.null(style$fontName) | !is.null(style$fontSize) |  !is.null(style$fontColour)){
   
     fontNode <- .self$createFontNode(style)
     fontId <- which(styles$font == fontNode)-1
-    
+      
     if(length(fontId) == 0){
             
         fontId <- length(styles$fonts)
@@ -683,9 +688,37 @@ Workbook$methods(updateStyles = function(style){
 })
 
 
+Workbook$methods(getBaseFont = function(){
+  
+  baseFont <- styles$fonts[[1]]
+  
+  sz <- getAttrs(baseFont, "<sz ")
+  colour <- getAttrs(baseFont, "<color ")
+  name <- getAttrs(baseFont, "<name ")
+  family <- getAttrs(baseFont, "<family ")
+  
+  list("size" = sz,
+    "colour" = colour,
+    "name" = name)
+  
+})
+
+
+
 
 Workbook$methods(createFontNode = function(style){
   
+  baseFont <- .self$getBaseFont()
+  
+  if(is.null(style$fontName[[1]]))
+    style$fontName <- baseFont$name
+  
+  if(is.null(style$fontSize[[1]]))
+    style$fontSize <- baseFont$size
+  
+  if(is.null(style$fontColour[[1]]))
+    style$fontColour <- baseFont$colour
+    
   ### Create new font and return Id
   fontNode <- "<font>"
 

@@ -302,9 +302,13 @@ convertFromExcelRef <- function(col){
 #' @description Create a new style to apply to worksheet cells
 #' @author Alexander Walker
 #' @seealso \code{\link{addStyle}}
-#' @param fontName A name of a font. Note the font name is not validated.
-#' @param fontColour Colour of text in cell.  A valid hex colour beginning with "#"  
+#' @param fontName A name of a font. Note the font name is not validated. If fontName is NULL,
+#' the workbook base font is used. (Defaults to Calibri)
+#' @param fontColour Colour of text in cell.  A valid hex colour beginning with "#"
+#' or one of colours(). If fontColour is NULL, the workbook base font colours is used.
+#' (Defaults to black)
 #' @param fontSize Font size. A numeric greater than 0.
+#' If fontSize is NULL, the workbook base font size is used. (Defaults to 11)
 #' @param numFmt Cell formatting
 #' \itemize{
 #'   \item{\bold{GENERAL}}
@@ -387,9 +391,9 @@ convertFromExcelRef <- function(col){
 #' 
 #' # supply all colours
 #' createStyle(border = "TopBottomLeft", borderColour = c("red","yellow", "green"))
-createStyle <- function(fontName = "Calibri",
-                        fontSize = 11,
-                        fontColour = "#000000",
+createStyle <- function(fontName = NULL,
+                        fontSize = NULL,
+                        fontColour = NULL,
                         numFmt = "GENERAL",
                         border = NULL,
                         borderColour = getOption("openxlsx.borderColour", "black"),
@@ -448,20 +452,23 @@ createStyle <- function(fontName = "Calibri",
       stop("Invalid hex code for fgFill")
   }
   
-  fontColour <- toupper(fontColour)
-  borderColour <- validateBorderColour(borderColour)
+  borderColour <- validateColour(borderColour)
   
-  if(length(fontName) == 0) stop("Invalid font name!")
-  if(fontSize < 1) stop("Font size must be greater than 0!")
-  if(!grepl("#[A-F0-9]{6}", fontColour)) stop("Invalid fontColour!")
+  if(!is.null(fontColour))
+    fontColour <- validateColour(fontColour)
   
+  if(!is.null(fontSize))
+    if(fontSize < 1) stop("Font size must be greater than 0!")
+  
+
   
   ######################### error checking complete #############################
   style <- Style$new()
   
   style$fontName <- list(val = fontName)
   style$fontSize <- list(val = fontSize)
-  style$fontColour <- list(rgb =  gsub("#", "FF", fontColour))
+  if(!is.null(fontColour))
+    style$fontColour <- list(rgb =  gsub("#", "FF", fontColour))
     
   style$fontDecoration <- toupper(textDecoration)
   
@@ -1309,11 +1316,10 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
   
   
   if(fontSize < 0) stop("Invalid fontSize")
-  if(!grepl("#[0-9A-F]{6}", fontColour)) stop("Invalid hex code for fontColour")
-  fontColour <- validateBorderColour(fontColour)
+  fontColour <- gsub("#", "FF", validateColour(fontColour))
   
       
-  wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/><family val="2"/></font>', fontSize, fontColour, fontName)
+  wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/></font>', fontSize, fontColour, fontName)
   
 }
 
@@ -1335,24 +1341,14 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
 #' getBaseFont(wb)
 getBaseFont <- function(wb){
   
+
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
 
-  baseFont <- wb$styles$fonts[[1]]
-
-  sz <- unname(getAttrs(baseFont, "<sz "))
-  colour <- unname(getAttrs(baseFont, "<color "))
-  name <- unname(getAttrs(baseFont, "<name "))
-  family <- unname(getAttrs(baseFont, "<family "))
-
-  c("size" = unlist(sz),
-       "colour" = unlist(colour),
-       "name" = unlist(name))
+  wb$getBaseFont()
   
-
 }
-
-
+  
 
 #' @name setHeader
 #' @title Set header for all worksheets

@@ -2,7 +2,7 @@
 \alias{createStyle}
 \title{Create a cell style}
 \usage{
-createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
+createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   numFmt = "GENERAL", border = NULL,
   borderColour = getOption("openxlsx.borderColour", "black"), bgFill = NULL,
   fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
@@ -10,12 +10,17 @@ createStyle(fontName = "Calibri", fontSize = 11, fontColour = "#000000",
 }
 \arguments{
   \item{fontName}{A name of a font. Note the font name is
-  not validated.}
+  not validated. If fontName is NULL, the workbook base
+  font is used. (Defaults to Calibri)}
 
   \item{fontColour}{Colour of text in cell.  A valid hex
-  colour beginning with "#"}
+  colour beginning with "#" or one of colours(). If
+  fontColour is NULL, the workbook base font colours is
+  used. (Defaults to black)}
 
-  \item{fontSize}{Font size. A numeric greater than 0.}
+  \item{fontSize}{Font size. A numeric greater than 0. If
+  fontSize is NULL, the workbook base font size is used.
+  (Defaults to 11)}
 
   \item{numFmt}{Cell formatting \itemize{
   \item{\bold{GENERAL}} \item{\bold{NUMBER}}
