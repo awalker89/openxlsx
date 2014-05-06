@@ -710,24 +710,31 @@ Workbook$methods(createFontNode = function(style){
   
   baseFont <- .self$getBaseFont()
   
-  if(is.null(style$fontName[[1]]))
-    style$fontName <- baseFont$name
-  
-  if(is.null(style$fontSize[[1]]))
-    style$fontSize <- baseFont$size
-  
-  if(is.null(style$fontColour[[1]]))
-    style$fontColour <- baseFont$colour
-    
-  ### Create new font and return Id
   fontNode <- "<font>"
-
-  fontNode <- paste0(fontNode, 
-                     sprintf('<sz %s="%s"/>', names(style$fontSize), style$fontSize),
-                     sprintf('<color %s="%s"/>', names( style$fontColour),  style$fontColour),
-                     sprintf('<name %s="%s"/>', names(style$fontName), style$fontName)
-  )
   
+  ## size
+  if(is.null(style$fontSize[[1]])){
+    fontNode <- paste0(fontNode, sprintf('<sz %s="%s"/>', names(baseFont$size), baseFont$size))
+  }else{
+    fontNode <- paste0(fontNode, sprintf('<sz %s="%s"/>', names(style$fontSize), style$fontSize))
+  }
+  
+  ## colour
+  if(is.null(style$fontColour[[1]])){
+    fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(baseFont$colour), baseFont$colour))
+  }else{
+    fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(style$fontColour), style$fontColour))
+  }
+  
+  
+  ## name
+  if(is.null(style$fontName[[1]])){
+    fontNode <- paste0(fontNode, sprintf('<name %s="%s"/>', names(baseFont$name), baseFont$name))
+  }else{
+    fontNode <- paste0(fontNode, sprintf('<name %s="%s"/>', names(style$fontName), style$fontName))
+  }
+  
+  ### Create new font and return Id  
   if(!is.null(style$fontFamily))
     fontNode <- paste0(fontNode, sprintf('<family val = "%s"/>', style$fontFamily))
   
