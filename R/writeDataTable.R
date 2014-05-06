@@ -112,7 +112,7 @@ writeDataTable <- function(wb, sheet, x,
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
     pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
     
-    addStyle(wb, sheet = sheet, style=createStyle(fontNamenumFmt="Date"), 
+    addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
   }
