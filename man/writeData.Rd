@@ -87,7 +87,7 @@ saveWorkbook(wb, "writeDataExample.xlsx", overwrite = TRUE)
 ## inspired by xtable gallery
 ##' http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
 
-## Create a new workbook and delete old file, if existing
+## Create a new workbook
 wb <- createWorkbook()
 data(tli, package = "xtable")
 

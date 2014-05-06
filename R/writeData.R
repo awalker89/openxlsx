@@ -203,7 +203,7 @@ writeData <- function(wb,
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else if("table" %in% class()){
+  }else if("table" %in% class(x)){
     
     x <- as.data.frame(unclass(x))
     x <- cbind(data.frame("Variable" = rownames(x)), x)
