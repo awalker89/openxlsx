@@ -1310,11 +1310,46 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
   
   if(fontSize < 0) stop("Invalid fontSize")
   if(!grepl("#[0-9A-F]{6}", fontColour)) stop("Invalid hex code for fontColour")
+  fontColour <- validateBorderColour(fontColour)
   
-  fontColour <- gsub("#", "FF", toupper(fontColour))
       
   wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/><family val="2"/></font>', fontSize, fontColour, fontName)
   
+}
+
+
+#' @name getBaseFont
+#' @title Return the workbook defaul font
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @description Returns the base font used in the workbook.
+#' @export
+#' @examples
+#' ## create a workbook
+#' wb <- createWorkbook()
+#' getBaseFont(wb)
+#' 
+#' ## modify base font to size 10 Arial Narrow in red
+#' modifyBaseFont(wb, fontSize = 10, fontColour = "#FF0000", fontName = "Arial Narrow")
+#' 
+#' getBaseFont(wb)
+getBaseFont <- function(wb){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+
+  baseFont <- wb$styles$fonts[[1]]
+
+  sz <- unname(getAttrs(baseFont, "<sz "))
+  colour <- unname(getAttrs(baseFont, "<color "))
+  name <- unname(getAttrs(baseFont, "<name "))
+  family <- unname(getAttrs(baseFont, "<family "))
+
+  c("size" = unlist(sz),
+       "colour" = unlist(colour),
+       "name" = unlist(name))
+  
+
 }
 
 

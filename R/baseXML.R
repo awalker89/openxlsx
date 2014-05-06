@@ -101,7 +101,7 @@ genBaseStyleSheet <- function(){
     
        numFmts = NULL,
        
-       fonts = c('<font><sz val="11"/><color indexed="8"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
+       fonts = c('<font><sz val="11"/><color rgb="%s"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
        
        fills = c('<fill><patternFill patternType="none"/></fill>',
                     '<fill><patternFill patternType="gray125"/></fill>'),

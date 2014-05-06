@@ -1,0 +1,26 @@
+\name{getBaseFont}
+\alias{getBaseFont}
+\title{Return the workbook defaul font}
+\usage{
+getBaseFont(wb)
+}
+\arguments{
+  \item{wb}{A workbook object}
+}
+\description{
+Returns the base font used in the workbook.
+}
+\examples{
+## create a workbook
+wb <- createWorkbook()
+getBaseFont(wb)
+
+## modify base font to size 10 Arial Narrow in red
+modifyBaseFont(wb, fontSize = 10, fontColour = "#FF0000", fontName = "Arial Narrow")
+
+getBaseFont(wb)
+}
+\author{
+Alexander Walker
+}
+
