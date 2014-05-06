@@ -109,8 +109,58 @@
 #'            binomial())
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
+#' 
+#' ## TEST 8 - prcomp
+#' test.n <- "prcomp"
+#' pr1 <- prcomp(USArrests)
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = pr1)
 #'
-#' ## TEST 8 - simple table
+#' ## TEST 9 - summary.prcomp
+#' test.n <- "summary.prcomp"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = summary(pr1))
+#'
+#' ## TEST 10 - univariate ts
+#' test.n <- "u.ts"
+#' set.seed(1)
+#' uts <- ts(cumsum(1+round(rnorm(100), 0)),
+#'           start = c(1954,7),
+#'           frequency = 12)
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = uts)
+#'
+#' ## TEST 11 - multivariate ts (from help(ts))
+#' test.n <- "m.ts"
+#' mts <- ts(matrix(rnorm(300), 100, 3), start = c(1961, 1), frequency = 12)
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = mts)
+#'
+#' ## TEST 12 - univariate ts (not calendar like)
+#' test.n <- "u.ts.2" 
+#' (uts2 <- ts(cumsum(1+round(rnorm(100), 0)),
+#'           start = c(1954,7),
+#'           frequency = 6))
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = uts2)
+#' 
+#' ## TEST 13 - univariate ts (calendar like, obs <= freq)
+#' test.n <- "u.ts.3" 
+#' (uts3 <- ts(cumsum(1+round(rnorm(2), 0)),
+#'           start = c(1954,1),
+#'           frequency = 4))
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = uts3)
+#'
+#' ## TEST 14 - univariate ts (yearly series, obs <= freq)
+#' test.n <- "u.ts.4" 
+#' (uts4 <- ts(cumsum(1+round(rnorm(2), 0)),
+#'           start = c(1954,1),
+#'           frequency = 1))
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = uts4)
+#' 
+#' ## TEST XX - simple table
 #' test.n <- "table"
 #' data(airquality)
 #' airquality$OzoneG80 <- factor(airquality$Ozone > 80,
@@ -162,19 +212,19 @@ writeData <- function(wb,
   ## borderColours validation
   borderColour <- validateBorderColour(borderColour)
   
-  ## Have decided to not use S3 as too much code duplication with input checking/converting
-  ## given that everything has to fit into a grid.
+  clx <- class(x)
+  Call <- match.call()
+  xname <- paste(Call$x)
   
-  if(any(c("data.frame", "data.table") %in% class(x))){
+  if(any(c("data.frame", "data.table") %in% clx)){
     ## Do nothing
-    
-  }else if("matrix" %in% class(x)){
+  }else if("matrix" %in% clx){
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     
-  }else if("array" %in% class(x)){
+  }else if("array" %in% clx){
     stop("array in writeData : currently not supported")
     
-  }else if("aov" %in% class(x)){
+  }else if("aov" %in% clx){
     
     x <- summary(x)
     x <- cbind(x[[1]])
@@ -182,38 +232,120 @@ writeData <- function(wb,
     names(x)[1] <- ""
     rowNames <- FALSE 
     
-  }else if("lm" %in% class(x)){
+  }else if("lm" %in% clx){
     
     x <- as.data.frame(summary(x)[["coefficients"]])
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
         
-  }else if("anova" %in% class(x)){
+  }else if("anova" %in% clx){
     
     x <- cbind(x)
     x <- cbind(data.frame("row name" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else if("glm" %in% class(x)){
+  }else if("glm" %in% clx){
     
     x <- as.data.frame(summary(x)[["coefficients"]])
     x <- cbind(data.frame("row name" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else if("table" %in% class()){
-    
+  }else if("table" %in% clx){
+      
     x <- as.data.frame(unclass(x))
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else{
-    x <- as.data.frame(x, stringsAsFactors = FALSE)
-    colNames <- FALSE
+  }else if("prcomp" %in% clx){
+    
+    x <- as.data.frame(x$rotation)
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
     rowNames <- FALSE
+    
+  }else if("summary.prcomp" %in% clx){
+    
+    x <- as.data.frame(x$importance)
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+
+  }else if("mts" %in% clx[1]){ ## Multivariate ts
+      ## HELP TODO BUG HERE: why doesn't this match (and it
+      ## goes to else?)... I can't figure it out, for the moment :(
+   
+      x <- as.data.frame(as.matrix(x))
+      rowNames <- TRUE
+      colNames <- TRUE
+
+  }else if("ts" %in% clx[1]){           #univariate ts
+      ## simplified/little changed version of print.ts with .preformat.ts
+      Tsp <- tsp(x)
+      if (is.null(Tsp))  stop("series is corrupt, with no 'tsp' attribute")
+      fr.x <- frequency(x)
+      ## do calendar iff a monthly/quaterly series
+      calendar <- any(fr.x == c(4, 12)) && length(start(x)) == 2L
+      if (calendar) { ##do calendar-like
+          rowNames <- TRUE
+          colNames <- TRUE
+          if (fr.x > 1) {                 
+              dn2 <- if (fr.x == 12)      #monthly series
+                  month.abb
+              else if (fr.x == 4) {       #quarterly series
+                  c("Qtr1", "Qtr2", "Qtr3", "Qtr4")
+              } #else paste0("p", 1L:fr.x)
+                #TODO: other"ly" series (not calendar now)
+
+              ## the series starts and ends in the same year with a
+              ## number of obs <= its frequency
+              if (NROW(x) <= fr.x && start(x)[1L] == end(x)[1L]) {
+                  ## rows
+                  dn1 <- start(x)[1L]
+                  ## cols
+                  dn2 <- dn2[1 + (start(x)[2L] - 2 + seq_along(x))%%fr.x]
+                  attributes(x) <- NULL
+                  x <- as.data.frame(matrix(x, nrow = 1L, byrow = TRUE,
+                                            dimnames = list(dn1, dn2)))
+              } else { ##otherwise (eg start and end in different years)
+                  start.pad <- start(x)[2L] - 1 # n of initial blank
+                  end.pad <- fr.x - end(x)[2L] # last blank
+                  dn1 <- start(x)[1L]:end(x)[1L] # rowNames
+                  attributes(x) <- NULL # makes it a vector
+                  vec <- c(rep.int(NA, start.pad), x,
+                           rep.int(NA, end.pad))
+                  x <- as.data.frame(matrix(vec, ncol = fr.x,  
+                                            byrow = TRUE,
+                                            dimnames = list(dn1, dn2)))
+              }
+
+          } else { ##(n-)yearly series
+              times <- unlist(lapply(time(x), paste)) # placeholder?
+              attributes(x) <- NULL
+              x <- data.frame(x)
+              row.names(x) <- times
+              names(x) <- xname
+              rowNames <- TRUE
+              colNames <- TRUE
+          }
+      } else { ## not calendar-like
+          times <- unlist(lapply(time(x), paste)) # placeholder?
+          attr(x, "class") <- attr(x, "tsp") <- attr(x, "na.action") <- NULL
+          x <- as.data.frame(x)
+          row.names(x) <- times
+          names(x) <- xname
+          rowNames <- TRUE
+          colNames <- TRUE
+      }
+            
+  }else{
+      ## TODO check if as.data.frame method exists, otherwise stop()
+      x <- as.data.frame(x, stringsAsFactors = FALSE)
+      colNames <- FALSE
+      rowNames <- FALSE
   }
   
   
@@ -248,7 +380,3 @@ writeData <- function(wb,
               borderColour = borderColour)
   
 }
-
-
-
-
