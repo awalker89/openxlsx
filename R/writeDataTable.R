@@ -10,7 +10,7 @@
 #' A vector of the form c(startCol, startRow)
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
-#' @param tableStyle Any excel table style name.
+#' @param tableStyle Any excel table style name or "none".
 #' @details columns of x with class Date, POSIXct of POSIXt are automatically
 #' styled as dates.
 #' @seealso \code{\link{addWorksheet}}
@@ -75,7 +75,7 @@ writeDataTable <- function(wb, sheet, x,
   
   ## If 0 rows append a blank row  
   
-  validNames <- c(paste0("TableStyleLight", 1:21), paste0("TableStyleMedium", 1:28), paste0("TableStyleDark", 1:11))
+  validNames <- c("none", paste0("TableStyleLight", 1:21), paste0("TableStyleMedium", 1:28), paste0("TableStyleDark", 1:11))
   if(!tolower(tableStyle) %in% tolower(validNames)){
     stop("Invalid table style.")
   }else{
@@ -107,12 +107,16 @@ writeDataTable <- function(wb, sheet, x,
   colClasses <- lapply(x, class)
   
   ## Style Dates as DATE
+  if(any(c("Date", "POSIXct", "POSIXt", "currency", "accounting", "hyperlink") %in% unlist(colClasses)))
+    baseFont <- getBaseFont(wb)
+  
+  
   if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
     
     dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
     pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
     
-    addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
+    addStyle(wb, sheet = sheet, style=createStyle(fontNamenumFmt="Date"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
   }

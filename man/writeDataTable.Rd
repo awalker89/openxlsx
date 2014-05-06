@@ -27,7 +27,7 @@ writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 
   \item{rowNames}{If TRUE, row names of x are written.}
 
-  \item{tableStyle}{Any excel table style name.}
+  \item{tableStyle}{Any excel table style name or "none".}
 }
 \description{
 Write to a worksheet and format as a table
