@@ -333,22 +333,22 @@ convertFromExcelRef <- function(col){
 #' @param borderColour  Colour of cell border.  
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"  
 #' 
-#'  @param borderStyle Border line style
+#' @param borderStyle Border line style
 #' \itemize{
 #'    \item{\bold{none}}{ No Border}
-#'    \item{\bold{thin}}{ Bottom border}
-#'    \item{\bold{medium}}{ Left border}
-#'    \item{\bold{dashed}}{ Right border}
-#'    \item{\bold{dotted}}{ Top and bottom border}
-#'    \item{\bold{thick}}{ Left and right border}
-#'    \item{\bold{double}}{ Right border}
-#'    \item{\bold{hair}}{ Top and bottom border}
-#'    \item{\bold{mediumDashed}}{ Left and right border}
-#'    \item{\bold{dashDot}}{ Top and bottom border}
-#'    \item{\bold{mediumDashDot}}{ Left and right border}
-#'    \item{\bold{dashDotDot}}{ Top and bottom border}
-#'    \item{\bold{mediumDashDotDot}}{ Left and right border}
-#'    \item{\bold{slantDashDot}}{ Left and right border}
+#'    \item{\bold{thin}}{ thin border}
+#'    \item{\bold{medium}}{ medium border}
+#'    \item{\bold{dashed}}{ dashed border}
+#'    \item{\bold{dotted}}{ dotted border}
+#'    \item{\bold{thick}}{ thick border}
+#'    \item{\bold{double}}{ double line border}
+#'    \item{\bold{hair}}{ Hairline border}
+#'    \item{\bold{mediumDashed}}{ medium weight dashed border}
+#'    \item{\bold{dashDot}}{ dash-dot border}
+#'    \item{\bold{mediumDashDot}}{ medium weight dash-dot border}
+#'    \item{\bold{dashDotDot}}{ dash-dot-dot border}
+#'    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
+#'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
 #'    
 #' @param bgFill Cell background fill colour. 
