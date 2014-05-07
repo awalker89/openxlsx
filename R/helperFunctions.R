@@ -28,25 +28,28 @@ col2hex <- function(my.col) {
 
 ## border helper function
 doBorders <- function(borders, wb, sheet, startRow, startCol, nrow,
-                      ncol, borderColour) {
+                      ncol, borderColour, borderStyle) {
   
   if("surrounding" == borders ){
     surroundingBorders(wb = wb, sheet = sheet,
                        startRow = startRow, startCol = startCol,
                        nRow = nrow, nCol = ncol,
-                       borderColour = borderColour)
+                       borderColour = borderColour,
+                       borderStyle = borderStyle)
     
   }else if("rows" == borders ){
     rowBorders(wb = wb, sheet = sheet,
                startRow = startRow, startCol = startCol,
                nRow = nrow, nCol = ncol,
-               borderColour = borderColour)
+               borderColour = borderColour,
+               borderStyle = borderStyle)
     
   }else if("columns" == borders ){
     colBorders(wb = wb, sheet = sheet,
                startRow = startRow, startCol = startCol,
                nRow = nrow, nCol = ncol,
-               borderColour = borderColour)
+               borderColour = borderColour,
+               borderStyle = borderStyle)
   }
   
 }

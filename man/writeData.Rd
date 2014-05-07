@@ -5,7 +5,8 @@
 writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
   borders = c("none", "surrounding", "rows", "columns"),
-  borderColour = getOption("openxlsx.borderColour", "black"), ...)
+  borderColour = getOption("openxlsx.borderColour", "black"),
+  borderStyle = getOption("openxlsx.borderStyle", "thin"), ...)
 }
 \arguments{
   \item{wb}{A Workbook object containing a worksheet.}
@@ -43,6 +44,20 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   \item{borderColour}{Colour of cell border.  A valid
   colour (belonging to colours() or a hex colour code.)}
 
+  \item{borderStyle}{Border line style \itemize{
+  \item{\bold{none}}{ No Border} \item{\bold{thin}}{ Bottom
+  border} \item{\bold{medium}}{ Left border}
+  \item{\bold{dashed}}{ Right border} \item{\bold{dotted}}{
+  Top and bottom border} \item{\bold{thick}}{ Left and
+  right border} \item{\bold{double}}{ Right border}
+  \item{\bold{hair}}{ Top and bottom border}
+  \item{\bold{mediumDashed}}{ Left and right border}
+  \item{\bold{dashDot}}{ Top and bottom border}
+  \item{\bold{mediumDashDot}}{ Left and right border}
+  \item{\bold{dashDotDot}}{ Top and bottom border}
+  \item{\bold{mediumDashDotDot}}{ Left and right border}
+  \item{\bold{slantDashDot}}{ Left and right border} }}
+
   \item{...}{Further arguments (for future use)}
 }
 \description{
@@ -69,8 +84,8 @@ writeData(wb, "Cars", x, rowNames = TRUE,
 hs1 <- createStyle(fgFill = "#DCE6F1", halign = "CENTER", textDecoration = "Italic",
                    border = "Bottom", borderColour = "green")
 
-writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
-          startCol="B", startRow = 23, borders="rows", headerStyle = hs1)
+writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE, startCol="B",
+     startRow = 23, borders="rows", headerStyle = hs1, borderStyle = "dashed")
 
 hs2 <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
                    halign = "center", valign = "center", textDecoration = "Bold",

@@ -19,6 +19,23 @@
 #' "columns", a surrounding border is drawn with a border between
 #' each column.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to colours() or a hex colour code.)
+#' @param borderStyle Border line style
+#' \itemize{
+#'    \item{\bold{none}}{ No Border}
+#'    \item{\bold{thin}}{ Bottom border}
+#'    \item{\bold{medium}}{ Left border}
+#'    \item{\bold{dashed}}{ Right border}
+#'    \item{\bold{dotted}}{ Top and bottom border}
+#'    \item{\bold{thick}}{ Left and right border}
+#'    \item{\bold{double}}{ Right border}
+#'    \item{\bold{hair}}{ Top and bottom border}
+#'    \item{\bold{mediumDashed}}{ Left and right border}
+#'    \item{\bold{dashDot}}{ Top and bottom border}
+#'    \item{\bold{mediumDashDot}}{ Left and right border}
+#'    \item{\bold{dashDotDot}}{ Top and bottom border}
+#'    \item{\bold{mediumDashDotDot}}{ Left and right border}
+#'    \item{\bold{slantDashDot}}{ Left and right border}
+#'   }
 #' @param ...  Further arguments (for future use)
 #' @seealso \code{\link{writeData}}
 #' @export writeData
@@ -44,8 +61,8 @@
 #' hs1 <- createStyle(fgFill = "#DCE6F1", halign = "CENTER", textDecoration = "Italic",
 #'                    border = "Bottom", borderColour = "green")
 #' 
-#' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
-#'           startCol="B", startRow = 23, borders="rows", headerStyle = hs1)
+#' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE, startCol="B",
+#'      startRow = 23, borders="rows", headerStyle = hs1, borderStyle = "dashed")
 #' 
 #' hs2 <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
 #'                    halign = "center", valign = "center", textDecoration = "Bold",
@@ -137,6 +154,7 @@ writeData <- function(wb,
                       headerStyle = NULL,
                       borders = c("none","surrounding","rows","columns"),
                       borderColour = getOption("openxlsx.borderColour", "black"),
+                      borderStyle = getOption("openxlsx.borderStyle", "thin"),
                       ...){
   
   ## All input conversions/validations
@@ -161,6 +179,7 @@ writeData <- function(wb,
   
   ## borderColours validation
   borderColour <- validateColour(borderColour)
+  borderStyle <- validateBorderStyle(borderStyle)[[1]]
   
   ## Have decided to not use S3 as too much code duplication with input checking/converting
   ## given that everything has to fit into a grid.
@@ -245,7 +264,7 @@ writeData <- function(wb,
     doBorders(borders = borders, wb = wb,
               sheet = sheet, startRow = startRow + colNames,
               startCol = startCol, nrow = nrow(x), ncol = ncol(x),
-              borderColour = borderColour)
+              borderColour = borderColour, borderStyle = borderStyle)
   
 }
 
