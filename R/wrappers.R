@@ -67,22 +67,16 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   if(!is.logical(overwrite))
     overwrite = FALSE
   
-  file <- gsub("\\\\", "\\/", file)
-  file <- gsub("\\/+", "\\/", file)
-  
-  file <- unlist(strsplit(file, split = "/"))
-  fileName <- tail(file, 1)
-  
-  if(length(file) == 1){
-    path <- getwd()
-  }else{
-    path <- paste(file[1:(length(file) - 1)], collapse = "/")
-  }
-
-  if(file.exists(file.path(path, fileName)) & !overwrite)
+  if(file.exists(file) & !overwrite)
     stop("File already exists!")
   
-  wb$saveWorkbook(path = path, fileName = fileName, overwrite = overwrite, quiet = TRUE)
+  tmpDir <- wb$saveWorkbook(quiet = TRUE)
+  setwd(wd)
+  
+  file.copy(file.path(tmpDir, "temp.xlsx"), file)
+  
+  ## delete temporary dir
+  unlink(tmpDir, force = TRUE, recursive= TRUE)
   
   invisible(1)
 }

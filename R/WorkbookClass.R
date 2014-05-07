@@ -130,7 +130,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
   
 })
 
-Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE, cleanUp = TRUE){
+Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## temp directory to save XML files prior to compressing
   tmpDir <- file.path(tempfile(pattern="workbookTemp_"))
@@ -141,11 +141,7 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
   success <- dir.create(path = tmpDir, recursive = TRUE)
   if(!success)
     stop(sprintf("Failed to create temporary directory '%s'", tmpDir))
-  
-  ## delete temporary dir on exit
-  if(cleanUp)
-    on.exit(unlink(tmpDir, force = TRUE, recursive= TRUE), add = TRUE)
-  
+    
   .self$preSaveCleanUp()
     
   nSheets <- length(worksheets)
@@ -343,8 +339,8 @@ Workbook$methods(saveWorkbook = function(path, fileName, overwrite, quiet = TRUE
   
   ## compress to xlsx
   setwd(tmpDir)
-  zipWorkbook(file.path(path, fileName), list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
-  
+  zipWorkbook("temp.xlsx", list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
+
   ## reset styles
   baseFont <- styles$fonts[[1]]
   styles <<- genBaseStyleSheet()
