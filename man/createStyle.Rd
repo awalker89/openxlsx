@@ -4,7 +4,8 @@
 \usage{
 createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   numFmt = "GENERAL", border = NULL,
-  borderColour = getOption("openxlsx.borderColour", "black"), bgFill = NULL,
+  borderColour = getOption("openxlsx.borderColour", "black"),
+  borderStyle = getOption("openxlsx.borderStyle", "thin"), bgFill = NULL,
   fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
   wrapText = FALSE)
 }
@@ -41,6 +42,20 @@ createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   \item{borderColour}{Colour of cell border. A valid colour
   (belonging to colours()) or a valid hex colour beginning
   with "#"}
+
+  \item{borderStyle}{Border line style \itemize{
+  \item{\bold{none}}{ No Border} \item{\bold{thin}}{ Bottom
+  border} \item{\bold{medium}}{ Left border}
+  \item{\bold{dashed}}{ Right border} \item{\bold{dotted}}{
+  Top and bottom border} \item{\bold{thick}}{ Left and
+  right border} \item{\bold{double}}{ Right border}
+  \item{\bold{hair}}{ Top and bottom border}
+  \item{\bold{mediumDashed}}{ Left and right border}
+  \item{\bold{dashDot}}{ Top and bottom border}
+  \item{\bold{mediumDashDot}}{ Left and right border}
+  \item{\bold{dashDotDot}}{ Top and bottom border}
+  \item{\bold{mediumDashDotDot}}{ Left and right border}
+  \item{\bold{slantDashDot}}{ Left and right border} }}
 
   \item{bgFill}{Cell background fill colour. A valid colour
   (belonging to colours()) or a valid hex colour beginning

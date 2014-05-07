@@ -73,7 +73,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   tmpDir <- wb$saveWorkbook(quiet = TRUE)
   setwd(wd)
   
-  file.copy(file.path(tmpDir, "temp.xlsx"), file)
+  file.copy(file.path(tmpDir, "temp.xlsx"), file, overwrite=overwrite)
   
   ## delete temporary dir
   unlink(tmpDir, force = TRUE, recursive= TRUE)
@@ -331,7 +331,26 @@ convertFromExcelRef <- function(col){
 #'   }
 #'   
 #' @param borderColour  Colour of cell border.  
-#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
+#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"  
+#' 
+#'  @param borderStyle Border line style
+#' \itemize{
+#'    \item{\bold{none}}{ No Border}
+#'    \item{\bold{thin}}{ Bottom border}
+#'    \item{\bold{medium}}{ Left border}
+#'    \item{\bold{dashed}}{ Right border}
+#'    \item{\bold{dotted}}{ Top and bottom border}
+#'    \item{\bold{thick}}{ Left and right border}
+#'    \item{\bold{double}}{ Right border}
+#'    \item{\bold{hair}}{ Top and bottom border}
+#'    \item{\bold{mediumDashed}}{ Left and right border}
+#'    \item{\bold{dashDot}}{ Top and bottom border}
+#'    \item{\bold{mediumDashDot}}{ Left and right border}
+#'    \item{\bold{dashDotDot}}{ Top and bottom border}
+#'    \item{\bold{mediumDashDotDot}}{ Left and right border}
+#'    \item{\bold{slantDashDot}}{ Left and right border}
+#'   }
+#'    
 #' @param bgFill Cell background fill colour. 
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
 #' @param fgFill Cell foreground fill colour.
@@ -391,6 +410,7 @@ createStyle <- function(fontName = NULL,
                         numFmt = "GENERAL",
                         border = NULL,
                         borderColour = getOption("openxlsx.borderColour", "black"),
+                        borderStyle =  getOption("openxlsx.borderStyle", "thin"),
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE){
@@ -412,6 +432,13 @@ createStyle <- function(fontName = NULL,
                         list("numFmtId" = 11),  # SCIENTIFIC
                         list("numFmtId" = 49))  # TEXT
     
+  
+  ## Validate border line style
+  if(!is.null(borderStyle))
+    borderStyle <- validateBorderStyle(borderStyle)
+  
+
+  
   if(!is.null(halign)){
     halign <- tolower(halign[[1]])
     if(!halign %in% c("left", "right", "center"))
@@ -498,6 +525,7 @@ createStyle <- function(fontName = NULL,
     
     borderColour <- gsub("#", "FF", borderColour)
     borderColour <- rep(borderColour, length.out = nSides)
+    borderStyle <-  rep(borderStyle, length.out = nSides)
     
     pos <- pos[pos > 0]
     
@@ -505,24 +533,25 @@ createStyle <- function(fontName = NULL,
       stop("Unknown border argument")
     
     names(borderColour) <- names(pos)
-         
+    names(borderStyle) <- names(pos)
+    
     if("LEFT" %in% names(pos)){
-      style$borderLeft <- "thin"
+      style$borderLeft <- borderStyle[["LEFT"]]
       style$borderLeftColour <- list(rgb = borderColour[["LEFT"]])
     }
     
     if("RIGHT" %in% names(pos)){
-      style$borderRight <- "thin"
+      style$borderRight <-  borderStyle[["RIGHT"]]
       style$borderRightColour <- list(rgb = borderColour[["RIGHT"]])
     }
     
     if("TOP" %in% names(pos)){
-      style$borderTop <- "thin"
+      style$borderTop <-  borderStyle[["TOP"]]
       style$borderTopColour <- list(rgb = borderColour[["TOP"]])
     }
     
     if("BOTTOM" %in% names(pos)){
-      style$borderBottom <- "thin"
+      style$borderBottom <-  borderStyle[["BOTTOM"]]
       style$borderBottomColour <- list(rgb = borderColour[["BOTTOM"]])
     }
 

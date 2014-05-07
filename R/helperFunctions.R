@@ -96,3 +96,19 @@ removeHeadTag <- function(x){
 }
 
 
+
+validateBorderStyle <- function(borderStyle){
+  
+  
+  valid <- c("none", "thin", "medium", "dashed", "dotted", "thick", "double", "hair", "mediumDashed", 
+             "dashDot", "mediumDashDot", "dashDotDot", "mediumDashDotDot", "slantDashDot")
+  
+  ind <- match(borderStyle, tolower(valid))
+  if(any(is.na(ind)))
+    stop("Invalid borderStyle", call. = FALSE)
+  
+  return(valid[ind])
+
+}
+
+
