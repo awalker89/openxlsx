@@ -951,56 +951,64 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
   Rcpp::CharacterMatrix m(nRows, nCols);
   std::fill(m.begin(), m.end(), NA_STRING);
     
-  for(int i = 0;i < k; i++)
+  // fill matrix
+  for(int i = 0;i < k; i++){
     m(rowInd[i], colInd[i]) = v[i];
+  }
 
   List dfList(nCols);
+  LogicalVector naElements(nRows);  
+  
   for(int i=0; i < nCols; i++){
     
+    CharacterVector tmp(nRows);
+    for(int ri=0; ri < nRows; ri++)
+      tmp[ri] = m(ri,i);
+      
+    LogicalVector notNAElements = !is_na(tmp);
+  
     // if i in charCols
-    if (std::find(charCols.begin(), charCols.end(), i) != charCols.end()){ 
+    if (std::find(charCols.begin(), charCols.end(), i) != charCols.end()){ // If column is character class
           
       bool logCol = true;
       for(int ri = 0; ri < nRows; ri++){
-        if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
-          logCol = false;
-          break;
-         }
+        if(notNAElements[ri]){
+          if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
+            logCol = false;
+            break;
+           }
+        }
        }
         
         
       if(logCol){
       
         LogicalVector logtmp(nRows);
-        for(int j=0; j < nRows; ++j)
-          logtmp[j] = m(j,i) == "TRUE"; //IF TRUE, TRUE else FALSE
-      
+        for(int ri=0; ri < nRows; ri++){
+         if(notNAElements[ri] & tmp[ri] == "TRUE"){
+            logtmp[ri] = true; //IF TRUE, TRUE else FALSE
+         }else{
+           logtmp[ri] = NA_LOGICAL;
+         }
+        }
         dfList[i] = logtmp;
         
       }else{
-           
-       CharacterVector tmp(nRows);
-        for(int j=0; j < nRows; ++j)
-          tmp[j] = m(j,i);
         
         dfList[i] = tmp;
+        
       }
 
-    }else{
-
-      LogicalVector isNotNA(nRows);
-      CharacterVector thisCol(nRows);
-      for(int j =0; j < nRows; j++)
-        thisCol[j] = m(j,i);
-      
-      isNotNA = !is_na(thisCol);
-            
+    }else{ // else if column NOT character class
+  
+        
       NumericVector ntmp(nRows);
-      std::fill(ntmp.begin(), ntmp.end(), NA_REAL);
-
-      for(int j=0; j < nRows; j++){
-        if(isNotNA[j])
-          ntmp[j] = atof(thisCol[j]);  
+      for(int ri=0; ri < nRows; ri++){
+        if(notNAElements[ri]){
+          ntmp[ri] = atof(tmp[ri]); 
+        }else{
+          ntmp[ri] = NA_REAL; 
+        }
       }
                 
       dfList[i] = ntmp;
@@ -1092,7 +1100,7 @@ List buildCellMerges(List comps){
 
 
 // [[Rcpp::export]]
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames){
+SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows){
     
   // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
   int nCells = r.size();
@@ -1177,7 +1185,12 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
       rowNumbers[i] = atoi(a.c_str()) - 1; 
     }
     
-    rowNumbers = matrixRowInds(rowNumbers);
+    if(skipEmptyRows){
+      rowNumbers = matrixRowInds(rowNumbers);
+    }else{
+      rowNumbers = rowNumbers - rowNumbers[0];
+    }
+
     uRows = unique(rowNumbers);
   }
 
@@ -1708,22 +1721,38 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
 
 
 // [[Rcpp::export]]  
-SEXP calcNRows(CharacterVector x){
+SEXP calcNRows(CharacterVector x, bool skipEmptyRows){
  
   int n = x.size();
+  int nRows;
+ 
+  if(skipEmptyRows){
    
-  CharacterVector res(n);
-  std::string r;
-  for(int i = 0; i < n; i++){
-    r = x[i];
-    r.erase(std::remove_if(r.begin(), r.end(), ::isalpha), r.end());
-    res[i] = r;
+    CharacterVector res(n);
+    std::string r;
+    for(int i = 0; i < n; i++){
+      r = x[i];
+      r.erase(std::remove_if(r.begin(), r.end(), ::isalpha), r.end());
+      res[i] = r;
+    }
+    
+    CharacterVector uRes = unique(res);
+    nRows = uRes.size();
+      
+  }else{
+   
+    std::string fRef = as<std::string>(x[0]);
+    std::string lRef = as<std::string>(x[n-1]);
+    fRef.erase(std::remove_if(fRef.begin(), fRef.end(), ::isalpha), fRef.end());
+    lRef.erase(std::remove_if(lRef.begin(), lRef.end(), ::isalpha), lRef.end());
+    int firstRow = atoi(fRef.c_str());
+    int lastRow = atoi(lRef.c_str());
+    nRows = lastRow - firstRow + 1;
+
   }
-   
-  CharacterVector uRes = unique(res);
-  int uN = uRes.size();
-   
-  return wrap( uN );
+
+  return wrap(nRows);
+
 }
 
 

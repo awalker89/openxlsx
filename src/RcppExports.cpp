@@ -432,8 +432,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // readWorkbook
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP stringIndsSEXP, SEXP rSEXP, SEXP tRSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP) {
+SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows);
+RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP stringIndsSEXP, SEXP rSEXP, SEXP tRSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -445,7 +445,8 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< CharacterVector >::type tR(tRSEXP );
         Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
         Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP );
-        SEXP __result = readWorkbook(v, vn, stringInds, r, tR, nRows, hasColNames);
+        Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP );
+        SEXP __result = readWorkbook(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -563,14 +564,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // calcNRows
-SEXP calcNRows(CharacterVector x);
-RcppExport SEXP openxlsx_calcNRows(SEXP xSEXP) {
+SEXP calcNRows(CharacterVector x, bool skipEmptyRows);
+RcppExport SEXP openxlsx_calcNRows(SEXP xSEXP, SEXP skipEmptyRowsSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
-        SEXP __result = calcNRows(x);
+        Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP );
+        SEXP __result = calcNRows(x, skipEmptyRows);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

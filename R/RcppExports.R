@@ -105,8 +105,8 @@ buildCellMerges <- function(comps) {
     .Call('openxlsx_buildCellMerges', PACKAGE = 'openxlsx', comps)
 }
 
-readWorkbook <- function(v, vn, stringInds, r, tR, nRows, hasColNames) {
-    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, stringInds, r, tR, nRows, hasColNames)
+readWorkbook <- function(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows) {
+    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows)
 }
 
 quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, R_fileName) {
@@ -133,8 +133,8 @@ writeCellStyles <- function(sheetData, rows, cols, styleId, LETTERS) {
     .Call('openxlsx_writeCellStyles', PACKAGE = 'openxlsx', sheetData, rows, cols, styleId, LETTERS)
 }
 
-calcNRows <- function(x) {
-    .Call('openxlsx_calcNRows', PACKAGE = 'openxlsx', x)
+calcNRows <- function(x, skipEmptyRows) {
+    .Call('openxlsx_calcNRows', PACKAGE = 'openxlsx', x, skipEmptyRows)
 }
 
 buildCellTypes <- function(classes, nRows) {

@@ -1,13 +1,14 @@
 
 #' @name read.xlsx
 #' @title Read data from a worksheet into a data.frame
-#' @param xlsxFile A xlsx workbook
+#' @param xlsxFile An xlsx file
 #' @param sheet The name or index of the sheet to read data 
-#' @param startRow startRow is used to specify where to begin looking for data.  Empty rows will be skipped
+#' @param startRow first row to begin looking for data.  Empty rows before any data is found are skipped.
 #' regardless of the value of startRow.
-#' @param colNames IF TRUE, will attempt to look for column names. 
-#' @details Creates a data.frame of all data in worksheet.  
-#' If the first row of data consists entirely of strings, these will be used as column names.
+#' @param colNames If TRUE, first row of data will be used as column names. 
+#' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
+#' will return a row of NAs
+#' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
 #' @seealso \code{\link{readWorkbook}}
@@ -25,7 +26,7 @@
 #' df8$Date <- convertToDate(df8$Date)
 #' sapply(df8, class)
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
 
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -106,7 +107,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   r <- r_v[[1]]
   v <- r_v[[2]]
     
-  nRows <- .Call("openxlsx_calcNRows", r, PACKAGE = "openxlsx")
+
+  nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   if(nRows == 0 | length(r) == 0){
     warning("No data found on worksheet.")
     return(NULL)
@@ -190,7 +192,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
   }
 
   ## Build data.frame
-  m = .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, PACKAGE = "openxlsx")
+  m = .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, PACKAGE = "openxlsx")
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
@@ -209,13 +211,14 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
 
 #' @name readWorkbook
 #' @title Read data from a worksheet into a data.frame
-#' @param xlsxFile A xlsx workbook
-#' @param sheet The name or index of the sheet to read data from
-#' @param startRow startRow is used to specify where to begin looking for data.  Empty rows will be skipped
+#' @param xlsxFile An xlsx file
+#' @param sheet The name or index of the sheet to read data 
+#' @param startRow first row to begin looking for data.  Empty rows before any data is found are skipped.
 #' regardless of the value of startRow.
-#' @param colNames IF TRUE, will attempt to look for column names. 
-#' @details Creates a data.frame of all data in worksheet.  
-#' If the first row of data consists entirely of strings, these will be used as column names.
+#' @param colNames If TRUE, first row of data will be used as column names. 
+#' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
+#' will return a row of NAs
+#' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
 #' @export
@@ -224,6 +227,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE){
-  read.xlsx(xlsxFile = xlsxFile, sheet = sheet)
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
+  read.xlsx(xlsxFile = xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows)
 }

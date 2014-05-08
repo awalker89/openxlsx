@@ -2,19 +2,24 @@
 \alias{read.xlsx}
 \title{Read data from a worksheet into a data.frame}
 \usage{
-read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE)
+read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
+  skipEmptyRows = TRUE)
 }
 \arguments{
-  \item{xlsxFile}{A xlsx workbook}
+  \item{xlsxFile}{An xlsx file}
 
   \item{sheet}{The name or index of the sheet to read data}
 
-  \item{startRow}{startRow is used to specify where to
-  begin looking for data.  Empty rows will be skipped
+  \item{startRow}{first row to begin looking for data.
+  Empty rows before any data is found are skipped.
   regardless of the value of startRow.}
 
-  \item{colNames}{IF TRUE, will attempt to look for column
-  names.}
+  \item{colNames}{If TRUE, first row of data will be used
+  as column names.}
+
+  \item{skipEmptyRows}{If TRUE, empty rows are skipped else
+  empty rows after the first row containing data will
+  return a row of NAs}
 }
 \value{
 data.frame
@@ -23,9 +28,7 @@ data.frame
 Read data from a worksheet into a data.frame
 }
 \details{
-Creates a data.frame of all data in worksheet. If the first
-row of data consists entirely of strings, these will be
-used as column names.
+Creates a data.frame of all data in worksheet.
 }
 \examples{
 xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
