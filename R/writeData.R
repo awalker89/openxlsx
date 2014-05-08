@@ -184,16 +184,17 @@ writeData <- function(wb,
   ## Have decided to not use S3 as too much code duplication with input checking/converting
   ## given that everything has to fit into a grid.
   
-  if(any(c("data.frame", "data.table") %in% class(x))){
+  clx <- class(x)
+  if(any(c("data.frame", "data.table") %in% clx)){
     ## Do nothing
     
-  }else if("matrix" %in% class(x)){
+  }else if("matrix" %in% clx){
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     
-  }else if("array" %in% class(x)){
+  }else if("array" %in% clx){
     stop("array in writeData : currently not supported")
     
-  }else if("aov" %in% class(x)){
+  }else if("aov" %in% clx){
     
     x <- summary(x)
     x <- cbind(x[[1]])
@@ -201,28 +202,28 @@ writeData <- function(wb,
     names(x)[1] <- ""
     rowNames <- FALSE 
     
-  }else if("lm" %in% class(x)){
+  }else if("lm" %in% clx){
     
     x <- as.data.frame(summary(x)[["coefficients"]])
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
         
-  }else if("anova" %in% class(x)){
+  }else if("anova" %in% clx){
     
     x <- cbind(x)
     x <- cbind(data.frame("row name" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else if("glm" %in% class(x)){
+  }else if("glm" %in% clx){
     
     x <- as.data.frame(summary(x)[["coefficients"]])
     x <- cbind(data.frame("row name" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
     
-  }else if("table" %in% class(x)){
+  }else if("table" %in% clx){
     
     x <- as.data.frame(unclass(x))
     x <- cbind(data.frame("Variable" = rownames(x)), x)
