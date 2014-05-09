@@ -1581,8 +1581,12 @@ worksheetOrder <- function(wb){
   if(!"Workbook" %in% class(wb))
     stop("Argument must be a Workbook.")
   
-  
+#   nms <- names(wb$worksheets)
+#   nms <- replaceXMLEntities(nms)
+#   sprintf('%s: "%s"', wb$sheetOrder, nms[wb$sheetOrder])
+
   wb$sheetOrder
+  
 }
 
 #' @rdname worksheetOrder
