@@ -41,13 +41,13 @@ insertImage.
 wb <- createWorkbook()
 
 ## Add a worksheet
-addWorksheet(wb, "Sheet 1")
+addWorksheet(wb, "Sheet 1", gridLines = FALSE)
 
-## create a plots
+## create plot objects
 require(ggplot2)
-p1 <- ggplot2::qplot(mpg, data=mtcars, geom="density",
+p1 <- qplot(mpg, data=mtcars, geom="density",
   fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Milage")
-p2 <- ggplot2::qplot(age, circumference,
+p2 <- qplot(age, circumference,
   data = Orange, geom = c("point", "line"), colour = Tree)
 
 ## Insert currently displayed plot to sheet 1, row 1, column 1
