@@ -4,31 +4,32 @@
 #' @description Write an object to worksheet with optional styling.
 #' @param wb A Workbook object containing a worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
-#' @param x Object to be written.
-#' @param startCol A vector specifiying the starting columns(s) to write df
-#' @param startRow A vector specifiying the starting row(s) to write df
-#' @param xy An alternative to specifying startCol and startRow individually.
-#'  A vector of the form c(startCol, startRow)
-#' @param colNames If TRUE, column names of x are written.
-#' @param rowNames If TRUE, data.frame row names of x are written.
+#' @param x Object to be written. For classes supported look at the examples.
+#' @param startCol A vector specifiying the starting columns(s) to write to.
+#' @param startRow A vector specifiying the starting row(s) to write to.
+#' @param xy An alternative to specifying \code{startCol} and
+#' \code{startRow} individually.  A vector of the form
+#' \code{c(startCol, startRow)}.
+#' @param colNames If \code{TRUE}, column names of x are written.
+#' @param rowNames If \code{TRUE}, data.frame row names of x are written.
 #' @param headerStyle Custom style to apply to column names.
-#' @param borders Either "none" (default), "surrounding",
-#' "columns", "rows" or respective abbreviations.  If
-#' "surrounding", a border is drawn around the data.  If "rows",
+#' @param borders Either "\code{none}" (default), "\code{surrounding}",
+#' "\code{columns}", "\code{rows}" or \emph{respective abbreviations}.  If
+#' "\code{surrounding}", a border is drawn around the data.  If "\code{rows}",
 #' a surrounding border is drawn a border around each row. If
-#' "columns", a surrounding border is drawn with a border between
+#' "\code{columns}", a surrounding border is drawn with a border between
 #' each column.
-#' @param borderColour Colour of cell border.  A valid colour (belonging to colours() or a hex colour code.)
+#' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
 #' \itemize{
-#'    \item{\bold{none}}{ No Border}
+#'    \item{\bold{none}}{ no border}
 #'    \item{\bold{thin}}{ thin border}
 #'    \item{\bold{medium}}{ medium border}
 #'    \item{\bold{dashed}}{ dashed border}
 #'    \item{\bold{dotted}}{ dotted border}
 #'    \item{\bold{thick}}{ thick border}
 #'    \item{\bold{double}}{ double line border}
-#'    \item{\bold{hair}}{ Hairline border}
+#'    \item{\bold{hair}}{ hairline border}
 #'    \item{\bold{mediumDashed}}{ medium weight dashed border}
 #'    \item{\bold{dashDot}}{ dash-dot border}
 #'    \item{\bold{mediumDashDot}}{ medium weight dash-dot border}
@@ -122,8 +123,7 @@
 #' 
 #' ## TEST 7 - GLM
 #' test.n <- "glm"
-#' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
-#'            binomial())
+#' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
 #'
@@ -264,7 +264,7 @@ writeData <- function(wb,
   if( "none" != borders )
     doBorders(borders = borders, wb = wb,
               sheet = sheet, startRow = startRow + colNames,
-              startCol = startCol, nrow = nrow(x), ncol = ncol(x),
+              startCol = startCol, nrow = nRow, ncol = nCol,
               borderColour = borderColour, borderStyle = borderStyle)
   
 }

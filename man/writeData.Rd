@@ -14,43 +14,47 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   \item{sheet}{The worksheet to write to. Can be the
   worksheet index or name.}
 
-  \item{x}{Object to be written.}
+  \item{x}{Object to be written. For classes supported look
+  at the examples.}
 
   \item{startCol}{A vector specifiying the starting
-  columns(s) to write df}
+  columns(s) to write to.}
 
   \item{startRow}{A vector specifiying the starting row(s)
-  to write df}
+  to write to.}
 
-  \item{xy}{An alternative to specifying startCol and
-  startRow individually.  A vector of the form c(startCol,
-  startRow)}
+  \item{xy}{An alternative to specifying \code{startCol}
+  and \code{startRow} individually.  A vector of the form
+  \code{c(startCol, startRow)}.}
 
-  \item{colNames}{If TRUE, column names of x are written.}
-
-  \item{rowNames}{If TRUE, data.frame row names of x are
+  \item{colNames}{If \code{TRUE}, column names of x are
   written.}
+
+  \item{rowNames}{If \code{TRUE}, data.frame row names of x
+  are written.}
 
   \item{headerStyle}{Custom style to apply to column
   names.}
 
-  \item{borders}{Either "none" (default), "surrounding",
-  "columns", "rows" or respective abbreviations.  If
-  "surrounding", a border is drawn around the data.  If
-  "rows", a surrounding border is drawn a border around
-  each row. If "columns", a surrounding border is drawn
-  with a border between each column.}
+  \item{borders}{Either "\code{none}" (default),
+  "\code{surrounding}", "\code{columns}", "\code{rows}" or
+  \emph{respective abbreviations}.  If
+  "\code{surrounding}", a border is drawn around the data.
+  If "\code{rows}", a surrounding border is drawn a border
+  around each row. If "\code{columns}", a surrounding
+  border is drawn with a border between each column.}
 
   \item{borderColour}{Colour of cell border.  A valid
-  colour (belonging to colours() or a hex colour code.)}
+  colour (belonging to \code{colours()} or a hex colour
+  code, eg see \href{http://www.colorpicker.com}{here}).}
 
   \item{borderStyle}{Border line style \itemize{
-  \item{\bold{none}}{ No Border} \item{\bold{thin}}{ thin
+  \item{\bold{none}}{ no border} \item{\bold{thin}}{ thin
   border} \item{\bold{medium}}{ medium border}
   \item{\bold{dashed}}{ dashed border}
   \item{\bold{dotted}}{ dotted border} \item{\bold{thick}}{
   thick border} \item{\bold{double}}{ double line border}
-  \item{\bold{hair}}{ Hairline border}
+  \item{\bold{hair}}{ hairline border}
   \item{\bold{mediumDashed}}{ medium weight dashed border}
   \item{\bold{dashDot}}{ dash-dot border}
   \item{\bold{mediumDashDot}}{ medium weight dash-dot
@@ -146,8 +150,7 @@ writeData(wb = wb, sheet = test.n, x = my.anova2)
 
 ## TEST 7 - GLM
 test.n <- "glm"
-fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family =
-           binomial())
+fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm3)
 
