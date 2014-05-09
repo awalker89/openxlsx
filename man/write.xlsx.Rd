@@ -15,6 +15,9 @@ write.xlsx(x, file, ...)
 
   see detail}
 }
+\value{
+A workbook object
+}
 \description{
 write directly to an xlsx file
 }
@@ -38,11 +41,34 @@ apply to column names.} \item{\bold{borders}}{ Either
 "rows", a surrounding border is drawn a border around each
 row. If "columns", a surrounding border is drawn with a
 border between each column.} \item{\bold{borderColour}}{
-Colour of cell border.  A valid hex colour beginning with
-"#".  NULL will set borders to black.} }
+Colour of cell border} \item{\bold{borderStyle}}{ Border
+line style.} \item{\bold{overwrite}}{ Overwrite existing
+file (Defaults to TRUE as with write.table)} }
 
 columns of x with class Date, POSIXct of POSIXt are
 automatically styled as dates.
+}
+\examples{
+## write xlsx file to working directory
+write.xlsx(iris, file = "writeXLSX1.xlsx", colNames = TRUE, borders = "rows")
+write.xlsx(iris, file = "writeXLSX2.xlsx", colNames = TRUE, borders = "columns",
+ borderStyle = "dashed")
+
+options("openxlsx.borderColour" = "#4F80BD")
+write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows",
+ sheetName = "Iris data", gridLines = FALSE)
+
+options("openxlsx.borderStyle" = "dashDot")
+write.xlsx(iris, file = "writeXLSX4.xlsx", colNames = TRUE, borders = "rows",
+ gridLines = FALSE)
+
+
+options("openxlsx.borderStyle" = "medium")
+hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=14,
+ fontName="Arial Narrow", fgFill = "#4F80BD")
+
+write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
+ headerStyle = hs)
 }
 \author{
 Alexander Walker
@@ -51,5 +77,7 @@ Alexander Walker
 \code{\link{addWorksheet}}
 
 \code{\link{writeData}}
+
+\code{\link{createStyle}} for style parameters
 }
 

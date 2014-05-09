@@ -29,13 +29,40 @@
 #'   \item{\bold{borders}}{ Either "surrounding", "columns" or "rows" or NULL.  If "surrounding", a border is drawn around the
 #' data.  If "rows", a surrounding border is drawn a border around each row. If "columns", a surrounding border is drawn with a border
 #' between each column.}
-#'   \item{\bold{borderColour}}{ Colour of cell border.  A valid hex colour beginning with "#".  NULL will set borders to black.}
+#'   \item{\bold{borderColour}}{ Colour of cell border}
+#'   \item{\bold{borderStyle}}{ Border line style.}
+#'   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
 #' }
 #' 
 #' columns of x with class Date, POSIXct of POSIXt are automatically
 #' styled as dates.
 #' @seealso \code{\link{addWorksheet}}
 #' @seealso \code{\link{writeData}}
+#' @seealso \code{\link{createStyle}} for style parameters
+#' @return A workbook object
+#' @examples
+#' 
+#' ## write xlsx file to working directory
+#' write.xlsx(iris, file = "writeXLSX1.xlsx", colNames = TRUE, borders = "rows")
+#' write.xlsx(iris, file = "writeXLSX2.xlsx", colNames = TRUE, borders = "columns",
+#'  borderStyle = "dashed")
+#' 
+#' options("openxlsx.borderColour" = "#4F80BD")
+#' write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows",
+#'  sheetName = "Iris data", gridLines = FALSE)
+#' 
+#' options("openxlsx.borderStyle" = "dashDot")
+#' write.xlsx(iris, file = "writeXLSX4.xlsx", colNames = TRUE, borders = "rows",
+#'  gridLines = FALSE)
+#' 
+#' 
+#' options("openxlsx.borderStyle" = "medium")
+#' hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=14,
+#'  fontName="Arial Narrow", fgFill = "#4F80BD")
+#'  
+#' write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
+#'  headerStyle = hs)
+#' 
 #' @export
 write.xlsx <- function(x, file, ...){
   
@@ -62,6 +89,10 @@ write.xlsx <- function(x, file, ...){
   ## headerStyle = NULL,
   ## borders = NULL,
   ## borderColour = "#4F81BD"
+  ## borderStyle
+  
+  #---saveWorkbook---#
+#   overwrite = TRUE
   
   creator <- ""
   if(creator %in% names(params))
@@ -174,15 +205,15 @@ write.xlsx <- function(x, file, ...){
     if(!borders %in% c("surrounding", "rows", "columns"))
       stop("Invalid borders argument")
   }
-  
-  borderColour <- "#4F81BD"
+
+  borderColour <- getOption("openxlsx.borderColour", "black")
   if("borderColour" %in% names(params)){
-    if(is.null(params$borderColour)){
-      borderColour <- "#000000"
-    }else{
-      borderColour <- toupper(params$borderColour)
-      if(!all(grepl("#[A-F0-9]{6}", borderColour))) stop("Invalid borderColour!")
-    }
+    borderColour <- validateColour(params$borderColour)
+  }
+  
+  borderStyle <- getOption("openxlsx.borderStyle", "thin")
+  if("borderStyle" %in% names(params)){
+    borderStyle <- validateBorderStyle(params$borderStyle)[[1]]
   }
   
   ## Input validating
@@ -200,7 +231,8 @@ write.xlsx <- function(x, file, ...){
             rowNames = rowNames,
             headerStyle = headerStyle,
             borders = borders,
-            borderColour = borderColour)
+            borderColour = borderColour,
+            borderStyle = borderStyle)
   
   
   saveWorkbook(wb = wb, file = file, overwrite = overwrite)
