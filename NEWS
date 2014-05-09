@@ -16,8 +16,11 @@ NEW FEATURES
 
 * hyperlinks in loaded workbooks are now maintained
 
-*
+* borderStyle argument to createStyle to modify border line type.
 
+* borderStyle argument to writeData to modify border line type.
+
+* "worksheetOrder" function to shuffle order of worksheets when writing to file
 
 BUG FIXES
 
@@ -35,7 +38,9 @@ BUG FIXES
 
 * sheet names containing non-local characters can now be referenced by name.
 
-* Invalid factor level when missing values
+* Invalid factor level when missing values in writeData
+
+* saveWorkbook now accepts relative paths.
 
 
 VIGNETTE

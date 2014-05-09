@@ -30,7 +30,8 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "workbook",
                                                "workbook.xml.rels",
                                                "worksheets",
-                                               "worksheets_rels")
+                                               "worksheets_rels",
+                                               "sheetOrder")
 )
 
 
@@ -69,6 +70,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   headFoot <<- data.frame("text" = rep(NA, 6), "pos" = c("left", "center", "right"), "head" = c("head", "head", "head", "foot", "foot", "foot"), stringsAsFactors = FALSE)
   printerSettings <<- list()
   hyperlinks <<- list()
+  sheetOrder <<- NULL
   
   attr(sharedStrings, "uniqueCount") <<- 0
   
@@ -125,6 +127,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
   hyperlinks[[newSheetIndex]] <<- ""
   
   dataCount[[newSheetIndex]] <<- 0
+  sheetOrder <<- c(sheetOrder, newSheetIndex)
   
   invisible(newSheetIndex)
   
@@ -1032,6 +1035,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove dataCount
   # Remove hyperlinks
   # Reduce calcChain i attributes & remove calcs on sheet
+  # Remove sheet from sheetOrder
 
   sheet <- validateSheet(sheet)
   sheetNames <- names(worksheets)
@@ -1051,7 +1055,8 @@ Workbook$methods(deleteWorksheet = function(sheet){
   rowHeights[[sheet]] <<- NULL
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL
-
+  sheetOrder <<- c(sheetOrder[sheetOrder < sheet], sheetOrder[sheetOrder > sheet] - 1)
+    
   ## remove styleObjects
   if(length(styleObjects) > 0){
     styleObjects <<- lapply(styleObjects, function(x){
@@ -1364,6 +1369,8 @@ Workbook$methods(preSaveCleanUp = function(){
   sId <- as.numeric(unlist(regmatches(workbook$sheets, gregexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE))))
   workbook$sheets <<- sapply(order(sId), function(i) gsub('(?<=id="rId)[0-9]+', i, workbook$sheets[[i]], perl = TRUE))
   workbook$sheets <<- sapply(1:nSheets, function(i) gsub('(?<=sheetId=")[0-9]+', i, workbook$sheets[[i]], perl = TRUE))
+  if(!is.null(sheetOrder))
+    workbook$sheets <<- workbook$sheets[sheetOrder]
   
   ## update workbook r:id to match reordered workbook.xml.rels externalLink element
   if(length(extRefInds) > 0){
@@ -1511,7 +1518,7 @@ Workbook$methods(show = function(){
   if(nCharts > 0)
     showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
   
-  
+  showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
   
   ## styles
 #   if(nStyles > 0){
