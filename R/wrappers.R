@@ -357,7 +357,6 @@ convertFromExcelRef <- function(col){
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
 #' @param fgFill Cell foreground fill colour.
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
-
 #'   
 #' @param halign
 #' Horizontal alignment of cell contents
@@ -462,19 +461,6 @@ createStyle <- function(fontName = NULL,
        stop("Invalid textDecoration!")
   }
   
-  
-  if(!is.null(bgFill)){
-    bgFill <- toupper(bgFill)
-    if(!grepl("#[0-9A-F]{6}", bgFill))
-      stop("Invalid hex code for bgFill")
-  }
-  
-  if(!is.null(fgFill)){
-    fgFill <- toupper(fgFill)
-    if(!grepl("#[0-9A-F]{6}", fgFill))
-      stop("Invalid hex code for fgFill")
-  }
-  
   borderColour <- validateColour(borderColour)
   
   if(!is.null(fontColour))
@@ -495,25 +481,22 @@ createStyle <- function(fontName = NULL,
     
   style$fontDecoration <- toupper(textDecoration)
   
-    
-   ## fill    
-   if(is.null(bgFill)){
-     bgFillList <- NULL
-   }else if(grepl("#[A-F0-9]{6}", bgFill)){
-     bgFillList <- list(rgb = gsub("#", "FF", bgFill))
-   }else{
-     bgFillList <- bgFill
-   }
-    
-   style$fill <- list(fillBg = bgFillList)
-   if(is.null(fgFill)){
+  ## background fill   
+  if(is.null(bgFill)){
+    bgFillList <- NULL
+  }else{
+    bgFill <- validateColour(bgFill)
+    style$fill <- append(style$fill, list(fillBg = list(rgb = gsub("#", "FF", bgFill))))
+  }
+  
+  ## foreground fill
+  if(is.null(fgFill)){
      fgFillList <- NULL
-   }else if(grepl("#[A-F0-9]{6}", fgFill)){
-     style$fill <- append(style$fill, list(fillFg = list(rgb = gsub("#", "FF", fgFill))))
    }else{
-     
-     style$fill <- append(style$fill, list(fillFg = fgFill))
+     fgFill <- validateColour(fgFill)
+     style$fill <- append(style$fill, list(fillFg = list(rgb = gsub("#", "FF", fgFill))))
    }
+  
   
   ## border
   if(!is.null(border)){
