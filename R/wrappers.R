@@ -389,6 +389,10 @@ convertFromExcelRef <- function(col){
 #' @export
 #' @examples
 #' 
+#' ## Modify default values of border colour and border line style
+#' options("openxlsx.borderColour" = "#4F80BD")
+#' options("openxlsx.borderStyle" = "thin")
+#' 
 #' ## Size 18 Arial, Bold, left horz. aligned, fill colour #1A33CC, all borders,
 #' style <- createStyle(fontSize = 18, fontName = "Arial",
 #'   textDecoration = "bold", halign = "left", fgFill = "#1A33CC", border= "TopBottomLeftRight")
@@ -575,7 +579,6 @@ createStyle <- function(fontName = NULL,
 #' 
 #' ## Add a worksheets
 #' addWorksheet(wb, "Expenditure", gridLines = FALSE) 
-#' addWorksheet(wb, "A Sheet to style") 
 #' 
 #' ##write data to worksheet 1
 #' writeData(wb, sheet = 1, USPersonalExpenditure, rowNames = TRUE)

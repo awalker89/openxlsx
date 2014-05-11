@@ -15,16 +15,17 @@
 #' @export
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
-#' df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1)
-#' df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 2)
-#' df3 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3) ## empty columns are skipped
-#' df4 <- read.xlsx(xlsxFile = xlsxFile, sheet = 4) ## Columns are padded with NA
-#' df5 <- read.xlsx(xlsxFile = xlsxFile, sheet = 5, startRow = 2)
-#' df6 <- read.xlsx(xlsxFile = xlsxFile, sheet = 6) ## NULL
-#' df7 <- read.xlsx(xlsxFile = xlsxFile, sheet = 7)
-#' df8 <- read.xlsx(xlsxFile = xlsxFile, sheet = 8)
-#' df8$Date <- convertToDate(df8$Date)
-#' sapply(df8, class)
+#' df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1, startRow=1, skipEmptyRows=FALSE, colNames=TRUE)
+#' sapply(df1, class)
+#' 
+#' df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow=1, skipEmptyRows=TRUE, colNames=TRUE)
+#' df2$Date <- convertToDate(df2$Date)
+#' sapply(df2, class)
+#' head(df2)
+#' 
+#' df3 <- read.xlsx(xlsxFile = xlsxFile, sheet = 4, startRow=1, skipEmptyRows=TRUE, colNames=TRUE)
+#' df3$Symbol
+#' 
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
 

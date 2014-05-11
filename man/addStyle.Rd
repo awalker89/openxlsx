@@ -29,7 +29,6 @@ wb <- createWorkbook("My name here")
 
 ## Add a worksheets
 addWorksheet(wb, "Expenditure", gridLines = FALSE)
-addWorksheet(wb, "A Sheet to style")
 
 ##write data to worksheet 1
 writeData(wb, sheet = 1, USPersonalExpenditure, rowNames = TRUE)
