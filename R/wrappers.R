@@ -480,7 +480,7 @@ createStyle <- function(fontName = NULL,
     style$fontColour <- list(rgb =  gsub("#", "FF", fontColour))
     
   style$fontDecoration <- toupper(textDecoration)
-  
+
   ## background fill   
   if(is.null(bgFill)){
     bgFillList <- NULL

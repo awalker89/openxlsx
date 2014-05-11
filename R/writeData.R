@@ -42,31 +42,33 @@
 #' @rdname writeData
 #' @examples
 #' wb <- createWorkbook()
-#'
+#' options("openxlsx.borderStyle" = "thin")
+#' options("openxlsx.borderColour" = "#4F81BD")
 #' ## Add worksheets
 #' addWorksheet(wb, "Cars")
+#' 
 #' 
 #' x <- mtcars[1:6,]
 #' writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
 #' writeData(wb, "Cars", x, rowNames = TRUE, startCol = "O", startRow = 3, 
-#'          borders="surrounding", borderColour = NULL) ## black border
+#'          borders="surrounding", borderColour = "black") ## black border
 #'
 #' writeData(wb, "Cars", x, rowNames = TRUE, 
 #'          startCol = 2, startRow = 12, borders="columns")
 #'
 #' writeData(wb, "Cars", x, rowNames = TRUE, 
-#'          startCol="O", startRow = 12, borders="rows", borderColour = "#4F81BD")
+#'          startCol="O", startRow = 12, borders="rows")
 #'
 #' ## header styles
 #' hs1 <- createStyle(fgFill = "#DCE6F1", halign = "CENTER", textDecoration = "Italic",
-#'                    border = "Bottom", borderColour = "green")
+#'                    border = "Bottom")
 #' 
 #' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE, startCol="B",
 #'      startRow = 23, borders="rows", headerStyle = hs1, borderStyle = "dashed")
 #' 
 #' hs2 <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
 #'                    halign = "center", valign = "center", textDecoration = "Bold",
-#'                    border = "TopBottomLeftRight", borderColour = "#4F81BD")
+#'                    border = "TopBottomLeftRight")
 #' 
 #' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
 #'           startCol="O", startRow = 23, borders="columns", headerStyle = hs2)

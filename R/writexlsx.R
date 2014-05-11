@@ -13,7 +13,7 @@
 #'   \item{saveWorkbook}
 #' }
 #' 
-#' see detail
+#' see details.
 #' @details Optional parameters are:
 #' \itemize{
 #'   \item{\bold{creator}}{ A string specifying the workbook author}
@@ -42,12 +42,12 @@
 #' @return A workbook object
 #' @examples
 #' 
-#' ## write xlsx file to working directory
+#' ## write to working directory
 #' write.xlsx(iris, file = "writeXLSX1.xlsx", colNames = TRUE, borders = "rows")
 #' write.xlsx(iris, file = "writeXLSX2.xlsx", colNames = TRUE, borders = "columns",
 #'  borderStyle = "dashed")
 #' 
-#' options("openxlsx.borderColour" = "#4F80BD")
+#' options("openxlsx.borderColour" = "#4F80BD") ## set default border colour
 #' write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows",
 #'  sheetName = "Iris data", gridLines = FALSE)
 #' 
@@ -55,9 +55,8 @@
 #' write.xlsx(iris, file = "writeXLSX4.xlsx", colNames = TRUE, borders = "rows",
 #'  gridLines = FALSE)
 #' 
-#' 
 #' options("openxlsx.borderStyle" = "medium")
-#' hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=14,
+#' hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=12,
 #'  fontName="Arial Narrow", fgFill = "#4F80BD")
 #'  
 #' write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
