@@ -308,7 +308,8 @@ loadWorkbook <- function(xlsxFile){
   
   ## tables
   if(length(tablesXML) > 0){
-    wb$tables <- lapply(sort(tablesXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+    tablesXML <- tablesXML[order(nchar(tablesXML), tablesXML)]
+    wb$tables <- lapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
     wb$Content_Types <- c(wb$Content_Types, 
                           sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', 1:length(wb$tables)+2))   
   }
@@ -351,7 +352,10 @@ loadWorkbook <- function(xlsxFile){
   ##*----------------------------------------------------------------------------------------------*##
   
   ## xl\worksheets
-  ws <- lapply(sort(worksheetsXML), function(x) readLines(x, warn = FALSE, encoding = "UTF-8"))
+  wsNumber <- as.numeric(regmatches(worksheetsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", worksheetsXML, perl = TRUE)))
+  worksheetsXML <- worksheetsXML[order(wsNumber)]
+  
+  ws <- lapply(worksheetsXML, function(x) readLines(x, warn = FALSE, encoding = "UTF-8"))
   ws <- lapply(ws, removeHeadTag)
   wsTemp <- lapply(ws, function(x) strsplit(x, split = "<sheetData>")[[1]])
     
@@ -514,9 +518,9 @@ loadWorkbook <- function(xlsxFile){
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   
   if(length(sheetRelsXML) > 0){
-    sheetRelsXML <- sort(sheetRelsXML)
-    sheetNumber <- as.numeric(regmatches(sheetRelsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", sheetRelsXML, perl = TRUE)))
     
+    sheetRelsXML <- sheetRelsXML[order(nchar(sheetRelsXML), sheetRelsXML)]
+    sheetNumber <- as.numeric(regmatches(sheetRelsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", sheetRelsXML, perl = TRUE)))
 
     xml <- lapply(sheetRelsXML, readLines, warn = FALSE)
     xml <- unlist(lapply(xml, removeHeadTag))
@@ -528,7 +532,7 @@ loadWorkbook <- function(xlsxFile){
     if(length(tablesXML) > 0){
   
       tables <- lapply(xml, function(x) as.numeric(regmatches(x, regexpr("(?<=table)[0-9]+(?=\\.xml)", x, perl = TRUE))))
-      if(length(unlist(tables)) > 0){    
+      if(length(unlist(tables)) > 0){  
         ## get the tables that belong to each worksheet and create a worksheets_rels for each
         tCount <- 2 ## table r:Ids start at 2
         for(i in 1:length(tables)){
@@ -558,11 +562,12 @@ loadWorkbook <- function(xlsxFile){
     if(length(hlinksInds) > 0){
     
       hlinks <- hlinks[hlinksInds]
-      for(i in hlinksInds){
+      for(i in 1:length(hlinksInds)){
         targets <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
         targets <- replaceXMLEntities(gsub('"$', "", targets))
         
-        names(wb$hyperlinks[[sheetNumber[[i]]]]) <- targets  
+        hSheet <- sheetNumber[hlinksInds[i]]
+        names(wb$hyperlinks[[hSheet]]) <- targets  
       }  
     }
     
@@ -571,13 +576,12 @@ loadWorkbook <- function(xlsxFile){
     drawInds <- which(sapply(draw, length) > 0)
     
     if(length(drawingRelsXML) > 0){
-      drawingRelsXML <- sort(drawingRelsXML)
+
       dRels <- lapply(drawingRelsXML, readLines, warn = FALSE)
       dRels <- unlist(lapply(dRels, removeHeadTag))
       dRels <- gsub("<Relationships .*?>", "", dRels)
       dRels <- gsub("</Relationships>", "", dRels)
 
-      drawingsXML <- sort(drawingsXML)
       dXML <- lapply(drawingsXML, readLines, warn = FALSE)  
       dXML <- unlist(lapply(dXML, removeHeadTag))
       dXML <- gsub("<xdr:wsDr .*?>", "", dXML)
