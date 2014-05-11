@@ -512,7 +512,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     uNewStr <- unique(newStrs)
     
     .self$updateSharedStrings(uNewStr)  
-    v[strFlag] <- match(newStrs, sharedStrings) - 1
+    v[strFlag] <- as.integer(match(newStrs, sharedStrings) - 1)
   }
   
 
