@@ -985,10 +985,10 @@ CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
       
         LogicalVector logtmp(nRows);
         for(int ri=0; ri < nRows; ri++){
-         if(notNAElements[ri] & tmp[ri] == "TRUE"){
-            logtmp[ri] = true; //IF TRUE, TRUE else FALSE
+         if(!notNAElements[ri]){
+            logtmp[ri] = NA_LOGICAL; //IF TRUE, TRUE else FALSE
          }else{
-           logtmp[ri] = NA_LOGICAL;
+           logtmp[ri] = (tmp[ri] == "TRUE");
          }
         }
         dfList[i] = logtmp;
