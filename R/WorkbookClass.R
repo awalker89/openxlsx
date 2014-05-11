@@ -287,12 +287,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## write worksheet, worksheet_rels, drawings, drawing_rels
   .self$writeSheetDataXML(xldrawingsDir, xldrawingsRelsDir, xlworksheetsDir, xlworksheetsRelsDir)
         
-#   ##calcChain
-#   if(!is.null(calcChain))
-#     .Call("openxlsx_writeFile", '<calcChain xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
-#           pxml(calcChain),
-#           "</calcChain>", file.path(xlDir, "calcChain.xml"))
-  
   ## write shareStrings.xml
   ct <- Content_Types
   if(length(sharedStrings) > 0){
