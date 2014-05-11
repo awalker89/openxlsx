@@ -89,7 +89,7 @@ loadWorkbook <- function(xlsxFile){
     ## defined Names
     dNames <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
     if(length(dNames) > 0)
-    wb$workbook$definedNames <- dNames
+      wb$workbook$definedNames <- dNames
     
   }
   
@@ -345,6 +345,11 @@ loadWorkbook <- function(xlsxFile){
   if(length(extLinksRelsXML))
     wb$externalLinksRels <- lapply(sort(extLinksRelsXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
     
+  
+  ##*----------------------------------------------------------------------------------------------*##
+  ### BEGIN READING IN WORKSHEET DATA
+  ##*----------------------------------------------------------------------------------------------*##
+  
   ## xl\worksheets
   ws <- lapply(sort(worksheetsXML), function(x) readLines(x, warn = FALSE, encoding = "UTF-8"))
   ws <- lapply(ws, removeHeadTag)
@@ -385,11 +390,7 @@ loadWorkbook <- function(xlsxFile){
       f <- .Call("openxlsx_getFunction", cells[[i]], PACKAGE = "openxlsx")
       
       ## XML replacements
-      v <- gsub('"', "&quot;", v)
-      v <- gsub('&', "&amp;", v)
-      v <- gsub("'", "&apos;", v)
-      v <- gsub('<', "&lt;", v)
-      v <- gsub('>', "&gt;", v)
+      v <- replaceIllegalCharacters(v)
       
       if(length(v) > 0)
         t[is.na(v)] <- as.character(NA)
@@ -506,7 +507,9 @@ loadWorkbook <- function(xlsxFile){
     }
   }
   
-  ############## worksheets complete
+  ##*----------------------------------------------------------------------------------------------*##
+  ### READING IN WORKSHEET DATA COMPLETE
+  ##*----------------------------------------------------------------------------------------------*##
   
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   
@@ -521,7 +524,7 @@ loadWorkbook <- function(xlsxFile){
     xml <- gsub("</Relationships>", "", xml)
     xml <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, "<Relationship ", PACKAGE="openxlsx"))
     
-    
+    ## tables
     if(length(tablesXML) > 0){
   
       tables <- lapply(xml, function(x) as.numeric(regmatches(x, regexpr("(?<=table)[0-9]+(?=\\.xml)", x, perl = TRUE))))
@@ -548,7 +551,7 @@ loadWorkbook <- function(xlsxFile){
       }
     } ## if(length(tablesXML) > 0)
     
-    
+    ## hyperlinks
     hlinks <- lapply(xml, function(x) x[grepl("hyperlink", x) & grepl("External", x)])
     hlinksInds <- which(sapply(hlinks, length) > 0)
     
@@ -560,31 +563,54 @@ loadWorkbook <- function(xlsxFile){
         targets <- replaceXMLEntities(gsub('"$', "", targets))
         
         names(wb$hyperlinks[[sheetNumber[[i]]]]) <- targets  
-      }
-      
+      }  
     }
     
+    ## drawings
+    draw <- lapply(xml, function(x) x[grepl("drawings/drawing", x)])
+    drawInds <- which(sapply(draw, length) > 0)
+    
+    if(length(drawingRelsXML) > 0){
+      drawingRelsXML <- sort(drawingRelsXML)
+      dRels <- lapply(drawingRelsXML, readLines, warn = FALSE)
+      dRels <- unlist(lapply(dRels, removeHeadTag))
+      dRels <- gsub("<Relationships .*?>", "", dRels)
+      dRels <- gsub("</Relationships>", "", dRels)
+
+      drawingsXML <- sort(drawingsXML)
+      dXML <- lapply(drawingsXML, readLines, warn = FALSE)  
+      dXML <- unlist(lapply(dXML, removeHeadTag))
+      dXML <- gsub("<xdr:wsDr .*?>", "", dXML)
+      dXML <- gsub("</xdr:wsDr>", "", dXML)
+      
+      ## split at one/two cell Anchor
+      dXML <- regmatches(dXML, gregexpr("<xdr:...CellAnchor.*?</xdr:...CellAnchor>", dXML))
+
+    } 
+
+    if(length(drawInds) > 0){
+      
+      draw <- draw[drawInds]
+      for(i in 1:length(drawInds)){
+        
+        dSheet <- sheetNumber[drawInds[i]]
+        
+        ## dSheet has a relationship pointing to the drawing(i).xml file specified by target
+        target <- unlist(lapply(draw[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+        target <- tail(strsplit(gsub('"$', "", target), split = "/")[[1]], 1)
+        
+        ## the media beloning to this sheet
+        mediaInd <- grepl(target, drawingRelsXML)
+        if(any(mediaInd))
+          wb$drawings_rels[dSheet] <- dRels[mediaInd]
+        
+        drawingInd <- grepl(target, drawingsXML)
+        if(any(drawingInd))
+          wb$drawings[dSheet] <- dXML[drawingInd]
+      
+      }     
+    }
   } 
-
-  
-  ## sheet i has sheet_rels i
-  ## sheet rels i will link to drawing.xml j via sheetRels Target
-  ## drawing.xml j has a drawing.rels j
-  ## drwaings.rels j will link to a image in media
-  
-  ## find which sheet links to which drawing.xml
-  ## look in corresping drawing rels for the image
-  
-  if(length(drawingRelsXML) > 0){
-    
-    xml <- lapply(sort(drawingRelsXML), readLines, warn = FALSE)
-    xml <- unlist(lapply(xml, removeHeadTag))
-    xml <- gsub("<Relationships .*?>", "", xml)
-    xml <- gsub("</Relationships>", "", xml)
-    
-    wb$drawings_rels[sheetNumber] <- xml
-
-  }
 
   ## table rels
   if(length(tableRelsXML) > 0){
@@ -601,48 +627,7 @@ loadWorkbook <- function(xlsxFile){
   }else if(length(tablesXML) > 0){
     wb$tables.xml.rels <- rep("", length(tablesXML))
   }
-  
-  ## worksheet i has drawing i via rId:1
-  
-  
-  ## Drawings
-  ## remove head opend/close tags
-  ## split each drawing
-  
-  if(length(drawingsXML > 0)){
 
-    xml <- lapply(sort(drawingsXML), readLines, warn = FALSE)  
-    xml <- unlist(lapply(xml, removeHeadTag))
-    xml <- gsub("<xdr:wsDr .*?>", "", xml)
-    xml <- gsub("</xdr:wsDr>", "", xml)
-    
-    ## split at one/two cell Anchor
-    xml <- regmatches(xml, gregexpr("<xdr:...CellAnchor.*?</xdr:...CellAnchor>", xml))
-    wb$drawings[sheetNumber] <- xml
-  } 
-  
-  ## calc chain
-#   if(length(calcChainXML) > 0){
-#     
-#     xml <- readLines(calcChainXML, warn = FALSE)
-#     xml <- removeHeadTag(xml)
-#     xml <- gsub("<calcChain .*?>", "", xml)
-#     xml <- gsub("</calcChain>", "", xml)  
-#     xml <- .Call("openxlsx_getChildlessNode", xml, "<c ")
-#     
-#     ## need to reset all i attributes to 1:nSheets
-#     replacements <- paste0('i="', 1:nSheets, '"')
-#     original <- paste0('i="', sheetId, '"')
-#     
-#     for(i in 1:length(replacements))
-#       xml <- gsub(original[[i]], replacements[[i]], xml)
-#       
-#     wb$calcChain <- xml
-#     wb$Content_Types <- c(wb$Content_Types, '<Override PartName="/xl/calcChain.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml"/>')
-#     wb$workbook.xml.rels <- c(wb$workbook.xml.rels, '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain" Target="calcChain.xml"/>')
-#   }
-#   
-  
   return(wb)
   
 }
