@@ -286,7 +286,11 @@ loadWorkbook <- function(xlsxFile){
   if(length(media) > 0){
     mediaNames <- regmatches(media, regexpr("image[0-9]\\.[a-z]+$", media))
     fileTypes <- unique(gsub("image[0-9]\\.", "", mediaNames))
-    wb$Content_Types <- c(sprintf('<Default Extension="%s" ContentType="image/%s"/>', fileTypes, fileTypes), wb$Content_Types) 
+    
+    contentNodes <- sprintf('<Default Extension="%s" ContentType="image/%s"/>', fileTypes, fileTypes)
+    contentNodes[fileTypes == "emf"] <- '<Default Extension="emf" ContentType="image/x-emf"/>'
+    
+    wb$Content_Types <- c(contentNodes, wb$Content_Types) 
     names(media) <- mediaNames
     wb$media <- media
   }
@@ -581,7 +585,9 @@ loadWorkbook <- function(xlsxFile){
       dRels <- unlist(lapply(dRels, removeHeadTag))
       dRels <- gsub("<Relationships .*?>", "", dRels)
       dRels <- gsub("</Relationships>", "", dRels)
-
+    }
+    
+    if(length(drawingsXML) > 0){
       dXML <- lapply(drawingsXML, readLines, warn = FALSE)  
       dXML <- unlist(lapply(dXML, removeHeadTag))
       dXML <- gsub("<xdr:wsDr .*?>", "", dXML)
@@ -589,7 +595,6 @@ loadWorkbook <- function(xlsxFile){
       
       ## split at one/two cell Anchor
       dXML <- regmatches(dXML, gregexpr("<xdr:...CellAnchor.*?</xdr:...CellAnchor>", dXML))
-
     } 
 
     if(length(drawInds) > 0){
