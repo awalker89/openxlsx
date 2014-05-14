@@ -6,8 +6,8 @@ NEW FEATURES
 * write.xlsx function to write data directly to file via the writeData function
  with basic cell styling.
 
-* writeDataTable now styles columns of class 'Date', 'POSIXct', 'POSIXt', 'currency', 'accounting'
- as Excel formats Date, Date, Date, Currency, accounting respectively.
+* writeDataTable now styles columns of class 'Date', 'POSIXct', 'POSIXt', 'currency', 'accounting', 'percentage'
+ as Excel formats Date, Date, Date, Currency, Accounting, Percentage respectively.
 
 * Data of class 'Date', 'POSIXct', 'POSIXt', 'currency', 'accounting' are converted to integers
  upon writing (as opposed to characters).
@@ -42,9 +42,6 @@ BUG FIXES
 
 * saveWorkbook now accepts relative paths.
 
+* Non-local character encoding issues.
 
-VIGNETTE
-
-* Instructions for installing Rtools and adding Rtools/bin directory to system PATH variable
-
-* Extra bracket in example and addWorksheet gridLines parameter corrected.
+* errors in vignette examples.
