@@ -11,16 +11,15 @@
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
 #' @param tableStyle Any excel table style name or "none".
-#' @details columns of x with class Date, POSIXct of POSIXt are automatically
-#' styled as dates.
+#' @details columns of x with class Date/POSIXct/POSIXt, currency, accounting, 
+#' hyperlink, percentage are automatically styled as dates, currency, accounting,
+#' hyperlinks, percentages respectively.
 #' @seealso \code{\link{addWorksheet}}
 #' @seealso \code{\link{writeData}}
 #' @export
 #' @examples
 #' ## see package vignette for further examples.
-#' 
-#' wb <- createWorkbook("Edgar Anderson")
-#' 
+#' wb <- createWorkbook()
 #' addWorksheet(wb, "S1")
 #' addWorksheet(wb, "S2")
 #' addWorksheet(wb, "S3")
@@ -33,11 +32,13 @@
 #' 
 #' df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
 #'                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
-#'                  "hLink" = "http://cran.r-project.org/", stringsAsFactors = FALSE)
+#'                  "hLink" = "http://cran.r-project.org/", 
+#'                  "Percentage" = seq(0, 1, length.out=20), stringsAsFactors = FALSE)
 #' 
 #' class(df$Cash) <- "currency"
 #' class(df$Cash2) <- "accounting"
 #' class(df$hLink) <- "hyperlink"
+#' class(df$Percentage) <- "percentage"
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
@@ -138,6 +139,14 @@ writeDataTable <- function(wb, sheet, x,
   if("hyperlink" %in% tolower(colClasses)){
     inds <- which(sapply(colClasses, function(x) "hyperlink" %in% tolower(x)))
     addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
+             rows= 1:nrow(x) + startRow + showColNames - 1,
+             cols = inds + startCol - 1, gridExpand = TRUE)  
+  }
+  
+  ## style percentages
+  if("percentage" %in% tolower(colClasses)){
+    inds <- which(sapply(colClasses, function(x) "percentage" %in% tolower(x)))
+    addStyle(wb, sheet = sheet, style=createStyle(numFmt = "PERCENTAGE"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = inds + startCol - 1, gridExpand = TRUE)  
   }

@@ -33,8 +33,10 @@ writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 Write to a worksheet and format as a table
 }
 \details{
-columns of x with class Date, POSIXct of POSIXt are
-automatically styled as dates.
+columns of x with class Date/POSIXct/POSIXt, currency,
+accounting, hyperlink, percentage are automatically styled
+as dates, currency, accounting, hyperlinks, percentages
+respectively.
 }
 \examples{
 ## see package vignette for further examples.
