@@ -3,7 +3,10 @@ Type: Package
 Title: .xlsx reading, writing and editing.
 Version: 1.0.4
 Date: 2014-02-06
-Author: Alexander Walker
+Authors@R: c(
+    person("Alexander", "Walker",
+    email = "Alexander.Walker9189@gmail.com", role = c("aut", "cre")),
+    person("Luca", "Braglia", role = "ctb"))
 URL: https://github.com/awalker89/openxlsx
 BugReports: https://github.com/awalker89/openxlsx/issues
 Maintainer: Alexander Walker <Alexander.Walker1989@gmail.com>
@@ -16,3 +19,4 @@ LinkingTo: Rcpp
 Imports:
     methods,
     Rcpp  (>= 0.11.1)
+Repository: CRAN

@@ -40,9 +40,7 @@ respectively.
 }
 \examples{
 ## see package vignette for further examples.
-
-wb <- createWorkbook("Edgar Anderson")
-
+wb <- createWorkbook()
 addWorksheet(wb, "S1")
 addWorksheet(wb, "S2")
 addWorksheet(wb, "S3")
@@ -55,11 +53,13 @@ writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="
 
 df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
-                 "hLink" = "http://cran.r-project.org/", stringsAsFactors = FALSE)
+                 "hLink" = "http://cran.r-project.org/",
+                 "Percentage" = seq(0, 1, length.out=20), stringsAsFactors = FALSE)
 
 class(df$Cash) <- "currency"
 class(df$Cash2) <- "accounting"
 class(df$hLink) <- "hyperlink"
+class(df$Percentage) <- "percentage"
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 
