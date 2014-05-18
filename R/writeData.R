@@ -16,7 +16,7 @@
 #' @param borders Either "\code{none}" (default), "\code{surrounding}",
 #' "\code{columns}", "\code{rows}" or \emph{respective abbreviations}.  If
 #' "\code{surrounding}", a border is drawn around the data.  If "\code{rows}",
-#' a surrounding border is drawn a border around each row. If
+#' a surrounding border is drawn with a border around each row. If
 #' "\code{columns}", a surrounding border is drawn with a border between
 #' each column.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).

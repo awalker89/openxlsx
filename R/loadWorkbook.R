@@ -477,6 +477,11 @@ loadWorkbook <- function(xlsxFile){
     if(length(pane) > 0)
       wb$freezePane[[i]] <- pane
     
+    ## showGridLines
+    sheetView <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<sheetView ")
+    if(length(sheetView) > 0)
+      wb$worksheets[[i]]$sheetViews <- paste0("<sheetViews>", sheetView, "</sheetViews>")
+    
     ## Drawing
     drawingId <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<drawing ")
     if(length(drawingId) == 0)
