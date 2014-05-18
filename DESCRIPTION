@@ -5,7 +5,7 @@ Version: 2.0.0
 Date: 2014-02-06
 Authors@R: c(
     person("Alexander", "Walker",
-    email = "Alexander.Walker9189@gmail.com", role = c("aut", "cre")),
+    email = "Alexander.Walker1989@gmail.com", role = c("aut", "cre")),
     person("Luca", "Braglia", role = "ctb"))
 URL: https://github.com/awalker89/openxlsx
 BugReports: https://github.com/awalker89/openxlsx/issues
