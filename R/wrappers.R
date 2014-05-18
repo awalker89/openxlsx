@@ -421,7 +421,7 @@ createStyle <- function(fontName = NULL,
                         textDecoration = NULL, wrapText = FALSE){
   
   ### Error checking
-  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNTING", "DATE", "LONGDATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT")
+  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNTING", "DATE", "LONGDATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT", "3", "4")
   numFmt <- toupper(numFmt)
   if(!numFmt %in% validNumFmt)
     stop("Invalid numFmt")
@@ -435,8 +435,10 @@ createStyle <- function(fontName = NULL,
                         list("numFmtId" = 167), # TIME
                         list("numFmtId" = 10),  # PERCENTAGE
                         list("numFmtId" = 11),  # SCIENTIFIC
-                        list("numFmtId" = 49))  # TEXT
-    
+                        list("numFmtId" = 49),
+                        
+                        list("numFmtId" = 3),
+                        list("numFmtId" = 4))
   
   ## Validate border line style
   if(!is.null(borderStyle))

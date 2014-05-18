@@ -151,6 +151,15 @@ writeDataTable <- function(wb, sheet, x,
              cols = inds + startCol - 1, gridExpand = TRUE)  
   }
   
+  ## style big mark
+  if("3" %in% tolower(colClasses)){
+    inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x)))
+    addStyle(wb, sheet = sheet, style=createStyle(numFmt = "3"), 
+             rows= 1:nrow(x) + startRow + showColNames - 1,
+             cols = inds + startCol - 1, gridExpand = TRUE)  
+  }
+  
+  
     
   ## write data to sheetData
   wb$writeData(df = x,

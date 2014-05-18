@@ -447,8 +447,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   }
   
   ## convert any Dates to integers and create date style object
-  if(any(c("currency", "accounting", "percentage") %in% tolower(colClasses))){
-    cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage") %in% tolower(x))))
+  if(any(c("currency", "accounting", "percentage", "3") %in% tolower(colClasses))){
+    cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3") %in% tolower(x))))
     for(i in cInds)
       df[,i] <- as.numeric(gsub("[^0-9\\.]", "", df[,i]))
   }
