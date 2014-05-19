@@ -47,7 +47,12 @@ openXL <- function(file = NULL){
 #' @export chooseExcelApp
 chooseExcelApp <- function() {
 
-    find_xlsx_bin <- function(program) {
+    if ("Linux" != (this.system <- Sys.info()["sysname"] ))
+        stop("Currently you should't need to run chooseExcelApp on ",
+             this.system,". Try using openXL directly.")
+    
+    
+    find_xl_bin <- function(program) {
             con <- pipe(paste0("which ",program))
             res <- readLines(con, n=1)
             close(con)
@@ -64,7 +69,7 @@ chooseExcelApp <- function() {
            `Gnumeric` = "gnumeric"
             )
 
-    prog <- sapply(m, find_xlsx_bin)
+    prog <- sapply(m, find_xl_bin)
     n.apps <- length(avail.prog <- prog[ "Not Available" != prog])
 
     if (0 == n.apps) {
