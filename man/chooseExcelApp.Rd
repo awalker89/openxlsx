@@ -9,7 +9,7 @@ chooseExcelApp()
 \description{
 This function search for available xls/xlsx
 reader application. If it founds anything, sets
-\code{options('openxlsx.excel.app')}, used by \code{openXL}.
+\code{options('openxlsx.excelApp')}, used by \code{openXL}.
 }
 \author{
 Luca Braglia

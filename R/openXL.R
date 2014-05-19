@@ -1,24 +1,42 @@
 #' @name openXL
-#' @title Open an xlsx file
+#' @title Open a Microsoft Excel file (xls/xlsx) or an openxlsx Workbook
 #' @author Luca Braglia
-#' @description This function tries to open an xlsx file with the
+#' @description This function tries to open a Microsoft Excel
+#' (xls/xlsx) file or an openxlsx Workbook with the
 #' proper application, in a portable manner.
-#' @param file path to the Excel (xls/xlsx) file
+#' @param file path to the Excel (xls/xlsx) file or Workbook object.
 #' @usage openXL(file=NULL)
 #' @export openXL
 #' @examples
+#' # file example
 #' example(writeData)
 #' openXL("writeDataExample.xlsx")
+#'
+#' # (not yet saved) Workbook example
+#' wb <- createWorkbook()
+#' x <- mtcars[1:6,]
+#' addWorksheet(wb, "Cars")
+#' writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
+#' openXL(wb)
 #' 
 openXL <- function(file = NULL){
 
     if (is.null(file)) stop("a file have to be specified")
 
+    ## workbook handling
+    if ("Workbook" == class(file)) {
+        old.wd <- getwd()
+        file <- file.path(file$saveWorkbook(quiet = TRUE), "temp.xlsx")
+        setwd(old.wd)
+    }
+    
+    if (!file.exists(file)) stop("Non existent file or wrong path.")
+    
     ## execution should be in background in order to not block R
     ## interpreter
     this.system <- Sys.info()["sysname"]
     if ("Linux" == this.system ) {
-        if (is.null(app <- unlist(options('openxlsx.excel.app')))) {
+        if (is.null(app <- unlist(options('openxlsx.excelApp')))) {
             app <- chooseExcelApp()
         }
         my.command <- paste(app, file, "&", sep = " ")
@@ -42,7 +60,7 @@ openXL <- function(file = NULL){
 #' @author Luca Braglia
 #' @description This function search for available xls/xlsx
 #' reader application. If it founds anything, sets
-#' \code{options('openxlsx.excel.app')}, used by \code{openXL}.
+#' \code{options('openxlsx.excelApp')}, used by \code{openXL}.
 #' @usage chooseExcelApp()
 #' @export chooseExcelApp
 chooseExcelApp <- function() {
@@ -74,19 +92,19 @@ chooseExcelApp <- function() {
 
     if (0 == n.apps) {
         stop("No application (detected) availables.\n",
-             "Set options('openxlsx.excel.app'), instead." )
+             "Set options('openxlsx.excelApp'), instead." )
     } else if (1 == n.apps) {
         cat("Only ", names(avail.prog), "found; I'll use it.\n")
         unnprog <- unname(avail.prog)
-        options(openxlsx.excel.app = unnprog)
+        options(openxlsx.excelApp = unnprog)
         invisible(unnprog)
     } else if (1 < n.apps) {
         if (!interactive())
             stop("Cannot choose an Excel file opener non-interactively.\n",
-                 "Set options('openxlsx.excel.app'), instead.")
+                 "Set options('openxlsx.excelApp'), instead.")
         res <- menu(names(avail.prog), title = "Excel Apps availables")
         unnprog <- unname(avail.prog[res])
-        if (res > 0L) options(openxlsx.excel.app = unnprog)
+        if (res > 0L) options(openxlsx.excelApp = unnprog)
         invisible(unname(unnprog))
     } else {
         stop("Unexpected error")
