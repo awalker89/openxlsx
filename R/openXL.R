@@ -46,9 +46,6 @@ openXL <- function(file = NULL){
 #' @usage chooseExcelApp()
 #' @export chooseExcelApp
 chooseExcelApp <- function() {
-    if (!interactive())
-        stop("Cannot choose an Excel file opener non-interactively.\n",
-             "Set options('openxlsx.excel.app'), instead.")
 
     find_xlsx_bin <- function(program) {
             con <- pipe(paste0("which ",program))
@@ -62,7 +59,7 @@ chooseExcelApp <- function() {
             }
         }
 
-    ## TODO: other useful executables?
+    ## TODO: other useful executables to search for?
     m <- c(`Libreoffice/OpenOffice` = "soffice",
            `Gnumeric` = "gnumeric"
             )
@@ -79,6 +76,9 @@ chooseExcelApp <- function() {
         options(openxlsx.excel.app = unnprog)
         invisible(unnprog)
     } else if (1 < n.apps) {
+        if (!interactive())
+            stop("Cannot choose an Excel file opener non-interactively.\n",
+                 "Set options('openxlsx.excel.app'), instead.")
         res <- menu(names(avail.prog), title = "Excel Apps availables")
         unnprog <- unname(avail.prog[res])
         if (res > 0L) options(openxlsx.excel.app = unnprog)
