@@ -129,7 +129,18 @@
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
 #'
-#' ## TEST 8 - simple table
+#' ## TEST 8 - prcomp
+#' test.n <- "prcomp"
+#' pr1 <- prcomp(USArrests)
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = pr1)
+#' 
+#' ## TEST 9 - summary.prcomp
+#' test.n <- "summary.prcomp"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' writeData(wb = wb, sheet = test.n, x = summary(pr1))
+#'
+#' ## TEST 10 - simple table
 #' test.n <- "table"
 #' data(airquality)
 #' airquality$OzoneG80 <- factor(airquality$Ozone > 80,
@@ -232,6 +243,20 @@ writeData <- function(wb,
     names(x)[1] <- ""
     rowNames <- FALSE
     
+  }else if("prcomp" %in% clx){
+      
+    x <- as.data.frame(x$rotation)
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+          
+  }else if("summary.prcomp" %in% clx){
+          
+     x <- as.data.frame(x$importance)
+     x <- cbind(data.frame("Variable" = rownames(x)), x)
+     names(x)[1] <- ""
+     rowNames <- FALSE
+
   }else{
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     colNames <- FALSE
