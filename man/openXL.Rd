@@ -13,10 +13,17 @@ This function tries to open a Microsoft Excel
 (xls/xlsx) file or an openxlsx Workbook with the proper
 application, in a portable manner.
 
-In Linux it searches for available xls/xlsx reader application
-(unless \code{options('openxlsx.excelApp')} is set to the bin
-app path), and if it founds anything, sets
-\code{options('openxlsx.excelApp')}.
+In Windows (c) and Mac (c), it uses system default handlers,
+given the file type.
+
+In Linux it searches (via \code{which}) for available xls/xlsx
+reader applications (unless \code{options('openxlsx.excelApp')}
+is set to the app bin path), and if it founds anything, sets
+\code{options('openxlsx.excelApp')} to the program choosed by
+the user via a menu (if many are present, otherwise it will
+set the only available). Currently searched for apps are
+Libreoffice/Openoffice (\code{soffice} bin), Gnumeric
+(\code{gnumeric}) and Calligra Sheets (\code{calligrasheets}).
 }
 \examples{
 # file example

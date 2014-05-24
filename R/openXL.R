@@ -5,10 +5,17 @@
 #' (xls/xlsx) file or an openxlsx Workbook with the proper
 #' application, in a portable manner.
 #'
-#' In Linux it searches for available xls/xlsx reader application
-#' (unless \code{options('openxlsx.excelApp')} is set to the bin
-#' app path), and if it founds anything, sets
-#' \code{options('openxlsx.excelApp')}.
+#' In Windows (c) and Mac (c), it uses system default handlers,
+#' given the file type.
+#' 
+#' In Linux it searches (via \code{which}) for available xls/xlsx
+#' reader applications (unless \code{options('openxlsx.excelApp')}
+#' is set to the app bin path), and if it founds anything, sets
+#' \code{options('openxlsx.excelApp')} to the program choosed by
+#' the user via a menu (if many are present, otherwise it will
+#' set the only available). Currently searched for apps are
+#' Libreoffice/Openoffice (\code{soffice} bin), Gnumeric
+#' (\code{gnumeric}) and Calligra Sheets (\code{calligrasheets}).
 #' 
 #' @param file path to the Excel (xls/xlsx) file or Workbook object.
 #' @usage openXL(file=NULL)
@@ -25,8 +32,6 @@
 #' writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
 #' openXL(wb)
 #' 
-
-
 openXL <- function(file = NULL){
 
     if (is.null(file)) stop("a file have to be specified")
@@ -81,8 +86,8 @@ chooseExcelApp <- function() {
         }
     }
 
-    ## TODO: other useful executables to search for?
     m <- c(`Libreoffice/OpenOffice` = "soffice",
+           `Calligra Sheets` = "calligrasheets",
            `Gnumeric` = "gnumeric")
 
     prog <- sapply(m, findXLbin)
