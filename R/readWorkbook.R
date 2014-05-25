@@ -102,7 +102,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   ## 0.75s
 
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
-  ws <- .Call("openxlsx_getCellsWithChildren", sort(worksheets)[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
+  worksheets <- worksheets[order(nchar(worksheets), worksheets)]
+  ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
   
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
