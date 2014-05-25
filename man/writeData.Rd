@@ -150,7 +150,18 @@ fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
 addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm3)
 
-## TEST 8 - simple table
+## TEST 8 - prcomp
+test.n <- "prcomp"
+pr1 <- prcomp(USArrests)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = pr1)
+
+## TEST 9 - summary.prcomp
+test.n <- "summary.prcomp"
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = summary(pr1))
+
+## TEST 10 - simple table
 test.n <- "table"
 data(airquality)
 airquality$OzoneG80 <- factor(airquality$Ozone > 80,
