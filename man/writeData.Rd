@@ -3,16 +3,18 @@
 \alias{writeData}
 \title{Write an object to a worksheet}
 \usage{
-writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
-  colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
-  borders = c("none", "surrounding", "rows", "columns"),
+writeData(wb = NULL, sheet = NULL, x = NULL, startCol = 1,
+  startRow = 1, xy = NULL, colNames = TRUE, rowNames = FALSE,
+  headerStyle = NULL, borders = c("none", "surrounding", "rows", "columns"),
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), ...)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"), gridLines = TRUE,
+  ...)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
 
-\item{sheet}{The worksheet to write to. Can be the worksheet index or name.}
+\item{sheet}{The worksheet to write to. Can be the worksheet
+index or name. If \code{NULL} (default) it's inferred from \code{x} name.}
 
 \item{x}{Object to be written. For classes supported look at the examples.}
 
@@ -56,6 +58,9 @@ each column.}
    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
+
+\item{gridLines}{gridLines passed to addWorksheet if a new
+worksheet is neede}
 
 \item{...}{Further arguments (for future use)}
 }
