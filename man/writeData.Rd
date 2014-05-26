@@ -14,7 +14,9 @@ writeData(wb = NULL, sheet = NULL, x = NULL, startCol = 1,
 \item{wb}{A Workbook object containing a worksheet.}
 
 \item{sheet}{The worksheet to write to. Can be the worksheet
-index or name. If \code{NULL} (default) it's inferred from \code{x} name.}
+index or name. If \code{NULL} (default) it's inferred from
+\code{x} name. It can be a numeric index. If not present in
+wb, it will be created via addWorksheet.}
 
 \item{x}{Object to be written. For classes supported look at the examples.}
 
@@ -115,55 +117,46 @@ data(tli, package = "xtable")
 ## TEST 1 - data.frame
 test.n <- "data.frame"
 my.df <- tli[1:10, ]
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
 
 ## TEST 2 - matrix
 test.n <- "matrix"
 design.matrix <- model.matrix(~ sex * grade, data = my.df)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = design.matrix)
 
 ## TEST 3 - aov
 test.n <- "aov"
 fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm1)
 
 ## TEST 4 - lm
 test.n <- "lm"
 fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm2)
 
 ## TEST 5 - anova 1
 test.n <- "anova"
 my.anova <- anova(fm2)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.anova)
 
 ## TEST 6 - anova 2
 test.n <- "anova2"
 fm2b <- lm(tlimth ~ ethnicty, data = tli)
 my.anova2 <- anova(fm2b, fm2)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.anova2)
 
 ## TEST 7 - GLM
 test.n <- "glm"
 fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = fm3)
 
 ## TEST 8 - prcomp
 test.n <- "prcomp"
 pr1 <- prcomp(USArrests)
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = pr1)
 
 ## TEST 9 - summary.prcomp
 test.n <- "summary.prcomp"
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = summary(pr1))
 
 ## TEST 10 - simple table
@@ -176,7 +169,6 @@ airquality$Month <- factor(airquality$Month,
                            levels = 5:9,
                            labels = month.abb[5:9])
 my.table <- with(airquality, table(OzoneG80,Month) )
-addWorksheet(wb = wb, sheetName = test.n)
 writeData(wb = wb, sheet = test.n, x = my.table)
 
 ## Save workbook
