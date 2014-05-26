@@ -71,33 +71,20 @@ openXL <- function(file = NULL){
 }
 
 
-## chooseExcelApp -- start
 chooseExcelApp <- function() {
     
-    findXLbin <- function(program) {
-        con <- pipe(paste0("which ",program))
-        res <- readLines(con, n=1)
-        close(con)
-
-        if (0 != length(res)){
-            return(res)
-        } else {
-            return("Not Available")
-        }
-    }
-
     m <- c(`Libreoffice/OpenOffice` = "soffice",
            `Calligra Sheets` = "calligrasheets",
            `Gnumeric` = "gnumeric")
-
-    prog <- sapply(m, findXLbin)
-    nApps <- length(availProg <- prog[ "Not Available" != prog])
+    prog <- Sys.which(m)
+    names(prog) <- names(m)
+    nApps <- length(availProg <- prog[ "" != prog])
 
     if (0 == nApps) {
         stop("No application (detected) availables.\n",
              "Set options('openxlsx.excelApp'), instead." )
     } else if (1 == nApps) {
-        cat("Only ", names(availProg), "found; I'll use it.\n")
+        cat("Only", names(availProg), "found; I'll use it.\n")
         unnprog <- unname(availProg)
         options(openxlsx.excelApp = unnprog)
         invisible(unnprog)
