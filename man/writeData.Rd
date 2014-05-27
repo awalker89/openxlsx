@@ -3,16 +3,20 @@
 \alias{writeData}
 \title{Write an object to a worksheet}
 \usage{
-writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
-  colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
-  borders = c("none", "surrounding", "rows", "columns"),
+writeData(wb = NULL, sheet = NULL, x = NULL, startCol = 1,
+  startRow = 1, xy = NULL, colNames = TRUE, rowNames = FALSE,
+  headerStyle = NULL, borders = c("none", "surrounding", "rows", "columns"),
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), ...)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"), gridLines = TRUE,
+  ...)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
 
-\item{sheet}{The worksheet to write to. Can be the worksheet index or name.}
+\item{sheet}{The worksheet to write to. Can be the worksheet
+index or name. If \code{NULL} (default) it's inferred from
+\code{x} name. It can be a numeric index. If not present in
+wb, it will be created via addWorksheet.}
 
 \item{x}{Object to be written. For classes supported look at the examples.}
 
@@ -56,6 +60,9 @@ each column.}
    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
+
+\item{gridLines}{gridLines passed to addWorksheet if a new
+worksheet is neede}
 
 \item{...}{Further arguments (for future use)}
 }
@@ -108,61 +115,42 @@ wb <- createWorkbook()
 data(tli, package = "xtable")
 
 ## TEST 1 - data.frame
-test.n <- "data.frame"
 my.df <- tli[1:10, ]
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
+writeData(wb = wb, sheet = "data.frame", x = my.df, borders = "n")
 
 ## TEST 2 - matrix
-test.n <- "matrix"
 design.matrix <- model.matrix(~ sex * grade, data = my.df)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = design.matrix)
+writeData(wb = wb, sheet = "matrix", x = design.matrix)
 
 ## TEST 3 - aov
-test.n <- "aov"
 fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = fm1)
+writeData(wb = wb, sheet = "aov", x = fm1)
 
 ## TEST 4 - lm
-test.n <- "lm"
 fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = fm2)
+writeData(wb = wb, sheet = "lm", x = fm2)
 
 ## TEST 5 - anova 1
-test.n <- "anova"
 my.anova <- anova(fm2)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = my.anova)
+writeData(wb = wb, sheet = "anova", x = my.anova)
 
 ## TEST 6 - anova 2
-test.n <- "anova2"
 fm2b <- lm(tlimth ~ ethnicty, data = tli)
 my.anova2 <- anova(fm2b, fm2)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = my.anova2)
+writeData(wb = wb, sheet = "anova2", x = my.anova2)
 
 ## TEST 7 - GLM
-test.n <- "glm"
 fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = fm3)
+writeData(wb = wb, sheet = "glm", x = fm3)
 
 ## TEST 8 - prcomp
-test.n <- "prcomp"
 pr1 <- prcomp(USArrests)
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = pr1)
+writeData(wb = wb, sheet = "prcomp", x = pr1)
 
 ## TEST 9 - summary.prcomp
-test.n <- "summary.prcomp"
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = summary(pr1))
+writeData(wb = wb, sheet = "summary.prcomp", x = summary(pr1))
 
 ## TEST 10 - simple table
-test.n <- "table"
 data(airquality)
 airquality$OzoneG80 <- factor(airquality$Ozone > 80,
                               levels = c(FALSE, TRUE),
@@ -171,8 +159,7 @@ airquality$Month <- factor(airquality$Month,
                            levels = 5:9,
                            labels = month.abb[5:9])
 my.table <- with(airquality, table(OzoneG80,Month) )
-addWorksheet(wb = wb, sheetName = test.n)
-writeData(wb = wb, sheet = test.n, x = my.table)
+writeData(wb = wb, sheet = "table", x = my.table)
 
 ## Save workbook
 saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
