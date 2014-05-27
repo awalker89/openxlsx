@@ -58,7 +58,7 @@ openXL <- function(file = NULL){
     system(command = myCommand)
     
   } else if ("Windows" == userSystem ){
-    shell(shQuote(string = file))
+    shell(shQuote(string = file), wait = FALSE)
     
   } else if ("Darwin" == userSystem){
     myCommand <- paste0("open ", file)
@@ -76,6 +76,7 @@ chooseExcelApp <- function() {
   m <- c(`Libreoffice/OpenOffice` = "soffice",
          `Calligra Sheets` = "calligrasheets",
          `Gnumeric` = "gnumeric")
+  
   prog <- Sys.which(m)
   names(prog) <- names(m)
   nApps <- length(availProg <- prog[ "" != prog])
