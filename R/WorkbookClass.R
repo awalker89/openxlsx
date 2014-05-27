@@ -453,16 +453,25 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
       df[,i] <- as.numeric(gsub("[^0-9\\.]", "", df[,i]))
   }
   
-  
   colClasses <- sapply(df, function(x) class(x)[[1]])
   
-  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-  
+  ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% colClasses){
-    df[df == TRUE] <- "1"
-    df[df == FALSE] <- "0"
+    for(i in which(colClasses == "logical"))
+      class(df[,i]) <- "numeric"
+    colClasses[colClasses == "logical"] <- "numeric"
   }
   
+  ## convert all numerics to character (this way preserves digits)
+  if("numeric" %in% colClasses){
+    for(i in which(colClasses == "numeric"))
+      class(df[,i]) <- "character"
+  }
+  
+  ## cell types
+  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
+  
+  ## cell values
   v <- as.character(t(as.matrix(df)))
   v[is.na(v)] <- as.character(NA)
   t[is.na(v)] <- as.character(NA)
