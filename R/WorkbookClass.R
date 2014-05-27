@@ -429,6 +429,11 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 100)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   sheet = validateSheet(sheet)
   nCols <- ncol(df)
   nRows <- nrow(df)  
@@ -450,7 +455,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   if(any(c("currency", "accounting", "percentage", "3") %in% tolower(colClasses))){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3") %in% tolower(x))))
     for(i in cInds)
-      df[,i] <- as.numeric(gsub("[^0-9\\.]", "", df[,i]))
+      df[,i] <- as.numeric(eval(gsub("[^0-9\\.]", "", df[,i])))
   }
   
   colClasses <- sapply(df, function(x) class(x)[[1]])
