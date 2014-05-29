@@ -23,14 +23,14 @@
 #' @examples
 #' # file example
 #' example(writeData)
-#' openXL("writeDataExample.xlsx")
+#' #openXL("writeDataExample.xlsx")
 #'
 #' # (not yet saved) Workbook example
 #' wb <- createWorkbook()
 #' x <- mtcars[1:6,]
 #' addWorksheet(wb, "Cars")
 #' writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
-#' openXL(wb)
+#' #openXL(wb)
 #' 
 openXL <- function(file = NULL){
   
