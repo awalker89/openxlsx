@@ -438,7 +438,7 @@ loadWorkbook <- function(xlsxFile){
     }
     
     ## auto filters
-    autoFilter <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<autoFilter ")
+    autoFilter <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<autoFilter ", PACKAGE = "openxlsx")
     if(length(autoFilter) > 0){
       autoFilter <- paste0("<", unlist(strsplit(autoFilter, split = "<"))[[2]])
       if(!grepl("/>$", autoFilter))
@@ -448,44 +448,44 @@ loadWorkbook <- function(xlsxFile){
     }
     
     ## hyperlinks
-    hyperlinks <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<hyperlink ")
+    hyperlinks <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<hyperlink ", PACKAGE = "openxlsx")
     if(length(hyperlinks) > 0)
       wb$hyperlinks[[i]] <- .Call("openxlsx_getHyperlinkRefs", hyperlinks, 1, PACKAGE = "openxlsx")
     
     ## pageMargins
-    pageMargins <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<pageMargins ")
+    pageMargins <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<pageMargins ", PACKAGE = "openxlsx")
     if(length(pageMargins) > 0)
       wb$worksheets[[i]]$pageMargins <- pageMargins
     
     ## pageSetup
-    pageSetup <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<pageSetup ")
+    pageSetup <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<pageSetup ", PACKAGE = "openxlsx")
     if(length(pageSetup) > 0)
       wb$worksheets[[i]]$pageSetup <- gsub('r:id="rId[0-9]+"', 'r:id="rId2"', pageSetup)
     
     ## tableParts
-    tableParts <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<tablePart ")
+    tableParts <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<tablePart ", PACKAGE = "openxlsx")
     if(length(tableParts) > 0)
       wb$worksheets[[i]]$tableParts <- sprintf('<tablePart r:id="rId%s"/>', 1:length(tableParts)+1)
     
     ## Merge Cells
-    merges <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<mergeCell ")
+    merges <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<mergeCell ", PACKAGE = "openxlsx")
     if(length(merges) > 0)
       wb$worksheets[[i]]$mergeCells <- merges
     
     ## freeze pane
-    pane <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<pane ")
+    pane <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<pane ", PACKAGE = "openxlsx")
     if(length(pane) > 0)
       wb$freezePane[[i]] <- pane
     
-    ## showGridLines
-    sheetView <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<sheetView ")
-    if(length(sheetView) > 0)
-      wb$worksheets[[i]]$sheetViews <- paste0("<sheetViews>", sheetView, "</sheetViews>")
+    ## sheetView
+    sheetViews <- .Call("openxlsx_getNodes", wsData[[i]], "<sheetViews>", PACKAGE = "openxlsx")
+    if(length(sheetViews) > 0)
+      wb$worksheets[[i]]$sheetViews <- sheetViews
     
     ## Drawing
-    drawingId <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<drawing ")
+    drawingId <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<drawing ", PACKAGE = "openxlsx")
     if(length(drawingId) == 0)
-      drawingId <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<legacyDrawing ")
+      drawingId <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<legacyDrawing ", PACKAGE = "openxlsx")
     
     if(length(drawingId) > 0)
       wb$worksheets[[i]]$drawing <- gsub('rId.+"', 'rId1"', drawingId)
