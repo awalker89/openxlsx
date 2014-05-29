@@ -334,6 +334,8 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
                             '</workbook>',   
                             file.path(xlDir,"workbook.xml"))
   
+  workbook$sheets <<- workbook$sheets[order(sheetOrder)] ## Need to reset sheet order to allow multiple savings
+  
   ## compress to xlsx
   setwd(tmpDir)
   zipWorkbook("temp.xlsx", list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
