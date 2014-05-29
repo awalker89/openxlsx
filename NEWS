@@ -14,6 +14,8 @@ NEW FEATURES
 
 * writeDataTable converts columns of class 'hyperlink' to hyperlinks.
 
+* logicals are converted to Excel booleans
+
 * hyperlinks in loaded workbooks are now maintained
 
 * borderStyle argument to createStyle to modify border line type.
@@ -21,6 +23,9 @@ NEW FEATURES
 * borderStyle argument to writeData to modify border line type.
 
 * "worksheetOrder" function to shuffle order of worksheets when writing to file
+
+* openXL function to open an excel file or Workbook object
+
 
 BUG FIXES
 
@@ -45,3 +50,7 @@ BUG FIXES
 * Non-local character encoding issues.
 
 * errors in vignette examples.
+
+* numbers with > 8 digits were rounded in writeData
+
+* 
