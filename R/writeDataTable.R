@@ -107,13 +107,13 @@ writeDataTable <- function(wb, sheet, x,
   ref <- paste(ref1, ref2, sep = ":")
   
   ## column class
-  colClasses <- lapply(x, class)
+  colClasses <- lapply(x, function(x) tolower(class(x)))
   
   ## Style Dates as DATE  
-  if(any(c("Date", "POSIXct", "POSIXt") %in% unlist(colClasses))){
+  if(any(c("date", "posixct", "posixt") %in% unlist(colClasses))){
     
-    dInds <- which(sapply(colClasses, function(x) "Date" %in% x))    
-    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
+    dInds <- which(sapply(colClasses, function(x) "date" %in% x))    
+    pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt") %in% x)))
     
     addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
@@ -122,39 +122,39 @@ writeDataTable <- function(wb, sheet, x,
   
   
   ## style currency as CURRENCY
-  if("currency" %in% tolower(colClasses)){
-    inds <- which(sapply(colClasses, function(x) "currency" %in% tolower(x)))
+  if("currency" %in% colClasses){
+    inds <- which(sapply(colClasses, function(x) "currency" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "CURRENCY"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = inds + startCol - 1, gridExpand = TRUE)
   }
   
   ## style accounting as ACCOUNTING
-  if("accounting" %in% tolower(colClasses)){
-    inds <- which(sapply(colClasses, function(x) "accounting" %in% tolower(x)))
+  if("accounting" %in% colClasses){
+    inds <- which(sapply(colClasses, function(x) "accounting" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "ACCOUNTING"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = inds + startCol - 1, gridExpand = TRUE)  
   }
   
   ## style hyperlinks
-  if("hyperlink" %in% tolower(colClasses)){
-    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% tolower(x)))
+  if("hyperlink" %in% colClasses){
+    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = inds + startCol - 1, gridExpand = TRUE)  
   }
   
   ## style percentages
-  if("percentage" %in% tolower(colClasses)){
-    inds <- which(sapply(colClasses, function(x) "percentage" %in% tolower(x)))
+  if("percentage" %in% colClasses){
+    inds <- which(sapply(colClasses, function(x) "percentage" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "PERCENTAGE"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
              cols = inds + startCol - 1, gridExpand = TRUE)  
   }
   
   ## style big mark
-  if("3" %in% tolower(colClasses)){
+  if("3" %in% colClasses){
     inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x)))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "3"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
