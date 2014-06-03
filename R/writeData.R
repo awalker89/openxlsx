@@ -287,12 +287,21 @@ writeData <- function(wb,
              cols = 0:(nCol-1) + startCol,
              gridExpand = TRUE)
   
+  
+  colClasses <- lapply(x, function(x) tolower(class(x)))
+  
   ## draw borders
-  if( "none" != borders )
-    doBorders(borders = borders, wb = wb,
-              sheet = sheet, startRow = startRow + colNames,
-              startCol = startCol, nrow = nRow, ncol = nCol,
-              borderColour = borderColour, borderStyle = borderStyle)
+  if(borders != ="none")
+    wb$makeBorderStyles(colClasses = colClasses,
+                          sheet = sheet,
+                          startRow = startRow + colNames,
+                          startCol = startCol,
+                          nRow = nRow, nCol = nCol,
+                          borderColour = borderColour,
+                          borderStyle = borderStyle,
+                          borderType = borders)
+  
+  
   
 }
 
