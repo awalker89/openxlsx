@@ -466,7 +466,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   if("logical" %in% colClasses){
     for(i in which(colClasses == "logical"))
       class(df[,i]) <- "numeric"
-    colClasses[colClasses == "logical"] <- "numeric"
   }
   
   ## convert all numerics to character (this way preserves digits)
