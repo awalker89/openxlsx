@@ -291,15 +291,34 @@ writeData <- function(wb,
   colClasses <- lapply(x, function(x) tolower(class(x)))
   
   ## draw borders
-  if(borders != ="none")
-    wb$makeBorderStyles(colClasses = colClasses,
+  if("surrounding" == borders){
+    wb$surroundingBorders(colClasses,
                           sheet = sheet,
                           startRow = startRow + colNames,
                           startCol = startCol,
                           nRow = nRow, nCol = nCol,
                           borderColour = borderColour,
-                          borderStyle = borderStyle,
-                          borderType = borders)
+                          borderStyle = borderStyle)
+    
+  }else if("rows" == borders ){
+    wb$rowBorders(colClasses,
+                  sheet = sheet,
+                  startRow = startRow + colNames,
+                  startCol = startCol,
+                  nRow = nRow, nCol = nCol,
+                  borderColour = borderColour,
+                  borderStyle = borderStyle)
+    
+  }else if("columns" == borders ){
+    wb$columnBorders(colClasses,
+                  sheet = sheet,
+                  startRow = startRow + colNames,
+                  startCol = startCol,
+                  nRow = nRow, nCol = nCol,
+                  borderColour = borderColour,
+                  borderStyle = borderStyle)
+    
+  }
   
   
   

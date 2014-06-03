@@ -436,7 +436,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   options("scipen" = 100)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
-  sheet = validateSheet(sheet)
+  sheet <- validateSheet(sheet)
   nCols <- ncol(df)
   nRows <- nrow(df)  
   
