@@ -287,39 +287,41 @@ writeData <- function(wb,
              cols = 0:(nCol-1) + startCol,
              gridExpand = TRUE)
   
-  
-  colClasses <- lapply(x, function(x) tolower(class(x)))
-  
   ## draw borders
-  if("surrounding" == borders){
-    wb$surroundingBorders(colClasses,
-                          sheet = sheet,
-                          startRow = startRow + colNames,
-                          startCol = startCol,
-                          nRow = nRow, nCol = nCol,
-                          borderColour = borderColour,
-                          borderStyle = borderStyle)
+  if(borders != "none"){
     
-  }else if("rows" == borders ){
-    wb$rowBorders(colClasses,
-                  sheet = sheet,
-                  startRow = startRow + colNames,
-                  startCol = startCol,
-                  nRow = nRow, nCol = nCol,
-                  borderColour = borderColour,
-                  borderStyle = borderStyle)
-    
-  }else if("columns" == borders ){
-    wb$columnBorders(colClasses,
-                  sheet = sheet,
-                  startRow = startRow + colNames,
-                  startCol = startCol,
-                  nRow = nRow, nCol = nCol,
-                  borderColour = borderColour,
-                  borderStyle = borderStyle)
-    
+    colClasses <- lapply(x, function(x) tolower(class(x)))
+    sheet <- wb$validateSheet(sheet)
+
+    if("surrounding" == borders){
+      wb$surroundingBorders(colClasses,
+                            sheet = sheet,
+                            startRow = startRow + colNames,
+                            startCol = startCol,
+                            nRow = nRow, nCol = nCol,
+                            borderColour = borderColour,
+                            borderStyle = borderStyle)
+      
+    }else if("rows" == borders ){
+      wb$rowBorders(colClasses,
+                    sheet = sheet,
+                    startRow = startRow + colNames,
+                    startCol = startCol,
+                    nRow = nRow, nCol = nCol,
+                    borderColour = borderColour,
+                    borderStyle = borderStyle)
+      
+    }else if("columns" == borders ){
+      wb$columnBorders(colClasses,
+                    sheet = sheet,
+                    startRow = startRow + colNames,
+                    startCol = startCol,
+                    nRow = nRow, nCol = nCol,
+                    borderColour = borderColour,
+                    borderStyle = borderStyle)
+      
+    }
   }
-  
   
   
 }
