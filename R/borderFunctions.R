@@ -313,7 +313,7 @@ Workbook$methods(surroundingBorders = function(colClasses, sheet, startRow, star
         ## Middle
         if(specialFormat){
           styleObjects <<- append(styleObjects, list(
-            list(style = sTop,
+            list(style = sMid,
                  cells = list(list("sheet" = sheet,
                                    "rows" = (startRow+1):(startRow + nRow - 2)   , #2nd -> 2nd to last
                                    "cols" = rep.int(startCol + i - 1, nRow - 2)
@@ -334,7 +334,7 @@ Workbook$methods(surroundingBorders = function(colClasses, sheet, startRow, star
   }## End of loop through columns
   
   
-  return(0)
+  invisible(0)
   
 })
 
@@ -425,7 +425,7 @@ Workbook$methods(rowBorders = function(colClasses, sheet, startRow, startCol, nR
   }## End of loop through columns
   
   
-  return(0)
+  invisible(0)
   
 })
 
@@ -535,7 +535,7 @@ Workbook$methods(columnBorders = function(colClasses, sheet, startRow, startCol,
   }## End of loop through columns
   
   
-  return(0)
+  invisible(0)
   
 })
 
