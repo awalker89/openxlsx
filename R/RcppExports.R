@@ -129,6 +129,10 @@ uniqueCellAppend <- function(sheetData, r, newCells) {
     .Call('openxlsx_uniqueCellAppend', PACKAGE = 'openxlsx', sheetData, r, newCells)
 }
 
+getHyperlinkRefs <- function(x) {
+    .Call('openxlsx_getHyperlinkRefs', PACKAGE = 'openxlsx', x)
+}
+
 writeCellStyles <- function(sheetData, rows, cols, styleId, LETTERS) {
     .Call('openxlsx_writeCellStyles', PACKAGE = 'openxlsx', sheetData, rows, cols, styleId, LETTERS)
 }
@@ -147,9 +151,5 @@ removeEmptyNodes <- function(x, emptyNodes) {
 
 getCellsWithChildren <- function(xmlFile, emptyNodes) {
     .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
-}
-
-getHyperlinkRefs <- function(x) {
-    .Call('openxlsx_getHyperlinkRefs', PACKAGE = 'openxlsx', x)
 }
 

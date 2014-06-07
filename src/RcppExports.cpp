@@ -544,6 +544,21 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// getHyperlinkRefs
+SEXP getHyperlinkRefs(CharacterVector x);
+RcppExport SEXP openxlsx_getHyperlinkRefs(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        SEXP __result = getHyperlinkRefs(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // writeCellStyles
 List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, String styleId, std::vector<std::string> LETTERS);
 RcppExport SEXP openxlsx_writeCellStyles(SEXP sheetDataSEXP, SEXP rowsSEXP, SEXP colsSEXP, SEXP styleIdSEXP, SEXP LETTERSSEXP) {
@@ -621,21 +636,6 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
         Rcpp::traits::input_parameter< CharacterVector >::type emptyNodes(emptyNodesSEXP );
         CharacterVector __result = getCellsWithChildren(xmlFile, emptyNodes);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// getHyperlinkRefs
-SEXP getHyperlinkRefs(CharacterVector x);
-RcppExport SEXP openxlsx_getHyperlinkRefs(SEXP xSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
-        SEXP __result = getHyperlinkRefs(x);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

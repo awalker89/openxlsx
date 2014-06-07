@@ -23,7 +23,6 @@ std::string cppReadFile(std::string xmlFile){
   ifstream file;
   file.open(xmlFile.c_str());
 
-  std::vector<std::string> tokens;
   while (file >> buf)
     xml += buf + ' ';
     
@@ -432,12 +431,13 @@ SEXP getRefsVals(CharacterVector x, int startRow){
   if(startRow == 1){
     for(int i = 0; i < n; i++){ 
       
-      // find opening tag     
+      // find r tag     
       xml = x[i];
-      pos = xml.find(rtag, 0);
-      endPos = xml.find(rtagEnd, pos+3);
+      pos = xml.find(rtag, 0);  // find r=
+      endPos = xml.find(rtagEnd, pos+3);  // find r= "
       r[i] = xml.substr(pos+3, endPos-pos-3).c_str();
       
+      // find <v> tag and </v> end tag
       pos = xml.find(vtag, endPos+1);
       endPos = xml.find(vtagEnd, pos+3);
       v[i] = xml.substr(pos+3, endPos-pos-3).c_str();
@@ -1638,6 +1638,36 @@ List uniqueCellAppend(List sheetData, CharacterVector r, List newCells){
 
 
 
+// [[Rcpp::export]]
+SEXP getHyperlinkRefs(CharacterVector x){
+
+  int n = x.size();
+    
+  std::string xml;
+  CharacterVector r(n);
+  size_t pos = 0;
+  size_t endPos = 0;
+
+  std::string rtag = "ref=";
+  std::string rtagEnd = "\"";
+
+  for(int i = 0; i < n; i++){ 
+      
+    // find opening tag     
+    xml = x[i];
+    pos = xml.find(rtag, 0);
+    endPos = xml.find(rtagEnd, pos+5);
+    r[i] = xml.substr(pos+5, endPos-pos-5).c_str();
+      
+  }
+  
+  return wrap(r) ;  
+
+}
+
+
+
+
 // [[Rcpp::export]]   
 List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, String styleId, std::vector<std::string> LETTERS){
   
@@ -1824,7 +1854,7 @@ CharacterVector removeEmptyNodes(CharacterVector x, CharacterVector emptyNodes){
 // [[Rcpp::export]]
 CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyNodes){
 
- //read in file without spaces
+//read in file without spaces
   std::string xml = cppReadFile(xmlFile);
       
  // std::string tag = "<c ";
@@ -1842,63 +1872,35 @@ CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyN
   CharacterVector cells(occurrences);
   std::fill(cells.begin(), cells.end(), NA_STRING);
 
-  //find "<c"
-  //find ">" after "<c"
-  //If char before > is / break else look for </c
   int i = 0;
-  size_t pos = 0;
   size_t nextPos = 3;
   size_t vPos = 2;
   std::string sub;
-  
+  size_t pos = xml.find("<c ", 0);
+        
   while(i < occurrences){
-    
-    pos = xml.find("<c ", pos+3); 
-    
+                
     if(pos != std::string::npos){
-      nextPos = xml.find("<c ", pos+10);
+      nextPos = xml.find("<c ", pos+9);
       vPos = xml.find("</v>", pos+8); // have to atleast pass <c r="XX">
       
       if(vPos < nextPos){
         cells[i] = xml.substr(pos, nextPos-pos);
-        i++;
+        i++; 
       }
+      
+      pos = nextPos;
+
     }
   }
-     
-  if(emptyNodes[0] != "")
-    cells = removeEmptyNodes(cells, emptyNodes);
+  
+   
+ if(emptyNodes[0] != "<v></v>")
+   cells = removeEmptyNodes(cells, emptyNodes);
      
   return wrap(cells) ;  
 
 }
 
-
-// [[Rcpp::export]]
-SEXP getHyperlinkRefs(CharacterVector x){
-
-  int n = x.size();
-    
-  std::string xml;
-  CharacterVector r(n);
-  size_t pos = 0;
-  size_t endPos = 0;
-
-  std::string rtag = "ref=";
-  std::string rtagEnd = "\"";
-
-  for(int i = 0; i < n; i++){ 
-      
-    // find opening tag     
-    xml = x[i];
-    pos = xml.find(rtag, 0);
-    endPos = xml.find(rtagEnd, pos+5);
-    r[i] = xml.substr(pos+5, endPos-pos-5).c_str();
-      
-  }
-  
-  return wrap(r) ;  
-
-}
 
 
