@@ -171,11 +171,7 @@ writeDataTable <- function(wb, sheet, x,
                startCol = startCol)
   
   ## replace invalid XML characters
-  colNames <- gsub('&', "&amp;", colNames)
-  colNames <- gsub('"', "&quot;", colNames)
-  colNames <- gsub("'", "&apos;", colNames)
-  colNames <- gsub('<', "&lt;", colNames)
-  colNames <- gsub('>', "&gt;", colNames)
+  colNames <- replaceIllegalCharacters(colNames)
   
   ## create table.xml and assign an id to worksheet tables
   wb$buildTable(sheet, colNames, ref, showColNames, tableStyle)

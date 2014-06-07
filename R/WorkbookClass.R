@@ -1099,24 +1099,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   freezePane[[sheet]] <<- NULL
   dataCount[[sheet]] <<- NULL
 
-  ## calcChain
-#   if(length(calcChain) > 0){
-#     ## remove elements with i = sheet
-#     pattern <- sprintf(' i="%s"', sheet)
-#     calcChain <<- calcChain[!grepl(pattern, calcChain)]
-#     
-#     ## decrement calcChain i attributes
-#     original <- (1:nSheets)[1:nSheets > sheet]
-#     if(length(original) > 0){
-#       replacements <- paste0(' i="', original-1, '"')
-#       original <- paste0(' i="', original, '"')
-#       for(i in 1:length(original))
-#         calcChain <<- gsub(original[[i]], replacements[[i]], calcChain)
-#     
-#     }
-#   }
-  
-  
+  invisible(1)
   
 })
 
@@ -1155,7 +1138,7 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
     sprintf('<conditionalFormatting sqref="%s"><cfRule type="cellIs" dxfId="%s" priority="1" operator="%s"><formula>%s</formula></cfRule></conditionalFormatting>', sqref, dxfId, operator, value)                
   )
   
-  invisible(return(0))
+  invisible(0)
   
 })
 
@@ -1205,7 +1188,7 @@ Workbook$methods(removeCellMerge = function(sheet, startRow, endRow, startCol, e
     
   }
   
-  ## Remove children
+  ## Remove intersection
   worksheets[[sheet]]$mergeCells <<- worksheets[[sheet]]$mergeCells[!mergeIntersections]
     
   
@@ -1528,27 +1511,7 @@ Workbook$methods(show = function(){
     showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
   
   showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
-  
-  ## styles
-#   if(nStyles > 0){
-#     
-#     showText <- c(showText, "\nWorkbook Styles: \n")
-#     
-#     styleText <- lapply(1:nStyles, function(i) {
-#       
-#       sheet <- paste(unlist(lapply(styleObjects[[i]]$cells, "[[", "sheet")), collapse = '", "')
-#       styleTxt = invisible(styleObjects[[i]]$style$show(FALSE))
-#       styleShow <- c(sprintf('Sheet(s): "%s" \n\n', sheet), styleTxt[-1])
-#       
-#       styleShow <- c(styleShow, "\n")
-#       paste(styleShow, collapse = " ")
-#       
-#     })
-#         
-#     showText <- c(showText, unlist(styleText))
-#     
-#   }
-  
+    
   cat(unlist(showText))
   
 })
