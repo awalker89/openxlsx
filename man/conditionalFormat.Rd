@@ -10,36 +10,58 @@ conditionalFormat(wb, sheet, cols, rows, rule, style = NULL)
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{cols}{Columns to apply conditional formattiong}
+\item{cols}{Columns to apply conditional formatting to}
 
-\item{rows}{Rows to apply conditional formattiong}
+\item{rows}{Rows to apply conditional formatting to}
 
 \item{rule}{The condition under which to apply the formatting.  See details.}
 
-\item{style}{A Style to apply to those cells that satisify the rule. A Style object returned from createStyle()}
+\item{style}{A style to apply to those cells that satisify the rule. A Style object returned from createStyle()}
 }
 \description{
 Add conditional formatting to cells
 }
 \details{
-Conditional format will be applied to all cells within region specified by rows X cols.
-valid operators are "<", "<=", ">", ">=", "==", "!=".
+Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 }
 \examples{
 wb <- createWorkbook()
+addWorksheet(wb, "cellIs")
+addWorksheet(wb, "moving Row")
+addWorksheet(wb, "moving Col")
+addWorksheet(wb, "Dependent on 1")
 
-## Add a worksheet and data
-addWorksheet(wb, "Worksheet Name")
-writeData(wb, 1, matrix(runif(100), ncol = 10), xy = c(1,1), colNames=FALSE)
-writeData(wb, 1, matrix(sample(LETTERS, 100, rep = TRUE), ncol = 10), xy = c(1, 11), colNames=FALSE)
+negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
 
-## Create a style
-conditionalStyle <- createStyle(bgFill = "#FFFF00")
+## rule applies to all each cell in range
+writeData(wb, 1, -5:5)
+writeData(wb, 1, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 1, cols=1, rows=1:11, rule="!=0", style = negStyle)
+conditionalFormat(wb, 1, cols=1, rows=1:11, rule="==0", style = posStyle)
 
-## Conditionally format cells:Rows 10 to 20 columns A to J (1:10)
-conditionalFormat(wb, 1, cols = 1:10, rows = 1:10, rule = "< 0.5", style = conditionalStyle)
-conditionalFormat(wb, 1, cols = 1:10, rows = 11:20, rule = '== "A"')  # default style
+## highlight row dependent on first cell in row
+writeData(wb, 2, -5:5)
+writeData(wb, 2, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
+conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
+
+## highlight column dependent on first cell in column
+writeData(wb, 3, -5:5)
+writeData(wb, 3, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
+conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
+
+
+## highlight entire range cols X rows dependent only on cell A1
+writeData(wb, 4, -5:5)
+writeData(wb, 4, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
+conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+
+## Save workbook
+saveWorkbook(wb, "c:/users/alex/desktop/conFormatting.xlsx", overwrite = TRUE)
 
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)

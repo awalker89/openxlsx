@@ -457,7 +457,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   if(any(c("currency", "accounting", "percentage", "3") %in% tolower(colClasses))){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3") %in% tolower(x))))
     for(i in cInds)
-      df[,i] <- as.numeric(eval(gsub("[^0-9\\.]", "", df[,i])))
+      df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))
   }
   
   colClasses <- sapply(df, function(x) class(x)[[1]])
@@ -1134,23 +1134,23 @@ Workbook$methods(addDXFS = function(style){
 
 
 
-Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, operator, value){
+Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula){
   
   sheet = validateSheet(sheet)
   sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
   
-  ## Increment priority
+  ## Increment priority of conditional formatting rule
   if(length((worksheets[[sheet]]$conditionalFormatting)) > 0){
     for(i in length(worksheets[[sheet]]$conditionalFormatting):1)
       worksheets[[sheet]]$conditionalFormatting[[i]] <<- gsub('(?<=priority=")[0-9]+', i+1, worksheets[[sheet]]$conditionalFormatting[[i]], perl = TRUE)
   }
   
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
+  cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
   
-  worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting,               
-                                                       sprintf('<cfRule type="cellIs" dxfId="%s" priority="1" operator="%s"><formula>%s</formula></cfRule>', dxfId, operator, value)                
-  )
   
+  worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              
+                                                                      
   names(worksheets[[sheet]]$conditionalFormatting) <<- nms
   
   invisible(0)

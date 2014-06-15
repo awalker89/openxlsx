@@ -647,82 +647,77 @@ getCellRefs <- function(cellCoords){
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
-#' @param cols Columns to apply conditional formattiong
-#' @param rows Rows to apply conditional formattiong
+#' @param cols Columns to apply conditional formatting to
+#' @param rows Rows to apply conditional formatting to
 #' @param rule The condition under which to apply the formatting.  See details.
-#' @param style A Style to apply to those cells that satisify the rule. A Style object returned from createStyle()
-#' @details Conditional format will be applied to all cells within region specified by rows X cols.
-#' valid operators are "<", "<=", ">", ">=", "==", "!=".
+#' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
+#' @details Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 #' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' @seealso \code{\link{createStyle}}
 #' @export
 #' @examples
 #' wb <- createWorkbook()
+#' addWorksheet(wb, "cellIs")
+#' addWorksheet(wb, "moving Row")
+#' addWorksheet(wb, "moving Col")
+#' addWorksheet(wb, "Dependent on 1")
 #' 
-#' ## Add a worksheet and data
-#' addWorksheet(wb, "Worksheet Name")
-#' writeData(wb, 1, matrix(runif(100), ncol = 10), xy = c(1,1), colNames=FALSE)
-#' writeData(wb, 1, matrix(sample(LETTERS, 100, rep = TRUE), ncol = 10), xy = c(1, 11), colNames=FALSE)
+#' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
 #' 
-#' ## Create a style
-#' conditionalStyle <- createStyle(bgFill = "#FFFF00")
+#' ## rule applies to all each cell in range
+#' writeData(wb, 1, -5:5)
+#' writeData(wb, 1, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 1, cols=1, rows=1:11, rule="!=0", style = negStyle)
+#' conditionalFormat(wb, 1, cols=1, rows=1:11, rule="==0", style = posStyle)
 #' 
-#' ## Conditionally format cells:Rows 10 to 20 columns A to J (1:10)
-#' conditionalFormat(wb, 1, cols = 1:10, rows = 1:10, rule = "< 0.5", style = conditionalStyle)
-#' conditionalFormat(wb, 1, cols = 1:10, rows = 11:20, rule = '== "A"')  # default style
+#' ## highlight row dependent on first cell in row
+#' writeData(wb, 2, -5:5)
+#' writeData(wb, 2, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
+#' conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
+#' 
+#' ## highlight column dependent on first cell in column
+#' writeData(wb, 3, -5:5)
+#' writeData(wb, 3, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
+#' conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
+#' 
+#' 
+#' ## highlight entire range cols X rows dependent only on cell A1
+#' writeData(wb, 4, -5:5)
+#' writeData(wb, 4, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
+#' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "c:/users/alex/desktop/conFormatting.xlsx", overwrite = TRUE)
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
 conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL){
   
-  ruleVals <- c('beginsWith', 'between', 'endsWith', 'equal', 'greaterThan',
-                'greaterThanOrEqual', "lessThan", 'lessThanOrEqual', 'notBetween',
-                'notContains', 'notEqual')
   
-  operator <- NULL  
+  ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
+
   
-  if(grepl("<=", rule)){
-    operator <- "lessThanOrEqual"    
-    foundFlag <- TRUE
-  }else if(grepl(">=", rule)){
-    operator <- "greaterThanOrEqual"
-    foundFlag <- TRUE
-  } else if(grepl("!=", rule)){
-    operator <- "notEqual"
-    foundFlag <- TRUE
-  } else if(grepl("==", rule)){
-    operator <- "equal"
-    foundFlag <- TRUE
-  }else if(grepl(">", rule)){
-    operator <- "greaterThan"
-    foundFlag <- TRUE
-  } else if(grepl("<", rule)){
-    operator <- "lessThan"
-    foundFlag <- TRUE
-  }
-  
-  msg <- c(ruleVals, "<", ">", "!=", "==")
-  if(!toupper(rule) %in% ruleVals & !foundFlag)
-    stop(sprintf("Cannot find specified rule.  Specify one of: \n%s", paste(msg, collapse = "\n")))
-  
-  if(is.null(operator))
-    operator <- ruleVals[toupper(rule) %in% toupper(ruleVals)]
-  
-  value <- gsub('[^0-9//.]', '', rule)
-  if(value == ""){
-    value <- regmatches(rule, regexpr('".*"', rule, perl = TRUE))
-    if(length(value) == 0)
-      value <- ""
-  }
-  
-  if(value == "")
-    stop('Cannot find value part of condition.  Format of rule is "operator value".  Place value in double quotes if character.') 
-  
-  
+  ## rows and cols
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)  
   rows <- as.numeric(rows)
-      
+  
+  rule <- toupper(gsub(" ", "", rule))
+  rule <- replaceIllegalCharacters(rule)
+  rule <- gsub("!=", "&lt;&gt;", rule)
+  rule <- gsub("==", "=", rule)
+
+  if(!grepl("[A-Z]", substr(rule, 1, 2))){
+
+    ## formula looks like "operatorX" , attach top left cell to rule    
+    rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
+
+  } ## Else, there is a letter in the formula and apply as is
+             
   if(is.null(style))
     style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
     
@@ -732,7 +727,10 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL){
                                      endRow = max(rows),
                                      startCol = min(cols),
                                      endCol = max(cols),
-                                     dxfId, operator = operator, value = value))
+                                     dxfId,
+                                     formula = rule))
+
+  invisible(0)
   
 }
 
