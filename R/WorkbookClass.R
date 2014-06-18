@@ -1134,7 +1134,7 @@ Workbook$methods(addDXFS = function(style){
 
 
 
-Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula){
+Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type){
   
   sheet = validateSheet(sheet)
   sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
@@ -1146,11 +1146,17 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
   }
   
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
-  cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
   
-  
+  if(type == "expression"){
+    cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
+  }else if(length(formula) == 2){
+    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]])
+  }else{
+    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="percentile" val="50"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]], formula[[3]])
+  }
+    
   worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              
-                                                                      
+  
   names(worksheets[[sheet]]$conditionalFormatting) <<- nms
   
   invisible(0)

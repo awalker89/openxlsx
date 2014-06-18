@@ -3,7 +3,8 @@
 \alias{conditionalFormat}
 \title{Add conditional formatting to cells}
 \usage{
-conditionalFormat(wb, sheet, cols, rows, rule, style = NULL)
+conditionalFormat(wb, sheet, cols, rows, rule, style = NULL,
+  type = "expression")
 }
 \arguments{
 \item{wb}{A workbook object}
@@ -31,6 +32,8 @@ addWorksheet(wb, "cellIs")
 addWorksheet(wb, "moving Row")
 addWorksheet(wb, "moving Col")
 addWorksheet(wb, "Dependent on 1")
+addWorksheet(wb, "colourScale 2 Colours")
+addWorksheet(wb, "colourScale 3 Colours")
 
 negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -60,8 +63,9 @@ writeData(wb, 4, LETTERS[1:11], startCol=2)
 conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
 conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
 
-## Save workbook
-saveWorkbook(wb, "c:/users/alex/desktop/conFormatting.xlsx", overwrite = TRUE)
+## colourscale colours cells based on cell value
+
+
 
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
