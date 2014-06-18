@@ -15,9 +15,13 @@ conditionalFormat(wb, sheet, cols, rows, rule, style = NULL,
 
 \item{rows}{Rows to apply conditional formatting to}
 
-\item{rule}{The condition under which to apply the formatting.  See details.}
+\item{rule}{The condition under which to apply the formatting or a vector of colours
+if type = "colourScale". See examples.}
 
 \item{style}{A style to apply to those cells that satisify the rule. A Style object returned from createStyle()}
+
+\item{type}{Either 'expression' or 'colorscale'. If 'expression' the formatting is determined
+by a formula.  If colorScale cells are coloured based on cell value. See examples.}
 }
 \description{
 Add conditional formatting to cells
@@ -65,7 +69,14 @@ conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
 
 ## colourscale colours cells based on cell value
 
+df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+writeData(wb, 1, df, colNames=FALSE)  ## write data.frame
+setColWidths(wb, 1, cols=1:ncol(df), widths=1.07)
+setRowHeights(wb, 1, rows=1:nrow(df), heights=7.5)
 
+## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
+conditionalFormat(wb, 1, cols=1:ncol(df), rows=1:nrow(df),
+   rule =c("black", "white"), type = "colourScale")
 
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
