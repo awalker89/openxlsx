@@ -649,10 +649,13 @@ getCellRefs <- function(cellCoords){
 #' @param sheet A name or index of a worksheet
 #' @param cols Columns to apply conditional formatting to
 #' @param rows Rows to apply conditional formatting to
-#' @param rule The condition under which to apply the formatting.  See details.
+#' @param rule The condition under which to apply the formatting or a vector of colours 
+#' if type = "colourScale". See examples.
 #' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
 #' @details Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 #' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' @param type Either 'expression' or 'colorscale'. If 'expression' the formatting is determined
+#' by a formula.  If colorScale cells are coloured based on cell value. See examples.
 #' @seealso \code{\link{createStyle}}
 #' @export
 #' @examples
@@ -662,7 +665,6 @@ getCellRefs <- function(cellCoords){
 #' addWorksheet(wb, "moving Col")
 #' addWorksheet(wb, "Dependent on 1")
 #' addWorksheet(wb, "colourScale 2 Colours")
-#' addWorksheet(wb, "colourScale 3 Colours")
 #' 
 #' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -695,12 +697,15 @@ getCellRefs <- function(cellCoords){
 #' ## colourscale colours cells based on cell value
 #' 
 #' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
-#' writeData(wb, 1, pic, colNames=FALSE)  ## write data.frame
-#' setColWidths(wb, 1, cols=1:ncol(df), widths=1.07)
-#' setRowHeights(wb, 1, rows=1:nrow(df), heights=7.5)
+#' writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
 #' 
 #' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
-#' conditionalFormat(wb, 1, cols=1:ncol(df), rows=1:nrow(df), rule =c('black', 'white'), type = "colourScale")
+#' conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
+#'    rule =c("black", "white"), type = "colourScale")
+#'    
+#' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
+#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5)
+#' 
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
