@@ -1,7 +1,7 @@
 
 
 
-validateColour <- function(colour){
+validateColour <- function(colour, errorMsg = "Invalid colour!"){
   
   ## check if
   if(is.null(colour))
@@ -13,7 +13,7 @@ validateColour <- function(colour){
     colour[colour %in% validColours] <- col2hex(colour[colour %in% validColours])
   
   if(any(!grepl("^#[A-Fa-f0-9]{6}$", colour)))
-    stop("Invalid colour!", call.=FALSE)
+    stop(errorMsg, call.=FALSE)
   
   return(toupper(colour))
   

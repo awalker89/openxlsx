@@ -467,10 +467,10 @@ createStyle <- function(fontName = NULL,
        stop("Invalid textDecoration!")
   }
   
-  borderColour <- validateColour(borderColour)
+  borderColour <- validateColour(borderColour, "Invalid border colour!")
   
   if(!is.null(fontColour))
-    fontColour <- validateColour(fontColour)
+    fontColour <- validateColour(fontColour, "Invalid font colour!")
   
   if(!is.null(fontSize))
     if(fontSize < 1) stop("Font size must be greater than 0!")
@@ -491,7 +491,7 @@ createStyle <- function(fontName = NULL,
   if(is.null(bgFill)){
     bgFillList <- NULL
   }else{
-    bgFill <- validateColour(bgFill)
+    bgFill <- validateColour(bgFill, "Invalid bgFill colour")
     style$fill <- append(style$fill, list(fillBg = list(rgb = gsub("#", "FF", bgFill))))
   }
   
@@ -499,7 +499,7 @@ createStyle <- function(fontName = NULL,
   if(is.null(fgFill)){
      fgFillList <- NULL
    }else{
-     fgFill <- validateColour(fgFill)
+     fgFill <- validateColour(fgFill, "Invalid fgFill colour")
      style$fill <- append(style$fill, list(fillFg = list(rgb = gsub("#", "FF", fgFill))))
    }
   
@@ -661,6 +661,8 @@ getCellRefs <- function(cellCoords){
 #' addWorksheet(wb, "moving Row")
 #' addWorksheet(wb, "moving Col")
 #' addWorksheet(wb, "Dependent on 1")
+#' addWorksheet(wb, "colourScale 2 Colours")
+#' addWorksheet(wb, "colourScale 3 Colours")
 #' 
 #' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -690,45 +692,66 @@ getCellRefs <- function(cellCoords){
 #' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
 #' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
 #' 
-#' ## Save workbook
-#' saveWorkbook(wb, "c:/users/alex/desktop/conFormatting.xlsx", overwrite = TRUE)
+#' ## colourscale colours cells based on cell value
+#' 
+#' 
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
-conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL){
+conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = "expression"){
   
   
   ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
+  type <- tolower(type)
+  if(tolower(type) %in% c("colorscale", "colourscale")){
+    type <- "colorScale"
+  }else if(type != "expression"){
+    stop("Invalid type argument.  type must be 'expression' or 'colourScale'")
+  }
 
-  
   ## rows and cols
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)  
   rows <- as.numeric(rows)
   
-  rule <- toupper(gsub(" ", "", rule))
-  rule <- replaceIllegalCharacters(rule)
-  rule <- gsub("!=", "&lt;&gt;", rule)
-  rule <- gsub("==", "=", rule)
-
-  if(!grepl("[A-Z]", substr(rule, 1, 2))){
-
-    ## formula looks like "operatorX" , attach top left cell to rule    
-    rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
-
-  } ## Else, there is a letter in the formula and apply as is
-             
-  if(is.null(style))
-    style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+  ## check valid rule
+  if(type == "colorScale"){
+    if(!length(rule) %in% 2:3)
+      stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
+    rule <- gsub("#", "FF", validateColour(rule, errorMsg="Invalid colour specified in rule."))
     
-  invisible(dxfId <- wb$addDXFS(style))
+    dxfId <- NULL
+    
+  }else{ ## else type == "expression"
+      
+    rule <- toupper(gsub(" ", "", rule))
+    rule <- replaceIllegalCharacters(rule)
+    rule <- gsub("!=", "&lt;&gt;", rule)
+    rule <- gsub("==", "=", rule)
+  
+    if(!grepl("[A-Z]", substr(rule, 1, 2))){
+  
+      ## formula looks like "operatorX" , attach top left cell to rule    
+      rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
+  
+    } ## else, there is a letter in the formula and apply as is
+      
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    invisible(dxfId <- wb$addDXFS(style))
+    
+  }
+  
+
   invisible(wb$conditionalFormatCell(sheet,
                                      startRow = min(rows),
                                      endRow = max(rows),
                                      startCol = min(cols),
                                      endCol = max(cols),
                                      dxfId,
-                                     formula = rule))
+                                     formula = rule,
+                                     type = type))
 
   invisible(0)
   
@@ -1089,16 +1112,16 @@ orderCellRef <- function(x){
 #' ## create plot objects
 #' require(ggplot2)
 #' p1 <- qplot(mpg, data=mtcars, geom="density",
-#'   fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Milage")
+#'   fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Mileage")
 #' p2 <- qplot(age, circumference,
 #'   data = Orange, geom = c("point", "line"), colour = Tree)
 #' 
 #' ## Insert currently displayed plot to sheet 1, row 1, column 1
-#'  p1 #plot needs to be showing
+#' print(p1) #plot needs to be showing
 #' insertPlot(wb, 1, width = 5, height = 3.5, fileType = "png", units = "in")
 #' 
-#' ##
-#' p2
+#' ## Insert plot 2
+#' print(p2)
 #' insertPlot(wb, 1, xy = c("J", 2), width = 16, height = 10,  fileType = "png", units = "cm")
 #'
 #' ## Save workbook

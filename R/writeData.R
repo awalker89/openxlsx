@@ -191,7 +191,7 @@ writeData <- function(wb,
   if(length(borders) != 1) stop("borders argument must be length 1.")    
   
   ## borderColours validation
-  borderColour <- validateColour(borderColour)
+  borderColour <- validateColour(borderColour, "Invalid border colour")
   borderStyle <- validateBorderStyle(borderStyle)[[1]]
   
   ## Have decided to not use S3 as too much code duplication with input checking/converting
