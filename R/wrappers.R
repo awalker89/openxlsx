@@ -694,7 +694,13 @@ getCellRefs <- function(cellCoords){
 #' 
 #' ## colourscale colours cells based on cell value
 #' 
+#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+#' writeData(wb, 1, pic, colNames=FALSE)  ## write data.frame
+#' setColWidths(wb, 1, cols=1:ncol(df), widths=1.07)
+#' setRowHeights(wb, 1, rows=1:nrow(df), heights=7.5)
 #' 
+#' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
+#' conditionalFormat(wb, 1, cols=1:ncol(df), rows=1:nrow(df), rule =c('black', 'white'), type = "colourScale")
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
