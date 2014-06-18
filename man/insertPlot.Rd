@@ -42,16 +42,16 @@ addWorksheet(wb, "Sheet 1", gridLines = FALSE)
 ## create plot objects
 require(ggplot2)
 p1 <- qplot(mpg, data=mtcars, geom="density",
-  fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Milage")
+  fill=as.factor(gear), alpha=I(.5), main="Distribution of Gas Mileage")
 p2 <- qplot(age, circumference,
   data = Orange, geom = c("point", "line"), colour = Tree)
 
 ## Insert currently displayed plot to sheet 1, row 1, column 1
- p1 #plot needs to be showing
+print(p1) #plot needs to be showing
 insertPlot(wb, 1, width = 5, height = 3.5, fileType = "png", units = "in")
 
-##
-p2
+## Insert plot 2
+print(p2)
 insertPlot(wb, 1, xy = c("J", 2), width = 16, height = 10,  fileType = "png", units = "cm")
 
 ## Save workbook
