@@ -503,7 +503,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     exhlinkRefs <- names(hyperlinks[[sheet]])
     
     newHlinks <- r[hInds]
-    names(newHlinks) <- v[hInds]
+    names(newHlinks) <- replaceXMLEntities(v[hInds])
     
     if(exHlinks[[1]] == ""){
       hyperlinks[[sheet]] <<- newHlinks
