@@ -704,8 +704,7 @@ getCellRefs <- function(cellCoords){
 #'    rule =c("black", "white"), type = "colourScale")
 #'    
 #' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
-#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5)
-#' 
+#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
@@ -729,8 +728,8 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
   if(type == "colorScale"){
     if(!length(rule) %in% 2:3)
       stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
-    rule <- gsub("#", "FF", validateColour(rule, errorMsg="Invalid colour specified in rule."))
     
+    rule <- gsub("#", "FF", validateColour(rule, errorMsg="Invalid colour specified in rule."))
     dxfId <- NULL
     
   }else{ ## else type == "expression"
@@ -835,7 +834,7 @@ convert2EMU <- function(d, units){
   if(grepl("mm|milli", units))
     d <- d/10
   
-  d*360000
+  return(d*360000)
   
 }
 
