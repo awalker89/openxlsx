@@ -78,7 +78,6 @@ conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
 setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
 setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5)
 
-
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
 }

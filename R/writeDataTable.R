@@ -120,7 +120,6 @@ writeDataTable <- function(wb, sheet, x,
              cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
   }
   
-  
   ## style currency as CURRENCY
   if("currency" %in% colClasses){
     inds <- which(sapply(colClasses, function(x) "currency" %in% x))

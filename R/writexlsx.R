@@ -206,9 +206,8 @@ write.xlsx <- function(x, file, ...){
   }
 
   borderColour <- getOption("openxlsx.borderColour", "black")
-  if("borderColour" %in% names(params)){
-    borderColour <- validateColour(params$borderColour, "Invalid border colour")
-  }
+  if("borderColour" %in% names(params))
+    borderColour <- params$borderColour
   
   borderStyle <- getOption("openxlsx.borderStyle", "thin")
   if("borderStyle" %in% names(params)){

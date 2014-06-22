@@ -182,6 +182,6 @@ saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
 Alexander Walker
 }
 \seealso{
-\code{\link{writeData}}
+\code{\link{writeDataTable}}
 }
 

@@ -38,7 +38,7 @@
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
 #' @param ...  Further arguments (for future use)
-#' @seealso \code{\link{writeData}}
+#' @seealso \code{\link{writeDataTable}}
 #' @export writeData
 #' @rdname writeData
 #' @examples
@@ -287,11 +287,36 @@ writeData <- function(wb,
              cols = 0:(nCol-1) + startCol,
              gridExpand = TRUE)
   
-  ## draw borders
-  if(borders != "none"){
+  
+  colClasses <- lapply(x, function(x) tolower(class(x)))
+  sheet <- wb$validateSheet(sheet)
+  
+  ## hyperlink style, if no borders
+  if(borders == "none"){
     
-    colClasses <- lapply(x, function(x) tolower(class(x)))
-    sheet <- wb$validateSheet(sheet)
+    if("hyperlink" %in% unlist(colClasses)){
+
+    ## style hyperlinks
+    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
+    addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
+             rows= 1:nrow(x) + startRow + colNames - 1,
+             cols = inds + startCol - 1, gridExpand = TRUE)  
+
+    }
+    
+    if(any(c("date", "posixct", "posixt") %in% unlist(colClasses))){
+      
+      ## style dates
+      dInds <- which(sapply(colClasses, function(x) "date" %in% x))    
+      pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt") %in% x)))
+      
+      addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
+               rows= 1:nrow(x) + startRow + colNames - 1,
+               cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
+      
+    }
+    
+  }else{ ## draw borders
 
     if("surrounding" == borders){
       wb$surroundingBorders(colClasses,
@@ -299,7 +324,7 @@ writeData <- function(wb,
                             startRow = startRow + colNames,
                             startCol = startCol,
                             nRow = nRow, nCol = nCol,
-                            borderColour = borderColour,
+                            borderColour = list("rgb" = borderColour),
                             borderStyle = borderStyle)
       
     }else if("rows" == borders ){
@@ -308,7 +333,7 @@ writeData <- function(wb,
                     startRow = startRow + colNames,
                     startCol = startCol,
                     nRow = nRow, nCol = nCol,
-                    borderColour = borderColour,
+                    borderColour = list("rgb" = borderColour),
                     borderStyle = borderStyle)
       
     }else if("columns" == borders ){
@@ -317,7 +342,7 @@ writeData <- function(wb,
                     startRow = startRow + colNames,
                     startCol = startCol,
                     nRow = nRow, nCol = nCol,
-                    borderColour = borderColour,
+                    borderColour = list("rgb" = borderColour),
                     borderStyle = borderStyle)
       
     }

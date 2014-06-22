@@ -15,7 +15,9 @@ validateColour <- function(colour, errorMsg = "Invalid colour!"){
   if(any(!grepl("^#[A-Fa-f0-9]{6}$", colour)))
     stop(errorMsg, call.=FALSE)
   
-  return(toupper(colour))
+  colour <- gsub("^#", "FF", toupper(colour))
+  
+  return(colour)
   
 }
 

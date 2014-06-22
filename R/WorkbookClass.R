@@ -638,7 +638,7 @@ Workbook$methods(updateStyles = function(style){
   }
   
   ## Border
-  if(!all(is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
     
     borderNode <- .self$createBorderNode(style)
     borderId <- which(styles$borders == borderNode)-1
@@ -1394,9 +1394,18 @@ Workbook$methods(preSaveCleanUp = function(){
   }
   
   ## styles
+  numFmtIds <- 300
+  
   for(x in styleObjects){
     if(length(x$cells) > 0){
-      sId <- .self$updateStyles(x$style)
+
+      this.sty <- x$style$copy()    
+      if(this.sty$numFmt$numFmtId == 9999){
+        this.sty$numFmt$numFmtId <- numFmtIds
+        numFmtIds <- numFmtIds + 1
+      }
+            
+      sId <- .self$updateStyles(this.sty)
       for(r in x$cells)
         .self$updateCellStyles(sheet = r$sheet, rows = r$rows, cols = r$cols, sId)
     }

@@ -7,7 +7,7 @@ genBaseColStyle <- function(cc){
   specialFormat <- TRUE
   
   if(any(c("date", "posixct", "posixt") %in% cc)){
-    colStyle$numFmt <- list("numFmtId" = 14)
+    colStyle <- createStyle(numFmt = "date")
   }else if("currency" %in% cc){
     colStyle$numFmt <- list("numFmtId" = 164, "formatCode" = "&quot;$&quot;#,##0.00")
   }else if("accounting" %in% cc){

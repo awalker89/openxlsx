@@ -1,9 +1,4 @@
 
-
-#' @useDynLib openxlsx
-#' @importFrom Rcpp sourceCpp 
-
-
 #' @name createWorkbook
 #' @title Create a new Workbook object
 #' @param creator Creator of the workbook (your name). Defaults to login username
@@ -421,10 +416,22 @@ createStyle <- function(fontName = NULL,
                         textDecoration = NULL, wrapText = FALSE){
   
   ### Error checking
-  validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNTING", "DATE", "LONGDATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT", "3", "4")
-  numFmt <- toupper(numFmt)
-  if(!numFmt %in% validNumFmt)
-    stop("Invalid numFmt")
+  
+  ## if num fmt is made up of dd, mm, yy
+  
+  numFmt <- tolower(numFmt[[1]])
+  validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4")
+  
+  if(numFmt == "date"){
+  
+    numFmt <- getOption("openxlsx.dateFormat", "date")
+  
+  }else if(!numFmt %in% validNumFmt){
+    
+    if(grepl("[^mdy[[:punct:] ]", numFmt))
+      stop("Invalid numFmt")
+
+  }
      
   numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
                         list("numFmtId" = 2),  # NUMBER
@@ -443,8 +450,6 @@ createStyle <- function(fontName = NULL,
   ## Validate border line style
   if(!is.null(borderStyle))
     borderStyle <- validateBorderStyle(borderStyle)
-  
-
   
   if(!is.null(halign)){
     halign <- tolower(halign[[1]])
@@ -483,7 +488,7 @@ createStyle <- function(fontName = NULL,
   style$fontName <- list(val = fontName)
   style$fontSize <- list(val = fontSize)
   if(!is.null(fontColour))
-    style$fontColour <- list(rgb =  gsub("#", "FF", fontColour))
+    style$fontColour <- list("rgb" =  fontColour)
     
   style$fontDecoration <- toupper(textDecoration)
 
@@ -492,7 +497,7 @@ createStyle <- function(fontName = NULL,
     bgFillList <- NULL
   }else{
     bgFill <- validateColour(bgFill, "Invalid bgFill colour")
-    style$fill <- append(style$fill, list(fillBg = list(rgb = gsub("#", "FF", bgFill))))
+    style$fill <- append(style$fill, list(fillBg = list("rgb" = bgFill)))
   }
   
   ## foreground fill
@@ -500,7 +505,7 @@ createStyle <- function(fontName = NULL,
      fgFillList <- NULL
    }else{
      fgFill <- validateColour(fgFill, "Invalid fgFill colour")
-     style$fill <- append(style$fill, list(fillFg = list(rgb = gsub("#", "FF", fgFill))))
+     style$fill <- append(style$fill, list(fillFg = list(rgb = fgFill)))
    }
   
   
@@ -514,7 +519,6 @@ createStyle <- function(fontName = NULL,
     pos <- pos[order(pos, decreasing = FALSE)]
     nSides <- sum(pos > 0)
     
-    borderColour <- gsub("#", "FF", borderColour)
     borderColour <- rep(borderColour, length.out = nSides)
     borderStyle <-  rep(borderStyle, length.out = nSides)
     
@@ -528,22 +532,22 @@ createStyle <- function(fontName = NULL,
     
     if("LEFT" %in% names(pos)){
       style$borderLeft <- borderStyle[["LEFT"]]
-      style$borderLeftColour <- list(rgb = borderColour[["LEFT"]])
+      style$borderLeftColour <- list("rgb" = borderColour[["LEFT"]])
     }
     
     if("RIGHT" %in% names(pos)){
       style$borderRight <-  borderStyle[["RIGHT"]]
-      style$borderRightColour <- list(rgb = borderColour[["RIGHT"]])
+      style$borderRightColour <- list("rgb" = borderColour[["RIGHT"]])
     }
     
     if("TOP" %in% names(pos)){
       style$borderTop <-  borderStyle[["TOP"]]
-      style$borderTopColour <- list(rgb = borderColour[["TOP"]])
+      style$borderTopColour <- list("rgb" = borderColour[["TOP"]])
     }
     
     if("BOTTOM" %in% names(pos)){
       style$borderBottom <-  borderStyle[["BOTTOM"]]
-      style$borderBottomColour <- list(rgb = borderColour[["BOTTOM"]])
+      style$borderBottomColour <- list("rgb" = borderColour[["BOTTOM"]])
     }
 
   }
@@ -552,8 +556,12 @@ createStyle <- function(fontName = NULL,
    style$halign <- halign
    style$valign <- valign
    style$wrapText <- wrapText[[1]]
-   style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
-     
+
+  if(numFmt %in% validNumFmt){
+    style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
+  }else{
+    style$numFmt <- list("numFmtId" = 9999, formatCode = numFmt)  ## Custom numFmt
+  }
 
   return(style)
 } 
@@ -729,7 +737,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
     if(!length(rule) %in% 2:3)
       stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
     
-    rule <- gsub("#", "FF", validateColour(rule, errorMsg="Invalid colour specified in rule."))
+    rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
     dxfId <- NULL
     
   }else{ ## else type == "expression"
@@ -1360,9 +1368,8 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
   
   
   if(fontSize < 0) stop("Invalid fontSize")
-  fontColour <- gsub("#", "FF", validateColour(fontColour))
-  
-      
+  fontColour <- validateColour(fontColour)
+    
   wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/></font>', fontSize, fontColour, fontName)
   
 }
