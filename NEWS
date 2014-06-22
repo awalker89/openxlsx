@@ -1,3 +1,25 @@
+
+openxlsx 2.0.5
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* writeData now style based on column class the same as writeDataTable
+
+* Vignette for examples focussed on formatting
+
+* Customizable date formatting with createStyle and also through option("openxlsx.dateFormat" = ...)
+
+* Generalised conditionalFormat function to complex expressions and color scales.
+
+
+BUG FIXES
+
+* Invalid XML characters in hyperlinks now replaced.
+
+
+
+
 openxlsx 2.0.1
 ----------------------------------------------------------------
 
@@ -52,5 +74,4 @@ BUG FIXES
 * errors in vignette examples.
 
 * numbers with > 8 digits were rounded in writeData
-
-* 
+ 

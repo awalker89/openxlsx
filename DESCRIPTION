@@ -20,3 +20,6 @@ Imports:
     methods,
     Rcpp  (>= 0.11.1)
 Repository: CRAN
+VignetteBuilder: knitr
+Suggests:
+    knitr
