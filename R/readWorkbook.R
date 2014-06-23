@@ -177,7 +177,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   vn <- as.numeric(v)
   
   ## Using -1 as a flag for no strings
-  if(length(sharedStrings) == 0 | stringInds == -1){
+  if(length(sharedStrings) == 0 | stringInds[[1]] == -1){
     stringInds <- -1
     tR <- as.character(NA)
   }else{
