@@ -71,12 +71,12 @@ Style$methods(show = function(print = TRUE){
   if(as.numeric(numFmt$numFmtId) %in% unlist(numFmtMapping)){
     numFmtStr <- validNumFmt[unlist(numFmtMapping) == as.numeric(numFmt$numFmtId)]
   }else{
-    numFmtStr <- paste(paste(names(numFmt),": ", numFmt), collapse = ", ")
+    numFmtStr <- sprintf('"%s"', numFmt$formatCode)
   }
   
-  borders <- c("Top", "Bottom", "Left", "Right")[!c(is.null(borderTop), is.null(borderBottom), is.null(borderLeft), is.null(borderRight))]
+  borders <- c(sprintf("Top: %s", borderTop), sprintf("Bottom: %s", borderBottom), sprintf("Left: %s", borderLeft), sprintf("Right: %s", borderRight))
   borderColours <- gsub("^FF", "#", c(borderTopColour, borderBottomColour, borderLeftColour, borderRightColour))
-    
+
   fgFill <- fill$fillFg
   bgFill <- fill$fillBg
 
