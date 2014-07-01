@@ -1654,39 +1654,38 @@ worksheetOrder <- function(wb){
 #' ##2014 April 21st to 25th
 #' x <- c(41750, 41751, 41752, 41753, 41754) 
 #' convertToDate(x)
+#' convertToDate(c(41821.8127314815, 41820.8127314815))
 convertToDate <- function(x, origin = "1970-1-1"){
   as.Date(x - 25569, origin = origin)  
 }
 
 
-# #' @name convertToTime
-# #' @title Convert from excel time number to R Date type
-# #' @param x A numeric vector
-# #' @param origin date. Default value is for Windows Excel 2010
-# #' @details Excel stores dates as number of days from some origin day
-# #' (this origin is "1970-1-1" for Excel 2010).
-# #' @export
-# #' @examples
-# #' ##2014 April 21st to 25th
-# #' x <- c(41750, 41751, 41752, 41753, 41754) 
-# #' convertToDate(x)
-# convertToTime <- function(x){
-#  
-#   if(!all(x <= 1, na.rm=TRUE))
-#     stop("All elements of x must be less than or equal to 1")
-#   
-#   y <- x[!is.na(x)]
-#   fraction <- 24*y
-#   hrs <- floor(fraction)
-#   minFrac <- (fraction-hrs)*60
-#   mins <- floor(minFrac)
-#   secs <- (minFrac - mins)*60
-#   y <- paste(hrs, mins, secs, sep = ":")
-#   y <- format(strptime(y, "%H:%M:%S"), "%H:%M:%S")
-#   x[!is.na(x)] <- y
-#   
-#   return(x)
-# }
+#' @name convertToDateTime
+#' @title Convert from excel time number to R as.POSIXct
+#' @param x A numeric vector
+#' @param origin date. Default value is for Windows Excel 2010
+#' @details Excel stores dates as number of days from some origin day
+#' (this origin is "1970-1-1" for Excel 2010).
+#' @export
+#' @examples
+#' ##2014 April 21st to 25th
+#' x <- c(41821.8127314815, 41820.8127314815) 
+#' convertToDateTime(x)
+convertToDateTime <- function(x, origin = "1970-1-1"){
+  
+  rem <- x %% 1
+  date <- as.Date(as.integer(x) - 25569, origin = origin)  
+  fraction <- 24*rem
+  hrs <- floor(fraction)
+  minFrac <- (fraction-hrs)*60
+  mins <- floor(minFrac)
+  secs <- (minFrac - mins)*60
+  y <- paste(hrs, mins, secs, sep = ":")
+  y <- format(strptime(y, "%H:%M:%S"), "%H:%M:%S") 
+  dateTime <- as.POSIXct(paste(date, y))
+  
+  return(dateTime)
+}
 
 
 

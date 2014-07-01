@@ -21,5 +21,6 @@ Excel stores dates as number of days from some origin day
 ##2014 April 21st to 25th
 x <- c(41750, 41751, 41752, 41753, 41754)
 convertToDate(x)
+convertToDate(c(41821.8127314815, 41820.8127314815))
 }
 
