@@ -492,28 +492,28 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   ## create references
   r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1), LETTERS, as.character(startRow:(startRow+nRows-1)))
   
-  
   ##Append hyperlinks, convert h to s in cell type
   if("hyperlink" %in% tolower(colClasses)){
     
     hInds <- which(t == "h")
-    t[hInds] <- "s"
-    
-    exHlinks <- hyperlinks[[sheet]]
-    exhlinkRefs <- names(hyperlinks[[sheet]])
-    
-    newHlinks <- r[hInds]
-    names(newHlinks) <- replaceIllegalCharacters(v[hInds])
-    
-    if(exHlinks[[1]] == ""){
-      hyperlinks[[sheet]] <<- newHlinks
-    }else{
-      allHlinks <- c(exHlinks, newHlinks)
-      allHlinks <- allHlinks[!duplicated(allHlinks, fromLast = TRUE)]
-      allHlinks <- allHlinks[order(nchar(allHlinks), allHlinks)]
-      hyperlinks[[sheet]] <<- allHlinks
+    if(length(hInds) > 0){
+      t[hInds] <- "s"
+      
+      exHlinks <- hyperlinks[[sheet]]
+      exhlinkRefs <- names(hyperlinks[[sheet]])
+      
+      newHlinks <- r[hInds]
+      names(newHlinks) <- replaceIllegalCharacters(v[hInds])
+      
+      if(exHlinks[[1]] == ""){
+        hyperlinks[[sheet]] <<- newHlinks
+      }else{
+        allHlinks <- c(exHlinks, newHlinks)
+        allHlinks <- allHlinks[!duplicated(allHlinks, fromLast = TRUE)]
+        allHlinks <- allHlinks[order(nchar(allHlinks), allHlinks)]
+        hyperlinks[[sheet]] <<- allHlinks
+      }
     }
-    
   }
   
   ## convert all strings to references in sharedStrings and update values (v)
@@ -1394,7 +1394,7 @@ Workbook$methods(preSaveCleanUp = function(){
   }
   
   ## styles
-  numFmtIds <- 300
+  numFmtIds <- 50000
   
   for(x in styleObjects){
     if(length(x$cells) > 0){

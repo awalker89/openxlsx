@@ -1,0 +1,211 @@
+
+\documentclass[11pt]{article}
+\usepackage{graphicx, verbatim}
+
+% \VignetteEngine{knitr::knitr}
+% \VignetteIndexEntry{Formatting Examples}
+% \VignetteDepends{openxlsx}
+% \VignetteKeyword{excel}
+% \VignetteKeyword{xlsx}
+% \VignetteKeyword{spreadsheet}
+
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={210mm,297mm},
+ left=15mm,
+ right=15mm,
+ top=20mm,
+ bottom=20mm,
+ }
+\begin{document}
+
+\title{Examples}
+\author{Alexander Walker\\
+\texttt{Alexander.Walker1989@gmail.com}}
+\maketitle
+
+
+\section{Formatting with writeData and writeDataTable}
+\begin{verbatim}
+
+## data.frame to write
+df <- data.frame("Date" = Sys.Date()-0:4,
+                 "Logical" = c(TRUE, FALSE, TRUE, TRUE, FALSE),
+                 "Currency" = paste("$",-2:2),
+                 "Accounting" = -2:2,
+                 "hLink" = "http://cran.r-project.org/", 
+                 "Percentage" = seq(0, 1, length.out=5), stringsAsFactors = FALSE)
+
+class(df$Currency) <- "currency"
+class(df$Accounting) <- "accounting"
+class(df$hLink) <- "hyperlink"
+class(df$Percentage) <- "percentage"
+
+
+
+## Formatting can be applied simply through the write functions
+## global options can be set to further simplify things
+options("openxlsx.borderStyle" = "thin")
+options("openxlsx.borderColour" = "#4F81BD")
+
+## create a workbook and add a worksheet
+wb <- createWorkbook()
+addWorksheet(wb, "writeData auto-formatting")
+
+writeData(wb, 1, df, startRow = 2, startCol = 2)
+writeData(wb, 1, df, startRow = 9, startCol = 2, borders = "surrounding")
+writeData(wb, 1, df, startRow = 16, startCol = 2, borders = "rows")
+writeData(wb, 1, df, startRow = 23, startCol = 2, borders ="columns")
+
+## headerStyles
+hs1 <- createStyle(fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
+                   border = "Bottom", fontColour = "white")
+
+writeData(wb, 1, df, startRow = 16, startCol = 2, headerStyle = hs1,
+          borders = "rows", borderStyle = "medium")
+
+
+
+
+
+
+## writing as an Excel Table
+
+
+addWorksheet(wb, "writeDataTable")
+writeDataTable(wb, 2, df, startRow = 2, startCol = 2)
+writeDataTable(wb, 2, df, startRow = 9, startCol = 2, tableStyle = "TableStyleLight9")
+writeDataTable(wb, 2, df, startRow = 16, startCol = 2, tableStyle = "TableStyleLight2")
+writeDataTable(wb, 2, df, startRow = 23, startCol = 2, tableStyle = "TableStyleMedium21")
+
+saveWorkbook(wb, "Formatting on write.xlsx", overwrite = TRUE)
+\end{verbatim}
+
+\noindent
+The 'tableStyle' argument in writeDataTable can be any ofthe predefined tableStyles in Excel.
+
+\begin{center}
+\includegraphics[width=14cm]{tableStyles}
+\end{center}
+
+\newpage
+\section{Date Formatting}
+\begin{verbatim}
+
+# data.frame of dates
+dates <- data.frame("d1" = Sys.Date() - 0:4)
+for(i in 1:3) dates <- cbind(dates, dates)
+names(dates) <- paste0("d", 1:8)
+
+## Date Formatting
+wb <- createWorkbook()
+addWorksheet(wb, "Date Formatting", gridLines = FALSE)
+writeData(wb, 1, dates) ## write without styling
+
+## openxlsx converts columns of class "Date" to Excel dates with the format given by
+getOption("openxlsx.dateFormat", "mm/dd/yyyy")
+
+## this can be set via (for example)
+options("openxlsx.dateFormat" = "yyyy/mm/dd")
+## custom date formats can be made up of any combination of:
+##   d, dd, ddd, dddd, m, mm, mmm, mmmm, mmmmm, yy, yyyy
+
+## numFmt == "DATE" will use the date format specified by the above
+addStyle(wb, 1, style = createStyle(numFmt = "DATE"), rows = 2:11, cols = 1, gridExpand = TRUE) 
+
+## some custom date format examples
+sty <- createStyle(numFmt = "yyyy/mm/dd")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 2, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "yy/mmm/dd")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 1, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "yyyy/m/ddd")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 4, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "yy/mmm/ddddd")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 5, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "yyyy-mmm-dddd")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 6, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = mm/ dd yyyy")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 7, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "mm/dd/yy")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 8, gridExpand = TRUE)
+
+setColWidths(wb, 1, cols = 1:10, widths = 23)
+
+## The default date format used in writeData and writeDataTable can be set with:
+options("openxlsx.dateFormat" = "dd/mm/yyyy")
+writeData(wb, "Date Formatting", dates, startRow  = 8, borders = "rows")
+options("openxlsx.dateFormat" = "yyyy-mm-dd")
+writeData(wb, "Date Formatting", dates, startRow  = 15)
+
+saveWorkbook(wb, "Date Formatting.xlsx", overwrite = TRUE)
+\end{verbatim}
+
+
+
+\newpage
+\section{Conditional Formatting}
+\begin{verbatim}
+
+
+wb <- createWorkbook()
+addWorksheet(wb, "cellIs")
+addWorksheet(wb, "moving Row")
+addWorksheet(wb, "moving Col")
+addWorksheet(wb, "Dependent on 1")
+addWorksheet(wb, "colourScale 2 Colours")
+
+negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
+
+## rule applies to all each cell in range
+writeData(wb, 1, -5:5)
+writeData(wb, 1, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 1, cols=1, rows=1:11, rule="!=0", style = negStyle)
+conditionalFormat(wb, 1, cols=1, rows=1:11, rule="==0", style = posStyle)
+
+## highlight row dependent on first cell in row
+writeData(wb, 2, -5:5)
+writeData(wb, 2, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
+conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
+
+## highlight column dependent on first cell in column
+writeData(wb, 3, -5:5)
+writeData(wb, 3, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
+conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
+
+
+## highlight entire range cols X rows dependent only on cell A1
+writeData(wb, 4, -5:5)
+writeData(wb, 4, LETTERS[1:11], startCol=2)
+conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
+conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+
+
+## colourscale colours cells based on cell value
+
+df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
+
+## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
+conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
+   rule =c("black", "white"), type = "colourScale")
+   
+setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
+setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
+#'
+## Save workbook
+saveWorkbook(wb, "Conditional Formatting Examples.xlsx", overwrite = TRUE)
+
+\end{verbatim}
+
+
+\end{document}
