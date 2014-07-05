@@ -10,7 +10,10 @@ NEW FEATURES
 
 * Customizable date formatting with createStyle and also through option("openxlsx.dateFormat" = ...)
 
+* Customizable POSIX formatting with createStyle and also through option("openxlsx.datetimeFormat" = ...)
+
 * Generalised conditionalFormat function to complex expressions and color scales.
+
 
 
 BUG FIXES

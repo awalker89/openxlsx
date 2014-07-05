@@ -113,10 +113,6 @@ quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, R_fileName) {
     .Call('openxlsx_quickBuildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, R_fileName)
 }
 
-buildCellXML <- function(prior, post, sheetData, rowHeights, order, R_fileName) {
-    .Call('openxlsx_buildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowHeights, order, R_fileName)
-}
-
 WhichMatch <- function(a, b) {
     .Call('openxlsx_WhichMatch', PACKAGE = 'openxlsx', a, b)
 }
@@ -151,5 +147,9 @@ removeEmptyNodes <- function(x, emptyNodes) {
 
 getCellsWithChildren <- function(xmlFile, emptyNodes) {
     .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
+}
+
+quickBuildCellXML2 <- function(prior, post, sheetData, rowNumbers, rowHeights, R_fileName) {
+    .Call('openxlsx_quickBuildCellXML2', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, rowHeights, R_fileName)
 }
 

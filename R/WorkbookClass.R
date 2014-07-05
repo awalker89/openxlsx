@@ -905,8 +905,14 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     prior <- paste0(header, pxml(ws[1:(sheetDataInd-1)]))
     post <- paste0(pxml(ws[(sheetDataInd+1):length(ws)]), "</worksheet>")
     
+    ## Sort sheetData before writing
+    if(dataCount[[i]] > 1){
+      r <- sapply(sheetData[[i]], "[[", "r")
+      sheetData[[i]] <<- sheetData[[i]][order(nchar(names(r)), names(r), r)]
+      dataCount[[i]] <<- 1
+    }
     
-    if(dataCount[[i]] == 1 & length(rowHeights[[i]]) == 0){
+    if(length(rowHeights[[i]]) == 0){
       
       .Call("openxlsx_quickBuildCellXML",
             prior,
@@ -915,20 +921,19 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
             as.integer(names(sheetData[[i]])),
             file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
             PACKAGE = "openxlsx")
-      
+            
     }else{
       
-      if(length(rowHeights[[i]]) > 0)
-        rowHeights[[i]] <<- rowHeights[[i]][order(as.numeric(names(rowHeights[[i]])))]
-      
-      .Call("openxlsx_buildCellXML",
+      ## row heights will always be in order and all row heights are given rows in preSaveCleanup  
+      .Call("openxlsx_quickBuildCellXML2",
             prior,
             post,
             sheetData[[i]],
+            as.integer(names(sheetData[[i]])),
             rowHeights[[i]],
-            orderCellRef,
             file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
             PACKAGE="openxlsx")
+      
     }
     
     ## write worksheet rels
@@ -1030,7 +1035,7 @@ Workbook$methods(setRowHeights = function(sheet, rows, heights){
     rowHeights[[sheet]] <<- rowHeights[[sheet]][!flag]
   
   allRowHeights <- c(rowHeights[[sheet]], heights)
-  allRowHeights <- allRowHeights[order(names(allRowHeights))]
+  allRowHeights <- allRowHeights[order(as.numeric(names(allRowHeights)))]
   
   rowHeights[[sheet]] <<- allRowHeights
   
