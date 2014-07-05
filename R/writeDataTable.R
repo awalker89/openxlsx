@@ -11,7 +11,7 @@
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
 #' @param tableStyle Any excel table style name or "none".
-#' @details columns of x with class Date/POSIXct/POSIXt, currency, accounting, 
+#' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
 #' @seealso \code{\link{addWorksheet}}
@@ -108,17 +108,24 @@ writeDataTable <- function(wb, sheet, x,
   
   ## column class
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  
-  ## Style Dates as DATE  
-  if(any(c("date", "posixct", "posixt") %in% unlist(colClasses))){
     
-    dInds <- which(sapply(colClasses, function(x) "date" %in% x))    
-    pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt") %in% x)))
+  if("date" %in% unlist(colClasses)){
     
-    addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
+    inds <- which(sapply(colClasses, function(x) "date" %in% x))    
+    addStyle(wb, sheet = sheet, style=createStyle(numFmt="DATE"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
-             cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
+             cols = inds + startCol - 1, gridExpand = TRUE)
+    
   }
+  
+  if(any(c("posixlt", "posixct", "posixt") %in% unlist(colClasses))){
+    
+    inds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
+    addStyle(wb, sheet = sheet, style=createStyle(numFmt="LONGDATE"), 
+             rows= 1:nrow(x) + startRow + showColNames - 1,
+             cols = inds + startCol - 1, gridExpand = TRUE)
+  }
+  
   
   ## style currency as CURRENCY
   if("currency" %in% colClasses){

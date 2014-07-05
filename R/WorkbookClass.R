@@ -448,9 +448,15 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     for(i in dInds)
       df[,i] <- as.integer(df[,i]) + 25569
     
-    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt") %in% x)))
+    t <- format(Sys.time(), "%z")
+    offSet <- ifelse(substr(t,1,1) == "+", 1, -1) * (as.numeric(substr(t,2,3)) + as.numeric(substr(t,4,5)) / 60) / 24
+        
+    if(is.na(offSet))
+      offSet <- 0
+    
+    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt", "POSIXlt") %in% x)))
     for(i in pInds)
-      df[,i] <- as.integer(df[,i])/86400 + 25569
+      df[,i] <- as.numeric(as.POSIXct(df[,i])) / 86400 + 25569 + offSet
   }
   
   ## convert any Dates to integers and create date style object

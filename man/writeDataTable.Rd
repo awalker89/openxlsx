@@ -30,7 +30,7 @@ A vector of the form c(startCol, startRow)}
 Write to a worksheet and format as a table
 }
 \details{
-columns of x with class Date/POSIXct/POSIXt, currency, accounting,
+columns of x with class Date/POSIXt, currency, accounting,
 hyperlink, percentage are automatically styled as dates, currency, accounting,
 hyperlinks, percentages respectively.
 }

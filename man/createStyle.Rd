@@ -108,6 +108,8 @@ A style object
 Create a new style to apply to worksheet cells
 }
 \examples{
+## See package vignettes for further examples
+
 ## Modify default values of border colour and border line style
 options("openxlsx.borderColour" = "#4F80BD")
 options("openxlsx.borderStyle" = "thin")

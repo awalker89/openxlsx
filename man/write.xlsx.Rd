@@ -47,8 +47,8 @@ between each column.}
   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
 }
 
-columns of x with class Date, POSIXct of POSIXt are automatically
-styled as dates.
+columns of x with class Date or POSIXt are automatically
+styled as dates and datetimes respectively.
 }
 \examples{
 ## write to working directory

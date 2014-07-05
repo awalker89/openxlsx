@@ -19,6 +19,7 @@
  bottom=20mm,
  }
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Examples}
 \author{Alexander Walker\\
@@ -119,7 +120,7 @@ sty <- createStyle(numFmt = "yyyy/mm/dd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 2, gridExpand = TRUE)
 
 sty <- createStyle(numFmt = "yy/mmm/dd")
-addStyle(wb, 1, style = sty, rows = 2:11, cols = 1, gridExpand = TRUE)
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 3, gridExpand = TRUE)
 
 sty <- createStyle(numFmt = "yyyy/m/ddd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 4, gridExpand = TRUE)
@@ -145,6 +146,64 @@ options("openxlsx.dateFormat" = "yyyy-mm-dd")
 writeData(wb, "Date Formatting", dates, startRow  = 15)
 
 saveWorkbook(wb, "Date Formatting.xlsx", overwrite = TRUE)
+\end{verbatim}
+
+
+
+
+
+\newpage
+\section{DateTime Formatting}
+\begin{verbatim}
+
+The conversion from POSIX to Excel datetimes uses format(Sys.time(), "%z")
+to get the time zone offSet.  If POSIX values are not being written correct try setting
+the timezone with (for example)
+
+Sys.setenv(TZ = "Australia/Sydney")
+
+dateTimes <- data.frame("d1" = Sys.time() - 0:4*10000)
+for(i in 1:2) dateTimes <- cbind(dateTimes, dateTimes)
+names(dateTimes) <- paste0("d", 1:4)
+
+## POSIX Formatting
+wb <- createWorkbook()
+addWorksheet(wb, "DateTime Formatting", gridLines = FALSE)
+writeData(wb, 1, dateTimes) ## write without styling
+
+## openxlsx converts columns of class "POSIxt" to Excel datetimes with the format given by
+getOption("openxlsx.datetimeFormat", "yyyy/mm/dd hh:mm:ss")
+
+## this can be set via (for example)
+options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")
+## custom datetime formats can be made up of any combination of:
+## d, dd, ddd, dddd, m, mm, mmm, mmmm, mmmmm, yy, yyyy, h, hh, m, mm, s, ss, AM/PM
+
+## numFmt == "LONGDATE" will use the date format specified by the above
+addStyle(wb, 1, style = createStyle(numFmt = "LONGDATE"), rows = 2:11, cols = 1, gridExpand = TRUE) 
+
+## some custom date format examples
+sty <- createStyle(numFmt = "yyyy/mm/dd hh:mm:ss AM/PM")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 2, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "hh:mm:ss AM/PM")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 3, gridExpand = TRUE)
+
+sty <- createStyle(numFmt = "hh:mm:ss")
+addStyle(wb, 1, style = sty, rows = 2:11, cols = 4, gridExpand = TRUE)
+
+setColWidths(wb, 1, cols = 1:4, widths = 30)
+
+## The default date format used in writeData and writeDataTable can be set with:
+options("openxlsx.datetimeFormat" = "yyyy/mm/dd hh:mm:ss")
+writeData(wb, "DateTime Formatting", dateTimes, startRow  = 8, borders = "rows")
+
+options("openxlsx.datetimeFormat" = "hh:mm:ss AM/PM")
+writeDataTable(wb, "DateTime Formatting", dateTimes, startRow  = 15)
+
+saveWorkbook(wb, "DateTime Formatting.xlsx", overwrite = TRUE)
+openXL("DateTime Formatting.xlsx")
+
 \end{verbatim}
 
 

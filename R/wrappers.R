@@ -24,7 +24,7 @@ createWorkbook <- function(creator = Sys.getenv("USERNAME")){
   
   ## remove any illegal XML characters
   creator <- replaceIllegalCharacters(creator)
-    
+  
   invisible(Workbook$new(creator))
 }
 
@@ -69,7 +69,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   setwd(wd)
   
   file.copy(file.path(tmpDir, "temp.xlsx"), file, overwrite = overwrite)
-
+  
   ## delete temporary dir
   unlink(tmpDir, force = TRUE, recursive= TRUE)
   
@@ -146,7 +146,7 @@ removeCellMerge <- function(wb, sheet, cols, rows){
   rows <- as.numeric(rows)
   
   wb$removeCellMerge(sheet, startRow = min(rows), endRow = max(rows), startCol = min(cols), endCol = max(cols))
-
+  
 }
 
 
@@ -172,12 +172,12 @@ sheets <- function(wb){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
- 
+  
   
   nms <- names(wb$worksheets)
   nms <- replaceXMLEntities(nms)
   
- return(nms)
+  return(nms)
 }
 
 
@@ -383,6 +383,7 @@ convertFromExcelRef <- function(col){
 #' @return A style object
 #' @export
 #' @examples
+#' ## See package vignettes for further examples
 #' 
 #' ## Modify default values of border colour and border line style
 #' options("openxlsx.borderColour" = "#4F80BD")
@@ -423,22 +424,23 @@ createStyle <- function(fontName = NULL,
   validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4")
   
   if(numFmt == "date"){
-  
     numFmt <- getOption("openxlsx.dateFormat", "date")
-  
   }else if(!numFmt %in% validNumFmt){
-    
-    if(grepl("[^mdy[[:punct:] ]", numFmt))
+    if(grepl("[^mdyhsap[[:punct:] ]", numFmt))
       stop("Invalid numFmt")
-
   }
-     
+  
+  if(numFmt == "longdate"){
+    numFmt <- getOption("openxlsx.datetimeFormat", "longdate")
+  }
+  
+  
   numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
                         list("numFmtId" = 2),  # NUMBER
                         list("numFmtId" = 164, formatCode = "&quot;$&quot;#,##0.00"), ## CURRENCY
                         list("numFmtId" = 44), # ACCOUNTING
                         list("numFmtId" = 14), # DATE
-                        list("numFmtId" = 166, formatCode = "[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy"), #LONGDATE
+                        list("numFmtId" = 166, formatCode = "yyyy/mm/dd hh:mm:ss"), #LONGDATE
                         list("numFmtId" = 167), # TIME
                         list("numFmtId" = 10),  # PERCENTAGE
                         list("numFmtId" = 11),  # SCIENTIFIC
@@ -462,14 +464,14 @@ createStyle <- function(fontName = NULL,
     if(!valign %in% c("top", "bottom", "center"))
       stop("Invalid valign argument!")
   }
-    
+  
   if(!is.logical(wrapText))
     stop("Invalid wrapText")
   
   textDecoration <- tolower(textDecoration)
   if(!is.null(textDecoration)){
     if(!all(textDecoration %in% c("bold", "strikeout", "italic", "underline", "underline2", "")))
-       stop("Invalid textDecoration!")
+      stop("Invalid textDecoration!")
   }
   
   borderColour <- validateColour(borderColour, "Invalid border colour!")
@@ -480,7 +482,7 @@ createStyle <- function(fontName = NULL,
   if(!is.null(fontSize))
     if(fontSize < 1) stop("Font size must be greater than 0!")
   
-
+  
   
   ######################### error checking complete #############################
   style <- Style$new()
@@ -489,9 +491,9 @@ createStyle <- function(fontName = NULL,
   style$fontSize <- list(val = fontSize)
   if(!is.null(fontColour))
     style$fontColour <- list("rgb" =  fontColour)
-    
+  
   style$fontDecoration <- toupper(textDecoration)
-
+  
   ## background fill   
   if(is.null(bgFill)){
     bgFillList <- NULL
@@ -502,11 +504,11 @@ createStyle <- function(fontName = NULL,
   
   ## foreground fill
   if(is.null(fgFill)){
-     fgFillList <- NULL
-   }else{
-     fgFill <- validateColour(fgFill, "Invalid fgFill colour")
-     style$fill <- append(style$fill, list(fillFg = list(rgb = fgFill)))
-   }
+    fgFillList <- NULL
+  }else{
+    fgFill <- validateColour(fgFill, "Invalid fgFill colour")
+    style$fill <- append(style$fill, list(fillFg = list(rgb = fgFill)))
+  }
   
   
   ## border
@@ -549,20 +551,20 @@ createStyle <- function(fontName = NULL,
       style$borderBottom <-  borderStyle[["BOTTOM"]]
       style$borderBottomColour <- list("rgb" = borderColour[["BOTTOM"]])
     }
-
+    
   }
   
-   ## other fields
-   style$halign <- halign
-   style$valign <- valign
-   style$wrapText <- wrapText[[1]]
-
+  ## other fields
+  style$halign <- halign
+  style$valign <- valign
+  style$wrapText <- wrapText[[1]]
+  
   if(numFmt %in% validNumFmt){
     style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
   }else{
     style$numFmt <- list("numFmtId" = 9999, formatCode = numFmt)  ## Custom numFmt
   }
-
+  
   return(style)
 } 
 
@@ -631,8 +633,8 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
   
   styleElements <- list(style = style,
                         cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                     rows = rows,
-                                     cols = cols)))
+                                          rows = rows,
+                                          cols = cols)))
   
   invisible(wb$styleObjects <- append(wb$styleObjects, list(styleElements)))
   
@@ -726,7 +728,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
   }else if(type != "expression"){
     stop("Invalid type argument.  type must be 'expression' or 'colourScale'")
   }
-
+  
   ## rows and cols
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)  
@@ -741,19 +743,19 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
     dxfId <- NULL
     
   }else{ ## else type == "expression"
-      
+    
     rule <- toupper(gsub(" ", "", rule))
     rule <- replaceIllegalCharacters(rule)
     rule <- gsub("!=", "&lt;&gt;", rule)
     rule <- gsub("==", "=", rule)
-  
+    
     if(!grepl("[A-Z]", substr(rule, 1, 2))){
-  
+      
       ## formula looks like "operatorX" , attach top left cell to rule    
       rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
-  
-    } ## else, there is a letter in the formula and apply as is
       
+    } ## else, there is a letter in the formula and apply as is
+    
     if(is.null(style))
       style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
     
@@ -761,7 +763,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
     
   }
   
-
+  
   invisible(wb$conditionalFormatCell(sheet,
                                      startRow = min(rows),
                                      endRow = max(rows),
@@ -770,7 +772,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
                                      dxfId,
                                      formula = rule,
                                      type = type))
-
+  
   invisible(0)
   
 }
@@ -996,7 +998,7 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #' ## Save workbook
 #' saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
 setColWidths <- function(wb, sheet, cols, widths){
-
+  
   sheet <- wb$validateSheet(sheet)
   
   if(!"Workbook" %in% class(wb))
@@ -1081,7 +1083,7 @@ removeRowHeights <- function(wb, sheet, rows){
   
   if(!is.numeric(rows))
     rows <- as.numeric(rows)
-    
+  
   customRows <- as.numeric(names(wb$rowHeights[[sheet]]))
   removeInds <- which(customRows %in% rows)
   if(length(removeInds) > 0)
@@ -1311,7 +1313,7 @@ removeWorksheet <- function(wb, sheet){
 #' 
 #' saveWorkbook(wb, "deleteDataExample.xlsx", overwrite = TRUE)
 deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
-    
+  
   sheet <- wb$validateSheet(sheet)
   
   if(!"Workbook" %in% class(wb))
@@ -1369,7 +1371,7 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
   
   if(fontSize < 0) stop("Invalid fontSize")
   fontColour <- validateColour(fontColour)
-    
+  
   wb$styles$fonts[[1]] <- sprintf('<font><sz val="%s"/><color rgb="%s"/><name val="%s"/></font>', fontSize, fontColour, fontName)
   
 }
@@ -1392,14 +1394,14 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName =
 #' getBaseFont(wb)
 getBaseFont <- function(wb){
   
-
+  
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-
+  
   wb$getBaseFont()
   
 }
-  
+
 
 #' @name setHeader
 #' @title Set header for all worksheets
@@ -1435,7 +1437,7 @@ setHeader <- function(wb, text, position = "center"){
   
   if(length(text) != 1)
     stop("Text argument must be a character vector of length 1")
-    
+  
   sheet <- wb$validateSheet(1)
   wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "head"] <- as.character(text)
   
@@ -1521,7 +1523,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100, left = 0
   
   orientation <- tolower(orientation)
   if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
-    
+  
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
   
@@ -1560,7 +1562,7 @@ showGridLines <- function(wb, sheet, showGridLines = FALSE){
   
   if(!is.logical(showGridLines)) stop("showGridLines must be a logical")
   
-
+  
   sv <- wb$worksheets[[sheet]]$sheetViews
   showGridLines <- as.numeric(showGridLines)
   ## If attribute exists gsub
@@ -1610,10 +1612,10 @@ worksheetOrder <- function(wb){
   if(!"Workbook" %in% class(wb))
     stop("Argument must be a Workbook.")
   
-#   nms <- names(wb$worksheets)
-#   nms <- replaceXMLEntities(nms)
-#   sprintf('%s: "%s"', wb$sheetOrder, nms[wb$sheetOrder])
-
+  #   nms <- names(wb$worksheets)
+  #   nms <- replaceXMLEntities(nms)
+  #   sprintf('%s: "%s"', wb$sheetOrder, nms[wb$sheetOrder])
+  
   wb$sheetOrder
   
 }

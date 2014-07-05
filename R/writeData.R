@@ -304,17 +304,25 @@ writeData <- function(wb,
 
     }
     
-    if(any(c("date", "posixct", "posixt") %in% unlist(colClasses))){
+    if("date" %in% unlist(colClasses)){
       
       ## style dates
       dInds <- which(sapply(colClasses, function(x) "date" %in% x))    
-      pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt") %in% x)))
-      
       addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
                rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = unlist(c(dInds, pInds) + startCol - 1), gridExpand = TRUE)
+               cols = unlist(dInds + startCol - 1), gridExpand = TRUE)
       
     }
+    
+    if(any(c("posixlt", "posixct", "posixt") %in% unlist(colClasses))){
+      
+      ## style POSIX
+      pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
+      addStyle(wb, sheet = sheet, style=createStyle(numFmt="LONGDATE"), 
+               rows= 1:nrow(x) + startRow + colNames - 1,
+               cols = unlist(pInds + startCol - 1), gridExpand = TRUE)
+    }
+    
     
   }else{ ## draw borders
 
