@@ -20,7 +20,6 @@
  }
 
 \begin{document}
-
 \title{Examples}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}

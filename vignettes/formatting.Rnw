@@ -156,10 +156,8 @@ saveWorkbook(wb, "Date Formatting.xlsx", overwrite = TRUE)
 \section{DateTime Formatting}
 \begin{verbatim}
 
-The conversion from POSIX to Excel datetimes uses format(Sys.time(), "%z")
-to get the time zone offSet.  If POSIX values are not being written correct try setting
-the timezone with (for example)
-
+The conversion from POSIX to Excel datetimes is dependent on the timezone you are in.
+If POSIX values are being written incorrectly, try setting the timezone with (for example)
 Sys.setenv(TZ = "Australia/Sydney")
 
 dateTimes <- data.frame("d1" = Sys.time() - 0:4*10000)
