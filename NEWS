@@ -14,7 +14,7 @@ NEW FEATURES
 
 * Generalised conditionalFormat function to complex expressions and color scales.
 
-
+* writeData border type "all" to draw all borders and maintain column styling.
 
 BUG FIXES
 

@@ -18,7 +18,7 @@
 #' "\code{surrounding}", a border is drawn around the data.  If "\code{rows}",
 #' a surrounding border is drawn with a border around each row. If
 #' "\code{columns}", a surrounding border is drawn with a border between
-#' each column.
+#' each column. If "\code{all}" all cell borders are drawn.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
 #' \itemize{
@@ -165,7 +165,7 @@ writeData <- function(wb,
                       colNames = TRUE,
                       rowNames = FALSE,
                       headerStyle = NULL,
-                      borders = c("none","surrounding","rows","columns"),
+                      borders = c("none","surrounding","rows","columns", "all"),
                       borderColour = getOption("openxlsx.borderColour", "black"),
                       borderStyle = getOption("openxlsx.borderStyle", "thin"),
                       ...){
@@ -221,7 +221,7 @@ writeData <- function(wb,
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
-        
+    
   }else if("anova" %in% clx){
     
     x <- cbind(x)
@@ -244,19 +244,19 @@ writeData <- function(wb,
     rowNames <- FALSE
     
   }else if("prcomp" %in% clx){
-      
+    
     x <- as.data.frame(x$rotation)
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
-          
+    
   }else if("summary.prcomp" %in% clx){
-          
-     x <- as.data.frame(x$importance)
-     x <- cbind(data.frame("Variable" = rownames(x)), x)
-     names(x)[1] <- ""
-     rowNames <- FALSE
-
+    
+    x <- as.data.frame(x$importance)
+    x <- cbind(data.frame("Variable" = rownames(x)), x)
+    names(x)[1] <- ""
+    rowNames <- FALSE
+    
   }else{
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     colNames <- FALSE
@@ -297,13 +297,13 @@ writeData <- function(wb,
   if(borders == "none"){
     
     if("hyperlink" %in% allColClasses){
-
-    ## style hyperlinks
-    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
-    addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
-             rows= 1:nrow(x) + startRow + colNames - 1,
-             cols = inds + startCol - 1, gridExpand = TRUE)  
-
+      
+      ## style hyperlinks
+      inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
+      addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
+               rows= 1:nrow(x) + startRow + colNames - 1,
+               cols = inds + startCol - 1, gridExpand = TRUE)  
+      
     }
     
     if("date" %in% allColClasses){
@@ -359,36 +359,48 @@ writeData <- function(wb,
     }
     
     
-  }else{ ## draw borders
-
-    if("surrounding" == borders){
-      wb$surroundingBorders(colClasses,
-                            sheet = sheet,
-                            startRow = startRow + colNames,
-                            startCol = startCol,
-                            nRow = nRow, nCol = nCol,
-                            borderColour = list("rgb" = borderColour),
-                            borderStyle = borderStyle)
-      
-    }else if("rows" == borders ){
-      wb$rowBorders(colClasses,
-                    sheet = sheet,
-                    startRow = startRow + colNames,
-                    startCol = startCol,
-                    nRow = nRow, nCol = nCol,
-                    borderColour = list("rgb" = borderColour),
-                    borderStyle = borderStyle)
-      
-    }else if("columns" == borders ){
-      wb$columnBorders(colClasses,
-                    sheet = sheet,
-                    startRow = startRow + colNames,
-                    startCol = startCol,
-                    nRow = nRow, nCol = nCol,
-                    borderColour = list("rgb" = borderColour),
-                    borderStyle = borderStyle)
-      
-    }
+  }else if(borders == "surrounding"){
+    
+    wb$surroundingBorders(colClasses,
+                          sheet = sheet,
+                          startRow = startRow + colNames,
+                          startCol = startCol,
+                          nRow = nRow, nCol = nCol,
+                          borderColour = list("rgb" = borderColour),
+                          borderStyle = borderStyle)
+    
+  }else if(borders == "rows"){
+    
+    wb$rowBorders(colClasses,
+                  sheet = sheet,
+                  startRow = startRow + colNames,
+                  startCol = startCol,
+                  nRow = nRow, nCol = nCol,
+                  borderColour = list("rgb" = borderColour),
+                  borderStyle = borderStyle)
+    
+  }else if(borders == "columns"){
+    
+    wb$columnBorders(colClasses,
+                     sheet = sheet,
+                     startRow = startRow + colNames,
+                     startCol = startCol,
+                     nRow = nRow, nCol = nCol,
+                     borderColour = list("rgb" = borderColour),
+                     borderStyle = borderStyle)
+    
+    
+  }else if(borders == "all"){
+    
+    wb$allBorders(colClasses,
+                  sheet = sheet,
+                  startRow = startRow + colNames,
+                  startCol = startCol,
+                  nRow = nRow, nCol = nCol,
+                  borderColour = list("rgb" = borderColour),
+                  borderStyle = borderStyle)
+    
+    
   }
   
   

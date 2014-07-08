@@ -543,3 +543,44 @@ Workbook$methods(columnBorders = function(colClasses, sheet, startRow, startCol,
 
 
 
+
+
+Workbook$methods(allBorders = function(colClasses, sheet, startRow, startCol, nRow, nCol, borderColour, borderStyle, borderType){
+  
+  sheet <- names(worksheets)[[sheet]]
+  ## steps
+  # get column class
+  # get corresponding base style
+  
+  for(i in 1:nCol){
+    
+    tmp <- genBaseColStyle(colClasses[[i]])
+    sTop <- tmp$style
+    
+    ## All borders
+    sTop$borderTop <- borderStyle
+    sTop$borderTopColour <- borderColour
+    
+    sTop$borderBottom <- borderStyle
+    sTop$borderBottomColour <- borderColour
+    
+    sTop$borderLeft <- borderStyle
+    sTop$borderLeftColour <- borderColour
+    
+    sTop$borderRight <- borderStyle
+    sTop$borderRightColour <- borderColour
+    
+    styleObjects <<- append(styleObjects, list(
+      list(style = sTop,
+           cells = list(list("sheet" = sheet,
+                             "rows" = (startRow):(startRow + nRow - 1),
+                             "cols" = rep(startCol + i - 1, nRow)
+           )))
+    ))
+    
+  }## End of loop through columns
+  
+  
+  invisible(0)
+  
+})

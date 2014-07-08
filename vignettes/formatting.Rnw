@@ -58,6 +58,7 @@ writeData(wb, 1, df, startRow = 2, startCol = 2)
 writeData(wb, 1, df, startRow = 9, startCol = 2, borders = "surrounding")
 writeData(wb, 1, df, startRow = 16, startCol = 2, borders = "rows")
 writeData(wb, 1, df, startRow = 23, startCol = 2, borders ="columns")
+writeData(wb, 1, df, startRow = 30, startCol = 2, borders ="all")
 
 ## headerStyles
 hs1 <- createStyle(fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
@@ -80,7 +81,8 @@ writeDataTable(wb, 2, df, startRow = 9, startCol = 2, tableStyle = "TableStyleLi
 writeDataTable(wb, 2, df, startRow = 16, startCol = 2, tableStyle = "TableStyleLight2")
 writeDataTable(wb, 2, df, startRow = 23, startCol = 2, tableStyle = "TableStyleMedium21")
 
-saveWorkbook(wb, "Formatting on write.xlsx", overwrite = TRUE)
+openXL(wb) ## opens a temp version
+
 \end{verbatim}
 
 \noindent

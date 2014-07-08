@@ -5,7 +5,7 @@
 \usage{
 writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
-  borders = c("none", "surrounding", "rows", "columns"),
+  borders = c("none", "surrounding", "rows", "columns", "all"),
   borderColour = getOption("openxlsx.borderColour", "black"),
   borderStyle = getOption("openxlsx.borderStyle", "thin"), ...)
 }
@@ -35,7 +35,7 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 "\code{surrounding}", a border is drawn around the data.  If "\code{rows}",
 a surrounding border is drawn with a border around each row. If
 "\code{columns}", a surrounding border is drawn with a border between
-each column.}
+each column. If "\code{all}" all cell borders are drawn.}
 
 \item{borderColour}{Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).}
 
