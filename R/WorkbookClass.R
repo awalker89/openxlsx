@@ -429,7 +429,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 
 
-Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
+Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses){
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- options("scipen")
@@ -440,11 +440,11 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
   nCols <- ncol(df)
   nRows <- nrow(df)  
   
-  colClasses <- sapply(df, function(x) class(x)[[1]])
+  allColClasses <- unlist(colClasses)
   
   ## convert any Dates to integers and create date style object
-  if(any(c("Date", "POSIXct", "POSIXt") %in% colClasses)){
-    dInds <- which(sapply(colClasses, function(x) "Date" %in% x))
+  if(any(c("date", "posixct", "posixt") %in% allColClasses)){
+    dInds <- which(sapply(colClasses, function(x) "date" %in% x))
     for(i in dInds)
       df[,i] <- as.integer(df[,i]) + 25569
     
@@ -454,13 +454,13 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames){
     if(is.na(offSet))
       offSet <- 0
     
-    pInds <- which(sapply(colClasses, function(x) any(c("POSIXct", "POSIXt", "POSIXlt") %in% x)))
+    pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     for(i in pInds)
       df[,i] <- as.numeric(as.POSIXct(df[,i])) / 86400 + 25569 + offSet
   }
   
   ## convert any Dates to integers and create date style object
-  if(any(c("currency", "accounting", "percentage", "3") %in% tolower(colClasses))){
+  if(any(c("currency", "accounting", "percentage", "3") %in% allColClasses)){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3") %in% tolower(x))))
     for(i in cInds)
       df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))

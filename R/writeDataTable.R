@@ -108,8 +108,9 @@ writeDataTable <- function(wb, sheet, x,
   
   ## column class
   colClasses <- lapply(x, function(x) tolower(class(x)))
+  allColClasses <- unlist(colClasses)
     
-  if("date" %in% unlist(colClasses)){
+  if("date" %in% allColClasses){
     
     inds <- which(sapply(colClasses, function(x) "date" %in% x))    
     addStyle(wb, sheet = sheet, style=createStyle(numFmt="DATE"), 
@@ -118,7 +119,7 @@ writeDataTable <- function(wb, sheet, x,
     
   }
   
-  if(any(c("posixlt", "posixct", "posixt") %in% unlist(colClasses))){
+  if(any(c("posixlt", "posixct", "posixt") %in% allColClasses)){
     
     inds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt="LONGDATE"), 
@@ -128,7 +129,7 @@ writeDataTable <- function(wb, sheet, x,
   
   
   ## style currency as CURRENCY
-  if("currency" %in% colClasses){
+  if("currency" %in% allColClasses){
     inds <- which(sapply(colClasses, function(x) "currency" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "CURRENCY"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
@@ -136,7 +137,7 @@ writeDataTable <- function(wb, sheet, x,
   }
   
   ## style accounting as ACCOUNTING
-  if("accounting" %in% colClasses){
+  if("accounting" %in% allColClasses){
     inds <- which(sapply(colClasses, function(x) "accounting" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "ACCOUNTING"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
@@ -144,7 +145,7 @@ writeDataTable <- function(wb, sheet, x,
   }
   
   ## style hyperlinks
-  if("hyperlink" %in% colClasses){
+  if("hyperlink" %in% allColClasses){
     inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
@@ -152,7 +153,7 @@ writeDataTable <- function(wb, sheet, x,
   }
   
   ## style percentages
-  if("percentage" %in% colClasses){
+  if("percentage" %in% allColClasses){
     inds <- which(sapply(colClasses, function(x) "percentage" %in% x))
     addStyle(wb, sheet = sheet, style=createStyle(numFmt = "PERCENTAGE"), 
              rows= 1:nrow(x) + startRow + showColNames - 1,
@@ -174,7 +175,8 @@ writeDataTable <- function(wb, sheet, x,
                colNames = showColNames,
                sheet = sheet,
                startRow = startRow,
-               startCol = startCol)
+               startCol = startCol,
+               colClasses = colClasses)
   
   ## replace invalid XML characters
   colNames <- replaceIllegalCharacters(colNames)
