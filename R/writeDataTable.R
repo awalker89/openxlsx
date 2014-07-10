@@ -49,7 +49,7 @@ writeDataTable <- function(wb, sheet, x,
                            xy = NULL,
                            colNames = TRUE,
                            rowNames = FALSE,
-                           tableStyle = "TableStyleMedium2"){
+                           tableStyle = "TableStyleLight9"){
   
   
   if(!is.null(xy)){
@@ -176,7 +176,8 @@ writeDataTable <- function(wb, sheet, x,
                sheet = sheet,
                startRow = startRow,
                startCol = startCol,
-               colClasses = colClasses)
+               colClasses = colClasses,
+               hlinkNames = NULL)
   
   ## replace invalid XML characters
   colNames <- replaceIllegalCharacters(colNames)

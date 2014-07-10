@@ -198,6 +198,7 @@ writeData <- function(wb,
   ## given that everything has to fit into a grid.
   
   clx <- class(x)
+  hlinkNames <- NULL
   if(any(c("data.frame", "data.table") %in% clx)){
     ## Do nothing
     
@@ -258,11 +259,15 @@ writeData <- function(wb,
     rowNames <- FALSE
     
   }else{
+    
+    if('hyperlink' %in% tolower(class(x))){
+      hlinkNames <- names(x)
+      class(x) <- c("character", "hyperlink") 
+    }
     x <- as.data.frame(x, stringsAsFactors = FALSE)
     colNames <- FALSE
     rowNames <- FALSE
   }
-  
   
   ## cbind rownames to x
   if(rowNames){
@@ -283,7 +288,8 @@ writeData <- function(wb,
                sheet = sheet,
                startCol = startCol,
                startRow = startRow,
-               colClasses = colClasses)
+               colClasses = colClasses,
+               hlinkNames = hlinkNames)
   
   ## header style  
   if(!is.null(headerStyle))

@@ -431,7 +431,7 @@ createStyle <- function(fontName = NULL,
   }
   
   if(numFmt == "longdate"){
-    numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "date")))  
+    numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
   }
   
   

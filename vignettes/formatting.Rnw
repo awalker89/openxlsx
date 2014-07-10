@@ -19,6 +19,7 @@
  bottom=20mm,
  }
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Examples}
 \author{Alexander Walker\\
@@ -35,14 +36,12 @@ df <- data.frame("Date" = Sys.Date()-0:4,
                  "Currency" = paste("$",-2:2),
                  "Accounting" = -2:2,
                  "hLink" = "http://cran.r-project.org/", 
-                 "Percentage" = seq(0, 1, length.out=5), stringsAsFactors = FALSE)
+                 "Percentage" = seq(-1, 1, length.out=5), stringsAsFactors = FALSE)
 
 class(df$Currency) <- "currency"
 class(df$Accounting) <- "accounting"
 class(df$hLink) <- "hyperlink"
 class(df$Percentage) <- "percentage"
-
-
 
 ## Formatting can be applied simply through the write functions
 ## global options can be set to further simplify things
@@ -63,16 +62,14 @@ writeData(wb, 1, df, startRow = 30, startCol = 2, borders ="all")
 hs1 <- createStyle(fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
                    border = "Bottom", fontColour = "white")
 
-writeData(wb, 1, df, startRow = 16, startCol = 2, headerStyle = hs1,
+writeData(wb, 1, df, startRow = 16, startCol = 9, headerStyle = hs1,
           borders = "rows", borderStyle = "medium")
 
-
-
-
+## to change the display text for a hyperlink column just write over those cells
+writeData(wb, sheet = 1, x = paste("Hyperlink", 1:5), startRow = 17, startCol = 13)
 
 
 ## writing as an Excel Table
-
 
 addWorksheet(wb, "writeDataTable")
 writeDataTable(wb, 2, df, startRow = 2, startCol = 2)

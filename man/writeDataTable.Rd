@@ -4,7 +4,7 @@
 \title{Write to a worksheet and format as a table}
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
-  colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleMedium2")
+  colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9")
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}

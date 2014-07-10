@@ -1704,18 +1704,15 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       LogicalVector attrs = !is_na(cValtmp);
       cVal = as<std::vector<std::string> >(cValtmp);
       hasRowData = true;
-
-      // cVal[0] is r    
-      // cVal[1] is t        
-      // cVal[2] is s    
-      // cVal[3] is v    
-      // cVal[4] is f    
       
        j += 1;
        
-       
       if(!attrs[0]){ //If r IS NA we have no row data we only have a rowHeight
         hasRowData = false;
+        
+        if(j == n)
+          break;
+        
         currentRow = rows[j];
         break;
       }

@@ -429,7 +429,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 
 
-Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses){
+Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames){
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- options("scipen")
@@ -465,20 +465,27 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     for(i in cInds)
       df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))
   }
+
+  if("hyperlink" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
+      class(df[,i]) <- "hyperlink"
+  }
   
-  colClasses <- sapply(df, function(x) class(x)[[1]]) ## by here all cols must have a single class only
+  colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
   
   ## convert logicals (Excel stores logicals as 0 & 1)
-  if("logical" %in% colClasses){
-    for(i in which(colClasses == "logical"))
+  if("logical" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[,i]) <- "numeric"
   }
   
   ## convert all numerics to character (this way preserves digits)
-  if("numeric" %in% colClasses){
-    for(i in which(colClasses == "numeric"))
+  if("numeric" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
       class(df[,i]) <- "character"
   }
+  
+
   
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
@@ -499,17 +506,19 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1), LETTERS, as.character(startRow:(startRow+nRows-1)))
   
   ##Append hyperlinks, convert h to s in cell type
-  if("hyperlink" %in% tolower(colClasses)){
+  if("hyperlink" %in% colClasses){
     
     hInds <- which(t == "h")
+    
     if(length(hInds) > 0){
       t[hInds] <- "s"
-      
+            
       exHlinks <- hyperlinks[[sheet]]
-      exhlinkRefs <- names(hyperlinks[[sheet]])
-      
       newHlinks <- r[hInds]
       names(newHlinks) <- replaceIllegalCharacters(v[hInds])
+      
+      if(!is.null(hlinkNames) & length(hlinkNames) == length(hInds))
+        v[hInds] <- hlinkNames 
       
       if(exHlinks[[1]] == ""){
         hyperlinks[[sheet]] <<- newHlinks
@@ -907,11 +916,11 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     
     ## Sort sheetData before writing
     if(dataCount[[i]] > 1 | length(rowHeights[[i]]) > 0){
-      r <- sapply(sheetData[[i]], "[[", "r")
-      sheetData[[i]] <<- sheetData[[i]][order(nchar(names(r)), names(r), r)]
+      r <- sapply(sheetData[[i]], "[[", "r")      
+      sheetData[[i]] <<- sheetData[[i]][order(as.numeric(names(r)), nchar(r), r)]
       dataCount[[i]] <<- 1
-    }
-    
+    }    
+        
     if(length(rowHeights[[i]]) == 0){
       
       .Call("openxlsx_quickBuildCellXML",
