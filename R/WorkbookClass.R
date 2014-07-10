@@ -440,7 +440,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nCols <- ncol(df)
   nRows <- nrow(df)  
   
-  allColClasses <- unlist(colClasses)
+  allColClasses <- unlist(colClasses)  
   
   ## convert any Dates to integers and create date style object
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
@@ -466,7 +466,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))
   }
   
-  colClasses <- sapply(df, function(x) class(x)[[1]])
+  colClasses <- sapply(df, function(x) class(x)[[1]]) ## by here all cols must have a single class only
   
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% colClasses){

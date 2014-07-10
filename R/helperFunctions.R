@@ -33,8 +33,15 @@ col2hex <- function(my.col) {
 
 
 replaceIllegalCharacters <- function(v){
+
+  vEnc <- Encoding(v)
+  if("UTF-8" %in% vEnc){
+    fromEnc <- "UTF-8"
+  }else{
+    fromEnc <- ""
+  }
   
-  v <- iconv(as.character(v), to = "UTF-8")
+  v <- iconv(as.character(v), from = fromEnc, to = "UTF-8")
   v <- gsub('&', "&amp;", v)
   v <- gsub('"', "&quot;", v)
   v <- gsub("'", "&apos;", v)
