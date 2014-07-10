@@ -20,7 +20,7 @@ BUG FIXES
 
 * Invalid XML characters in hyperlinks now replaced.
 
-
+* Encoding issues when writing data read in with read.xlsx
 
 
 openxlsx 2.0.1
