@@ -701,7 +701,7 @@ SEXP buildLoadCellList( CharacterVector r, CharacterVector t, CharacterVector v,
   
   //Valid combinations
   //  r t	v	f
-  //  T	F	F	F
+  //  T	F	F	F done
   //  T	T	T	F done
   //  T	T	T	T done
   
@@ -799,56 +799,6 @@ SEXP constructCellData(IntegerVector cols, std::vector<std::string> LETTERS, std
 }
 
 
-
-
-// [[Rcpp::export]]
-SEXP buildCellList212121(CharacterVector r, CharacterVector t, CharacterVector v, CharacterVector s) {
-  
-  //  r t	s	v	
-  //  T	F	T	F	
-  //  T	T	F	T	
-  //  T	T	T	T	
-  
-  int n = r.size();
-  List cells(n);
-  LogicalVector hasV = is_na(v);
-  LogicalVector hasS = is_na(s);
-  
-  for(int i=0; i < n; i++){
-    
-    if(hasV[i]){
-      
-      if(hasS[i]){
-        
-        cells[i] = CharacterVector::create(
-          Named("r") = r[i],
-          Named("t") = t[i],
-          Named("s") = s[i],
-          Named("v") = v[i],
-          Named("f") = NA_STRING);
-          
-      }else{
-        cells[i] = CharacterVector::create(
-          Named("r") = r[i],
-          Named("t") = t[i],
-          Named("s") = NA_STRING,
-          Named("v") = v[i],
-          Named("f") = NA_STRING);
-      }
-    }else{
-      
-      cells[i] = CharacterVector::create(
-        Named("r") = r[i],
-        Named("t") = NA_STRING,
-        Named("s") = NA_STRING,
-        Named("v") = NA_STRING,
-        Named("f") = NA_STRING);
-        
-    }
-  } // end of for loop
-  
-  return cells ;
-}
 
 
 // [[Rcpp::export]]
@@ -1334,26 +1284,6 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
 }
 
 
-
-
-
-// [[Rcpp::export]]
-IntegerVector WhichMatch( IntegerVector a, int b ){
-  
-  int n = a.size();
-  
-  std::vector<int> res;
-  for(int i =0; i < n; i ++){
-    if(a[i] == b)
-    res.push_back(i);
-  }
-  
-  return wrap(res) ;
-  
-}
-
-
-
 // [[Rcpp::export]]
 CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle){
   
@@ -1774,16 +1704,19 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       LogicalVector attrs = !is_na(cValtmp);
       cVal = as<std::vector<std::string> >(cValtmp);
       hasRowData = true;
-      
+
       // cVal[0] is r    
       // cVal[1] is t        
       // cVal[2] is s    
       // cVal[3] is v    
       // cVal[4] is f    
       
-      if(!attrs[0]){ //If we have no row data we only have a rowHeight
-        j += 1;
+       j += 1;
+       
+       
+      if(!attrs[0]){ //If r IS NA we have no row data we only have a rowHeight
         hasRowData = false;
+        currentRow = rows[j];
         break;
       }
       
@@ -1806,12 +1739,11 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
         cellXML += "\"/>";
       }
       
-      j += 1;
-      
       if(j == n)
         break;
       
       currentRow = rows[j];
+      
     }
     
     if(h < nRowHeights){

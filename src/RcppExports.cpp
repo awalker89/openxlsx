@@ -309,24 +309,6 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// buildCellList212121
-SEXP buildCellList212121(CharacterVector r, CharacterVector t, CharacterVector v, CharacterVector s);
-RcppExport SEXP openxlsx_buildCellList212121(SEXP rSEXP, SEXP tSEXP, SEXP vSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< CharacterVector >::type r(rSEXP );
-        Rcpp::traits::input_parameter< CharacterVector >::type t(tSEXP );
-        Rcpp::traits::input_parameter< CharacterVector >::type v(vSEXP );
-        Rcpp::traits::input_parameter< CharacterVector >::type s(sSEXP );
-        SEXP __result = buildCellList212121(r, t, v, s);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
 // convert2ExcelRef
 SEXP convert2ExcelRef(IntegerVector cols, std::vector<std::string> LETTERS);
 RcppExport SEXP openxlsx_convert2ExcelRef(SEXP colsSEXP, SEXP LETTERSSEXP) {
@@ -466,22 +448,6 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP );
         Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP );
         SEXP __result = quickBuildCellXML(prior, post, sheetData, rowNumbers, R_fileName);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// WhichMatch
-IntegerVector WhichMatch(IntegerVector a, int b);
-RcppExport SEXP openxlsx_WhichMatch(SEXP aSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< IntegerVector >::type a(aSEXP );
-        Rcpp::traits::input_parameter< int >::type b(bSEXP );
-        IntegerVector __result = WhichMatch(a, b);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

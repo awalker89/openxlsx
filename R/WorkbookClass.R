@@ -906,7 +906,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     post <- paste0(pxml(ws[(sheetDataInd+1):length(ws)]), "</worksheet>")
     
     ## Sort sheetData before writing
-    if(dataCount[[i]] > 1){
+    if(dataCount[[i]] > 1 | length(rowHeights[[i]]) > 0){
       r <- sapply(sheetData[[i]], "[[", "r")
       sheetData[[i]] <<- sheetData[[i]][order(nchar(names(r)), names(r), r)]
       dataCount[[i]] <<- 1

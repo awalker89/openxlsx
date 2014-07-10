@@ -77,10 +77,6 @@ constructCellData <- function(cols, LETTERS, rows, t, v) {
     .Call('openxlsx_constructCellData', PACKAGE = 'openxlsx', cols, LETTERS, rows, t, v)
 }
 
-buildCellList212121 <- function(r, t, v, s) {
-    .Call('openxlsx_buildCellList212121', PACKAGE = 'openxlsx', r, t, v, s)
-}
-
 convert2ExcelRef <- function(cols, LETTERS) {
     .Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', cols, LETTERS)
 }
@@ -111,10 +107,6 @@ readWorkbook <- function(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmpty
 
 quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, R_fileName) {
     .Call('openxlsx_quickBuildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, R_fileName)
-}
-
-WhichMatch <- function(a, b) {
-    .Call('openxlsx_WhichMatch', PACKAGE = 'openxlsx', a, b)
 }
 
 buildTableXML <- function(id, ref, colNames, showColNames, tableStyle) {
