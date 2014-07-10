@@ -424,14 +424,14 @@ createStyle <- function(fontName = NULL,
   validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4")
   
   if(numFmt == "date"){
-    numFmt <- getOption("openxlsx.dateFormat", "date")
+    numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
   }else if(!numFmt %in% validNumFmt){
     if(grepl("[^mdyhsap[[:punct:] ]", numFmt))
       stop("Invalid numFmt")
   }
   
   if(numFmt == "longdate"){
-    numFmt <- getOption("openxlsx.datetimeFormat", "longdate")
+    numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "date")))  
   }
   
   
