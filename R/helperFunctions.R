@@ -1,6 +1,147 @@
 
 
 
+classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasses){
+  
+  sheet = wb$validateSheet(sheet)
+  allColClasses <- unlist(colClasses, use.names = FALSE)
+  rowInds <- 1:nRow + startRow + colNames - 1L
+  startCol <- startCol - 1L
+  
+  newStylesElements <- NULL
+  names(colClasses) <- NULL
+  
+  if("hyperlink" %in% allColClasses){
+    
+    ## style hyperlinks
+    inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
+    coords <- expand.grid(rowInds, inds +startCol)   
+    styleElements <- list(style = createStyle(fontColour = "#0000FF", textDecoration = "underline"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+    
+  }
+
+  if("date" %in% allColClasses){
+
+    ## style dates
+    inds <- which(sapply(colClasses, function(x) "date" %in% x)) 
+    coords <- expand.grid(rowInds, inds +startCol)   
+    styleElements <- list(style = createStyle(numFmt = "date"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+    
+  }
+  
+  if(any(c("posixlt", "posixct", "posixt") %in% allColClasses)){
+    
+    ## style POSIX
+    inds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
+    coords <- expand.grid(rowInds, inds +startCol)   
+    
+    styleElements <- list(style = createStyle(numFmt = "LONGDATE"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+    
+  }
+  
+  
+  ## style currency as CURRENCY
+  if("currency" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "currency" %in% x))
+    coords <- expand.grid(rowInds, inds +startCol)  
+    
+    styleElements <- list(style = createStyle(numFmt = "CURRENCY"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+  }
+  
+  ## style accounting as ACCOUNTING
+  if("accounting" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "accounting" %in% x))
+    coords <- expand.grid(rowInds, inds +startCol)  
+    
+    styleElements <- list(style = createStyle(numFmt = "ACCOUNTING"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+    
+  }
+  
+  ## style percentages
+  if("percentage" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "percentage" %in% x))
+    coords <- expand.grid(rowInds, inds +startCol)  
+    
+    styleElements <- list(style = createStyle(numFmt = "percentage"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+  }
+  
+  ## style big mark
+  if("scientific" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "scientific" %in% x))
+    coords <- expand.grid(rowInds, inds +startCol)  
+    
+    styleElements <- list(style = createStyle(numFmt = "scientific"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+  }
+  
+  ## style big mark
+  if("3" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x)))
+    coords <- expand.grid(rowInds, inds +startCol)  
+    
+    styleElements <- list(style = createStyle(numFmt = "3"),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
+    
+    newStylesElements <- append(newStylesElements, list(styleElements))
+  }
+  
+  if(!is.null(newStylesElements))
+    wb$styleObjects <- append(wb$styleObjects, newStylesElements)
+  
+  
+  invisible(1)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 validateColour <- function(colour, errorMsg = "Invalid colour!"){
   
   ## check if
