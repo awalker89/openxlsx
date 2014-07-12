@@ -8,22 +8,33 @@ genBaseColStyle <- function(cc){
   
   if("date" %in% cc){
     colStyle <- createStyle(numFmt = "date")
+    
   }else if(any(c("posixlt", "posixct", "posixt") %in% cc)){
     colStyle <- createStyle(numFmt = "longdate")
+    
   }else if("currency" %in% cc){
     colStyle$numFmt <- list("numFmtId" = "164", "formatCode" = "&quot;$&quot;#,##0.00")
+    
   }else if("accounting" %in% cc){
     colStyle$numFmt <- list("numFmtId" = "44")
+    
   }else if("hyperlink" %in% cc){
     colStyle$fontDecoration <- "UNDERLINE"
     colStyle$fontColour <- list("rgb" = "FF0000FF")
+    
   }else if("percentage" %in% cc){
     colStyle$numFmt <- list(numFmtId = "10")
+    
+  }else if("scientific" %in% cc){
+    colStyle$numFmt <- list(numFmtId = "11")
+    
   }else if("3" %in% cc){
     colStyle$numFmt <- list(numFmtId = "3")
+    
   }else{
     colStyle$numFmt <- list(numFmtId = "0")
     specialFormat <- FALSE
+    
   }
   
   list("style" = colStyle,

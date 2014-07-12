@@ -36,12 +36,14 @@ df <- data.frame("Date" = Sys.Date()-0:4,
                  "Currency" = paste("$",-2:2),
                  "Accounting" = -2:2,
                  "hLink" = "http://cran.r-project.org/", 
-                 "Percentage" = seq(-1, 1, length.out=5), stringsAsFactors = FALSE)
+                 "Percentage" = seq(-1, 1, length.out=5),
+                 "TinyNumber" = runif(5) / 1E9, stringsAsFactors = FALSE)
 
 class(df$Currency) <- "currency"
 class(df$Accounting) <- "accounting"
 class(df$hLink) <- "hyperlink"
 class(df$Percentage) <- "percentage"
+class(df$TinyNumber) <- "scientific"
 
 ## Formatting can be applied simply through the write functions
 ## global options can be set to further simplify things
@@ -62,11 +64,11 @@ writeData(wb, 1, df, startRow = 30, startCol = 2, borders ="all")
 hs1 <- createStyle(fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
                    border = "Bottom", fontColour = "white")
 
-writeData(wb, 1, df, startRow = 16, startCol = 9, headerStyle = hs1,
+writeData(wb, 1, df, startRow = 16, startCol = 10, headerStyle = hs1,
           borders = "rows", borderStyle = "medium")
 
 ## to change the display text for a hyperlink column just write over those cells
-writeData(wb, sheet = 1, x = paste("Hyperlink", 1:5), startRow = 17, startCol = 13)
+writeData(wb, sheet = 1, x = paste("Hyperlink", 1:5), startRow = 17, startCol = 14)
 
 
 ## writing as an Excel Table

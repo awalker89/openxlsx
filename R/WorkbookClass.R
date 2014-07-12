@@ -466,6 +466,12 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[,i]) <- "hyperlink"
   }
   
+  ## convert scientific
+  if("scientific" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
+      class(df[,i]) <- "numeric"
+  }
+  
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
   
   ## convert logicals (Excel stores logicals as 0 & 1)
@@ -473,6 +479,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[,i]) <- "numeric"
   }
+  
+
   
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){

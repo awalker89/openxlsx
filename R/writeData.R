@@ -285,7 +285,6 @@ writeData <- function(wb,
   nRow <- nrow(x)
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  allColClasses <- unlist(colClasses)
   sheet <- wb$validateSheet(sheet)
 
   ## write data.frame
@@ -308,68 +307,7 @@ writeData <- function(wb,
   ## hyperlink style, if no borders
   if(borders == "none"){
     
-    if("hyperlink" %in% allColClasses){
-      
-      ## style hyperlinks
-      inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
-      addStyle(wb, sheet = sheet, style=createStyle(fontColour = "#0000FF", textDecoration = "underline"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = inds + startCol - 1, gridExpand = TRUE)  
-      
-    }
-    
-    if("date" %in% allColClasses){
-      
-      ## style dates
-      dInds <- which(sapply(colClasses, function(x) "date" %in% x))    
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt="Date"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = unlist(dInds + startCol - 1), gridExpand = TRUE)
-      
-    }
-    
-    if(any(c("posixlt", "posixct", "posixt") %in% allColClasses)){
-      
-      ## style POSIX
-      pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt="LONGDATE"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = unlist(pInds + startCol - 1), gridExpand = TRUE)
-    }
-    
-    
-    ## style currency as CURRENCY
-    if("currency" %in% allColClasses){
-      inds <- which(sapply(colClasses, function(x) "currency" %in% x))
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt = "CURRENCY"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = inds + startCol - 1, gridExpand = TRUE)
-    }
-    
-    ## style accounting as ACCOUNTING
-    if("accounting" %in% allColClasses){
-      inds <- which(sapply(colClasses, function(x) "accounting" %in% x))
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt = "ACCOUNTING"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = inds + startCol - 1, gridExpand = TRUE)  
-    }
-    
-    ## style percentages
-    if("percentage" %in% allColClasses){
-      inds <- which(sapply(colClasses, function(x) "percentage" %in% x))
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt = "PERCENTAGE"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = inds + startCol - 1, gridExpand = TRUE)  
-    }
-    
-    ## style big mark
-    if("3" %in% colClasses){
-      inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x)))
-      addStyle(wb, sheet = sheet, style=createStyle(numFmt = "3"), 
-               rows= 1:nrow(x) + startRow + colNames - 1,
-               cols = inds + startCol - 1, gridExpand = TRUE)  
-    }
-    
+    invisible(classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = colNames, nRow = nrow(x), colClasses = colClasses))
     
   }else if(borders == "surrounding"){
     
@@ -415,6 +353,7 @@ writeData <- function(wb,
     
   }
   
+  invisible(0)
   
 }
 
