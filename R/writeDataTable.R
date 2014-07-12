@@ -52,6 +52,11 @@ writeDataTable <- function(wb, sheet, x,
                            tableStyle = "TableStyleLight9"){
   
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   if(!is.null(xy)){
     if(length(xy) != 2)
       stop("xy parameter must have length 2")
@@ -67,8 +72,9 @@ writeDataTable <- function(wb, sheet, x,
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
   
   ## convert startRow and startCol
-  startCol <- convertFromExcelRef(startCol)
-  startRow <- as.numeric(startRow)
+  if(!is.numeric(startCol))
+    startCol <- convertFromExcelRef(startCol)
+  startRow <- as.integer(startRow)
   
   ##Coordinates for each section
   if(rowNames)

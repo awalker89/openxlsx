@@ -53,6 +53,11 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   wd <- getwd()
   on.exit(setwd(wd), add = TRUE)
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
@@ -143,7 +148,7 @@ removeCellMerge <- function(wb, sheet, cols, rows){
     stop("First argument must be a Workbook.")
   
   cols <- convertFromExcelRef(cols)
-  rows <- as.numeric(rows)
+  rows <- as.integer(rows)
   
   wb$removeCellMerge(sheet, startRow = min(rows), endRow = max(rows), startCol = min(cols), endCol = max(cols))
   
@@ -273,17 +278,22 @@ renameWorksheet <- function(wb, sheet, newName){
 #' convertFromExcelRef("R22")
 convertFromExcelRef <- function(col){
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   col <- toupper(col)
   charFlag <- grepl("[A-Z]", col)
   if(any(charFlag)){
     col[charFlag] <- gsub("[0-9]", "", col[charFlag])
     d <- lapply(strsplit(col[charFlag], split = ""), function(x) match(rev(x), LETTERS))
-    col[charFlag] <- unlist(lapply(1:length(d), function(i) sum(d[[i]]*(26^(0:(length(d[[i]])-1)))) ))
+    col[charFlag] <- unlist(lapply(1:length(d), function(i) sum(d[[i]]*(26^(0:(length(d[[i]])-1L)))) ))
   }
   
-  col[!charFlag] <- as.numeric(col[!charFlag])
+  col[!charFlag] <- as.integer(col[!charFlag])
   
-  return(as.numeric(col))
+  return(as.integer(col))
 }
 
 
@@ -618,7 +628,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
     stop("style argument must be a Style object.")
   
   cols <- convertFromExcelRef(cols)
-  rows <- as.numeric(rows)
+  rows <- as.integer(rows)
   
   ## rows and cols need to be the same length
   if(gridExpand){
@@ -732,7 +742,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
   ## rows and cols
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)  
-  rows <- as.numeric(rows)
+  rows <- as.integer(rows)
   
   ## check valid rule
   if(type == "colorScale"){
@@ -814,8 +824,8 @@ freezePane <- function(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL, 
   firstActiveRow <- convertFromExcelRef(firstActiveRow)
   firstActiveCol <- convertFromExcelRef(firstActiveCol)
   
-  if(is.null(firstActiveRow)) firstActiveRow <- 1
-  if(is.null(firstActiveCol)) firstActiveCol <- 1
+  if(is.null(firstActiveRow)) firstActiveRow <- 1L
+  if(is.null(firstActiveCol)) firstActiveCol <- 1L
   if(!is.logical(firstRow)) firstRow <- FALSE
   if(!is.logical(firstCol)) firstCol <- FALSE
   
@@ -824,7 +834,7 @@ freezePane <- function(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL, 
   }else if(firstCol &! firstRow){
     invisible(wb$freezePanes(sheet, firstCol = firstCol))
   }else if(firstRow & firstCol){
-    invisible(wb$freezePanes(sheet, firstActiveRow = 2, firstActiveCol = 2))
+    invisible(wb$freezePanes(sheet, firstActiveRow = 2L, firstActiveCol = 2L))
   }else{ 
     
     if(!is.numeric(firstActiveRow))
@@ -896,7 +906,7 @@ insertImage <- function(wb, sheet, file, width = 6, height = 3, startRow = 1, st
     stop("Invalid units.\nunits must be one of: cm, in, px")
   
   startCol <- convertFromExcelRef(startCol)
-  startRow <- as.numeric(startRow)
+  startRow <- as.integer(startRow)
   
   ##convert to inches
   if(units == "px"){
@@ -1025,7 +1035,7 @@ setColWidths <- function(wb, sheet, cols, widths){
   cols <- cols[!duplicated(cols)]
   
   allWidths <- append(wb$colWidths[[sheet]], lapply(1:length(cols), function(i) c('col' = cols[[i]], 'width' = widths[[i]])))
-  allWidths <- allWidths[order(as.numeric(sapply(allWidths, "[[", "col")))]
+  allWidths <- allWidths[order(as.integer(sapply(allWidths, "[[", "col")))]
   
   wb$colWidths[[sheet]] <- allWidths
 }
@@ -1053,7 +1063,7 @@ removeColWidths <- function(wb, sheet, cols){
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)
   
-  customCols <- as.numeric(unlist(lapply(wb$colWidths[[sheet]], "[[", "col")))
+  customCols <- as.integer(unlist(lapply(wb$colWidths[[sheet]], "[[", "col")))
   removeInds <- which(customCols %in% cols)
   if(length(removeInds) > 0)
     wb$colWidths[[sheet]] <- wb$colWidths[[sheet]][-removeInds]
@@ -1081,10 +1091,7 @@ removeRowHeights <- function(wb, sheet, rows){
   
   sheet <- wb$validateSheet(sheet)
   
-  if(!is.numeric(rows))
-    rows <- as.numeric(rows)
-  
-  customRows <- as.numeric(names(wb$rowHeights[[sheet]]))
+  customRows <- as.integer(names(wb$rowHeights[[sheet]]))
   removeInds <- which(customRows %in% rows)
   if(length(removeInds) > 0)
     wb$rowHeights[[sheet]] <- wb$rowHeights[[sheet]][-removeInds]
@@ -1100,7 +1107,7 @@ removeRowHeights <- function(wb, sheet, rows){
 #' @return Ordering of sorted cell references 
 #' @export
 orderCellRef <- function(x){
-  order(nchar(x), x) - 1
+  order(nchar(x), x) - 1L
 }
 
 
@@ -1320,7 +1327,7 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
     stop("First argument must be a Workbook.")
   
   cols <- convertFromExcelRef(cols)
-  rows <- as.numeric(rows)
+  rows <- as.integer(rows)
   
   ## rows and cols need to be the same length
   if(gridExpand){
@@ -1564,7 +1571,7 @@ showGridLines <- function(wb, sheet, showGridLines = FALSE){
   
   
   sv <- wb$worksheets[[sheet]]$sheetViews
-  showGridLines <- as.numeric(showGridLines)
+  showGridLines <- as.integer(showGridLines)
   ## If attribute exists gsub
   if(grepl("showGridLines", sv)){
     sv <- gsub('showGridLines=".?[^"]', sprintf('showGridLines="%s', showGridLines), sv, perl = TRUE)

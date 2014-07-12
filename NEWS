@@ -22,6 +22,8 @@ BUG FIXES
 
 * Encoding issues when writing data read in with read.xlsx
 
+* scientific notation resulting in corrupt workbooks fix
+
 
 openxlsx 2.0.1
 ----------------------------------------------------------------

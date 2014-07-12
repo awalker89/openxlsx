@@ -65,7 +65,7 @@ genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE){
   
   ## list of all possible children
   tmp <- list(list(dimension = '<dimension ref="A1"/>',
-       sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" showGridLines="%s" tabSelected="TRUE"/></sheetViews>', as.numeric(showGridLines)),
+       sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" showGridLines="%s" tabSelected="TRUE"/></sheetViews>', as.integer(showGridLines)),
        sheetFormatPr = '<sheetFormatPr defaultRowHeight="15.0"/>',
        cols = NULL,
        sheetData = '<sheetData/>',

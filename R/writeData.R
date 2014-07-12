@@ -170,6 +170,11 @@ writeData <- function(wb,
                       borderStyle = getOption("openxlsx.borderStyle", "thin"),
                       ...){
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   ## All input conversions/validations
   if(!is.null(xy)){
     if(length(xy) != 2)
@@ -179,7 +184,8 @@ writeData <- function(wb,
   }
   
   ## convert startRow and startCol
-  startCol <- convertFromExcelRef(startCol)
+  if(!is.numeric(startCol))
+    startCol <- convertFromExcelRef(startCol)
   startRow <- as.integer(startRow)
   
   if(!"Workbook" %in% class(wb)) stop("First argument must be a Workbook.")
@@ -281,7 +287,7 @@ writeData <- function(wb,
   colClasses <- lapply(x, function(x) tolower(class(x)))
   allColClasses <- unlist(colClasses)
   sheet <- wb$validateSheet(sheet)
-  
+
   ## write data.frame
   wb$writeData(df = x,
                colNames = colNames,

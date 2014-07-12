@@ -39,7 +39,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     stop("sheet must be of length 1.")
   
   if(startRow < 1)
-    startRow <- 1
+    startRow <- 1L
   
   ## create temp dir and unzip
   xmlDir <- paste0(tempdir(), "_excelXMLRead")
@@ -119,19 +119,19 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   ## get references for string cells
   tR <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"|t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
   if(length(tR) == 0)
-    tR <- -1
+    tR <- -1L
   
   ## get Refs for boolean 
   tB <- .Call("openxlsx_getRefs", ws[which(grepl('t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
-  if(length(tB) > 0 & tB[[1]] != -1){
+  if(length(tB) > 0 & tB[[1]] != -1L){
     
-    fInd <- which(sharedStrings == "FALSE") - 1
+    fInd <- which(sharedStrings == "FALSE") - 1L
     if(length(fInd) == 0){
       fInd <- length(sharedStrings) 
       sharedStrings <- c(sharedStrings, "FALSE")
     }
     
-    tInd <- which(sharedStrings == "TRUE") - 1
+    tInd <- which(sharedStrings == "TRUE") - 1L
     if(length(tInd) == 0){
       tInd <- length(sharedStrings) 
       sharedStrings <- c(sharedStrings, "TRUE")
@@ -145,10 +145,11 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     
   }
   
-  if(tR[[1]] == -1){
-    stringInds <- -1
+  if(tR[[1]] == -1L){
+    stringInds <- -1L
   }else{
-    stringInds <- na.omit(match(tR, r))
+    stringInds <- match(tR, r)
+    stringInds <- stringInds[!is.na(stringInds)]
   }
 
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
@@ -162,7 +163,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     strInds <- na.omit(match(strRV[[1]], r))
     stringInds <- c(stringInds, strInds)
     
-    newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) -1) 
+    newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) - 1L) 
     
     ## replace strings in v with reference to sharedStrings, (now can convert v to numeric)
     v[strInds] <- newSharedStringInds[match(strRV[[2]], uStrs)]
@@ -177,8 +178,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   vn <- as.numeric(v)
   
   ## Using -1 as a flag for no strings
-  if(length(sharedStrings) == 0 | stringInds[[1]] == -1){
-    stringInds <- -1
+  if(length(sharedStrings) == 0 | stringInds[[1]] == -1L){
+    stringInds <- -1L
     tR <- as.character(NA)
   }else{
     
@@ -186,10 +187,10 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     Encoding(sharedStrings) <- "UTF-8"
     
     ## Now replace values in v with string values
-    v[stringInds] <- sharedStrings[vn[stringInds]+1]
+    v[stringInds] <- sharedStrings[vn[stringInds] + 1L]
     
     ## decrement stringInds as sharedString inds are zero based
-    stringInds = stringInds - 1;  
+    stringInds = stringInds - 1L;  
     
   }
 
