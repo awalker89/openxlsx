@@ -160,9 +160,11 @@ removeCellMerge <- function(wb, sheet, cols, rows){
 #' @param wb A workbook object
 #' @return Name of worksheet(s) for a given index
 #' @author Alexander Walker
-#' @seealso \code{\link{renameWorksheet}}
+#' @seealso \code{\link{names}} to rename a worksheet in a Workbook
+#' @details DEPRECATED. Use \code{\link{names}}
 #' @export
 #' @examples
+#' 
 #' ## Create a new workbook
 #' wb <- createWorkbook()
 #' 
@@ -172,12 +174,17 @@ removeCellMerge <- function(wb, sheet, cols, rows){
 #' addWorksheet(wb, "The third worksheet")
 #' 
 #' ## Return names of sheets, can not be used for assignment.
-#' sheets(wb)
+#' names(wb)
+#' # openXL(wb)
+#' 
+#' names(wb) <- c("A", "B", "C")
+#' names(wb)
+#' # openXL(wb)
+#' 
 sheets <- function(wb){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-  
   
   nms <- names(wb$worksheets)
   nms <- replaceXMLEntities(nms)
@@ -217,8 +224,8 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
   if(!is.logical(gridLines) | length(gridLines) > 1)
     stop("gridLines must be a logical of length 1.")
   
-  if(nchar(sheetName) > 29)
-    stop("sheetName too long! Max length is 28 characters.")
+  if(nchar(sheetName) > 31)
+    stop("sheetName too long! Max length is 31 characters.")
   
   nSheets <- length(wb$worksheets)
   
@@ -234,9 +241,11 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
 #' @author Alexander Walker
 #' @param wb A Workbook object containing a worksheet
 #' @param sheet The name or index of the worksheet to rename
-#' @param newName The new name of the worksheet. No longer than 28 chars.
+#' @param newName The new name of the worksheet. No longer than 31 chars.
+#' @details DEPRECATED. Use \code{\link{names}}
 #' @export
 #' @examples
+#' 
 #' ## Create a new workbook
 #' wb <- createWorkbook("CREATOR")
 #' 
@@ -245,11 +254,14 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
 #' addWorksheet(wb, "This is worksheet 2")
 #' addWorksheet(wb, "Not the best name")
 #' 
-#' ## Rename worksheet 1
-#' renameWorksheet(wb, 1, "New name for sheet 1")
+#' #' ## rename all worksheets
+#' names(wb) <- c("A", "B", "C")
 #' 
-#' ## Rename worksheet 3
-#' renameWorksheet(wb, "Not the best name", "A better name")
+#' 
+#' ## Rename worksheet 1 & 3
+#' renameWorksheet(wb, 1, "New name for sheet 1")
+#' names(wb)[[1]] <- "New name for sheet 1"
+#' names(wb)[[3]] <-  "A better name"
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "renameWorksheetExample.xlsx", overwrite = TRUE)
@@ -257,9 +269,6 @@ renameWorksheet <- function(wb, sheet, newName){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-  
-  if(!"characrter" %in% class(newName))
-    newName <- as.character(newName)
   
   invisible(wb$setSheetName(sheet, newName))
 }
@@ -1556,7 +1565,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100, left = 0
 #' @export
 #' @examples
 #' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
-#' sheets(wb) ## list worksheets in workbook
+#' names(wb) ## list worksheets in workbook
 #' showGridLines(wb, 1, showGridLines = FALSE)
 #' showGridLines(wb, "Empty sheet", showGridLines = FALSE)
 #' saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
@@ -1605,11 +1614,11 @@ showGridLines <- function(wb, sheet, showGridLines = FALSE){
 #' writeData(wb = wb, sheet = 3, x = Formaldehyde)
 #' 
 #' worksheetOrder(wb)
-#' sheets(wb)
+#' names(wb)
 #' worksheetOrder(wb) <- c(1,3,2) # switch position of sheets 2 & 3 
 #' writeData(wb, 2, 'This is still the "mtcars" worksheet', startCol = 15)
 #' worksheetOrder(wb)
-#' sheets(wb)  ## ordering within workbook is not changed
+#' names(wb)  ## ordering within workbook is not changed
 #' 
 #' saveWorkbook(wb, "worksheetOrderExample.xlsx",  overwrite = TRUE)
 #' worksheetOrder(wb) <- c(3,2,1)
@@ -1695,6 +1704,63 @@ convertToDateTime <- function(x, origin = "1970-1-1"){
   
   return(dateTime)
 }
+
+
+
+#' @name names
+#' @export names.Workbook
+#' @method names Workbook
+#' @title get or set worksheet names
+#' @param x A \code{Workbook} object
+#' @examples
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' addWorksheet(wb, "S2")
+#' addWorksheet(wb, "S3")
+#' 
+#' names(wb)
+#' names(wb)[[2]] <- "S2a"
+#' names(wb)
+#' names(wb) <- paste("Sheet", 1:3)
+names.Workbook <- function(x){
+  nms <- names(x$worksheets)
+  nms <- replaceXMLEntities(nms)
+}
+
+#' @rdname names
+#' @param value a character vector the same length as wb
+#' @export
+`names<-.Workbook` <- function(x, value) {
+  
+  if(any(duplicated(value)))
+    stop("Worksheet names must be unique.")
+  
+  exSheets <- names(x$worksheets)
+  inds <- which(value != exSheets)
+  
+  if(length(inds) == 0)
+    return(invisible(x))
+  
+  if(length(value) != length(x$worksheets))
+    stop(sprintf("names vector must have length equal to number of worksheets in Workbook [%s]", length(exSheets)))
+  
+  if(any(nchar(value) > 31)){
+    warning("Worksheet names must less than 32 characters. Truncating names...")
+    value[nchar(value) > 31] <- sapply(value[nchar(value) > 31], substr, start = 1, stop = 31)
+  }
+  
+  for(i in inds)
+    invisible(x$setSheetName(i, value[[i]]))
+  
+  invisible(x)
+  
+}
+
+
+
+
+
 
 
 

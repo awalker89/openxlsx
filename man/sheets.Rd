@@ -14,6 +14,9 @@ Name of worksheet(s) for a given index
 \description{
 Returns names of worksheets.
 }
+\details{
+DEPRECATED. Use \code{\link{names}}
+}
 \examples{
 ## Create a new workbook
 wb <- createWorkbook()
@@ -24,12 +27,17 @@ addWorksheet(wb, "This is worksheet 2")
 addWorksheet(wb, "The third worksheet")
 
 ## Return names of sheets, can not be used for assignment.
-sheets(wb)
+names(wb)
+# openXL(wb)
+
+names(wb) <- c("A", "B", "C")
+names(wb)
+# openXL(wb)
 }
 \author{
 Alexander Walker
 }
 \seealso{
-\code{\link{renameWorksheet}}
+\code{\link{names}} to rename a worksheet in a Workbook
 }
 

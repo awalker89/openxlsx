@@ -42,6 +42,9 @@
 #' @export writeData
 #' @rdname writeData
 #' @examples
+#' 
+#' ## See formatting vignette for further examples. 
+#' 
 #' wb <- createWorkbook()
 #' options("openxlsx.borderStyle" = "thin")
 #' options("openxlsx.borderColour" = "#4F81BD")
@@ -74,11 +77,18 @@
 #' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
 #'           startCol="O", startRow = 23, borders="columns", headerStyle = hs2)
 #' 
+## Write a hyperlink vector
+#' v <- rep("http://cran.r-project.org/", 4)
+#' names(v) <- paste("Hyperlink", 1:4) # Names will be used as display text
+#' class(v) <- 'hyperlink'
+#' writeData(wb, "Cars", x = v, xy = c("B", 32))
+
 #' ## Save workbook
 #' saveWorkbook(wb, "writeDataExample.xlsx", overwrite = TRUE)
 #' 
+#' 
+#' 
 #' \dontrun{
-#'
 #' ## inspired by xtable gallery
 #' ##' http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
 #' 
@@ -86,61 +96,61 @@
 #' wb <- createWorkbook()
 #' data(tli, package = "xtable")
 #' 
-#' ## TEST 1 - data.frame
+#' ## data.frame
 #' test.n <- "data.frame"
 #' my.df <- tli[1:10, ]
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
 #' 
-#' ## TEST 2 - matrix
+#' ## matrix
 #' test.n <- "matrix"
 #' design.matrix <- model.matrix(~ sex * grade, data = my.df)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = design.matrix)
 #' 
-#' ## TEST 3 - aov
+#' ## aov
 #' test.n <- "aov"
 #' fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm1)
 #' 
-#' ## TEST 4 - lm
+#' ## lm
 #' test.n <- "lm"
 #' fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm2)
 #' 
-#' ## TEST 5 - anova 1 
+#' ## anova 1 
 #' test.n <- "anova"
 #' my.anova <- anova(fm2)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova)
 #' 
-#' ## TEST 6 - anova 2
+#' ## anova 2
 #' test.n <- "anova2"
 #' fm2b <- lm(tlimth ~ ethnicty, data = tli)
 #' my.anova2 <- anova(fm2b, fm2)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova2)
 #' 
-#' ## TEST 7 - GLM
+#' ## GLM
 #' test.n <- "glm"
 #' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
 #'
-#' ## TEST 8 - prcomp
+#' ## prcomp
 #' test.n <- "prcomp"
 #' pr1 <- prcomp(USArrests)
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = pr1)
 #' 
-#' ## TEST 9 - summary.prcomp
+#' ## summary.prcomp
 #' test.n <- "summary.prcomp"
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = summary(pr1))
 #'
-#' ## TEST 10 - simple table
+#' ## simple table
 #' test.n <- "table"
 #' data(airquality)
 #' airquality$OzoneG80 <- factor(airquality$Ozone > 80,

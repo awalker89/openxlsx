@@ -13,7 +13,7 @@
 #' @examples
 #' ## load existing workbook from package folder
 #' wb <- loadWorkbook(xlsxFile = system.file("loadExample.xlsx", package= "openxlsx"))
-#' sheets(wb)  #list worksheets
+#' names(wb)  #list worksheets
 #' wb ## view object
 #' ## Add a worksheet
 #' addWorksheet(wb, "A new worksheet")

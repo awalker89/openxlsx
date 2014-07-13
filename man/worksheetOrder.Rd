@@ -33,11 +33,11 @@ addWorksheet(wb = wb, sheetName = "Sheet 3", gridLines = FALSE)
 writeData(wb = wb, sheet = 3, x = Formaldehyde)
 
 worksheetOrder(wb)
-sheets(wb)
+names(wb)
 worksheetOrder(wb) <- c(1,3,2) # switch position of sheets 2 & 3
 writeData(wb, 2, 'This is still the "mtcars" worksheet', startCol = 15)
 worksheetOrder(wb)
-sheets(wb)  ## ordering within workbook is not changed
+names(wb)  ## ordering within workbook is not changed
 
 saveWorkbook(wb, "worksheetOrderExample.xlsx",  overwrite = TRUE)
 worksheetOrder(wb) <- c(3,2,1)
