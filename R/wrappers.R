@@ -13,7 +13,7 @@
 #' wb <- createWorkbook()
 #' 
 #' ## Save workbook to working directory
-#' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
+#' saveWorkbook(wb, file = "createWorkbookExample", overwrite = TRUE)
 createWorkbook <- function(creator = Sys.getenv("USERNAME")){
   
   if(class(creator) != "character")
@@ -62,7 +62,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
     stop("First argument must be a Workbook.")
   
   if(!grepl("\\.xlsx", file))
-    stop("File name must end with '.xlsx'")
+    file <- paste0(file, ".xlsx")
   
   if(!is.logical(overwrite))
     overwrite = FALSE
