@@ -16,6 +16,10 @@ NEW FEATURES
 
 * writeData border type "all" to draw all borders and maintain column styling.
 
+* Deprecated "sheets" and replaced with "names" function
+
+* column class "scientific" to automatically style as scientific numbers
+
 BUG FIXES
 
 * Invalid XML characters in hyperlinks now replaced.
