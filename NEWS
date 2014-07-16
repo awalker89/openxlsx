@@ -6,7 +6,7 @@ NEW FEATURES
 
 * writeData now style based on column class the same as writeDataTable
 
-* Vignette for examples focussed on formatting
+* Vignette "Formatting" for examples focussed on formatting
 
 * Customizable date formatting with createStyle and also through option("openxlsx.dateFormat" = ...)
 
@@ -20,6 +20,8 @@ NEW FEATURES
 
 * column class "scientific" to automatically style as scientific numbers
 
+* writeData now handles additional object classes: coxph, cox.zph, summary.coxph1 from Survival package
+
 BUG FIXES
 
 * Invalid XML characters in hyperlinks now replaced.
@@ -27,6 +29,10 @@ BUG FIXES
 * Encoding issues when writing data read in with read.xlsx
 
 * scientific notation resulting in corrupt workbooks fix
+
+* Multiple saves of Workbooks with conditional formatting were corrupt.
+
+* Latin1 characters now write correctly.
 
 
 openxlsx 2.0.1
