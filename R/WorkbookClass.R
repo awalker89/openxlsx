@@ -228,9 +228,12 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## write tables
   if(length(unlist(tables)) > 0){
-    for(i in 1:length(unlist(tables)))
+    for(i in 1:length(unlist(tables))){
       .Call("openxlsx_writeFile", '', pxml(unlist(tables)[[i]]), '', file.path(xlTablesDir, sprintf("table%s.xml", i+2)))
-    .Call("openxlsx_writeFile", '', tables.xml.rels[[i]], '', file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))
+      
+      if(tables.xml.rels[[i]] != "")
+        .Call("openxlsx_writeFile", '', tables.xml.rels[[i]], '', file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))
+    }
   }
   
   

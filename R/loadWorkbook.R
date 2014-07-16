@@ -322,7 +322,7 @@ loadWorkbook <- function(xlsxFile){
     
     wb$queryTables <- lapply(sort(queryTablesXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
     wb$Content_Types <- c(wb$Content_Types, 
-                          sprintf('<Override PartName="/xl/queryTables/queryTable1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.queryTable+xml"/>', 1:length(queryTablesXML)))   
+                          sprintf('<Override PartName="/xl/queryTables/queryTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.queryTable+xml"/>', 1:length(queryTablesXML)))   
   }
   
   
@@ -334,7 +334,7 @@ loadWorkbook <- function(xlsxFile){
   }
   
   ## externalLinks
-  if(length(extLinksXML)){
+  if(length(extLinksXML) > 0){
     wb$externalLinks <- lapply(sort(extLinksXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
     
     wb$Content_Types <-c(wb$Content_Types, 
@@ -345,7 +345,7 @@ loadWorkbook <- function(xlsxFile){
   }
   
   ## externalLinksRels
-  if(length(extLinksRelsXML))
+  if(length(extLinksRelsXML) > 0)
     wb$externalLinksRels <- lapply(sort(extLinksRelsXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
   
   
