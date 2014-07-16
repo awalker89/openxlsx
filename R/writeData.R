@@ -77,7 +77,7 @@
 #' writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
 #'           startCol="O", startRow = 23, borders="columns", headerStyle = hs2)
 #' 
-## Write a hyperlink vector
+#' ## Write a hyperlink vector
 #' v <- rep("http://cran.r-project.org/", 4)
 #' names(v) <- paste("Hyperlink", 1:4) # Names will be used as display text
 #' class(v) <- 'hyperlink'
@@ -133,7 +133,7 @@
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova2)
 #' 
-#' ## GLM
+#' ## glm
 #' test.n <- "glm"
 #' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
 #' addWorksheet(wb = wb, sheetName = test.n)
@@ -162,7 +162,54 @@
 #' my.table <- with(airquality, table(OzoneG80,Month) )
 #' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.table)
+#'
+#' ## survdiff 1
+#' library(survival)
+#' test.n <- "survdiff1"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' x <- survdiff(Surv(futime, fustat) ~ rx, data = ovarian)
+#' writeData(wb = wb, sheet = test.n, x = x)
+#'
+#' ## survdiff 2
+#' test.n <- "survdiff2"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' expect <- survexp(futime ~ ratetable(age=(accept.dt - birth.dt),
+#'                   sex=1,year=accept.dt,race="white"), jasa, cohort=FALSE,
+#'                   ratetable=survexp.usr)
+#' x <- survdiff(Surv(jasa$futime, jasa$fustat) ~ offset(expect))
+#' writeData(wb = wb, sheet = test.n, x = x)
+#'
+#' ## coxph 1
+#' test.n <- "coxph1"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' bladder$rx <- factor(bladder$rx, levels = 1:2, labels = c("Pla","Thi"))
+#' x <- coxph(Surv(stop,event) ~ rx, data = bladder)
+#' writeData(wb = wb, sheet = test.n, x = x)
 #' 
+#' ## coxph 2
+#' test.n <- "coxph2"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' x <- coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder)
+#' writeData(wb = wb, sheet = test.n, x = x)
+#'
+#' ## cox.zph
+#' test.n <- "cox.zph"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' x <- cox.zph(coxph(Surv(futime, fustat) ~ age + ecog.ps,  data=ovarian))
+#' writeData(wb = wb, sheet = test.n, x = x)
+#'
+#' ## summary.coxph 1
+#' test.n <- "summary.coxph1"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' x <- summary(coxph(Surv(stop,event) ~ rx, data = bladder))
+#' writeData(wb = wb, sheet = test.n, x = x)
+#' 
+#' ## summary.coxph 2
+#' test.n <- "summary.coxph2"
+#' addWorksheet(wb = wb, sheetName = test.n)
+#' x <- summary(coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder))
+#' writeData(wb = wb, sheet = test.n, x = x)
+#'
 #' ## Save workbook
 #' saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
 #' }
@@ -273,6 +320,73 @@ writeData <- function(wb,
     x <- cbind(data.frame("Variable" = rownames(x)), x)
     names(x)[1] <- ""
     rowNames <- FALSE
+
+  }else if("survdiff" %in% clx){
+
+    ## like print.survdiff with some ideas from the ascii package
+    if (length(x$n) == 1) {
+      z <- sign(x$exp - x$obs) * sqrt(x$chisq)
+      temp <- c(x$obs, x$exp, z, 1 - pchisq(x$chisq,  1))
+      names(temp) <- c("Observed", "Expected", "Z", "p")
+      x <- as.data.frame(t(temp))
+    }
+    else {                              
+      if (is.matrix(x$obs)) {
+        otmp <- apply(x$obs, 1, sum)
+        etmp <- apply(x$exp, 1, sum)
+      }
+      else {
+        otmp <- x$obs
+        etmp <- x$exp
+      }
+      chisq <- c(x$chisq, rep(NA, length(x$n) - 1))
+      df <- c((sum(1 * (etmp > 0))) - 1, rep(NA, length(x$n) - 1))
+      p <- c(1 - pchisq(x$chisq, df[!is.na(df)]), rep(NA, length(x$n) - 1))
+      temp <- cbind( x$n, otmp, etmp, 
+                    ((otmp - etmp)^2)/etmp, ((otmp - etmp)^2)/diag(x$var),
+                    chisq, df, p)
+      colnames(temp) <- c("N", "Observed", "Expected", "(O-E)^2/E", "(O-E)^2/V",
+                          "Chisq", "df","p")
+      temp <- as.data.frame(temp, checknames = FALSE)
+      x <- cbind("Group" = names(x$n), temp)
+      names(x)[1] <- ""
+    }
+    rowNames <- FALSE
+
+  }else if("coxph" %in% clx){
+    ## sligthly modified print.coxph
+    coef <- x$coefficients
+    se <- sqrt(diag(x$var))
+    if (is.null(coef) | is.null(se)) 
+      stop("Input is not valid")
+    if (is.null(x$naive.var)) {
+      tmp <- cbind(coef, exp(coef), se, coef/se, pchisq((coef/se)^2, 1))
+      colnames(tmp) <- c("coef", "exp(coef)", "se(coef)", "z", "p")
+    }
+    else {
+      nse <- sqrt(diag(x$naive.var))
+      tmp <- cbind(coef, exp(coef), nse, se, coef/se, pchisq((coef/se)^2, 1))
+      colnames(tmp) <- c("coef", "exp(coef)", "se(coef)", "robust se", "z", "p")
+    }
+    x <- cbind("Variable" = names(coef), as.data.frame(tmp, checknames = FALSE))
+    names(x)[1] <- ""
+    rowNames <- FALSE
+
+  }else if("summary.coxph" %in% clx){
+
+    coef <- x$coefficients
+    ci <- x$conf.int
+    nvars <- nrow(coef)
+    tmp <- cbind(coef[, - ncol(coef), drop=FALSE],          #p later
+                 ci[, (ncol(ci) - 1):ncol(ci), drop=FALSE], #confint
+                 coef[, ncol(coef), drop=FALSE])            #p.value
+    x <- as.data.frame(tmp, checknames = FALSE)
+    rowNames <- TRUE
+    
+  }else if("cox.zph" %in% clx){
+
+    x <- as.data.frame(x$table)
+    rowNames <- TRUE
     
   }else{
     
