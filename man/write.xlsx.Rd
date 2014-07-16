@@ -41,7 +41,7 @@ Optional parameters are:
   \item{\bold{headerStyle}}{ Custom style to apply to column names.}
   \item{\bold{borders}}{ Either "surrounding", "columns" or "rows" or NULL.  If "surrounding", a border is drawn around the
 data.  If "rows", a surrounding border is drawn a border around each row. If "columns", a surrounding border is drawn with a border
-between each column.}
+between each column.  If "\code{all}" all cell borders are drawn.}
   \item{\bold{borderColour}}{ Colour of cell border}
   \item{\bold{borderStyle}}{ Border line style.}
   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
@@ -70,6 +70,12 @@ hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=12,
 
 write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
  headerStyle = hs)
+
+## Lists elements are written to individual worksheets
+l <- list(iris, mtcars, matrix(runif(1000), ncol = 5))
+write.xlsx(l, "writeList.xlsx")
+names(l) <- c("IRIS", "MTCARS", "RUNIF")
+write.xlsx(l, "writeLis2t.xlsx")
 }
 \author{
 Alexander Walker

@@ -28,7 +28,7 @@
 #'   \item{\bold{headerStyle}}{ Custom style to apply to column names.}
 #'   \item{\bold{borders}}{ Either "surrounding", "columns" or "rows" or NULL.  If "surrounding", a border is drawn around the
 #' data.  If "rows", a surrounding border is drawn a border around each row. If "columns", a surrounding border is drawn with a border
-#' between each column.}
+#' between each column.  If "\code{all}" all cell borders are drawn.}
 #'   \item{\bold{borderColour}}{ Colour of cell border}
 #'   \item{\bold{borderStyle}}{ Border line style.}
 #'   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
@@ -61,6 +61,12 @@
 #'  
 #' write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
 #'  headerStyle = hs)
+#' 
+#' ## Lists elements are written to individual worksheets
+#' l <- list(iris, mtcars, matrix(runif(1000), ncol = 5))
+#' write.xlsx(l, "writeList.xlsx")
+#' names(l) <- c("IRIS", "MTCARS", "RUNIF")
+#' write.xlsx(l, "writeLis2t.xlsx")
 #' 
 #' @export
 write.xlsx <- function(x, file, ...){
@@ -100,8 +106,8 @@ write.xlsx <- function(x, file, ...){
   sheetName <- "Sheet 1"
   if("sheetName" %in% names(params)){
     
-    if(nchar(params$sheetName) > 29)
-      stop("sheetName too long! Max length is 28 characters.")
+    if(nchar(params$sheetName) > 31)
+      stop("sheetName too long! Max length is 31 characters.")
     
     sheetName <- as.character(params$sheetName)
   }
@@ -214,23 +220,60 @@ write.xlsx <- function(x, file, ...){
     borderStyle <- validateBorderStyle(params$borderStyle)[[1]]
   }
   
-  ## Input validating
-  
+  ## create new Workbook object
   wb <- Workbook$new(creator)
-  wb$addWorksheet(sheetName, showGridLines = gridLines)
   
-  writeData(wb = wb, 
-            sheet = 1,
-            x = x,
-            startCol = startCol,
-            startRow = startRow, 
-            xy = xy,
-            colNames = colNames,
-            rowNames = rowNames,
-            headerStyle = headerStyle,
-            borders = borders,
-            borderColour = borderColour,
-            borderStyle = borderStyle)
+  ## If a list is supplied write to individual worksheets using names if available
+  if("list" %in% class(x)){
+    
+    nms <- names(x)
+    nSheets <- length(x)
+    
+    if(is.null(nms)){
+      nms <- paste("Sheet", 1:nSheets)
+    }else{
+      nms <- make.names(nms, unique  = TRUE)
+    }
+    
+    for(i in 1:nSheets){
+      
+      wb$addWorksheet(nms[[i]], showGridLines = gridLines)
+      writeData(wb = wb, 
+                sheet = i,
+                x = x[[i]],
+                startCol = startCol,
+                startRow = startRow, 
+                xy = xy,
+                colNames = colNames,
+                rowNames = rowNames,
+                headerStyle = headerStyle,
+                borders = borders,
+                borderColour = borderColour,
+                borderStyle = borderStyle)
+      
+      
+    }
+  
+    
+  }else{
+    
+    wb$addWorksheet(sheetName, showGridLines = gridLines)
+    
+    writeData(wb = wb, 
+              sheet = 1,
+              x = x,
+              startCol = startCol,
+              startRow = startRow, 
+              xy = xy,
+              colNames = colNames,
+              rowNames = rowNames,
+              headerStyle = headerStyle,
+              borders = borders,
+              borderColour = borderColour,
+              borderStyle = borderStyle)
+    
+  }
+
   
   
   saveWorkbook(wb = wb, file = file, overwrite = overwrite)
