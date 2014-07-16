@@ -95,7 +95,7 @@ genBaseSheetRels <- function(sheetInd){
 
 }
 
-genBaseStyleSheet <- function(){
+genBaseStyleSheet <- function(dxfs = NULL){
    
   list(
     
@@ -114,7 +114,7 @@ genBaseStyleSheet <- function(){
        
        cellStyles = c('<cellStyle name="Normal" xfId="0" builtinId="0"/>'),
        
-       dxfs = NULL,
+       dxfs = dxfs,
        
        indexedColors = NULL
   )

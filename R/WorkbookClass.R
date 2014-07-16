@@ -312,7 +312,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         '</Types>', 
         file.path(tmpDir, "[Content_Types].xml"))
   
-  
   styleXML <- styles
   styleXML$numFmts <- paste0(sprintf('<numFmts count="%s">', length(styles$numFmts)), pxml(styles$numFmts), '</numFmts>')
   styleXML$fonts <- paste0(sprintf('<fonts count="%s">', length(styles$fonts)), pxml(styles$fonts), '</fonts>')
@@ -345,7 +344,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## reset styles
   baseFont <- styles$fonts[[1]]
-  styles <<- genBaseStyleSheet()
+  styles <<- genBaseStyleSheet(styles$dxfs)
   styles$fonts[[1]] <<- baseFont
   
   invisible(tmpDir)
