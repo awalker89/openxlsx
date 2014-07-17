@@ -432,3 +432,42 @@ buildBorder <- function(x){
 
 
 
+existsOrAddSheet <- function(wb, sheet, gridLines = TRUE) {
+
+  ## Numeric sheet
+  if (is.numeric(sheet)) {
+    ## Sheet exists
+    if ( sheet <= length(names(wb)) ){
+      ## Extract its name
+      sheet <- wb$getSheetName(sheet)        
+    }                                 
+    else {
+      ## Sheet does not exist, create it (a plain char number
+      ## is probably better)
+      message("Sheet '", sheet,
+              "' currently not existing : creating it ... ",
+              "(sheet numeric id: ", length(names(wb))+1, ")"  )
+      sheet <- as.character(sheet)
+      addWorksheet(wb = wb, sheetName = sheet, gridLines = gridLines)
+    }
+  } ##Character sheet
+  else if (is.character(sheet)){
+    ## checks of addWorksheet (if the sheet is already existing
+    ## this does not modify it
+    sheet <- strtrim(replaceIllegalCharacters(sheet), 31)
+    ## Sheet exists
+    if(sheet %in% names(wb)){
+      ## Do Nothing
+    }
+    else{## Add the sheet
+      message("Sheet ", sheet," currently not existing : creating it ...")
+      addWorksheet(wb = wb, sheetName = sheet, gridLines = gridLines)
+    }
+  }
+  else {
+    error("sheet must be a numeric or character")
+  }
+
+  ## Return (character) sheet name
+  return(sheet)
+}

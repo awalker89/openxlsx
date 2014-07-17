@@ -99,55 +99,46 @@
 #' ## data.frame
 #' test.n <- "data.frame"
 #' my.df <- tli[1:10, ]
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
 #' 
 #' ## matrix
 #' test.n <- "matrix"
 #' design.matrix <- model.matrix(~ sex * grade, data = my.df)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = design.matrix)
 #' 
 #' ## aov
 #' test.n <- "aov"
 #' fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm1)
 #' 
 #' ## lm
 #' test.n <- "lm"
 #' fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm2)
 #' 
 #' ## anova 1 
 #' test.n <- "anova"
 #' my.anova <- anova(fm2)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova)
 #' 
 #' ## anova 2
 #' test.n <- "anova2"
 #' fm2b <- lm(tlimth ~ ethnicty, data = tli)
 #' my.anova2 <- anova(fm2b, fm2)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.anova2)
 #' 
 #' ## glm
 #' test.n <- "glm"
 #' fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = fm3)
 #'
 #' ## prcomp
 #' test.n <- "prcomp"
 #' pr1 <- prcomp(USArrests)
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = pr1)
 #' 
 #' ## summary.prcomp
 #' test.n <- "summary.prcomp"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = summary(pr1))
 #'
 #' ## simple table
@@ -160,19 +151,16 @@
 #'                            levels = 5:9,
 #'                            labels = month.abb[5:9])
 #' my.table <- with(airquality, table(OzoneG80,Month) )
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' writeData(wb = wb, sheet = test.n, x = my.table)
 #'
 #' ## survdiff 1
 #' library(survival)
 #' test.n <- "survdiff1"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' x <- survdiff(Surv(futime, fustat) ~ rx, data = ovarian)
 #' writeData(wb = wb, sheet = test.n, x = x)
 #'
 #' ## survdiff 2
 #' test.n <- "survdiff2"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' expect <- survexp(futime ~ ratetable(age=(accept.dt - birth.dt),
 #'                   sex=1,year=accept.dt,race="white"), jasa, cohort=FALSE,
 #'                   ratetable=survexp.usr)
@@ -181,41 +169,36 @@
 #'
 #' ## coxph 1
 #' test.n <- "coxph1"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' bladder$rx <- factor(bladder$rx, levels = 1:2, labels = c("Pla","Thi"))
 #' x <- coxph(Surv(stop,event) ~ rx, data = bladder)
 #' writeData(wb = wb, sheet = test.n, x = x)
 #' 
 #' ## coxph 2
 #' test.n <- "coxph2"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' x <- coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder)
 #' writeData(wb = wb, sheet = test.n, x = x)
 #'
 #' ## cox.zph
 #' test.n <- "cox.zph"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' x <- cox.zph(coxph(Surv(futime, fustat) ~ age + ecog.ps,  data=ovarian))
 #' writeData(wb = wb, sheet = test.n, x = x)
 #'
 #' ## summary.coxph 1
 #' test.n <- "summary.coxph1"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' x <- summary(coxph(Surv(stop,event) ~ rx, data = bladder))
 #' writeData(wb = wb, sheet = test.n, x = x)
 #' 
 #' ## summary.coxph 2
 #' test.n <- "summary.coxph2"
-#' addWorksheet(wb = wb, sheetName = test.n)
 #' x <- summary(coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder))
 #' writeData(wb = wb, sheet = test.n, x = x)
 #'
 #' ## Save workbook
 #' saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
 #' }
-writeData <- function(wb, 
-                      sheet,
-                      x,
+writeData <- function(wb = NULL, 
+                      sheet = NULL,
+                      x = NULL,
                       startCol = 1,
                       startRow = 1, 
                       xy = NULL,
@@ -233,6 +216,12 @@ writeData <- function(wb,
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
   ## All input conversions/validations
+  if (is.null(wb))  stop("wb must be specified")
+  if (is.null(x)) stop("x must be specified")
+  ## if sheet is NULL default it to x name
+  if (is.null(sheet))  sheet <- deparse(substitute(x))
+  sheet <- existsOrAddSheet(wb, sheet)
+
   if(!is.null(xy)){
     if(length(xy) != 2)
       stop("xy parameter must have length 2")
