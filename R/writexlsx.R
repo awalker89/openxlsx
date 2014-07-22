@@ -278,7 +278,7 @@ write.xlsx <- function(x, file, ...){
   
   saveWorkbook(wb = wb, file = file, overwrite = overwrite)
   
-  return(wb)
+  invisible(wb)
   
 }
 

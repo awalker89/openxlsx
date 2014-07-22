@@ -229,6 +229,9 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
   
   nSheets <- length(wb$worksheets)
   
+  if(!is.character(sheetName))
+    sheetName <- as.character(sheetName)
+  
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
   

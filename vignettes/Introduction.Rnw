@@ -10,17 +10,17 @@
 % \VignetteKeyword{spreadsheet}
 
 \usepackage{geometry}
- \geometry{
- a4paper,
- total={210mm,297mm},
- left=15mm,
- right=15mm,
- top=20mm,
- bottom=20mm,
- }
+\geometry{
+a4paper,
+total={210mm,297mm},
+left=15mm,
+right=15mm,
+top=20mm,
+bottom=20mm,
+}
 
 \begin{document}
-\title{Examples}
+\title{Introduction}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}
 \maketitle
@@ -33,31 +33,29 @@ The openxlsx package requires a zip application to be available to R, such as th
 \noindent
 If the command
 \begin{verbatim}
- shell("zip") 
+shell("zip") 
 \end{verbatim}
 returns "zip is not recognised..." install Rtools from: http://cran.r-project.org/bin/windows/Rtools/ 
 and add the R tools bin directory (defaults to c:\textbackslash Rtools\textbackslash bin on windows) to the system path.\\
-    
+
 \noindent
 If the command returns
 \begin{verbatim}
- Warning message: running command '"zip" -r1 ... had status 127
+Warning message: running command '"zip" -r1 ... had status 127
 \end{verbatim}
 it is most likely because R cannot find a zip application.  First check if the Rtools/bin directory is in the 
 system PATH variable.  This can be checked from within R using the command
 \begin{verbatim}
- shell("PATH")
+shell("PATH")
 \end{verbatim}
 The output should contain a path to Rtools/bin somewhere in the string.
 
 
-    
+
 \newpage
-\section{Examples}
+\section{Basic Examples}
 
 \subsection{Basic Workbook}
-
-
 \begin{verbatim}
 require(ggplot2)
 
@@ -73,8 +71,8 @@ addWorksheet(wb, sheetName = "Iris", gridLines = FALSE)
 ## sheet 1
 freezePane(wb, sheet = 1, firstRow = TRUE, firstCol = TRUE) ## freeze first row and column
 writeDataTable(wb, sheet = 1, x = mtcars,
-               colNames = TRUE, rowNames = TRUE,
-               tableStyle = "TableStyleLight9")
+colNames = TRUE, rowNames = TRUE,
+tableStyle = "TableStyleLight9")
 
 setColWidths(wb, sheet = 1, cols = "A", widths = 18)
 
@@ -95,7 +93,7 @@ writeData(wb, 2, x = means, startCol = "B", startRow=3, borders="rows", headerSt
 ## write group variances
 writeData(wb, 2, x = "Iris dataset group variances", startCol = 2, startRow = 9)
 writeData(wb, 2, x= vars, startCol = "B", startRow=10, borders="columns",
-  headerStyle = headSty)
+headerStyle = headSty)
 
 setColWidths(wb, 2, cols=2:6, widths = 12) ## width is recycled for each col
 setColWidths(wb, 2, cols=11:15, widths = 15)
@@ -108,6 +106,144 @@ saveWorkbook(wb, "basics.xlsx", overwrite = TRUE) ## save to working directory
 \end{verbatim}
 
 \newpage
+\subsection{Gallery}
+\begin{verbatim}
+
+## inspired by xtable gallery
+#http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+
+## Create a new workbook
+wb <- createWorkbook()
+data(tli, package = "xtable")
+
+## data.frame
+test.n <- "data.frame"
+my.df <- tli[1:10, ]
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = my.df, borders = "n")
+
+## matrix
+test.n <- "matrix"
+design.matrix <- model.matrix(~ sex * grade, data = my.df)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = design.matrix)
+
+## aov
+test.n <- "aov"
+fm1 <- aov(tlimth ~ sex + ethnicty + grade + disadvg, data = tli)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = fm1)
+
+## lm
+test.n <- "lm"
+fm2 <- lm(tlimth ~ sex*ethnicty, data = tli)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = fm2)
+
+## anova 1 
+test.n <- "anova"
+my.anova <- anova(fm2)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = my.anova)
+
+## anova 2
+test.n <- "anova2"
+fm2b <- lm(tlimth ~ ethnicty, data = tli)
+my.anova2 <- anova(fm2b, fm2)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = my.anova2)
+
+## glm
+test.n <- "glm"
+fm3 <- glm(disadvg ~ ethnicty*grade, data = tli, family = binomial())
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = fm3)
+
+## prcomp
+test.n <- "prcomp"
+pr1 <- prcomp(USArrests)
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = pr1)
+
+## summary.prcomp
+test.n <- "summary.prcomp"
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = summary(pr1))
+
+## simple table
+test.n <- "table"
+data(airquality)
+airquality$OzoneG80 <- factor(airquality$Ozone > 80,
+levels = c(FALSE, TRUE),
+labels = c("Oz <= 80", "Oz > 80"))
+airquality$Month <- factor(airquality$Month,
+levels = 5:9,
+labels = month.abb[5:9])
+my.table <- with(airquality, table(OzoneG80,Month) )
+addWorksheet(wb = wb, sheetName = test.n)
+writeData(wb = wb, sheet = test.n, x = my.table)
+
+## survdiff 1
+library(survival)
+test.n <- "survdiff1"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- survdiff(Surv(futime, fustat) ~ rx, data = ovarian)
+writeData(wb = wb, sheet = test.n, x = x)
+
+## survdiff 2
+test.n <- "survdiff2"
+addWorksheet(wb = wb, sheetName = test.n)
+expect <- survexp(futime ~ ratetable(age=(accept.dt - birth.dt),
+      sex=1,year=accept.dt,race="white"), jasa, cohort=FALSE,
+      ratetable=survexp.usr)
+x <- survdiff(Surv(jasa$futime, jasa$fustat) ~ offset(expect))
+writeData(wb = wb, sheet = test.n, x = x)
+
+## coxph 1
+test.n <- "coxph1"
+addWorksheet(wb = wb, sheetName = test.n)
+bladder$rx <- factor(bladder$rx, labels = c("Pla","Thi"))
+x <- coxph(Surv(stop,event) ~ rx, data = bladder)
+writeData(wb = wb, sheet = test.n, x = x)
+
+## coxph 2
+test.n <- "coxph2"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder)
+writeData(wb = wb, sheet = test.n, x = x)
+
+## cox.zph
+test.n <- "cox.zph"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- cox.zph(coxph(Surv(futime, fustat) ~ age + ecog.ps,  data=ovarian))
+writeData(wb = wb, sheet = test.n, x = x)
+
+## summary.coxph 1
+test.n <- "summary.coxph1"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- summary(coxph(Surv(stop,event) ~ rx, data = bladder))
+writeData(wb = wb, sheet = test.n, x = x)
+
+## summary.coxph 2
+test.n <- "summary.coxph2"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- summary(coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder))
+writeData(wb = wb, sheet = test.n, x = x)
+
+## Save workbook
+saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
+
+
+
+\end{verbatim}
+
+
+
+
+
+\newpage
+\section{Further Examples}
+
 \subsection{Stock Price}
 
 \begin{verbatim}
@@ -118,7 +254,7 @@ wb <- createWorkbook()
 ## read historical prices from yahoo finance
 ticker <- "CBA.AX"
 csv.url <- paste("http://ichart.finance.yahoo.com/table.csv?s=",
-                 ticker, "&a=01&b=9&c=2009&d=01&e=9&f=2014&g=d&ignore=.csv")
+ticker, "&a=01&b=9&c=2009&d=01&e=9&f=2014&g=d&ignore=.csv")
 prices <- read.csv(url(csv.url), as.is = TRUE)
 prices$Date <- as.Date(prices$Date)
 close <- prices$Close
@@ -126,10 +262,10 @@ prices$logReturns = c(0, log(close[2:length(close)]/close[1:(length(close)-1)]))
 
 ## Create plot of price series and add to worksheet
 ggplot(data = prices, aes(as.Date(Date), as.numeric(Close))) +
-  geom_line(colour="royalblue2") +
-  labs(x = "Date", y = "Price", title = ticker) +
-  geom_area(fill = "royalblue1",alpha = 0.3) +
-  coord_cartesian(ylim=c(min(prices$Close)-1.5, max(prices$Close)+1.5)) 
+geom_line(colour="royalblue2") +
+labs(x = "Date", y = "Price", title = ticker) +
+geom_area(fill = "royalblue1",alpha = 0.3) +
+coord_cartesian(ylim=c(min(prices$Close)-1.5, max(prices$Close)+1.5)) 
 
 ## Add worksheet and write plot to sheet
 addWorksheet(wb, sheetName = "CBA")
@@ -137,7 +273,7 @@ insertPlot(wb, sheet = 1, xy = c("J", 3))
 
 ## Histogram of log returns
 ggplot(data = prices, aes(x = logReturns)) + geom_bar(binwidth=0.0025) +
-  labs(title = "Histogram of log returns")
+labs(title = "Histogram of log returns")
 
 ## currency 
 class(prices$Close) <- "currency" ## styles as currency in workbook
@@ -147,19 +283,20 @@ writeDataTable(wb, sheet = "CBA", x = prices)
 insertPlot(wb, sheet = 1, startRow=25, startCol = "J")
 
 ## Add conditional formatting to show where logReturn > 0.01 using default style
-conditionalFormat(wb, sheet = 1, cols = ncol(prices), rows = 2:(nrow(prices)+1),
-                  rule = "> 0.01")
+conditionalFormat(wb, sheet = 1, cols = 1:ncol(prices), rows = 2:(nrow(prices)+1),
+rule = "$H2 > 0.01")
 
 ## style log return col as a percentage  
 logRetStyle <- createStyle(numFmt = "percentage")
 
-addStyle(wb, 1, style = logRetStyle, rows = 2:(nrow(prices)+1), 
-         cols = "H", gridExpand = TRUE)
+addStyle(wb, 1, style = logRetStyle, rows = 2:(nrow(prices) + 1), 
+cols = "H", gridExpand = TRUE)
 
 setColWidths(wb, sheet=1, cols = c("A", "F", "G", "H"), widths = 15)
 
 ## save workbook to working directory
-saveWorkbook(wb, "stockPrice.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "stockPrice1.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "stockPrice2.xlsx", overwrite = TRUE)
 \end{verbatim}
 
 \newpage
@@ -185,8 +322,8 @@ writeData(wb, 1, "Original Image", xy = c(2,2))
 ## writeData will coerce df to a data.frame, 
 ## if df is a character vector here, colNames is set to FALSE
 writeData(wb, 1, sprintf("Image object size: %s bytes",
-                         format(object.size(A+0), big.mark=',')), 
-          xy = c(2,3))  ## equivalent to startCol = 2, startRow = 3
+format(object.size(A+0), big.mark=',')), 
+xy = c(2,3))  ## equivalent to startCol = 2, startRow = 3
 
 ## Plot image
 par(mar=rep(0, 4), xpd = NA) 
@@ -202,15 +339,15 @@ A <- A - rowMeans
 C <- A %*% t(A) / (ncol(A) - 1) # covariance matrix of A
 E <- svd(C)  ## singlur value decomposition
 pve <- data.frame("Eigenvalues" = E$d, 
-                  "PVE" = E$d/sum(E$d),
-                  "Cumulative PVE" = cumsum(E$d/sum(E$d)))
+"PVE" = E$d/sum(E$d),
+"Cumulative PVE" = cumsum(E$d/sum(E$d)))
 
 ## write eigenvalues to worksheet
 addWorksheet(wb, "Principal Component Analysis")
 hs <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
-                     halign = "CENTER", textDecoration = "Bold",
-                     border = "TopBottomLeftRight", borderColour = "#4F81BD")
- 
+halign = "CENTER", textDecoration = "Bold",
+border = "TopBottomLeftRight", borderColour = "#4F81BD")
+
 writeData(wb, 2, x="Proportions of variance explained by Eigenvector" ,startRow = 2)
 mergeCells(wb, sheet=2, cols=1:4, rows=2)
 
@@ -220,17 +357,17 @@ writeData(wb, 2, x=pve, startRow = 3, startCol = 1, borders="rows", headerStyle=
 ## Plots
 pve <- cbind(pve, "Ind" = 1:nrow(pve))
 ggplot(data = pve[1:20,], aes(x = Ind, y = 100*PVE)) +
-  geom_bar(stat="identity", position = "dodge") +
-  xlab("Principal Component Index") + ylab("Proportion of Variance Explained") +
-  geom_line(size = 1, col = "blue") + geom_point(size =3, col = "blue")
+geom_bar(stat="identity", position = "dodge") +
+xlab("Principal Component Index") + ylab("Proportion of Variance Explained") +
+geom_line(size = 1, col = "blue") + geom_point(size =3, col = "blue")
 
 ## Write plot to worksheet 2
 insertPlot(wb, 2, width = 5, height = 4, startCol = "E", startRow = 2) 
 
 ## Plot of cumulative explained variance
 ggplot(data = pve[1:50,], aes(x = Ind, y = 100*Cumulative.PVE)) +
-  geom_point(size=2.5) + geom_line(size=1) + xlab("Number of PCs") +
-  ylab("Cumulative Proportion of Variance Explained")
+geom_point(size=2.5) + geom_line(size=1) + xlab("Number of PCs") +
+ylab("Cumulative Proportion of Variance Explained")
 insertPlot(wb, 2, width = 5, height = 4, xy= c("M", 2)) 
 
 
@@ -243,30 +380,30 @@ startCol <- rep(c("B", "H", "N"), 2)
 addWorksheet(wb, "Reconstructed Images")
 
 for(i in 1:length(nPCs)){
-  
-  V <- E$v[, 1:nPCs[i]]
-  imgHat <- t(V) %*% A  ## project img data on to PCs
-  imgHat.size <- object.size(imgHat)
-  V.size <- object.size(V)
-  
-  imgHat <- V %*% imgHat + rowMeans  ## reconstruct from PCs and add back row means
-  imgHat <- round((imgHat - min(imgHat)) / (max(imgHat) - min(imgHat))*255) # scale
-  plot(imagedata(imgHat), bty ="n", frame.plot=F, ann=FALSE)
-  imgSize <- V.size + imgHat.size + object.size(rMeans)
-  
-  ## write strings to worksheet 3
-  writeData(wb, "Reconstructed Images", 
-            sprintf("Number of principal components used:  %s", 
-                    nPCs[[i]]), startCol[i], startRow[i])
-  
-  writeData(wb, "Reconstructed Images", 
-            sprintf("Sum of component object sizes: %s bytes",
-                    format(imgSize, big.mark=',')), startCol[i], startRow[i]+1)
-  
-  ## write reconstruced image
-  insertPlot(wb, "Reconstructed Images", width, height, units="px",
-             xy = c(startCol[i], startRow[i]+3))
-  
+
+V <- E$v[, 1:nPCs[i]]
+imgHat <- t(V) %*% A  ## project img data on to PCs
+imgHat.size <- object.size(imgHat)
+V.size <- object.size(V)
+
+imgHat <- V %*% imgHat + rowMeans  ## reconstruct from PCs and add back row means
+imgHat <- round((imgHat - min(imgHat)) / (max(imgHat) - min(imgHat))*255) # scale
+plot(imagedata(imgHat), bty ="n", frame.plot=F, ann=FALSE)
+imgSize <- V.size + imgHat.size + object.size(rMeans)
+
+## write strings to worksheet 3
+writeData(wb, "Reconstructed Images", 
+sprintf("Number of principal components used:  %s", 
+nPCs[[i]]), startCol[i], startRow[i])
+
+writeData(wb, "Reconstructed Images", 
+sprintf("Sum of component object sizes: %s bytes",
+format(imgSize, big.mark=',')), startCol[i], startRow[i]+1)
+
+## write reconstruced image
+insertPlot(wb, "Reconstructed Images", width, height, units="px",
+xy = c(startCol[i], startRow[i]+3))
+
 }
 
 # hide grid lines
@@ -277,8 +414,8 @@ boldStyle <- createStyle(textDecoration="BOLD")
 
 ## only want to apply style to specified cells (not all combinations of rows & cols)
 addStyle(wb, "Reconstructed Images", style=boldStyle, 
-         rows = c(startRow, startRow+1), cols = rep(startCol, 2), 
-         gridExpand = FALSE)  
+rows = c(startRow, startRow+1), cols = rep(startCol, 2), 
+gridExpand = FALSE)  
 
 ## save workbook to working directory
 saveWorkbook(wb, "Image dimensionality reduction.xlsx", overwrite = TRUE)
