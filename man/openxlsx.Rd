@@ -5,9 +5,8 @@
 \alias{openxlsx-package}
 \title{xlsx reading, writing and editing.}
 \description{
-Roxygen is a Doxygen-like documentation system for R; allowing
-in-source specification of Rd files, collation and namespace
-directives.
+openxlsx simplifies the the process of writing and styling xlsx files from R
+and removes the dependency on Java.
 }
 \details{
 The openxlsx package uses global options to simplfy formatting:
@@ -19,11 +18,12 @@ The openxlsx package uses global options to simplfy formatting:
    \item{\code{options("openxlsx.dateFormat" = "mm/dd/yyyy")}}
   }
 }
-\author{
-Alex Walker \email{Alexander.Walker@gmail.com},
-}
 \seealso{
-See \code{vignette("examples", package = "openxlsx")} and
- \code{vignette("formatting", package = "openxlsx")} for examples
+See
+\itemize{
+   \item{\code{vignette("Introduction", package = "openxlsx")}}
+   \item{\code{vignette("formatting", package = "openxlsx")}}
+  }
+for examples
 }
 
