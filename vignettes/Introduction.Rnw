@@ -230,8 +230,8 @@ addWorksheet(wb = wb, sheetName = test.n)
 x <- summary(coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder))
 writeData(wb = wb, sheet = test.n, x = x)
 
-## Save workbook
-saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
+## view without saving
+openXL(wb)
 
 
 
@@ -295,8 +295,8 @@ cols = "H", gridExpand = TRUE)
 setColWidths(wb, sheet=1, cols = c("A", "F", "G", "H"), widths = 15)
 
 ## save workbook to working directory
-saveWorkbook(wb, "stockPrice1.xlsx", overwrite = TRUE)
-saveWorkbook(wb, "stockPrice2.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "stockPrice.xlsx", overwrite = TRUE)
+openXL("stockPrice.xlsx")
 \end{verbatim}
 
 \newpage
@@ -322,7 +322,7 @@ writeData(wb, 1, "Original Image", xy = c(2,2))
 ## writeData will coerce df to a data.frame, 
 ## if df is a character vector here, colNames is set to FALSE
 writeData(wb, 1, sprintf("Image object size: %s bytes",
-format(object.size(A+0), big.mark=',')), 
+format(object.size(A+0)[[1]], big.mark=',')), 
 xy = c(2,3))  ## equivalent to startCol = 2, startRow = 3
 
 ## Plot image
@@ -398,7 +398,7 @@ nPCs[[i]]), startCol[i], startRow[i])
 
 writeData(wb, "Reconstructed Images", 
 sprintf("Sum of component object sizes: %s bytes",
-format(imgSize, big.mark=',')), startCol[i], startRow[i]+1)
+format(as.numeric(imgSize), big.mark=',')), startCol[i], startRow[i]+1)
 
 ## write reconstruced image
 insertPlot(wb, "Reconstructed Images", width, height, units="px",
