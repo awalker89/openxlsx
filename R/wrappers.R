@@ -70,13 +70,13 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   if(file.exists(file) & !overwrite)
     stop("File already exists!")
   
-  tmpDir <- wb$saveWorkbook(quiet = TRUE)
+  tmp <- wb$saveWorkbook(quiet = TRUE)
   setwd(wd)
   
-  file.copy(file.path(tmpDir, "temp.xlsx"), file, overwrite = overwrite)
+  file.copy(file.path(tmp$tmpDir, tmp$tmpFile), file, overwrite = overwrite)
   
   ## delete temporary dir
-  unlink(tmpDir, force = TRUE, recursive= TRUE)
+  unlink(tmp$tmpDir, force = TRUE, recursive = TRUE)
   
   invisible(1)
 }

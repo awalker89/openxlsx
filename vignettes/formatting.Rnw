@@ -130,7 +130,7 @@ addStyle(wb, 1, style = sty, rows = 2:11, cols = 5, gridExpand = TRUE)
 sty <- createStyle(numFmt = "yyyy-mmm-dddd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 6, gridExpand = TRUE)
 
-sty <- createStyle(numFmt = mm/ dd yyyy")
+sty <- createStyle(numFmt = "mm/ dd yyyy")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 7, gridExpand = TRUE)
 
 sty <- createStyle(numFmt = "mm/dd/yy")

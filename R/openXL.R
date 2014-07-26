@@ -39,7 +39,8 @@ openXL <- function(file = NULL){
   ## workbook handling
   if ("Workbook" == class(file)) {
     oldWD <- getwd()
-    file <- file.path(file$saveWorkbook(quiet = TRUE), "temp.xlsx")
+    tmp <- file$saveWorkbook(quiet = TRUE)
+    file <- file.path(tmp$tmpDir, tmp$tmpFile)
     setwd(oldWD)
   }
   

@@ -340,14 +340,17 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## compress to xlsx
   setwd(tmpDir)
-  zipWorkbook("temp.xlsx", list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
+  tmpFile <- tempfile(tmpdir = tmpDir, fileext = ".xlsx")
+  tmpFile <- basename(tmpFile)
+  
+  zipWorkbook(tmpFile, list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
   
   ## reset styles
   baseFont <- styles$fonts[[1]]
   styles <<- genBaseStyleSheet(styles$dxfs)
   styles$fonts[[1]] <<- baseFont
   
-  invisible(tmpDir)
+  invisible(list("tmpDir" = tmpDir, "tmpFile" = tmpFile))
   
 })
 
