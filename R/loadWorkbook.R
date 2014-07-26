@@ -33,7 +33,6 @@ loadWorkbook <- function(xlsxFile){
   
   wb <- createWorkbook()
   
-  
   ## create temp dir
   xmlDir <- paste0(tempdir(),  tempfile(tmpdir = ""), "_openxlsx_loadWorkbook")
   
