@@ -14,8 +14,8 @@ The openxlsx package uses global options to simplfy formatting:
 \itemize{
    \item{\code{options("openxlsx.borderColour" = "black")}}
    \item{\code{options("openxlsx.borderStyle" = "thin")}}
-   \item{\code{ooptions("openxlsx.dateFormat" = "mm/dd/yyyy")}}
    \item{\code{options("openxlsx.dateFormat" = "mm/dd/yyyy")}}
+   \item{\code{options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")}}
   }
 }
 \seealso{

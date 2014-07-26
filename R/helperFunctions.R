@@ -16,7 +16,9 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     ## style hyperlinks
     inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)   
-    styleElements <- list(style = createStyle(fontColour = "#0000FF", textDecoration = "underline"),
+    hyperlinkstyle <- createStyle(fontColour = "#0000FF", textDecoration = "underline")
+    hyperlinkstyle$fontColour <- list("theme"="10")
+    styleElements <- list(style = hyperlinkstyle,
                           cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
                                             rows = coords[[1]],
                                             cols = coords[[2]])))
