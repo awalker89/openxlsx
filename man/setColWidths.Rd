@@ -27,9 +27,6 @@ addWorksheet(wb, "Sheet 1")
 ## set col widths
 setColWidths(wb, 1, cols = c(1,4,6,7,9), widths = c(16,15,12,18,33))
 
-## overwrite col 1 to auto width ("auto" defaults to 8.43 (excel default) if column is empty)
-setColWidths(wb, 1, "A", "auto")
-
 ## Save workbook
 saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
 }

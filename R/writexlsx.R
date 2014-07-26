@@ -3,7 +3,7 @@
 #' @name write.xlsx
 #' @title write directly to an xlsx file
 #' @author Alexander Walker
-#' @param x data to write to file
+#' @param x object or a list of objects that can be handled by \code{\link{writeData}} to write to file
 #' @param file xlsx file name
 #' @param ... optional parameters to pass to functions:
 #' \itemize{
@@ -66,7 +66,7 @@
 #' l <- list(iris, mtcars, matrix(runif(1000), ncol = 5))
 #' write.xlsx(l, "writeList.xlsx")
 #' names(l) <- c("IRIS", "MTCARS", "RUNIF")
-#' write.xlsx(l, "writeLis2t.xlsx")
+#' write.xlsx(l, "writeList2.xlsx")
 #' 
 #' @export
 write.xlsx <- function(x, file, ...){

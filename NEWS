@@ -1,5 +1,5 @@
 
-openxlsx 2.0.5
+openxlsx 2.0.15
 ----------------------------------------------------------------
 
 NEW FEATURES
@@ -30,10 +30,11 @@ BUG FIXES
 
 * scientific notation resulting in corrupt workbooks fix
 
-* Multiple saves of Workbooks with conditional formatting were corrupt.
+* Multiple saves of Workbooks containing conditional formatting were corrupt.
 
 * Latin1 characters now write correctly.
 
+* logicals written as 0/1 instead of TRUE/FALSE
 
 openxlsx 2.0.1
 ----------------------------------------------------------------

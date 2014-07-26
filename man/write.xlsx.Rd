@@ -6,7 +6,7 @@
 write.xlsx(x, file, ...)
 }
 \arguments{
-\item{x}{data to write to file}
+\item{x}{object or a list of objects that can be handled by \code{\link{writeData}} to write to file}
 
 \item{file}{xlsx file name}
 
@@ -75,7 +75,7 @@ write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
 l <- list(iris, mtcars, matrix(runif(1000), ncol = 5))
 write.xlsx(l, "writeList.xlsx")
 names(l) <- c("IRIS", "MTCARS", "RUNIF")
-write.xlsx(l, "writeLis2t.xlsx")
+write.xlsx(l, "writeList2.xlsx")
 }
 \author{
 Alexander Walker

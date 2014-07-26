@@ -19,10 +19,13 @@ The openxlsx package uses global options to simplfy formatting:
   }
 }
 \seealso{
-See
 \itemize{
    \item{\code{vignette("Introduction", package = "openxlsx")}}
    \item{\code{vignette("formatting", package = "openxlsx")}}
+   \item{\code{\link{writeData}}}
+   \item{\code{\link{writeDataTable}}}
+   \item{\code{\link{write.xlsx}}}
+   \item{\code{\link{read.xlsx}}}
   }
 for examples
 }
