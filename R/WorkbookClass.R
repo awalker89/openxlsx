@@ -80,16 +80,25 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
   
   ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
-  
+
   if(quiet){
-    invisible(system2(zip, args, stdout = NULL))
+    
+    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
+    
   }else{
-    if (.Platform$OS.type == "windows") 
-      invisible(system2(zip, args, invisible = TRUE))
-    else invisible(system2(zip, args))
+    if (.Platform$OS.type == "windows"){
+      res <- invisible(suppressWarnings(system2(zip, args, invisible = TRUE)))
+    }else{
+      res <- invisible(suppressWarnings(system2(zip, args)))
+    }
   }
   
-  invisible(0)
+  if(res != 0){
+    stop("zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
+         Try installr::install.rtools() on Windows.", call. = FALSE)
+  }
+  
+  invisible(res)
 })
 
 
