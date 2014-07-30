@@ -87,9 +87,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     sharedStrings <- gsub("&amp;", '&', sharedStrings)
     sharedStrings <- gsub("&lt;", '<', sharedStrings)
     sharedStrings <- gsub("&gt;", '>', sharedStrings)
-    
-#     sharedStrings <- gsub("&quot;", '"', sharedStrings)
-#     sharedStrings <- gsub("&apos;", "'", sharedStrings)
+    sharedStrings <- gsub("&quot;", '"', sharedStrings)
+    sharedStrings <- gsub("&apos;", "'", sharedStrings)
     
   }else{
     sharedStrings <- NULL
