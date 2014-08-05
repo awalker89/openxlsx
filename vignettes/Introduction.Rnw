@@ -230,6 +230,12 @@ addWorksheet(wb = wb, sheetName = test.n)
 x <- summary(coxph(Surv(stop,event) ~ rx + cluster(id), data = bladder))
 writeData(wb = wb, sheet = test.n, x = x)
 
+## htest (t.test example)
+test.n <- "htest_ttest"
+addWorksheet(wb = wb, sheetName = test.n)
+x <- t.test(extra ~ group, data = sleep)
+writeData(wb = wb, sheet = test.n, x = x)
+
 ## Save workbook
 saveWorkbook(wb, "classTests.xlsx",  overwrite = TRUE)
 
