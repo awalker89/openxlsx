@@ -262,6 +262,37 @@ writeData <- function(wb,
 
     x <- as.data.frame(x$table)
     rowNames <- TRUE
+
+  }else if ("htest" %in% clx){
+
+        col1 <- c(ifelse(!is.null(x$statistic), names(x$statistic), ""),
+                  ifelse(!is.null(x$parameter), names(x$parameter), ""),
+                  ifelse(!is.null(x$p.value), "p-value", ""))
+        col2 <- c(ifelse(!is.null(x$statistic), x$statistic, NA),
+                  ifelse(!is.null(x$parameter), x$parameter, NA),
+                  ifelse(!is.null(x$p.value), x$p.value, NA))
+        col3 <- c("Method",
+                  "Data",
+                  ifelse(!is.null(x$alternative),  "Alternative", NA))
+        col4 <- c(x$method,
+                  x$data.name,
+                  ifelse(is.null(x$alternative), NA,
+                         paste(capture.output(if (!is.null(x$null.value)) {
+                           if (length(x$null.value) == 1L) {
+                             alt.char <- switch(x$alternative,
+                                                two.sided = "not equal to",
+                                                less = "less than",
+                                                greater = "greater than")
+                             cat("true ", names(x$null.value), " is ", alt.char,
+                                 " ", x$null.value, "\n", sep = "")
+                           } else {
+                             cat(x$alternative, "\nnull values:\n", sep = "")
+                             print(x$null.value, ...)
+                           }
+                         } else cat(x$alternative, "\n", sep = "")), collapse = "")))
+        x <- data.frame(col1, col2, col3, col4, stringsAsFactors = FALSE)
+        rowNames <- FALSE
+        colNames <- FALSE
     
   }else{
     
