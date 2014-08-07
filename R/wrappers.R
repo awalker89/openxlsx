@@ -1708,6 +1708,7 @@ convertToDateTime <- function(x, origin = "1970-1-1"){
 
 
 #' @name names
+#' @aliases names.Workbook
 #' @export names.Workbook
 #' @method names Workbook
 #' @title get or set worksheet names
