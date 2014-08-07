@@ -283,6 +283,10 @@ writeData <- function(wb,
   nCol <- ncol(x)
   nRow <- nrow(x)
   
+  ## If no rows and not writing column names return as nothing to write
+  if(nRow == 0 & !colNames)
+    return(invisible(0))
+  
   colClasses <- lapply(x, function(x) tolower(class(x)))
   sheet <- wb$validateSheet(sheet)
 
@@ -296,11 +300,15 @@ writeData <- function(wb,
                hlinkNames = hlinkNames)
   
   ## header style  
-  if(!is.null(headerStyle))
+  if("Style" %in% class(headerStyle) & colNames)
     addStyle(wb = wb, sheet = sheet, style=headerStyle,
              rows = startRow,
              cols = 0:(nCol-1) + startCol,
              gridExpand = TRUE)
+  
+  ## If we don't have any rows to write return
+  if(nRow == 0)
+    return(invisible(0))
   
   
   ## hyperlink style, if no borders
@@ -355,7 +363,3 @@ writeData <- function(wb,
   invisible(0)
   
 }
-
-
-
-
