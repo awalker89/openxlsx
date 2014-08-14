@@ -101,10 +101,17 @@ writeDataTable <- function(wb, sheet, x,
     colNames <- colnames(x)
     if(any(duplicated(tolower(colNames))))
       stop("Column names of x must be case-insensitive unique.")
+      
+    ## zero char names are invalid
+    char0 <- nchar(colNames) == 0
+    if(any(char0)){
+      colNames[char0] <- colnames(x)[char0] <- paste0("Column", which(char0))
+    }
+    
   }else{
     colNames <- paste0("Column", 1:ncol(x))
   }
-  ## If zero rows append an empty row (prevent XML from corrupting)
+  ## If zero rows, append an empty row (prevent XML from corrupting)
   if(nrow(x) == 0){
     x <- rbind(x, matrix("", nrow = 1, ncol = ncol(x)))
     names(x) <- colNames
