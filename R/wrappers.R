@@ -740,10 +740,11 @@ getCellRefs <- function(cellCoords){
 #'
 #' ## Databars
 #' writeData(wb, "databar", -5:5)
-#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar")
+#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
 #' 
 #' writeData(wb, "databar", -5:5, startCol = 2)
-#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = "green", type = "databar")
+#' ## set negative and positive colours
+#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = c("yellow", "green"), type = "databar")
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
@@ -751,6 +752,8 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
   
   
   ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
+  ## Rule for "databar" and colourscale are colours of length 2/3 or 1 respectively.
+  
   type <- tolower(type)
   if(tolower(type) %in% c("colorscale", "colourscale")){
     type <- "colorScale"

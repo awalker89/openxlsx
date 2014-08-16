@@ -1202,9 +1202,17 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
  
   }else if(type == "dataBar"){
     
-    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extList))
-    cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', formula, guid)
-    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, getExtLst(guid, sqref))
+    if(length(formula) == 2){
+      negColour <- formula[[1]]
+      posColour <- formula[[2]]
+    }else{
+      posColour <- formula
+      negColour <- "FFFF0000"
+    }
+      
+    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
+    cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
+    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, genExtLst(guid, sqref, posColour, negColour))
     
   }else if(length(formula) == 2L){
     
