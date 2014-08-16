@@ -3,7 +3,7 @@
 \alias{conditionalFormat}
 \title{Add conditional formatting to cells}
 \usage{
-conditionalFormat(wb, sheet, cols, rows, rule, style = NULL,
+conditionalFormat(wb, sheet, cols, rows, rule = NULL, style = NULL,
   type = "expression")
 }
 \arguments{
@@ -15,12 +15,11 @@ conditionalFormat(wb, sheet, cols, rows, rule, style = NULL,
 
 \item{rows}{Rows to apply conditional formatting to}
 
-\item{rule}{The condition under which to apply the formatting or a vector of colours
-if type = "colourScale". See examples.}
+\item{rule}{The condition under which to apply the formatting or a vector of colours. See examples.}
 
 \item{style}{A style to apply to those cells that satisify the rule. A Style object returned from createStyle()}
 
-\item{type}{Either 'expression' or 'colorscale'. If 'expression' the formatting is determined
+\item{type}{Either 'expression', 'colorscale' or 'databar'. If 'expression' the formatting is determined
 by a formula.  If colorScale cells are coloured based on cell value. See examples.}
 }
 \description{
@@ -37,6 +36,7 @@ addWorksheet(wb, "moving Row")
 addWorksheet(wb, "moving Col")
 addWorksheet(wb, "Dependent on 1")
 addWorksheet(wb, "colourScale 2 Colours")
+addWorksheet(wb, "databar")
 
 negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -77,6 +77,13 @@ conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
 
 setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
 setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5)
+
+## Databars
+writeData(wb, "databar", -5:5)
+conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar")
+
+writeData(wb, "databar", -5:5, startCol = 2)
+conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = "green", type = "databar")
 
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
