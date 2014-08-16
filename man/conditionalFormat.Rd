@@ -80,10 +80,12 @@ setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5)
 
 ## Databars
 writeData(wb, "databar", -5:5)
-conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar")
+conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
 
 writeData(wb, "databar", -5:5, startCol = 2)
-conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = "green", type = "databar")
+## set negative and positive colours
+conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
+ rule = c("yellow", "green"), type = "databar")
 
 ## Save workbook
 saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)

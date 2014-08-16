@@ -216,6 +216,7 @@ addWorksheet(wb, "moving Row")
 addWorksheet(wb, "moving Col")
 addWorksheet(wb, "Dependent on 1")
 addWorksheet(wb, "colourScale 2 Colours")
+addWorksheet(wb, "databar")
 
 negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -257,7 +258,17 @@ conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
    
 setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
 setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
-#'
+
+
+## Databars
+writeData(wb, "databar", -5:5)
+conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
+
+writeData(wb, "databar", -5:5, startCol = 2)
+## set negative and positive colours
+conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
+  rule = c("yellow", "green"), type = "databar")
+
 ## Save workbook
 saveWorkbook(wb, "Conditional Formatting Examples.xlsx", overwrite = TRUE)
 

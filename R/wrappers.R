@@ -744,7 +744,8 @@ getCellRefs <- function(cellCoords){
 #' 
 #' writeData(wb, "databar", -5:5, startCol = 2)
 #' ## set negative and positive colours
-#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = c("yellow", "green"), type = "databar")
+#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
+#'  rule = c("yellow", "green"), type = "databar")
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
