@@ -920,6 +920,9 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
     
+    if(length(worksheets[[i]]$extLst) > 0)
+      ws$extLst <- sprintf('<extLst>%s</extLst>', paste(worksheets[[i]]$extLst, collapse = ""))
+      
     if(hyperlinks[[i]][[1]] != ""){
       nTables <- length(tables)
       nHLinks <- length(hyperlinks[[i]])
@@ -1194,13 +1197,24 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
   
   if(type == "expression"){
+ 
     cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
+ 
+  }else if(type == "dataBar"){
+    
+    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extList))
+    cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', formula, guid)
+    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, getExtLst(guid, sqref))
+    
   }else if(length(formula) == 2L){
+    
     cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]])
+    
   }else{
+    
     cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="percentile" val="50"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]], formula[[3]])
   }
-    
+  
   worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              
   
   names(worksheets[[sheet]]$conditionalFormatting) <<- nms

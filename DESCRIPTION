@@ -1,7 +1,7 @@
 Package: openxlsx
 Type: Package
 Title: .xlsx reading, writing and editing.
-Version: 2.0.15
+Version: 2.0.16
 Date: 2014-05-29
 Authors@R: c(
     person("Alexander", "Walker",

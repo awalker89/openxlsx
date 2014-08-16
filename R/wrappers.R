@@ -681,12 +681,11 @@ getCellRefs <- function(cellCoords){
 #' @param sheet A name or index of a worksheet
 #' @param cols Columns to apply conditional formatting to
 #' @param rows Rows to apply conditional formatting to
-#' @param rule The condition under which to apply the formatting or a vector of colours 
-#' if type = "colourScale". See examples.
+#' @param rule The condition under which to apply the formatting or a vector of colours. See examples.
 #' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
 #' @details Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 #' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-#' @param type Either 'expression' or 'colorscale'. If 'expression' the formatting is determined
+#' @param type Either 'expression', 'colorscale' or 'databar'. If 'expression' the formatting is determined
 #' by a formula.  If colorScale cells are coloured based on cell value. See examples.
 #' @seealso \code{\link{createStyle}}
 #' @export
@@ -697,6 +696,7 @@ getCellRefs <- function(cellCoords){
 #' addWorksheet(wb, "moving Col")
 #' addWorksheet(wb, "Dependent on 1")
 #' addWorksheet(wb, "colourScale 2 Colours")
+#' addWorksheet(wb, "databar")
 #' 
 #' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -738,17 +738,26 @@ getCellRefs <- function(cellCoords){
 #' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
 #' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
 #'
+#' ## Databars
+#' writeData(wb, "databar", -5:5)
+#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar")
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 2)
+#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12, rule = "green", type = "databar")
+#' 
 #' ## Save workbook
 #' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
-conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = "expression"){
+conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
   
   
   ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
   type <- tolower(type)
   if(tolower(type) %in% c("colorscale", "colourscale")){
     type <- "colorScale"
+  }else if(type == "databar"){
+    type <- "dataBar"
   }else if(type != "expression"){
-    stop("Invalid type argument.  type must be 'expression' or 'colourScale'")
+    stop("Invalid type argument.  Type must be 'expression', 'colourScale' or 'databar'")
   }
   
   ## rows and cols
@@ -762,6 +771,17 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule, style = NULL, type = 
       stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
     
     rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
+    dxfId <- NULL
+    
+  }else if(type == "dataBar"){
+    
+    ## If rule is NULL use default colour
+    if(is.null(rule)){
+      rule <- "FF638EC6"
+    }else{
+      rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
+    }
+    
     dxfId <- NULL
     
   }else{ ## else type == "expression"
