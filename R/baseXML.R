@@ -1,85 +1,87 @@
 
 
 genBaseContent_Type <- function(){
-    
-          c(
-            '<Default Extension="bin" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"/>',
-            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
-            '<Default Extension="xml" ContentType="application/xml"/>',
-            '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>',
-            '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>',
-            '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>',
-            '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>',
-            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>',
-            '<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>'
-          )
-    
+  
+  c(
+    '<Default Extension="bin" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"/>',
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
+    '<Default Extension="xml" ContentType="application/xml"/>',
+    '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>',
+    '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>',
+    '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>',
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>',
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>',
+    '<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>'
+  )
+  
 }
 
 
 genBaseRels <- function(){
-
-       list(
-         '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>',
-         '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>',
-         '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
-       )
+  
+  list(
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>',
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>',
+    '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
+  )
 }
 
 
 genBaseApp <- function(){
-       list('<Application>Microsoft Excel</Application>')
+  list('<Application>Microsoft Excel</Application>')
 }
 
 
 genBaseCore <- function(creator){  
   
-             list('<dcterms:created xsi:type="dcterms:W3CDTF">2014-03-07T16:08:25Z</dcterms:created>',
-             sprintf('<dc:creator>%s</dc:creator>', creator))
-
+  list('<dcterms:created xsi:type="dcterms:W3CDTF">2014-03-07T16:08:25Z</dcterms:created>',
+       sprintf('<dc:creator>%s</dc:creator>', creator))
+  
 } 
 
 genBaseWorkbook.xml.rels <- function(){
-
-       c('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>',
-         '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>',
-         '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>')
+  
+  c('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>',
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>',
+    '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>')
 }
 
 
 genBaseWorkbook <- function(){
-
-    list(workbookPr = '<workbookPr date1904="false"/>',
-         bookViews = '<bookViews><workbookView activeTab="0"/></bookViews>',
-         sheets = NULL,
-         externalReferences = NULL,
-         definedNames = NULL,
-         calcPr = NULL
-    )
-
+  
+  list(workbookPr = '<workbookPr date1904="false"/>',
+       bookViews = '<bookViews><workbookView activeTab="0"/></bookViews>',
+       sheets = NULL,
+       externalReferences = NULL,
+       definedNames = NULL,
+       calcPr = NULL
+  )
+  
 }
 
-genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE){
+genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL){
   
-  
+  if(!is.null(tabColour))
+    tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
   
   ## list of all possible children
-  tmp <- list(list(dimension = '<dimension ref="A1"/>',
-       sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" showGridLines="%s" tabSelected="TRUE"/></sheetViews>', as.integer(showGridLines)),
-       sheetFormatPr = '<sheetFormatPr defaultRowHeight="15.0"/>',
-       cols = NULL,
-       sheetData = '<sheetData/>',
-       autoFilter = NULL,
-       mergeCells = NULL,
-       conditionalFormatting = NULL,
-       hyperlinks = NULL,
-       pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
-       pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
-       headerFooter = NULL,
-       drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
-       tableParts = NULL,
-       extLst = NULL
-       ))
+  tmp <- list(list(sheetPr = tabColour,
+                   dimension = '<dimension ref="A1"/>',
+                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" showGridLines="%s" tabSelected="TRUE"/></sheetViews>', as.integer(showGridLines)),
+                   sheetFormatPr = '<sheetFormatPr defaultRowHeight="15.0"/>',
+                   cols = NULL,
+                   sheetData = '<sheetData/>',
+                   autoFilter = NULL,
+                   mergeCells = NULL,
+                   conditionalFormatting = NULL,
+                   hyperlinks = NULL,
+                   pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
+                   pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
+                   headerFooter = NULL,
+                   drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
+                   tableParts = NULL,
+                   extLst = NULL
+  ))
   
   names(tmp) <- sheetName
   
@@ -90,36 +92,36 @@ genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE){
 genBaseSheetRels <- function(sheetInd){
   
   c(
-  sprintf('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing%s.xml"/>', sheetInd),
-  sprintf('<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings" Target="../printerSettings/printerSettings%s.bin"/>', sheetInd)
+    sprintf('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing%s.xml"/>', sheetInd),
+    sprintf('<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings" Target="../printerSettings/printerSettings%s.bin"/>', sheetInd)
   )
-
+  
 }
 
 genBaseStyleSheet <- function(dxfs = NULL){
-   
+  
   list(
     
-       numFmts = NULL,
-       
-       fonts = c('<font><sz val="11"/><color rgb="%s"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
-       
-       fills = c('<fill><patternFill patternType="none"/></fill>',
-                    '<fill><patternFill patternType="gray125"/></fill>'),
-       
-       borders = c('<border><left/><right/><top/><bottom/><diagonal/></border>'),
-       
-       cellStyleXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>'),
-       
-       cellXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'),
-       
-       cellStyles = c('<cellStyle name="Normal" xfId="0" builtinId="0"/>'),
-       
-       dxfs = dxfs,
-       
-       indexedColors = NULL
+    numFmts = NULL,
+    
+    fonts = c('<font><sz val="11"/><color rgb="%s"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
+    
+    fills = c('<fill><patternFill patternType="none"/></fill>',
+              '<fill><patternFill patternType="gray125"/></fill>'),
+    
+    borders = c('<border><left/><right/><top/><bottom/><diagonal/></border>'),
+    
+    cellStyleXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>'),
+    
+    cellXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'),
+    
+    cellStyles = c('<cellStyle name="Normal" xfId="0" builtinId="0"/>'),
+    
+    dxfs = dxfs,
+    
+    indexedColors = NULL
   )
-        
+  
 }
 
 
@@ -165,7 +167,7 @@ genBaseTable <- function(id, ref, colNames){
   
   table <- paste(c(table, tableCols, tableStyle, '</table>'))
   writeLines(table)
-    
+  
   
 }
 
@@ -321,7 +323,7 @@ genBaseTheme <- function(){
   <a:path path="circle"><a:fillToRect l="50000" t="50000" r="50000" b="50000"/></a:path>
   </a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>'  
   
-    
+  
 }
 
 

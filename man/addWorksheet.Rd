@@ -3,7 +3,7 @@
 \alias{addWorksheet}
 \title{Add a worksheet to a workbook}
 \usage{
-addWorksheet(wb, sheetName, gridLines = TRUE)
+addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL)
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}
@@ -11,6 +11,8 @@ addWorksheet(wb, sheetName, gridLines = TRUE)
 \item{sheetName}{A name for the new worksheet}
 
 \item{gridLines}{A logical. If FALSE, the worksheet grid lines will be hidden.}
+
+\item{tabColour}{Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
 }
 \value{
 XML tree
@@ -23,9 +25,10 @@ Add a worksheet to a workbook
 wb <- createWorkbook("Fred")
 
 ## Add 3 worksheets
-addWorksheet(wb, "Worksheet Name")
-addWorksheet(wb, "This is worksheet 2")
-addWorksheet(wb, "The third worksheet")
+addWorksheet(wb, "Sheet 1")
+addWorksheet(wb, "Sheet 2", gridLines = FALSE)
+addWorksheet(wb, "Sheet 3", tabColour = "red")
+addWorksheet(wb, "Sheet 4", gridLines = FALSE, tabColour = "#4F81BD")
 
 ## Save workbook
 saveWorkbook(wb, "addWorksheetExample.xlsx", overwrite = TRUE)

@@ -446,6 +446,11 @@ loadWorkbook <- function(xlsxFile){
       wb$worksheets[[i]]$autoFilter <- autoFilter
     }
     
+    ## tab colour (sheetPR)
+    tabColour <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<tabColor ", PACKAGE = "openxlsx")
+    if(length(tabColour) > 0)
+      wb$worksheets[[i]]$sheetPr <- sprintf('<sheetPr>%s</sheetPr>', tabColour)
+    
     ## hyperlinks
     hyperlinks <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<hyperlink ", PACKAGE = "openxlsx")
     if(length(hyperlinks) > 0)

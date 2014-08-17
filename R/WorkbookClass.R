@@ -102,7 +102,7 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
 })
 
 
-Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
+Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL){
 
   newSheetIndex = length(worksheets) + 1L
   
@@ -110,7 +110,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE){
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, newSheetIndex, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName, showGridLines))
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour))
   
   ## update content_tyes
   Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex))

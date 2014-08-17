@@ -200,6 +200,7 @@ sheets <- function(wb){
 #' @param wb A Workbook object to attach the new worksheet
 #' @param sheetName A name for the new worksheet
 #' @param gridLines A logical. If FALSE, the worksheet grid lines will be hidden.
+#' @param tabColour Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
 #' @return XML tree
 #' @export
 #' @examples
@@ -207,13 +208,14 @@ sheets <- function(wb){
 #' wb <- createWorkbook("Fred")
 #' 
 #' ## Add 3 worksheets
-#' addWorksheet(wb, "Worksheet Name")
-#' addWorksheet(wb, "This is worksheet 2")
-#' addWorksheet(wb, "The third worksheet")
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2", gridLines = FALSE)
+#' addWorksheet(wb, "Sheet 3", tabColour = "red")
+#' addWorksheet(wb, "Sheet 4", gridLines = FALSE, tabColour = "#4F81BD")
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "addWorksheetExample.xlsx", overwrite = TRUE)
-addWorksheet <- function(wb, sheetName, gridLines = TRUE){
+addWorksheet <- function(wb, sheetName, gridLines = TRUE, tabColour = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -227,7 +229,8 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
   if(nchar(sheetName) > 31)
     stop("sheetName too long! Max length is 31 characters.")
   
-  nSheets <- length(wb$worksheets)
+  if(!is.null(tabColour))
+    tabColour <- validateColour(tabColour, "Invalid tabColour in addWorksheet.")
   
   if(!is.character(sheetName))
     sheetName <- as.character(sheetName)
@@ -235,7 +238,7 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE){
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
   
-  invisible(wb$addWorksheet(sheetName, gridLines))
+  invisible(wb$addWorksheet(sheetName, gridLines, tabColour))
 } 
 
 
