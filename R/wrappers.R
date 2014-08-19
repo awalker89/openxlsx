@@ -957,8 +957,8 @@ insertImage <- function(wb, sheet, file, width = 6, height = 3, startRow = 1, st
   }
   
   ## Convert to EMUs
-  widthEMU <- width * 914400 #(EMUs per inch)
-  heightEMU <- height * 914400 #(EMUs per inch)
+  widthEMU <- as.integer(round(width * 914400L, 0)) #(EMUs per inch)
+  heightEMU <- as.integer(round(height * 914400L, 0)) #(EMUs per inch)
   
   wb$insertImage(sheet, file = file, startRow = startRow, startCol = startCol, width = widthEMU, height = heightEMU)
   
