@@ -1135,18 +1135,6 @@ removeRowHeights <- function(wb, sheet, rows){
 }
 
 
-
-
-#' @name orderCellRef
-#' @title Returns ordering of sorted cell references 
-#' @param x vector of cell references
-#' @return Ordering of sorted cell references 
-#' @export
-orderCellRef <- function(x){
-  order(nchar(x), x) - 1L
-}
-
-
 #' @name insertPlot
 #' @title Insert the current plot into a worksheet
 #' @author Alexander Walker

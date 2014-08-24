@@ -1598,7 +1598,7 @@ Workbook$methods(show = function(){
     showText <- c(showText, sheetTxt, "\n")
     
   }else{
-    showText <- c(showText, "\nWorksheets:\n", "No worksheets attached")
+    showText <- c(showText, "\nWorksheets:\n", "No worksheets attached\n")
   }
   
   ## images
@@ -1608,7 +1608,8 @@ Workbook$methods(show = function(){
   if(nCharts > 0)
     showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
   
-  showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
+  if(nSheets > 0)
+    showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
   
   cat(unlist(showText))
   
