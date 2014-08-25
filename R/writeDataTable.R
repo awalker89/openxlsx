@@ -11,6 +11,7 @@
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
 #' @param tableStyle Any excel table style name or "none".
+#' @param tableName name of table in workbook.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
@@ -51,14 +52,10 @@ writeDataTable <- function(wb, sheet, x,
                            xy = NULL,
                            colNames = TRUE,
                            rowNames = FALSE,
-                           tableStyle = "TableStyleLight9"){
+                           tableStyle = "TableStyleLight9",
+                           tableName = NULL){
   
-  
-  ## increase scipen to avoid writing in scientific 
-  exSciPen <- options("scipen")
-  options("scipen" = 10000)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
-  
+    
   if(!is.null(xy)){
     if(length(xy) != 2)
       stop("xy parameter must have length 2")
@@ -66,12 +63,22 @@ writeDataTable <- function(wb, sheet, x,
     startRow = xy[[2]]
   }
   
-  
   ## Input validating
   if(!"Workbook" %in% class(wb)) stop("First argument must be a Workbook.")
   if(!"data.frame" %in% class(x)) stop("x must be a data.frame.")
   if(!is.logical(colNames)) stop("colNames must be a logical.")
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
+    
+  if(is.null(tableName)){
+    tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
+  }else if(tableName %in% attr(wb$tables, "tableName")){
+    stop(sprintf("Table with name '%s' already exists!", tableName))
+  }
+  
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
   
   ## convert startRow and startCol
   if(!is.numeric(startCol))
@@ -121,6 +128,33 @@ writeDataTable <- function(wb, sheet, x,
   ref2 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow+nrow(x)-1 + showColNames)
   ref <- paste(ref1, ref2, sep = ":")
   
+  ## check not overwriting another table
+  if(length(wb$tables) > 0){
+    
+    tableSheets <- attr(wb$tables, "sheet")
+    if(sheet %in% tableSheets){ ## only look at tables on this sheet
+
+      exTable <- wb$tables[tableSheets %in% sheet]
+    
+      newRows <- c(startRow, startRow + nrow(x) - 1L + showColNames)
+      newCols <- c(startCol, startCol + ncol(x) - 1L)
+      
+      rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
+      cols <- lapply(names(exTable), function(rectCoords) convertFromExcelRef(unlist(regmatches(rectCoords, gregexpr("[A-Z]+", rectCoords)))))
+      
+      ## loop through existing tables checking if any over lap with new table
+      for(i in 1:length(exTable)){
+
+       exCols <- cols[[i]]
+       exRows <- rows[[i]]
+       
+       if(exCols[1] < newCols[2] & exCols[2] > newCols[1] & exRows[1] < newRows[2] & exRows[2] > newRows[1]) 
+         stop("Cannot overwrite existing table.")
+        
+      }
+    } ## end if(sheet %in% tableSheets) 
+  } ## end (length(wb$tables) > 0)
+  
   ## column class styling
   colClasses <- lapply(x, function(x) tolower(class(x)))
   classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = showColNames, nRow = nrow(x), colClasses = colClasses)
@@ -138,6 +172,6 @@ writeDataTable <- function(wb, sheet, x,
   colNames <- replaceIllegalCharacters(colNames)
   
   ## create table.xml and assign an id to worksheet tables
-  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle)
+  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle, tableName)
   
 }

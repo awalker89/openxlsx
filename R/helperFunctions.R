@@ -1,6 +1,7 @@
 
 
-
+## creates style object based on column classes
+## Used in writeData and writeDataTable
 classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasses){
   
   sheet = wb$validateSheet(sheet)

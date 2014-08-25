@@ -310,13 +310,15 @@ loadWorkbook <- function(xlsxFile){
   
   ## tables
   if(length(tablesXML) > 0){
-    tablesXML <- tablesXML[order(nchar(tablesXML), tablesXML)]
 
+    tablesXML <- tablesXML[order(nchar(tablesXML), tablesXML)]
     wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
     
     ## pull out refs and attach names
-    nms <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
-    names(wb$tables) <- nms
+    refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
+    names(wb$tables) <- refs
+        
+    tableIds <- as.numeric(regmatches(wb$tables, regexpr('(?<=id=")[0-9]+', wb$tables, perl = TRUE)))
     
     wb$Content_Types <- c(wb$Content_Types, 
                           sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', 1:length(wb$tables)+2))   
@@ -537,7 +539,7 @@ loadWorkbook <- function(xlsxFile){
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   
   if(length(sheetRelsXML) > 0){
-    
+
     sheetRelsXML <- sheetRelsXML[order(nchar(sheetRelsXML), sheetRelsXML)]
     sheetNumber <- as.integer(regmatches(sheetRelsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", sheetRelsXML, perl = TRUE)))
     
@@ -549,28 +551,41 @@ loadWorkbook <- function(xlsxFile){
     
     ## tables
     if(length(tablesXML) > 0){
-      
+    
       tables <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=table)[0-9]+(?=\\.xml)", x, perl = TRUE))))
+      tableSheets <- unlist(lapply(1:length(sheetNumber), function(i) rep(sheetNumber[i], length(tables[[i]]))))  
+      
       if(length(unlist(tables)) > 0){  
         ## get the tables that belong to each worksheet and create a worksheets_rels for each
-        tCount <- 2L ## table r:Ids start at 2
+        tCount <- 2L ## table r:Ids start at 3
         for(i in 1:length(tables)){
-          k <- 1:length(tables[[i]]) + tCount
-          wb$worksheets_rels[[sheetNumber[i]]] <- unlist(c(wb$worksheets_rels[[sheetNumber[i]]],
-                                                           sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table%s.xml"/>',  k,  k)))
-          
-          
-          wb$worksheets[[sheetNumber[i]]]$tableParts <- sprintf("<tablePart r:id=\"rId%s\"/>", k)
-          tCount <- tCount + length(k)
+          if(length(tables[[i]]) > 0){
+            k <- 1:length(tables[[i]]) + tCount
+            wb$worksheets_rels[[sheetNumber[i]]] <- unlist(c(wb$worksheets_rels[[sheetNumber[i]]],
+                                                             sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table%s.xml"/>',  k,  k)))
+            
+            
+            wb$worksheets[[sheetNumber[i]]]$tableParts <- sprintf("<tablePart r:id=\"rId%s\"/>", k)
+            tCount <- tCount + length(k)
+          }
         }
+               
         
-        wb$tables <- wb$tables[order(unlist(tables))]
+        wb$tables <- unlist(lapply(1:length(tables), function(i) wb$tables[tableIds %in% tables[[i]]]))
         
         ## relabel ids
         for(i in 1:length(wb$tables)){
           newId <- sprintf(' id="%s" ', i+2)
-          wb$tables[[i]] <- sub(' id="[0-9]+" ' ,newId, wb$tables[[i]])
+          wb$tables[[i]] <- sub(' id="[0-9]+" ' , newId, wb$tables[[i]])
         }
+        
+        displayNames <- unlist(regmatches(wb$tables, regexpr('(?<=displayName=").*?[^"]+', wb$tables, perl = TRUE)))
+        if(length(displayNames) != length(tablesXML))
+          displayNames <- paste0("Table", 1:length(tablesXML))
+        
+        attr(wb$tables, "sheet") <- tableSheets
+        attr(wb$tables, "tableName") <- displayNames
+        
       }
     } ## if(length(tablesXML) > 0)
     

@@ -417,17 +417,23 @@ Workbook$methods(getSheetName = function(sheetIndex){
 
 
 
-Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle){
+Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle, tableName){
   
   ## id will start at 3 and drawing will always be 1, printer Settings at 2 (printer settings has been removed)
   id <- as.character(length(tables) + 3L)
   sheet = validateSheet(sheet)
-  
+      
   ## build table XML and save to tables field
+  table <- sprintf('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="%s" name="%s" displayName="%s" ref="%s"', id, tableName, tableName, ref)
+  
   nms <- names(tables)
-  tables <<- c(tables, .Call("openxlsx_buildTableXML", id, ref, colNames, showColNames, tableStyle, PACKAGE = "openxlsx"))
+  tSheets <- attr(tables, "sheet")
+  tNames <- attr(tables, "tableName") 
+  
+  tables <<- c(tables, .Call("openxlsx_buildTableXML", table, ref, colNames, showColNames, tableStyle, PACKAGE = "openxlsx"))
   names(tables) <<- c(nms, ref)
-  attr(tables, "sheet") <<- c(attr(tables, "sheet"), sheet)
+  attr(tables, "sheet") <<- c(tSheets, sheet)
+  attr(tables, "tableName") <<- c(tNames, tableName)
   
   worksheets[[sheet]]$tableParts <<- append(worksheets[[sheet]]$tableParts, sprintf('<tablePart r:id="rId%s"/>', id))
   

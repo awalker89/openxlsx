@@ -4,7 +4,8 @@
 \title{Write to a worksheet and format as a table}
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
-  colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9")
+  colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
+  tableName = NULL)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -25,6 +26,8 @@ A vector of the form c(startCol, startRow)}
 \item{rowNames}{If TRUE, row names of x are written.}
 
 \item{tableStyle}{Any excel table style name or "none".}
+
+\item{tableName}{name of table in workbook.}
 }
 \description{
 Write to a worksheet and format as a table

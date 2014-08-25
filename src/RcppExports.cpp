@@ -470,18 +470,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // buildTableXML
-CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle);
-RcppExport SEXP openxlsx_buildTableXML(SEXP idSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP tableStyleSEXP) {
+CharacterVector buildTableXML(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle);
+RcppExport SEXP openxlsx_buildTableXML(SEXP tableSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP tableStyleSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< std::string >::type id(idSEXP );
+        Rcpp::traits::input_parameter< std::string >::type table(tableSEXP );
         Rcpp::traits::input_parameter< std::string >::type ref(refSEXP );
         Rcpp::traits::input_parameter< std::vector<std::string> >::type colNames(colNamesSEXP );
         Rcpp::traits::input_parameter< bool >::type showColNames(showColNamesSEXP );
         Rcpp::traits::input_parameter< std::string >::type tableStyle(tableStyleSEXP );
-        CharacterVector __result = buildTableXML(id, ref, colNames, showColNames, tableStyle);
+        CharacterVector __result = buildTableXML(table, ref, colNames, showColNames, tableStyle);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

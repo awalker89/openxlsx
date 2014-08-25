@@ -1346,15 +1346,11 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
 
 
 // [[Rcpp::export]]
-CharacterVector buildTableXML(std::string id, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle){
+CharacterVector buildTableXML(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle){
   
   int n = colNames.size();
-  std::string table;
   std::string tableCols;
   std::string tableStyleXML = "<tableStyleInfo name=\"" + tableStyle + "\" showFirstColumn=\"0\" showLastColumn=\"0\" showRowStripes=\"1\" showColumnStripes=\"0\"/>";
-  
-  table = "<table xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" id=\"" + id + "\" name=\"Table" + id + "\" displayName=\"Table" + id + "\" ref=\"" + ref + "\"";
-  
   
   //if colnames are null
   if(!showColNames){

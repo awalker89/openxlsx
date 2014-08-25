@@ -113,8 +113,8 @@ quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, R_fileName) {
     .Call('openxlsx_quickBuildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, R_fileName)
 }
 
-buildTableXML <- function(id, ref, colNames, showColNames, tableStyle) {
-    .Call('openxlsx_buildTableXML', PACKAGE = 'openxlsx', id, ref, colNames, showColNames, tableStyle)
+buildTableXML <- function(table, ref, colNames, showColNames, tableStyle) {
+    .Call('openxlsx_buildTableXML', PACKAGE = 'openxlsx', table, ref, colNames, showColNames, tableStyle)
 }
 
 uniqueCellAppend <- function(sheetData, r, newCells) {
