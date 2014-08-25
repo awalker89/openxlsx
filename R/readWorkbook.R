@@ -79,8 +79,9 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx')
     emptyStrs <- attr(sharedStrings, "empty")
     
-    sharedStrings[grepl("^true$", sharedStrings, ignore.case = TRUE)] <- "TRUE"
-    sharedStrings[grepl("^false$", sharedStrings, ignore.case = TRUE)] <- "FALSE"
+    z <- tolower(sharedStrings)
+    sharedStrings[z == "true"] <- "TRUE"
+    sharedStrings[z == "false"] <- "FALSE"
     
     ###  invalid xml character replacements
     ## XML replacements
