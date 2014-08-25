@@ -405,6 +405,7 @@ convertFromExcelRef <- function(col){
 #'   } 
 #'   
 #' @param wrapText Logical. If TRUE cell contents will wrap to fit in column.  
+#' @param textRotation Rotation of text in degrees. Numeric in [0, 180].
 #' @return A style object
 #' @export
 #' @examples
@@ -439,7 +440,8 @@ createStyle <- function(fontName = NULL,
                         borderStyle =  getOption("openxlsx.borderStyle", "thin"),
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
-                        textDecoration = NULL, wrapText = FALSE){
+                        textDecoration = NULL, wrapText = FALSE,
+                        textRotation = 0){
   
   ### Error checking
   
@@ -506,7 +508,6 @@ createStyle <- function(fontName = NULL,
   
   if(!is.null(fontSize))
     if(fontSize < 1) stop("Font size must be greater than 0!")
-  
   
   
   ######################### error checking complete #############################
@@ -583,6 +584,9 @@ createStyle <- function(fontName = NULL,
   style$halign <- halign
   style$valign <- valign
   style$wrapText <- wrapText[[1]]
+  
+  if(!is.null(textRotation))
+    style$textRotation <- round(textRotation[[1]], 0)
   
   if(numFmt %in% validNumFmt){
     style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]

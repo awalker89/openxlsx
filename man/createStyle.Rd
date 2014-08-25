@@ -8,7 +8,7 @@ createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   borderColour = getOption("openxlsx.borderColour", "black"),
   borderStyle = getOption("openxlsx.borderStyle", "thin"), bgFill = NULL,
   fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
-  wrapText = FALSE)
+  wrapText = FALSE, textRotation = 0)
 }
 \arguments{
 \item{fontName}{A name of a font. Note the font name is not validated. If fontName is NULL,
@@ -100,6 +100,8 @@ Vertical alignment of cell contents
   }}
 
 \item{wrapText}{Logical. If TRUE cell contents will wrap to fit in column.}
+
+\item{textRotation}{Rotation of text in degrees. Numeric in [0, 180].}
 }
 \value{
 A style object
