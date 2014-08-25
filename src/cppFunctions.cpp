@@ -546,6 +546,67 @@ CharacterVector getSharedStrings(CharacterVector x){
 }
 
 
+
+
+// [[Rcpp::export]]
+CharacterVector getSharedStrings2(CharacterVector x){
+  
+  int n = x.size();
+  std::string xml;
+  
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  std::string ttag = "<t";
+  std::string tag = ">";
+  std::string tagEnd = "<";
+  
+  CharacterVector strs(n);
+  std::fill(strs.begin(), strs.end(), NA_STRING);
+  
+  IntegerVector emptyStrs;
+  
+  for(int i = 0; i < n; i++){ 
+    
+    // find opening tag     
+    xml = x[i];
+    pos = xml.find(ttag, 0); // find ttag      
+    
+    if(xml[pos+2] == '/'){
+       emptyStrs.push_back(i); //this should only ever grow to length 1
+    }else{
+      strs[i] = "";
+      while(1){
+
+        if(xml[pos+2] == '/'){
+           emptyStrs.push_back(i); //this should only ever grow to length 1
+          break;
+        }else{
+      
+          pos = xml.find(tag, pos+1); // find where opening ttag ends
+          endPos = xml.find(tagEnd, pos+2); // find where the node ends </t> (closing tag)
+          strs[i] += xml.substr(pos+1, endPos-pos - 1).c_str(); 
+          pos = xml.find(ttag, endPos); // find ttag    
+        
+          if(pos == std::string::npos)
+            break;
+            
+        }  
+      }
+      
+    }
+    
+    
+
+    
+  }
+  
+  strs.attr("empty") = emptyStrs;
+  
+  return wrap(strs) ;  
+  
+}
+
 // [[Rcpp::export]]
 List getNumValues(CharacterVector inFile, int n, std::string tagIn) {
   
@@ -1021,14 +1082,14 @@ List buildCellMerges(List comps){
     
     std::vector<int> v(ck) ;
     for(size_t j = 0; j < ck; j++)
-    v[j] = j + ca;
+      v[j] = j + ca;
     
     size_t ra(row[0]);
     
     size_t rk = int(row[1]) - ra + 1;
     std::vector<int> r(rk) ;
     for(size_t j = 0; j < rk; j++)
-    r[j] = j + ra;
+      r[j] = j + ra;
     
     CharacterVector M(ck*rk);
     int ind = 0;

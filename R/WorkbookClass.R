@@ -424,7 +424,10 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   sheet = validateSheet(sheet)
   
   ## build table XML and save to tables field
+  nms <- names(tables)
   tables <<- c(tables, .Call("openxlsx_buildTableXML", id, ref, colNames, showColNames, tableStyle, PACKAGE = "openxlsx"))
+  names(tables) <<- c(nms, ref)
+  attr(tables, "sheet") <<- c(attr(tables, "sheet"), sheet)
   
   worksheets[[sheet]]$tableParts <<- append(worksheets[[sheet]]$tableParts, sprintf('<tablePart r:id="rId%s"/>', id))
   

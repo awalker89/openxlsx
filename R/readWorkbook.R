@@ -28,7 +28,7 @@
 #' 
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
-
+  
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
   
@@ -76,12 +76,21 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     ## read in, get si tags, get t tag value
     ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
     sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")
-    sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx')
+    
+    ## Need to remove any inline styling
+    formattingFlag <- grepl("<rPr>", ss)
+    if(formattingFlag){
+      sharedStrings <- .Call("openxlsx_getSharedStrings2", sharedStrings, PACKAGE = 'openxlsx') ## Where there is inline formatting
+    }else{
+      sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx') ## No inline formatting
+    }
+    
     emptyStrs <- attr(sharedStrings, "empty")
     
     z <- tolower(sharedStrings)
     sharedStrings[z == "true"] <- "TRUE"
     sharedStrings[z == "false"] <- "FALSE"
+    rm(z)
     
     ###  invalid xml character replacements
     ## XML replacements
@@ -95,12 +104,12 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     sharedStrings <- NULL
     emptyStrs <- NULL
   }
-
+  
   if(length(emptyStrs) == 0)
     emptyStrs <- ""
   
   ## 0.75s
-
+  
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
   ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
@@ -108,14 +117,14 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
   v <- r_v[[2]]
-    
-
+  
+  
   nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   if(nRows == 0 | length(r) == 0){
     warning("No data found on worksheet.")
     return(NULL)
   }
-      
+  
   ## get references for string cells
   tR <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"|t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
   if(length(tR) == 0)
@@ -151,7 +160,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     stringInds <- match(tR, r)
     stringInds <- stringInds[!is.na(stringInds)]
   }
-
+  
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
   wsStrInds <- which(grepl('t="str"|t="e"', ws, perl = TRUE))
   if(length(wsStrInds) > 0){
@@ -193,7 +202,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     stringInds = stringInds - 1L;  
     
   }
-
+  
   ## Build data.frame
   m = .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, PACKAGE = "openxlsx")
   
@@ -201,7 +210,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
     colnames(m) <- gsub("[[:space:]]+", ".", colnames(m))
   }
-
+  
   
   return(m)
   

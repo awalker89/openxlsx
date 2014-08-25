@@ -205,6 +205,21 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// getSharedStrings2
+CharacterVector getSharedStrings2(CharacterVector x);
+RcppExport SEXP openxlsx_getSharedStrings2(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        CharacterVector __result = getSharedStrings2(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getNumValues
 List getNumValues(CharacterVector inFile, int n, std::string tagIn);
 RcppExport SEXP openxlsx_getNumValues(SEXP inFileSEXP, SEXP nSEXP, SEXP tagInSEXP) {

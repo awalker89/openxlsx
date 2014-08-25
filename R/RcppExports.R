@@ -53,6 +53,10 @@ getSharedStrings <- function(x) {
     .Call('openxlsx_getSharedStrings', PACKAGE = 'openxlsx', x)
 }
 
+getSharedStrings2 <- function(x) {
+    .Call('openxlsx_getSharedStrings2', PACKAGE = 'openxlsx', x)
+}
+
 getNumValues <- function(inFile, n, tagIn) {
     .Call('openxlsx_getNumValues', PACKAGE = 'openxlsx', inFile, n, tagIn)
 }

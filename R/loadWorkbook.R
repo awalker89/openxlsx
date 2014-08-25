@@ -311,7 +311,13 @@ loadWorkbook <- function(xlsxFile){
   ## tables
   if(length(tablesXML) > 0){
     tablesXML <- tablesXML[order(nchar(tablesXML), tablesXML)]
-    wb$tables <- lapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+
+    wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+    
+    ## pull out refs and attach names
+    nms <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
+    names(wb$tables) <- nms
+    
     wb$Content_Types <- c(wb$Content_Types, 
                           sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', 1:length(wb$tables)+2))   
   }
