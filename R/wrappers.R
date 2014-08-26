@@ -337,10 +337,13 @@ convertFromExcelRef <- function(col){
 #'   \item{\bold{PERCENTAGE}}
 #'   \item{\bold{FRACTION}}
 #'   \item{\bold{SCIENTIFIC}}
+#'   \item{\bold{COMMA}{  for comma seperated thousands}}
+#'   \item{For date/datetime styling a combination of d, m, y and punctuation marks}
+#'   \item{For numeric rouding use "0.00" with the preferred number of deciaml places}
 #' }
 #' 
 #' @param border Cell border 
-#' (Any combination of "Top", "Bottom", "Left", "Right").
+#' (Any combination of "Top", "Bottom", "Left", "Right" in any order).
 #' \itemize{
 #'    \item{\bold{Top}}{ Top border}
 #'    \item{\bold{Bottom}}{ Bottom border}
@@ -441,19 +444,19 @@ createStyle <- function(fontName = NULL,
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE,
-                        textRotation = 0){
+                        textRotation = NULL){
   
   ### Error checking
   
   ## if num fmt is made up of dd, mm, yy
   
   numFmt <- tolower(numFmt[[1]])
-  validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4")
+  validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4", "comma")
   
   if(numFmt == "date"){
     numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
   }else if(!numFmt %in% validNumFmt){
-    if(grepl("[^mdyhsap[[:punct:] ]", numFmt))
+    if(grepl("[^mdyhsap[[:punct:] 0\\.]", numFmt))
       stop("Invalid numFmt")
   }
   
@@ -474,7 +477,10 @@ createStyle <- function(fontName = NULL,
                         list("numFmtId" = 49),
                         
                         list("numFmtId" = 3),
-                        list("numFmtId" = 4))
+                        list("numFmtId" = 4),
+                        list("numFmtId" = 3))
+  
+  names(numFmtMapping) <- validNumFmt
   
   ## Validate border line style
   if(!is.null(borderStyle))
@@ -592,7 +598,7 @@ createStyle <- function(fontName = NULL,
   }
   
   if(numFmt %in% validNumFmt){
-    style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
+    style$numFmt <- numFmtMapping[[numFmt[[1]]]]
   }else{
     style$numFmt <- list("numFmtId" = 9999, formatCode = numFmt)  ## Custom numFmt
   }
@@ -654,9 +660,9 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
   
   ## rows and cols need to be the same length
   if(gridExpand){
-    combs <- expand.grid(rows, cols) 
-    rows <- combs[,1]
-    cols <- combs[,2]
+    combs <- expand.grid(cols, rows) 
+    cols <- combs[,1]
+    rows <- combs[,2]
   }
   
   if(length(rows) != length(cols)){

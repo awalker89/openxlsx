@@ -1284,7 +1284,7 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
   size_t j=0;
   string currentRow = uniqueRows[0];
   
-  for(size_t i=0;i<k;i++){
+  for(size_t i = 0; i < k; i++){
     
     std::string r(uniqueRows[i]);
     std::string cellXML;
@@ -1324,7 +1324,7 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
       j += 1;
       
       if(j == n)
-      break;
+        break;
       
       currentRow = rows[j];
     }
@@ -1475,12 +1475,14 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   
   int nStyleCells = rows.size();
   int n = sheetData.size();
+  CharacterVector exCellNames = "";
   
   // cell names
-  CharacterVector exCellNames = sheetData.attr("names");
+  if(n > 0)
+    exCellNames = sheetData.attr("names");
+  
   //new cell names will be elements of rows where styleCell doesn't exist  
-  
-  
+    
   // create cellRefs from rows & cols
   CharacterVector styleCells(nStyleCells);
   CharacterVector colNames = convert2ExcelRef(cols, LETTERS);
@@ -1488,25 +1490,24 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   std::string r;
   std::string c;
   
-  for(int i =0; i < nStyleCells; i++){
+  for(int i = 0; i < nStyleCells; i++){
     r = rows[i];
     c = colNames[i];
     styleCells[i] = c + r; 
   }
-  
+
   // get refs of existing cells
   CharacterVector exCells(n);
   CharacterVector tmp;
-  for(int i =0; i < n; i++){
+  for(int i = 0; i < n; i++){
     tmp = sheetData[i];
     exCells[i] = tmp[0];
   }
   
-  
   // get all existing cells that need to be styled with this ID
   IntegerVector exPos = match(exCells, styleCells);
   LogicalVector toApply = !is_na(exPos);
-  
+    
   IntegerVector stylePos = match(styleCells, exCells);
   LogicalVector isNewCell = is_na(stylePos);
   int nNewCells = sum(isNewCell); 
@@ -1525,6 +1526,8 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
     }
     newSheetDataNames[i] = exCellNames[i];
   }
+  
+  //return(newSheetData);
   
   int j = n;
   // append new cells with styleId
