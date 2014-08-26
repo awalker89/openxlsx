@@ -12,6 +12,7 @@
 #' @param rowNames If TRUE, row names of x are written.
 #' @param tableStyle Any excel table style name or "none".
 #' @param tableName name of table in workbook.
+#' @param headerStyle Custom style to apply to column names.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
@@ -45,6 +46,9 @@
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
+#' ## Additional headerStyling
+#' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45))
+#' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,
                            startCol = 1,
@@ -53,7 +57,8 @@ writeDataTable <- function(wb, sheet, x,
                            colNames = TRUE,
                            rowNames = FALSE,
                            tableStyle = "TableStyleLight9",
-                           tableName = NULL){
+                           tableName = NULL,
+                           headerStyle= NULL){
   
     
   if(!is.null(xy)){
@@ -68,7 +73,8 @@ writeDataTable <- function(wb, sheet, x,
   if(!"data.frame" %in% class(x)) stop("x must be a data.frame.")
   if(!is.logical(colNames)) stop("colNames must be a logical.")
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
-    
+  if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
+  
   if(is.null(tableName)){
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
   }else if(tableName %in% attr(wb$tables, "tableName")){
@@ -103,6 +109,13 @@ writeDataTable <- function(wb, sheet, x,
   tableStyle <- na.omit(tableStyle)
   if(length(tableStyle) == 0)
     stop("Unknown table style.")
+  
+  ## header style  
+  if("Style" %in% class(headerStyle))
+    addStyle(wb = wb, sheet = sheet, style=headerStyle,
+             rows = startRow,
+             cols = 0:(ncol(x) - 1L) + startCol,
+             gridExpand = TRUE)
   
   showColNames <- colNames
   

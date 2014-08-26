@@ -5,7 +5,7 @@
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
-  tableName = NULL)
+  tableName = NULL, headerStyle = NULL)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -28,6 +28,8 @@ A vector of the form c(startCol, startRow)}
 \item{tableStyle}{Any excel table style name or "none".}
 
 \item{tableName}{name of table in workbook.}
+
+\item{headerStyle}{Custom style to apply to column names.}
 }
 \description{
 Write to a worksheet and format as a table
@@ -63,6 +65,9 @@ class(df$Percentage) <- "percentage"
 class(df$TinyNumbers) <- "scientific"
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
+
+## Additional headerStyling
+writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45))
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 }
