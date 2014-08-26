@@ -1,7 +1,7 @@
 
 
 ## creates style object based on column classes
-## Used in writeData and writeDataTable
+## Used in writeData for styling when no borders and writeData table for all column-class based styling
 classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasses){
   
   sheet = wb$validateSheet(sheet)
@@ -17,7 +17,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     ## style hyperlinks
     inds <- which(sapply(colClasses, function(x) "hyperlink" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)   
-    hyperlinkstyle <- createStyle(fontColour = "#0000FF", textDecoration = "underline")
+    hyperlinkstyle <- createStyle(textDecoration = "underline")
     hyperlinkstyle$fontColour <- list("theme"="10")
     styleElements <- list(style = hyperlinkstyle,
                           cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
@@ -112,17 +112,31 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
   }
   
   ## style big mark
-  if("3" %in% allColClasses){
-    inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x)))
+  if("3" %in% allColClasses | "comma" %in% allColClasses){
+    inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x) | "comma" %in% tolower(x)))
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list(style = createStyle(numFmt = "3"),
                           cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
                                             rows = coords[[1]],
                                             cols = coords[[2]])))
+   
+    newStylesElements <- append(newStylesElements, list(styleElements))
+  }
+
+  ## numeric sigfigs (Col must be numeric and numFmt options must only have 0s and \\.)
+  if("numeric" %in% allColClasses & !grepl("[^0\\.,#]", getOption("openxlsx.numFmt", "GENERAL")) ){
+    inds <- which(sapply(colClasses, function(x) "numeric" %in% tolower(x)))
+    coords <- expand.grid(rowInds, inds +startCol)
+    
+    styleElements <- list(style = createStyle(numFmt = getOption("openxlsx.numFmt", "0")),
+                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
+                                            rows = coords[[1]],
+                                            cols = coords[[2]])))
     
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
+  
   
   if(!is.null(newStylesElements))
     wb$styleObjects <- append(wb$styleObjects, newStylesElements)

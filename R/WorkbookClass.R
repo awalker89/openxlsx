@@ -478,8 +478,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## convert any Dates to integers and create date style object
-  if(any(c("currency", "accounting", "percentage", "3") %in% allColClasses)){
-    cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3") %in% tolower(x))))
+  if(any(c("currency", "accounting", "percentage", "3", "comma") %in% allColClasses)){
+    cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3", "comma") %in% tolower(x))))
     for(i in cInds)
       df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))
   }
@@ -602,10 +602,16 @@ Workbook$methods(updateCellStyles = function(sheet, rows, cols, styleId){
   
   if(length(rows) == 0)
     return(NULL)
-  
+
   ## convert sheet name to index
   sheet <- which(names(worksheets) == sheet)
-  sheetData[[sheet]] <<- .Call("openxlsx_writeCellStyles", sheetData[[sheet]], as.character(rows), cols, as.character(styleId), LETTERS)
+  tmp <- .Call("openxlsx_writeCellStyles", sheetData[[sheet]], as.character(rows), cols, as.character(styleId), LETTERS)
+  
+  if(length(tmp) > length(sheetData[[sheet]]))
+    dataCount[[sheet]] <<- dataCount[[sheet]] + 1
+    
+  sheetData[[sheet]] <<- tmp
+  
   
 })
 
@@ -949,7 +955,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
       dataCount[[i]] <<- 1L
     }    
-        
+    
     if(length(rowHeights[[i]]) == 0){
       
       .Call("openxlsx_quickBuildCellXML",
@@ -1481,7 +1487,7 @@ Workbook$methods(preSaveCleanUp = function(){
         this.sty$numFmt$numFmtId <- numFmtIds
         numFmtIds <- numFmtIds + 1L
       }
-            
+
       sId <- .self$updateStyles(this.sty)
       for(r in x$cells)
         .self$updateCellStyles(sheet = r$sheet, rows = r$rows, cols = r$cols, sId)

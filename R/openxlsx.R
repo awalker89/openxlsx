@@ -27,7 +27,8 @@
 #'    \item{\code{options("openxlsx.borderStyle" = "thin")}}
 #'    \item{\code{options("openxlsx.dateFormat" = "mm/dd/yyyy")}}
 #'    \item{\code{options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")}}
-#'   } 
-#' 
+#'    \item{\code{options("openxlsx.numFmt" = NULL)}}
+#' } 
+#'  See the Formatting vignette for examples. 
 #' 
 NULL

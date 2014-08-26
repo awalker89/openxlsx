@@ -28,7 +28,7 @@ genBaseColStyle <- function(cc){
   }else if("scientific" %in% cc){
     colStyle$numFmt <- list(numFmtId = "11")
     
-  }else if("3" %in% cc){
+  }else if("3" %in% cc | "comma" %in% cc){
     colStyle$numFmt <- list(numFmtId = "3")
     
   }else{
@@ -39,6 +39,7 @@ genBaseColStyle <- function(cc){
   
   list("style" = colStyle,
        "specialFormat" = specialFormat)
+  
   
 }
 

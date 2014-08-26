@@ -275,4 +275,61 @@ saveWorkbook(wb, "Conditional Formatting Examples.xlsx", overwrite = TRUE)
 \end{verbatim}
 
 
+\newpage
+\section{Numeric Formatting}
+\begin{verbatim}
+
+numeric columns styling can be set using the numFmt parameter in createStyle or a default can be 
+set with, for example, options("openxlsx.numFmt" = "#,#0.00")
+
+options("openxlsx.numFmt" = NULL)
+wb <- createWorkbook()
+addWorksheet(wb, "Sheet 1")
+df <- data.frame(matrix(12.987654321, ncol = 7, nrow = 5)) ## data.frame to write
+df[ ,6:7] <- df[ ,6:7]*1E6
+
+## Set column 1 class to "comma" to get comma seperated thousands
+class(df$X1) <- "comma"
+
+writeData(wb, 1, df)
+s <- createStyle(numFmt = "0.0")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 2, gridExpand = TRUE)
+
+s <- createStyle(numFmt = "0.00")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 3, gridExpand = TRUE)
+
+s <- createStyle(numFmt = "0.000")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 4, gridExpand = TRUE)
+
+s <- createStyle(numFmt = "0.0000")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 5, gridExpand = TRUE)
+
+s <- createStyle(numFmt = "#,##0")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 6, gridExpand = TRUE)
+
+s <- createStyle(numFmt = "#,##0.00")
+addStyle(wb, 1, style = s, rows = 2:6, cols = 7, gridExpand = TRUE)
+
+## set a default number format for numeric columns of data.frames
+options("openxlsx.numFmt" = "#,#0.00")
+writeData(wb, 1, x = data.frame("Using Default Options" = rep(12345.12345, 5)), startCol = 9)
+
+setColWidths(wb, 1, cols = 1:10, widths = 15)
+
+## Using default numFmt to round to 2 dp (Any numeric column will be affected)
+addWorksheet(wb, "Sheet 2")
+df <- iris; df[, 1:4] <- df[1:4] + runif(1)
+writeDataTable(wb, sheet = 2, x = df)
+
+## To stop auto-formatting numerics set
+options("openxlsx.numFmt" = NULL)
+addWorksheet(wb, "Sheet 3")
+writeDataTable(wb, sheet = 3, x = df)
+
+openXL(wb)
+
+\end{verbatim}
+
+
+
 \end{document}
