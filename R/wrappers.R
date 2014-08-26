@@ -585,8 +585,11 @@ createStyle <- function(fontName = NULL,
   style$valign <- valign
   style$wrapText <- wrapText[[1]]
   
-  if(!is.null(textRotation))
+  if(!is.null(textRotation)){
+    if(!is.numeric(textRotation))
+      stop("textRotation must be numeric.")
     style$textRotation <- round(textRotation[[1]], 0)
+  }
   
   if(numFmt %in% validNumFmt){
     style$numFmt <- numFmtMapping[[which(validNumFmt == numFmt[[1]])]]
