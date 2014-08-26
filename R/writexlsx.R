@@ -5,6 +5,7 @@
 #' @author Alexander Walker
 #' @param x object or a list of objects that can be handled by \code{\link{writeData}} to write to file
 #' @param file xlsx file name
+#' @param asTable write using writeDataTable as opposed to writeData
 #' @param ... optional parameters to pass to functions:
 #' \itemize{
 #'   \item{createWorkbook}
@@ -69,7 +70,7 @@
 #' write.xlsx(l, "writeList2.xlsx")
 #' 
 #' @export
-write.xlsx <- function(x, file, ...){
+write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   
   ## set scientific notation penalty
@@ -96,8 +97,21 @@ write.xlsx <- function(x, file, ...){
   ## borderColour = "#4F81BD"
   ## borderStyle
   
+  #----writeDataTable---#
+  ## startCol = 1,
+  ## startRow = 1, 
+  ## xy = NULL,
+  ## colNames = TRUE
+  ## rowNames = FALSE
+  ## tableStyle = "TableStyleLight9"
+  ## tableName = NULL
+  ## headerStyle = NULL,
+  
   #---saveWorkbook---#
-#   overwrite = TRUE
+  #   overwrite = TRUE
+  
+  if(!is.logical(asTable))
+    stop("asTable must be a logical.")
   
   creator <- ""
   if(creator %in% names(params))
@@ -210,7 +224,7 @@ write.xlsx <- function(x, file, ...){
     if(!borders %in% c("surrounding", "rows", "columns"))
       stop("Invalid borders argument")
   }
-
+  
   borderColour <- getOption("openxlsx.borderColour", "black")
   if("borderColour" %in% names(params))
     borderColour <- params$borderColour
@@ -219,6 +233,11 @@ write.xlsx <- function(x, file, ...){
   if("borderStyle" %in% names(params)){
     borderStyle <- validateBorderStyle(params$borderStyle)[[1]]
   }
+  
+  tableStyle <- "TableStyleLight9"
+  if("tableStyle" %in% names(params))
+    tableStyle <- params$tableStyle
+  
   
   ## create new Workbook object
   wb <- Workbook$new(creator)
@@ -238,9 +257,72 @@ write.xlsx <- function(x, file, ...){
     for(i in 1:nSheets){
       
       wb$addWorksheet(nms[[i]], showGridLines = gridLines)
+      
+      if(asTable){
+        
+        if(!all(sapply(x, function(df) "data.frame" %in% class(df))))
+          stop("All list elements must be a data.frame if asTable = TRUE")
+        
+        writeDataTable(wb = wb,
+                       sheet = i,
+                       x = x[[i]],
+                       startCol = startCol,
+                       startRow = startRow,
+                       xy = xy,
+                       colNames = colNames,
+                       rowNames = rowNames,
+                       tableStyle = tableStyle,
+                       tableName = NULL,
+                       headerStyle = headerStyle)
+        
+      }else{
+        
+        
+        writeData(wb = wb, 
+                  sheet = i,
+                  x = x[[i]],
+                  startCol = startCol,
+                  startRow = startRow, 
+                  xy = xy,
+                  colNames = colNames,
+                  rowNames = rowNames,
+                  headerStyle = headerStyle,
+                  borders = borders,
+                  borderColour = borderColour,
+                  borderStyle = borderStyle)
+        
+      }
+      
+      
+    }
+    
+    
+  }else{
+    
+    wb$addWorksheet(sheetName, showGridLines = gridLines)
+    
+    if(asTable){
+      
+      if(!"data.frame" %in% class(x))
+        stop("x must be a data.frame is asTable == TRUE")
+      
+      writeDataTable(wb = wb,
+                     sheet = 1,
+                     x = x,
+                     startCol = startCol,
+                     startRow = startRow,
+                     xy = xy,
+                     colNames = colNames,
+                     rowNames = rowNames,
+                     tableStyle = tableStyle,
+                     tableName = NULL,
+                     headerStyle = headerStyle)
+      
+    }else{
+            
       writeData(wb = wb, 
-                sheet = i,
-                x = x[[i]],
+                sheet = 1,
+                x = x,
                 startCol = startCol,
                 startRow = startRow, 
                 xy = xy,
@@ -249,31 +331,11 @@ write.xlsx <- function(x, file, ...){
                 headerStyle = headerStyle,
                 borders = borders,
                 borderColour = borderColour,
-                borderStyle = borderStyle)
-      
-      
+                borderStyle = borderStyle)      
     }
-  
-    
-  }else{
-    
-    wb$addWorksheet(sheetName, showGridLines = gridLines)
-    
-    writeData(wb = wb, 
-              sheet = 1,
-              x = x,
-              startCol = startCol,
-              startRow = startRow, 
-              xy = xy,
-              colNames = colNames,
-              rowNames = rowNames,
-              headerStyle = headerStyle,
-              borders = borders,
-              borderColour = borderColour,
-              borderStyle = borderStyle)
     
   }
-
+  
   
   
   saveWorkbook(wb = wb, file = file, overwrite = overwrite)

@@ -55,20 +55,20 @@ The output should contain a path to Rtools/bin somewhere in the string.
 
 \newpage
 \section{Basic Examples}
-
-
-
 \subsection{write.xlsx}
 \begin{verbatim}
-
-The simplest way to write to a workbook is write.xlsx
+The simplest way to write to a workbook is write.xlsx().
+By default, write.xlsx calls writeData.  If asTable is TRUE write.xlsx will write x as
+an Excel table.
 
 ## write to working directory
 write.xlsx(iris, file = "writeXLSX1.xlsx")
+write.xlsx(iris, file = "writeXLSXTable1.xlsx", asTable = TRUE)
 
 ## write a list of data.frames to individual worksheets using list names as worksheet names
 l <- list("IRIS" = iris, "MTCARS" = mtcars)
-write.xlsx(l, "writeXLSX2.xlsx")
+write.xlsx(l, file = "writeXLSX2.xlsx")
+write.xlsx(l, file = "writeXLSXTable2.xlsx", asTable = TRUE)
 
 ## write.xlsx also accepts styling parameters.
 ## The simplest way is to set default options and set column class
@@ -92,6 +92,9 @@ class(df$Percentage) <- "percentage"
 class(df$TinyNumbers) <- "scientific"
 
 write.xlsx(df, "writeXLSX3.xlsx")
+write.xlsx(df, file = "writeXLSXTable3.xlsx", asTable = TRUE)
+
+
 
 ## Additional styling
 ## define a style for column headers
@@ -102,12 +105,23 @@ hs <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
 write.xlsx(iris, file = "writeXLSX4.xlsx", borders = "rows", headerStyle = hs)
 write.xlsx(iris, file = "writeXLSX5.xlsx", borders = "columns", headerStyle = hs)
 
-## When writing a list, the stylings will apply to all list elements
+write.xlsx(iris, "writeXLSXTable4.xlsx", asTable = TRUE,
+headerStyle = createStyle(textRotation = 45))
 
+
+
+## When writing a list, the stylings will apply to all list elements
 l <- list("IRIS" = iris, "colClasses" = df)
 write.xlsx(l, file = "writeXLSX6.xlsx", borders = "columns", headerStyle = hs)
-openXL("writeXLSX6.xlsx")
+write.xlsx(l, file = "writeXLSXTable5.xlsx", asTable = TRUE, tableStyle = "TableStyleLight2")
 
+openXL("writeXLSX6.xlsx")
+openXL("writeXLSXTable5.xlsx")
+
+## write.xlsx returns the workbook object for further editing
+wb <- write.xlsx(iris, "writeXLSX6.xlsx")
+setColWidths(wb, sheet = 1, cols = 1:5, widths = 20)
+saveWorkbook(wb, "writeXLSX6.xlsx", overwrite = TRUE)
 
 \end{verbatim}
 

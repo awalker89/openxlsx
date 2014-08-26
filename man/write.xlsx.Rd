@@ -3,12 +3,14 @@
 \alias{write.xlsx}
 \title{write directly to an xlsx file}
 \usage{
-write.xlsx(x, file, ...)
+write.xlsx(x, file, asTable = FALSE, ...)
 }
 \arguments{
 \item{x}{object or a list of objects that can be handled by \code{\link{writeData}} to write to file}
 
 \item{file}{xlsx file name}
+
+\item{asTable}{write using writeDataTable as opposed to writeData}
 
 \item{...}{optional parameters to pass to functions:
 \itemize{
