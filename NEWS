@@ -1,14 +1,30 @@
-openxlsx 2.1.1
+openxlsx 2.1.3
 ----------------------------------------------------------------
 
 NEW FEATURES
 
 * conditionalFormatting type "databar"
 
+* asTable parameter to write.xlsx to writing using writeDataTable.
+
+* extended numFmt formatting to numeric rounding also added option("openxlsx.numFmt" = ...)
+ for default number formatting of numeric columns
+
+* additional numFmt "comma" to format numerics with "," thousands separator 
+
+VIGNETTE
+
+* section on write.xlsx in Introductory vignette
+
 BUG FIXES
 
 * Fix reading in of apostrophes
 
+* Styling blank cells no longer corrupts workbooks
+
+* read.xlsx now correctly reads sharedStrings with inline styling
+
+* sharedStrings now exact matches true/false to determine logical values from workbooks.
 
 openxlsx 2.0.15
 ----------------------------------------------------------------
