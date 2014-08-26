@@ -32,7 +32,7 @@ Optional parameters are:
   \item{\bold{creator}}{ A string specifying the workbook author}
   \item{\bold{sheetName}}{ Name of the worksheet}
   \item{\bold{gridLines}}{ A logical. If FALSE, the worksheet grid lines will be hidden.}
-  \item{\bold{startCol}}{ A vector specifiying the starting columns(s) to write df}
+  \item{\bold{startCol}}{ A vector specifiying the starting column(s) to write df}
   \item{\bold{startRow}}{ A vector specifiying the starting row(s) to write df}
   \item{\bold{xy}}{ An alternative to specifying startCol and startRow individually.
  A vector of the form c(startCol, startRow)}

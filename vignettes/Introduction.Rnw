@@ -20,6 +20,7 @@ bottom=20mm,
 }
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{Introduction}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}
@@ -55,6 +56,63 @@ The output should contain a path to Rtools/bin somewhere in the string.
 \newpage
 \section{Basic Examples}
 
+
+
+\subsection{write.xlsx}
+\begin{verbatim}
+
+The simplest way to write to a workbook is write.xlsx
+
+## write to working directory
+write.xlsx(iris, file = "writeXLSX1.xlsx")
+
+## write a list of data.frames to individual worksheets using list names as worksheet names
+l <- list("IRIS" = iris, "MTCARS" = mtcars)
+write.xlsx(l, "writeXLSX2.xlsx")
+
+## write.xlsx also accepts styling parameters.
+## The simplest way is to set default options and set column class
+options("openxlsx.borderColour" = "#4F80BD")
+options("openxlsx.borderStyle" = "thin")
+options("openxlsx.dateFormat" = "mm/dd/yyyy")
+options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")
+options("openxlsx.numFmt" = NULL) ## For default style rounding of numeric columns
+
+df <- data.frame("Date" = Sys.Date()-0:19, "LogicalT" = TRUE
+                 "Time" = Sys.time()-0:19*60*60,
+                 "Cash" = paste("$",1:20), "Cash2" = 31:50,
+                 "hLink" = "http://cran.r-project.org/",
+                 "Percentage" = seq(0, 1, length.out=20),
+                 "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
+
+class(df$Cash) <- "currency"
+class(df$Cash2) <- "accounting"
+class(df$hLink) <- "hyperlink"
+class(df$Percentage) <- "percentage"
+class(df$TinyNumbers) <- "scientific"
+
+write.xlsx(df, "writeXLSX3.xlsx")
+
+## Additional styling
+## define a style for column headers
+hs <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
+                  halign = "center", valign = "center", textDecoration = "Bold",
+                  border = "TopBottomLeftRight", textRotation = 45)
+
+write.xlsx(iris, file = "writeXLSX4.xlsx", borders = "rows", headerStyle = hs)
+write.xlsx(iris, file = "writeXLSX5.xlsx", borders = "columns", headerStyle = hs)
+
+## When writing a list, the stylings will apply to all list elements
+
+l <- list("IRIS" = iris, "colClasses" = df)
+write.xlsx(l, file = "writeXLSX6.xlsx", borders = "columns", headerStyle = hs)
+openXL("writeXLSX6.xlsx")
+
+
+\end{verbatim}
+
+
+\newpage
 \subsection{Basic Workbook}
 \begin{verbatim}
 require(ggplot2)
