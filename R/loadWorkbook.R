@@ -27,7 +27,6 @@
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
 loadWorkbook <- function(xlsxFile){
   
-  
   if(!file.exists(xlsxFile))
     stop("File does not exist.")
   
@@ -307,23 +306,6 @@ loadWorkbook <- function(xlsxFile){
   
   
   
-  
-  ## tables
-  if(length(tablesXML) > 0){
-
-    tablesXML <- tablesXML[order(nchar(tablesXML), tablesXML)]
-    wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
-    
-    ## pull out refs and attach names
-    refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
-    names(wb$tables) <- refs
-        
-    tableIds <- as.numeric(regmatches(wb$tables, regexpr('(?<=id=")[0-9]+', wb$tables, perl = TRUE)))
-    
-    wb$Content_Types <- c(wb$Content_Types, 
-                          sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', 1:length(wb$tables)+2))   
-  }
-  
   ## queryTables
   if(length(queryTablesXML) > 0){
     
@@ -539,7 +521,7 @@ loadWorkbook <- function(xlsxFile){
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   
   if(length(sheetRelsXML) > 0){
-
+    
     sheetRelsXML <- sheetRelsXML[order(nchar(sheetRelsXML), sheetRelsXML)]
     sheetNumber <- as.integer(regmatches(sheetRelsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", sheetRelsXML, perl = TRUE)))
     
@@ -551,11 +533,11 @@ loadWorkbook <- function(xlsxFile){
     
     ## tables
     if(length(tablesXML) > 0){
-    
+      
       tables <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=table)[0-9]+(?=\\.xml)", x, perl = TRUE))))
       tableSheets <- unlist(lapply(1:length(sheetNumber), function(i) rep(sheetNumber[i], length(tables[[i]]))))  
       
-      if(length(unlist(tables)) > 0){  
+      if(length(unlist(tables)) > 0){
         ## get the tables that belong to each worksheet and create a worksheets_rels for each
         tCount <- 2L ## table r:Ids start at 3
         for(i in 1:length(tables)){
@@ -569,9 +551,17 @@ loadWorkbook <- function(xlsxFile){
             tCount <- tCount + length(k)
           }
         }
-               
         
-        wb$tables <- unlist(lapply(1:length(tables), function(i) wb$tables[tableIds %in% tables[[i]]]))
+        names(tablesXML) <- basename(tablesXML)
+        tablesXML <-tablesXML[sprintf("table%s.xml", unlist(tables))]
+
+        wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+        
+        ## pull out refs and attach names
+        refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
+        names(wb$tables) <- refs
+        
+        wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', 1:length(wb$tables)+2))   
         
         ## relabel ids
         for(i in 1:length(wb$tables)){

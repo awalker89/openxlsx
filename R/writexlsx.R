@@ -98,14 +98,14 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   ## borderStyle
   
   #----writeDataTable---#
-  ## startCol = 1,
-  ## startRow = 1, 
-  ## xy = NULL,
+  ## startCol = 1
+  ## startRow = 1
+  ## xy = NULL
   ## colNames = TRUE
   ## rowNames = FALSE
   ## tableStyle = "TableStyleLight9"
   ## tableName = NULL
-  ## headerStyle = NULL,
+  ## headerStyle = NULL
   
   #---saveWorkbook---#
   #   overwrite = TRUE
