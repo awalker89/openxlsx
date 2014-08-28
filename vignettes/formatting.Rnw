@@ -302,18 +302,18 @@ addStyle(wb, 1, style = s, rows = 2:6, cols = 3, gridExpand = TRUE)
 s <- createStyle(numFmt = "0.000")
 addStyle(wb, 1, style = s, rows = 2:6, cols = 4, gridExpand = TRUE)
 
-s <- createStyle(numFmt = "0.0000")
+s <- createStyle(numFmt = "#,##0")
 addStyle(wb, 1, style = s, rows = 2:6, cols = 5, gridExpand = TRUE)
 
-s <- createStyle(numFmt = "#,##0")
+s <- createStyle(numFmt = "#,##0.00")
 addStyle(wb, 1, style = s, rows = 2:6, cols = 6, gridExpand = TRUE)
 
-s <- createStyle(numFmt = "#,##0.00")
+s <- createStyle(numFmt = "$ #,##0.00")
 addStyle(wb, 1, style = s, rows = 2:6, cols = 7, gridExpand = TRUE)
 
 ## set a default number format for numeric columns of data.frames
-options("openxlsx.numFmt" = "#,#0.00")
-writeData(wb, 1, x = data.frame("Using Default Options" = rep(12345.12345, 5)), startCol = 9)
+options("openxlsx.numFmt" = "$* #,#0.00")
+writeData(wb, 1, x = data.frame("Using Default Options" = rep(2345.1235, 5)), startCol = 9)
 
 setColWidths(wb, 1, cols = 1:10, widths = 15)
 

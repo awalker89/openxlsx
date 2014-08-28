@@ -125,7 +125,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
   }
 
   ## numeric sigfigs (Col must be numeric and numFmt options must only have 0s and \\.)
-  if("numeric" %in% allColClasses & !grepl("[^0\\.,#]", getOption("openxlsx.numFmt", "GENERAL")) ){
+  if("numeric" %in% allColClasses & !grepl("[^0\\.,#\\$\\* ]", getOption("openxlsx.numFmt", "GENERAL")) ){
     inds <- which(sapply(colClasses, function(x) "numeric" %in% tolower(x)))
     coords <- expand.grid(rowInds, inds +startCol)
     

@@ -456,10 +456,10 @@ createStyle <- function(fontName = NULL,
   if(numFmt == "date"){
     numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
   }else if(!numFmt %in% validNumFmt){
-    if(grepl("[^mdyhsap[[:punct:] 0\\.#]", numFmt))
+    if(grepl("[^mdyhsap[[:punct:] 0\\.#\\$\\*]", numFmt))
       stop("Invalid numFmt")
   }
-  
+
   if(numFmt == "longdate"){
     numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
   }

@@ -31,7 +31,7 @@ genBaseColStyle <- function(cc){
   }else if("3" %in% cc | "comma" %in% cc){
     colStyle$numFmt <- list(numFmtId = "3")
     
-  }else if("numeric" %in% cc & !grepl("[^0\\.,#]", getOption("openxlsx.numFmt", "GENERAL")) ){
+  }else if("numeric" %in% cc & !grepl("[^0\\.,#\\$\\* ]", getOption("openxlsx.numFmt", "GENERAL")) ){
     colStyle$numFmt <- list("numFmtId" = 9999, "formatCode" = getOption("openxlsx.numFmt"))
           
   }else{
