@@ -12,6 +12,8 @@ NEW FEATURES
 
 * additional numFmt "comma" to format numerics with "," thousands separator 
 
+* tableName parameter to writeDataTable to assign the table a name
+
 VIGNETTE
 
 * section on write.xlsx in Introductory vignette
