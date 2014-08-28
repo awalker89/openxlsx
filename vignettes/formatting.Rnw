@@ -19,6 +19,7 @@
  bottom=20mm,
  }
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Examples}
 \author{Alexander Walker\\
@@ -320,6 +321,8 @@ setColWidths(wb, 1, cols = 1:10, widths = 15)
 addWorksheet(wb, "Sheet 2")
 df <- iris; df[, 1:4] <- df[1:4] + runif(1)
 writeDataTable(wb, sheet = 2, x = df)
+writeData(wb, sheet = 2, x = df, startCol = 7)
+writeData(wb, sheet = 2, x = df, startCol = 13, borders = "rows")
 
 ## To stop auto-formatting numerics set
 options("openxlsx.numFmt" = NULL)
