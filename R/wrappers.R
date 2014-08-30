@@ -1790,4 +1790,91 @@ names.Workbook <- function(x){
 
 
 
+#' @name addFilter
+#' @title add filters to columns
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols columns to add filter to. 
+#' @param rows A row numbers
+#' @seealso \code{\link{writeData}}
+#' @details adds filters to worksheet columns, same as filter parameters in writeData.
+#' writeDataTable automatically adds filters to first row of a table.
+#' NOTE Can only have a single filter per worksheet unless using tables.
+#' @export
+#' @seealso \code{\link{addFilter}}
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' addWorksheet(wb, "Sheet 3")
+#' 
+#' writeData(wb, 1, iris)
+#' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
+#' 
+#' ## Equivalently
+#' writeData(wb, 2, x = iris, filter = TRUE)
+#' 
+#' ## Similarly
+#' writeDataTable(wb, 3, iris)
+#' 
+#' saveWorkbook(wb, file = "addFilterExample.xlsx", overwrite = TRUE)
+addFilter <- function(wb, sheet, rows, cols){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(length(rows) != 1)
+    stop("row must be a numeric of length 1.")
+  
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)
+  
+  wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(rows, rows), "y" = c(min(cols), max(cols)))), collapse = ":"))
+  
+  invisible(wb)
+  
+}
+
+
+#' @name removeFilter
+#' @title removes worksheet filter from addFilter and writeData
+#' @param wb A workbook object
+#' @param sheet A vector of names or indices of worksheets
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' addWorksheet(wb, "Sheet 3")
+#' 
+#' writeData(wb, 1, iris)
+#' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
+#' 
+#' ## Equivalently
+#' writeData(wb, 2, x = iris, filter = TRUE)
+#' 
+#' ## Similarly
+#' writeDataTable(wb, 3, iris)
+#' 
+#' ## remove filters
+#' removeFilter(wb, 1:2) ## remove filters
+#' removeFilter(wb, 3) ## Does not affect tables!
+#' 
+#' saveWorkbook(wb, file = "removeFilterExample.xlsx", overwrite = TRUE)
+removeFilter <- function(wb, sheet){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  for(s in sheet){
+    s <- wb$validateSheet(s)
+    wb$worksheets[[s]]$autoFilter <- NULL  
+  }
+  
+  invisible(wb)
+  
+}
+
 
