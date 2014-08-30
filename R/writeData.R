@@ -97,6 +97,7 @@ writeData <- function(wb,
                       borders = c("none","surrounding","rows","columns", "all"),
                       borderColour = getOption("openxlsx.borderColour", "black"),
                       borderStyle = getOption("openxlsx.borderStyle", "thin"),
+                      filter = FALSE,
                       ...){
   
   ## increase scipen to avoid writing in scientific 
@@ -286,6 +287,12 @@ writeData <- function(wb,
   ## If no rows and not writing column names return as nothing to write
   if(nRow == 0 & !colNames)
     return(invisible(0))
+  
+  ## write autoFilter, can only have a single filter per worksheet
+  if(filter){
+    ref <- paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":")
+    wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', ref)
+  }
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
   sheet <- wb$validateSheet(sheet)

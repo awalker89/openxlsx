@@ -7,7 +7,8 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
   borders = c("none", "surrounding", "rows", "columns", "all"),
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), ...)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"), filter = FALSE,
+  ...)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
