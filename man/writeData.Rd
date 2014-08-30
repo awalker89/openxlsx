@@ -40,7 +40,9 @@ each column. If "\code{all}" all cell borders are drawn.}
 
 \item{borderColour}{Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).}
 
-\item{borderStyle}{Border line style
+\item{borderStyle}{Border line style}
+
+\item{add}{filters to column name row. NOTE cn only have one autoFilter per worksheet.
 \itemize{
    \item{\bold{none}}{ no border}
    \item{\bold{thin}}{ thin border}

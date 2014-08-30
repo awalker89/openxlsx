@@ -21,6 +21,7 @@
 #' each column. If "\code{all}" all cell borders are drawn.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
+#' @param add filters to column name row. NOTE cn only have one autoFilter per worksheet. 
 #' \itemize{
 #'    \item{\bold{none}}{ no border}
 #'    \item{\bold{thin}}{ thin border}
@@ -289,10 +290,8 @@ writeData <- function(wb,
     return(invisible(0))
   
   ## write autoFilter, can only have a single filter per worksheet
-  if(filter){
-    ref <- paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":")
-    wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', ref)
-  }
+  if(filter)
+    wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
   sheet <- wb$validateSheet(sheet)

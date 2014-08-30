@@ -433,11 +433,7 @@ loadWorkbook <- function(xlsxFile){
       if(!grepl("/>$", autoFilter))
         autoFilter <- gsub(">$", "/>", autoFilter)
       
-      wb$worksheets[[i]]$autoFilter <- autoFilter
-      
-      refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', autoFilter, perl = TRUE))
-      names(wb$worksheets[[i]]$autoFilter) <- refs
-      
+      wb$worksheets[[i]]$autoFilter <- autoFilter      
     }
     
     ## tab colour (sheetPR)

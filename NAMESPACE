@@ -2,7 +2,6 @@
 
 S3method("names<-",Workbook)
 export("worksheetOrder<-")
-export(addFilter)
 export(addStyle)
 export(addWorksheet)
 export(conditionalFormat)
