@@ -18,6 +18,13 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "hyperlinks",
                                                "media",
                                                "printerSettings",
+
+                                               "pivotTables",
+                                               "pivotTables.xml.rels",
+                                               "pivotDefinitions",
+                                               "pivotRecords",
+                                               "pivotDefinitionsRels",
+                                               
                                                "queryTables",
                                                "rowHeights",
                                                "sharedStrings",
@@ -71,6 +78,13 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   printerSettings <<- list()
   hyperlinks <<- list()
   sheetOrder <<- NULL
+  
+  pivotTables <<- NULL
+  pivotTables.xml.rels <<- NULL
+  pivotDefinitions <<- NULL
+  pivotRecords <<- NULL
+  pivotDefinitionsRels <<- NULL
+  
   
   attr(sharedStrings, "uniqueCount") <<- 0
   
@@ -158,6 +172,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   nSheets <- length(worksheets)
   nThemes <- length(theme)
+  nPivots <- length(pivotTables)
   
   relsDir <- file.path(tmpDir, "_rels")
   dir.create(path = relsDir, recursive = TRUE)
@@ -207,6 +222,29 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   printDir <- file.path(tmpDir, "xl", "printerSettings")
   dir.create(path = printDir, recursive = TRUE)
   
+  if(nPivots > 0){
+    
+    pivotTablesDir <- file.path(tmpDir, "xl", "pivotTables")
+    dir.create(path = pivotTablesDir, recursive = TRUE)
+    
+    pivotTablesRelsDir <- file.path(tmpDir, "xl", "pivotTables", "_rels")
+    dir.create(path = pivotTablesRelsDir, recursive = TRUE)
+    
+    pivotCacheDir <- file.path(tmpDir, "xl", "pivotCache")
+    dir.create(path = pivotCacheDir, recursive = TRUE)
+    
+    pivotCacheRelsDir <- file.path(tmpDir, "xl", "pivotCache", "_rels")
+    dir.create(path = pivotCacheRelsDir, recursive = TRUE)
+    
+    for(i in 1:nPivots){
+      .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
+      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
+      .Call("openxlsx_writeFile", "", pivotDefinitions[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)))
+      .Call("openxlsx_writeFile", "", pivotRecords[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)))
+      .Call("openxlsx_writeFile", "", pivotDefinitionsRels[[i]], "", file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)))   
+    }
+  
+  }
   
   ## Write content
   
@@ -1421,6 +1459,7 @@ Workbook$methods(preSaveCleanUp = function(){
   nSheets <- length(worksheets)
   nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
+  nPivots <- length(pivotDefinitions)
   
   ## add a worksheet if none added
   if(nSheets == 0){
@@ -1452,6 +1491,7 @@ Workbook$methods(preSaveCleanUp = function(){
   extRefInds <- which(targets %in% sprintf("externalLinks/externalLink%s.xml", 1:nExtRefs))
   sharedStringsInd <- which(targets == "sharedStrings.xml")
   tableInds <- which(grepl("table[0-9]+.xml", targets))
+  pivotNode <- workbook.xml.rels[which(targets %in% sprintf("pivotCache/pivotCacheDefinition%s.xml", 1:nPivots))] ## don't want to re-assign rIds for pivot tables
   
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
@@ -1460,6 +1500,8 @@ Workbook$methods(preSaveCleanUp = function(){
   workbook.xml.rels <<- unlist(lapply(1:length(workbook.xml.rels), function(i) {
     gsub('(?<=Relationship Id="rId)[0-9]+', i, workbook.xml.rels[[i]], perl = TRUE)
   }))
+  
+  workbook.xml.rels <<- c(workbook.xml.rels, pivotNode)
   
   ## Reassign rId to workbook sheet elements, (order sheets by sheetId first)
   sId <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE))))

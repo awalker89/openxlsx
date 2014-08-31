@@ -54,7 +54,8 @@ genBaseWorkbook <- function(){
        sheets = NULL,
        externalReferences = NULL,
        definedNames = NULL,
-       calcPr = NULL
+       calcPr = NULL,
+       pivotCaches = NULL
   )
   
 }
@@ -347,5 +348,11 @@ genExtLst <- function(guid, sqref, posColour, negColour){
 
 
 
-
+contentTypePivotXML <- function(i){
+  
+  c(sprintf('<Override PartName="/xl/pivotCache/pivotCacheDefinition%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml"/>', i),
+    sprintf('<Override PartName="/xl/pivotCache/pivotCacheRecords%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml"/>', i),
+    sprintf('<Override PartName="/xl/pivotTables/pivotTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml"/>', i))
+    
+}
 

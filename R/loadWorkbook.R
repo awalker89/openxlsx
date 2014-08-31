@@ -27,6 +27,8 @@
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
 loadWorkbook <- function(xlsxFile){
   
+  xlsxFile <- "c:/users/alex/desktop/Book1.xlsx"
+  
   if(!file.exists(xlsxFile))
     stop("File does not exist.")
   
@@ -57,6 +59,13 @@ loadWorkbook <- function(xlsxFile){
   connectionsXML    <- xmlFiles[grepl("connections.xml$", xmlFiles, perl = TRUE)]
   extLinksXML       <- xmlFiles[grepl("externalLink[0-9]+.xml$", xmlFiles, perl = TRUE)]
   extLinksRelsXML   <- xmlFiles[grepl("externalLink[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
+  
+  # pivot tables
+  pivotTableXML     <- xmlFiles[grepl("pivotTable[0-9]+.xml$", xmlFiles, perl = TRUE)]
+  pivotTableRelsXML <- xmlFiles[grepl("pivotTable[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
+  pivotDefXML       <- xmlFiles[grepl("pivotCacheDefinition[0-9]+.xml$", xmlFiles, perl = TRUE)]
+  pivotDefRelsXML   <- xmlFiles[grepl("pivotCacheDefinition[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
+  pivotRecordsXML   <- xmlFiles[grepl("pivotCacheRecords[0-9]+.xml$", xmlFiles, perl = TRUE)]
   
   
   nSheets <- length(worksheetsXML)
@@ -103,6 +112,51 @@ loadWorkbook <- function(xlsxFile){
     attr(vals, "uniqueCount") <- uniqueCount
     
     wb$sharedStrings <- vals
+    
+  }
+  
+  ## xl\pivotTables & xl\pivotCache
+  if(length(pivotTableXML) > 0){
+    
+    nPivotTables      <- length(pivotTableXML)
+    rIds <- 10000L + 1:nPivotTables
+    
+    pivotTableXML     <- pivotTableXML[order(nchar(pivotTableXML), pivotTableXML)]
+    pivotTableRelsXML <- pivotTableRelsXML[order(nchar(pivotTableRelsXML), pivotTableRelsXML)]
+    pivotDefXML       <- pivotDefXML[order(nchar(pivotDefXML), pivotDefXML)]
+    pivotDefRelsXML   <- pivotDefRelsXML[order(nchar(pivotDefRelsXML), pivotDefRelsXML)]
+    pivotRecordsXML   <- pivotRecordsXML[order(nchar(pivotRecordsXML), pivotRecordsXML)]
+  
+    wb$pivotTables <- unlist(lapply(pivotTableXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$pivotTables.xml.rels <- unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$pivotDefinitions <- unlist(lapply(pivotDefXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$pivotDefinitionsRels <- unlist(lapply(pivotDefRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$pivotRecords <- unlist(lapply(pivotRecordsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    
+    ## update content_types
+    wb$Content_Types <- c(wb$Content_Types, unlist(lapply(1:nPivotTables, contentTypePivotXML)))
+    
+    ## workbook rels
+    wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
+      sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:nPivotTables)
+    )
+    
+    caches <- .Call("openxlsx_getChildlessNode", workbook, "<pivotCache ", PACKAGE = "openxlsx")
+    for(i in 1:length(caches))
+      caches[i] <- gsub('"rId[0-9]+"', sprintf('"rId%s"', rIds[i]), caches[i])
+    
+    wb$workbook$pivotCaches <- paste0('<pivotCaches>', paste(caches, collapse = ""), '</pivotCaches>')
+      
+    ## worksheet rels (which pivotTable belongs on which worksheet)
+    
+#     wb$worksheets_rels
+    
+#     wb$worksheets_rels
+#     <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable" Target="../pivotTables/pivotTable1.xml"/>
+      
+    
+#       <Relationship Id="rId99" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable" Target="../pivotTables/pivotTable1.xml"/>
+      
     
   }
   
@@ -639,7 +693,26 @@ loadWorkbook <- function(xlsxFile){
         
       }     
     }
-  } 
+  
+    ## pivot tables
+    if(length(pivotTableXML) > 0){
+      
+      pivotTableJ <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=pivotTable)[0-9]+(?=\\.xml)", x, perl = TRUE))))
+      sheetWithPivot <- sheetNumber[which(sapply(pivotTableJ, length) > 0)]
+      pivotRels <- lapply(xml, function(x) {y <- x[grepl("pivotTable", x)]; y[order(nchar(y), y)]})
+      pivotRels <- pivotRels[sapply(pivotRels, length) > 0]
+      
+      ## Modify rIds
+      for(i in 1:length(pivotRels)){
+        for(j in 1:length(pivotRels[[i]]))  
+          pivotRels[[i]][j] <- gsub('"rId[0-9]+"', sprintf('"rId%s"', 10000L + j), pivotRels[[i]][j])
+        wb$worksheets_rels[[sheetWithPivot[i]]] <- c(wb$worksheets_rels[[sheetNumber[i]]], pivotRels[[i]])
+      }
+      
+    }
+  
+  
+  } ## end of worksheetRels
   
   ## table rels
   if(length(tableRelsXML) > 0){
