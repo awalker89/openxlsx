@@ -42,7 +42,7 @@ each column. If "\code{all}" all cell borders are drawn.}
 
 \item{borderStyle}{Border line style}
 
-\item{add}{filters to column name row. NOTE cn only have one autoFilter per worksheet.
+\item{filter}{If TRUE, add filters to column name row. NOTE can only have one autoFilter per worksheet.
 \itemize{
    \item{\bold{none}}{ no border}
    \item{\bold{thin}}{ thin border}

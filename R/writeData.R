@@ -21,7 +21,7 @@
 #' each column. If "\code{all}" all cell borders are drawn.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
-#' @param add filters to column name row. NOTE cn only have one autoFilter per worksheet. 
+#' @param filter If TRUE, add filters to column name row. NOTE can only have one autoFilter per worksheet. 
 #' \itemize{
 #'    \item{\bold{none}}{ no border}
 #'    \item{\bold{thin}}{ thin border}
