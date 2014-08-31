@@ -27,8 +27,6 @@
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
 loadWorkbook <- function(xlsxFile){
   
-  xlsxFile <- "c:/users/alex/desktop/Book1.xlsx"
-  
   if(!file.exists(xlsxFile))
     stop("File does not exist.")
   
