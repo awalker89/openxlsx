@@ -19,7 +19,6 @@
  bottom=20mm,
  }
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 
 \title{Examples}
 \author{Alexander Walker\\
