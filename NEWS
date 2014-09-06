@@ -14,6 +14,15 @@ NEW FEATURES
 
 * tableName parameter to writeDataTable to assign the table a name
 
+* headerStyle parameter to writeDataTable for additional column names styling
+
+* textRotation parameter to createStyle to rotate cell text
+
+* functions addFilter & removeFilter to add filters to columns
+
+* Headers & footers extended, can now be set with addWorksheet and setHeaderFooter.
+  setHeader & setFooter deprecated.  
+
 VIGNETTE
 
 * section on write.xlsx in Introductory vignette

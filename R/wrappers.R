@@ -201,6 +201,22 @@ sheets <- function(wb){
 #' @param sheetName A name for the new worksheet
 #' @param gridLines A logical. If FALSE, the worksheet grid lines will be hidden.
 #' @param tabColour Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
+#' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param footer document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param evenHeader document header for even pages.
+#' @param evenFooter document footer for even pages.
+#' @param firstHeader document header for first page only.
+#' @param firstFooter document footer for first page only.
+#' @details Headers and footers can contain special tags
+#' \itemize{
+#'   \item{\bold{&[Page]}}{ Page number}
+#'   \item{\bold{&[Pages]}}{ Number of pages}
+#'   \item{\bold{&[Date]}}{ Current date}
+#'   \item{\bold{&[Time]}}{ Current time}
+#'   \item{\bold{&[Path]}}{ File path}
+#'   \item{\bold{&[File]}}{ File name}
+#'   \item{\bold{&[Tab]}}{ Worksheet name}
+#' }
 #' @return XML tree
 #' @export
 #' @examples
@@ -213,9 +229,40 @@ sheets <- function(wb){
 #' addWorksheet(wb, "Sheet 3", tabColour = "red")
 #' addWorksheet(wb, "Sheet 4", gridLines = FALSE, tabColour = "#4F81BD")
 #' 
+#' ## Headers and Footers
+#' addWorksheet(wb, "S1",
+#' header = c("ODD HEAD LEFT", "ODD HEAD CENTER", "ODD HEAD RIGHT"),
+#' footer = c("ODD FOOT RIGHT", "ODD FOOT CENTER", "ODD FOOT RIGHT"),
+#' evenHeader = c("EVEN HEAD LEFT", "EVEN HEAD CENTER", "EVEN HEAD RIGHT"),
+#' evenFooter = c("EVEN FOOT RIGHT", "EVEN FOOT CENTER", "EVEN FOOT RIGHT"),
+#' firstHeader = c("TOP", "OF FIRST", "PAGE"),
+#' firstFooter = c("BOTTOM", "OF FIRST", "PAGE"))
+#' 
+#' addWorksheet(wb, "Sheet 5",
+#'              header = c("&[Date]", "ALL HEAD CENTER 2", "&[Page] / &[Pages]"),
+#'              footer = c("&[Path]&[File]", NA, "&[Tab]"),
+#'              firstHeader = c(NA, "Center Header of First Page", NA),
+#'              firstFooter = c(NA, "Center Footer of First Page", NA))
+#' 
+#' addWorksheet(wb, "Sheet 6",
+#'              header = c("ALL HEAD LEFT 2", "ALL HEAD CENTER 2", "ALL HEAD RIGHT 2"),
+#'              footer = c("ALL FOOT RIGHT 2", "ALL FOOT CENTER 2", "ALL FOOT RIGHT 2"))
+#' 
+#' addWorksheet(wb, "Sheet 7",
+#'              firstHeader = c("FIRST ONLY L", NA, "FIRST ONLY R"),
+#'              firstFooter = c("FIRST ONLY L", NA, "FIRST ONLY R"))
+#' 
 #' ## Save workbook
 #' saveWorkbook(wb, "addWorksheetExample.xlsx", overwrite = TRUE)
-addWorksheet <- function(wb, sheetName, gridLines = TRUE, tabColour = NULL){
+addWorksheet <- function(wb, sheetName,
+                         gridLines = TRUE,
+                         tabColour = NULL,
+                         header = NULL,
+                         footer = NULL,
+                         evenHeader = NULL,
+                         evenFooter = NULL,
+                         firstHeader = NULL,
+                         firstFooter = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -235,10 +282,36 @@ addWorksheet <- function(wb, sheetName, gridLines = TRUE, tabColour = NULL){
   if(!is.character(sheetName))
     sheetName <- as.character(sheetName)
   
+  if(!is.null(header) & length(header) != 3)
+    stop("header must have length 3 where elements correspond to positions: left, center, right.")
+  
+  if(!is.null(footer) & length(footer) != 3)
+    stop("footer must have length 3 where elements correspond to positions: left, center, right.")
+  
+  if(!is.null(evenHeader) & length(evenHeader) != 3)
+    stop("evenHeader must have length 3 where elements correspond to positions: left, center, right.")
+  
+  if(!is.null(evenFooter) & length(evenFooter) != 3)
+    stop("evenFooter must have length 3 where elements correspond to positions: left, center, right.")
+  
+  if(!is.null(firstHeader) & length(firstHeader) != 3)
+    stop("firstHeader must have length 3 where elements correspond to positions: left, center, right.")
+  
+  if(!is.null(firstFooter) & length(firstFooter) != 3)
+    stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
+  
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
   
-  invisible(wb$addWorksheet(sheetName, gridLines, tabColour))
+  invisible(wb$addWorksheet(sheetName = sheetName, 
+                            showGridLines = gridLines,
+                            tabColour = tabColour,
+                            oddHeader = headerFooterSub(header),
+                            oddFooter = headerFooterSub(footer),
+                            evenHeader = headerFooterSub(evenHeader),
+                            evenFooter = headerFooterSub(evenFooter),
+                            firstHeader = headerFooterSub(firstHeader),
+                            firstFooter = headerFooterSub(firstFooter)))
 } 
 
 
@@ -1447,87 +1520,127 @@ getBaseFont <- function(wb){
 }
 
 
-#' @name setHeader
-#' @title Set header for all worksheets
+#' @name setHeaderFooter
+#' @title Set document headers and footers
 #' @author Alexander Walker
 #' @param wb A workbook object
-#' @param text header text. A character vector of length 1.
-#' @param position Postion of text in header. One of "left", "center" or "right"
+#' @param sheet A name or index of a worksheet
+#' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param footer document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param evenHeader document header for even pages.
+#' @param evenFooter document footer for even pages.
+#' @param firstHeader document header for first page only.
+#' @param firstFooter document footer for first page only.
+#' @details Headers and footers can contain special tags
+#' \itemize{
+#'   \item{\bold{&[Page]}}{ Page number}
+#'   \item{\bold{&[Pages]}}{ Number of pages}
+#'   \item{\bold{&[Date]}}{ Current date}
+#'   \item{\bold{&[Time]}}{ Current time}
+#'   \item{\bold{&[Path]}}{ File path}
+#'   \item{\bold{&[File]}}{ File name}
+#'   \item{\bold{&[Tab]}}{ Worksheet name}
+#' }
 #' @export
+#' @seealso \code{\link{addWorksheet}} to set headers and footers when adding a worksheet
 #' @examples
-#' wb <- createWorkbook("Edgar Anderson")
+#' wb <- createWorkbook()
+#' 
 #' addWorksheet(wb, "S1")
-#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
+#' addWorksheet(wb, "S2")
+#' addWorksheet(wb, "S3")
+#' addWorksheet(wb, "S4")
 #' 
-#' ## set all headers
-#' setHeader(wb, "This is a header", position="center")
-#' setHeader(wb, "To the left", position="left")
-#' setHeader(wb, "On the right", position="right")
+#' writeData(wb, 1, 1:400)
+#' writeData(wb, 2, 1:400)
+#' writeData(wb, 3, 3:400)
+#' writeData(wb, 4, 3:400)
 #' 
-#' ## set all footers
-#' setFooter(wb, "Center Footer Here", position="center")
-#' setFooter(wb, "Bottom left", position="left")
-#' setFooter(wb, Sys.Date(), position="right")
+#' setHeaderFooter(wb, sheet = "S1",  
+#'                 header = c("ODD HEAD LEFT", "ODD HEAD CENTER", "ODD HEAD RIGHT"),
+#'                 footer = c("ODD FOOT RIGHT", "ODD FOOT CENTER", "ODD FOOT RIGHT"),
+#'                 evenHeader = c("EVEN HEAD LEFT", "EVEN HEAD CENTER", "EVEN HEAD RIGHT"),
+#'                 evenFooter = c("EVEN FOOT RIGHT", "EVEN FOOT CENTER", "EVEN FOOT RIGHT"),
+#'                 firstHeader = c("TOP", "OF FIRST", "PAGE"),
+#'                 firstFooter = c("BOTTOM", "OF FIRST", "PAGE"))
 #' 
-#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
-setHeader <- function(wb, text, position = "center"){
+#' setHeaderFooter(wb, sheet = 2,  
+#'                 header = c("&[Date]", "ALL HEAD CENTER 2", "&[Page] / &[Pages]"),
+#'                 footer = c("&[Path]&[File]", NA, "&[Tab]"),
+#'                 firstHeader = c(NA, "Center Header of First Page", NA),
+#'                 firstFooter = c(NA, "Center Footer of First Page", NA))
+#' 
+#' setHeaderFooter(wb, sheet = 3,  
+#'                 header = c("ALL HEAD LEFT 2", "ALL HEAD CENTER 2", "ALL HEAD RIGHT 2"),
+#'                 footer = c("ALL FOOT RIGHT 2", "ALL FOOT CENTER 2", "ALL FOOT RIGHT 2"))
+#' 
+#' setHeaderFooter(wb, sheet = 4,  
+#'                 firstHeader = c("FIRST ONLY L", NA, "FIRST ONLY R"),
+#'                 firstFooter = c("FIRST ONLY L", NA, "FIRST ONLY R"))
+#' 
+#' 
+#' saveWorkbook(wb, "setHeaderFooterExample.xlsx", overwrite = TRUE)
+setHeaderFooter <- function(wb, sheet,
+                            header = NULL,
+                            footer = NULL,
+                            evenHeader = NULL,
+                            evenFooter = NULL,
+                            firstHeader = NULL,
+                            firstFooter = NULL){
+  
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  position <- tolower(position)
-  if(!position %in% c("left", "center", "right")) 
-    stop("Invalid position.")
+  sheet <- wb$validateSheet(sheet)
   
-  if(length(text) != 1)
-    stop("Text argument must be a character vector of length 1")
+  if(!is.null(header) & length(header) != 3)
+    stop("header must have length 3 where elements correspond to positions: left, center, right.")
   
-  sheet <- wb$validateSheet(1)
-  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "head"] <- as.character(text)
+  if(!is.null(footer) & length(footer) != 3)
+    stop("footer must have length 3 where elements correspond to positions: left, center, right.")
   
-}
-
-
-#' @name setFooter
-#' @title Set footer for all worksheets
-#' @author Alexander Walker
-#' @param wb A workbook object
-#' @param text footer text. A character vector of length 1.
-#' @param position Postion of text in footer. One of "left", "center" or "right"
-#' @export
-#' @examples
-#' wb <- createWorkbook("Edgar Anderson")
-#' addWorksheet(wb, "S1")
-#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
-#' 
-#' ## set all headers
-#' setHeader(wb, "This is a header", position="center")
-#' setHeader(wb, "To the left", position="left")
-#' setHeader(wb, "On the right", position="right")
-#' 
-#' ## set all footers
-#' setFooter(wb, "Center Footer Here", position="center")
-#' setFooter(wb, "Bottom left", position="left")
-#' setFooter(wb, Sys.Date(), position="right")
-#' 
-#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
-setFooter <- function(wb, text, position = "center"){
+  if(!is.null(evenHeader) & length(evenHeader) != 3)
+    stop("evenHeader must have length 3 where elements correspond to positions: left, center, right.")
   
-  if(!"Workbook" %in% class(wb))
-    stop("First argument must be a Workbook.")
+  if(!is.null(evenFooter) & length(evenFooter) != 3)
+    stop("evenFooter must have length 3 where elements correspond to positions: left, center, right.")
   
-  position <- tolower(position)
-  if(!position %in% c("left", "center", "right")) 
-    stop("Invalid position.")
+  if(!is.null(firstHeader) & length(firstHeader) != 3)
+    stop("firstHeader must have length 3 where elements correspond to positions: left, center, right.")
   
-  if(length(text) != 1)
-    stop("Text argument must be a character vector of length 1")
+  if(!is.null(firstFooter) & length(firstFooter) != 3)
+    stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
   
-  sheet <- wb$validateSheet(1)
-  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "foot"] <- as.character(text)
+  oddHeader = headerFooterSub(header)
+  oddFooter = headerFooterSub(footer)
+  evenHeader = headerFooterSub(evenHeader)
+  evenFooter = headerFooterSub(evenFooter)
+  firstHeader = headerFooterSub(firstHeader)
+  firstFooter = headerFooterSub(firstFooter)
+  
+  naToNULLList <- function(x){
+    lapply(x, function(x) {
+      if(is.na(x))
+        return(NULL)
+      x})
+  }
+  
+  hf <- list(oddHeader = naToNULLList(oddHeader),
+             oddFooter = naToNULLList(oddFooter),
+             evenHeader = naToNULLList(evenHeader),
+             evenFooter = naToNULLList(evenFooter), 
+             firstHeader = naToNULLList(firstHeader),
+             firstFooter = naToNULLList(firstFooter))
+  
+  if(all(sapply(hf, length) == 0))
+    hf <- NULL
+  
+  
+  wb$worksheets[[sheet]]$headerFooter <- hf
+  
   
 }
-
 
 
 
@@ -1878,3 +1991,91 @@ removeFilter <- function(wb, sheet){
 }
 
 
+
+
+
+
+#' @name setHeader
+#' @title Set header for all worksheets
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param text header text. A character vector of length 1.
+#' @param position Postion of text in header. One of "left", "center" or "right"
+#' @export
+#' @examples
+#' wb <- createWorkbook("Edgar Anderson")
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
+#' 
+#' ## set all headers
+#' setHeader(wb, "This is a header", position="center")
+#' setHeader(wb, "To the left", position="left")
+#' setHeader(wb, "On the right", position="right")
+#' 
+#' ## set all footers
+#' setFooter(wb, "Center Footer Here", position="center")
+#' setFooter(wb, "Bottom left", position="left")
+#' setFooter(wb, Sys.Date(), position="right")
+#' 
+#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+setHeader <- function(wb, text, position = "center"){
+  
+  warning("This function is deprecated. Use function 'setHeaderFooter()'")
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  position <- tolower(position)
+  if(!position %in% c("left", "center", "right")) 
+    stop("Invalid position.")
+  
+  if(length(text) != 1)
+    stop("Text argument must be a character vector of length 1")
+  
+  sheet <- wb$validateSheet(1)
+  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "head"] <- as.character(text)
+  
+}
+
+
+#' @name setFooter
+#' @title Set footer for all worksheets
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param text footer text. A character vector of length 1.
+#' @param position Postion of text in footer. One of "left", "center" or "right"
+#' @export
+#' @examples
+#' wb <- createWorkbook("Edgar Anderson")
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
+#' 
+#' ## set all headers
+#' setHeader(wb, "This is a header", position="center")
+#' setHeader(wb, "To the left", position="left")
+#' setHeader(wb, "On the right", position="right")
+#' 
+#' ## set all footers
+#' setFooter(wb, "Center Footer Here", position="center")
+#' setFooter(wb, "Bottom left", position="left")
+#' setFooter(wb, Sys.Date(), position="right")
+#' 
+#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+setFooter <- function(wb, text, position = "center"){
+  
+  warning("This function is deprecated. Use function 'setHeaderFooter()'")
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  position <- tolower(position)
+  if(!position %in% c("left", "center", "right")) 
+    stop("Invalid position.")
+  
+  if(length(text) != 1)
+    stop("Text argument must be a character vector of length 1")
+  
+  sheet <- wb$validateSheet(1)
+  wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "foot"] <- as.character(text)
+  
+}

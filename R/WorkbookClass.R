@@ -74,7 +74,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   connections <<- NULL
   externalLinks <<- NULL
   externalLinksRels <<- NULL
-  headFoot <<- data.frame("text" = rep(NA, 6), "pos" = c("left", "center", "right"), "head" = c("head", "head", "head", "foot", "foot", "foot"), stringsAsFactors = FALSE)
+  headFoot <<- NULL
   printerSettings <<- list()
   hyperlinks <<- list()
   sheetOrder <<- NULL
@@ -116,7 +116,10 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
 })
 
 
-Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL){
+Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL,
+                                         oddHeader = NULL, oddFooter = NULL,
+                                         evenHeader = NULL, evenFooter = NULL,
+                                         firstHeader = NULL, firstFooter = NULL){
 
   newSheetIndex = length(worksheets) + 1L
   
@@ -124,7 +127,10 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, newSheetIndex, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour))
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour,
+                                                 oddHeader = oddHeader, oddFooter = oddFooter,
+                                                 evenHeader = evenHeader, evenFooter = evenFooter,
+                                                 firstHeader = firstHeader, firstFooter = firstFooter))
   
   ## update content_tyes
   Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex))
@@ -148,7 +154,6 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   freezePane[[newSheetIndex]] <<- list()
   printerSettings[[newSheetIndex]] <<- genPrinterSettings()
   hyperlinks[[newSheetIndex]] <<- ""
-  
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
@@ -970,6 +975,10 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       ws$conditionalFormatting <- paste(sapply(uNames, function(x) paste0(sprintf('<conditionalFormatting sqref="%s">', x), pxml(ws$conditionalFormatting[nms == x]), '</conditionalFormatting>')), collapse = "")
     }
     
+    ## Header footer
+    if(!is.null(ws$headerFooter))
+      ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
+    
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
     
@@ -1535,11 +1544,7 @@ Workbook$methods(preSaveCleanUp = function(){
         .self$updateCellStyles(sheet = r$sheet, rows = r$rows, cols = r$cols, sId)
     }
   }
-  
-  ## Header footer
-  if(any(!is.na(headFoot$text)))
-    .self$setHeaderFooter()
-  
+    
   ## Make sure all rowHeights have rows, if not append them!
   for(i in 1:length(worksheets)){
     
@@ -1563,48 +1568,6 @@ Workbook$methods(preSaveCleanUp = function(){
 
 
 
-
-
-Workbook$methods(setHeaderFooter = function(){
-  
-  headerPos <- headFoot$pos[!is.na(headFoot$text) & headFoot$head == "head"]
-  
-  if(length(headerPos) > 0){
-    headNode <- "<oddHeader>"
-    if("left" %in% headerPos)
-      headNode <- paste0(headNode, "&amp;L",  headFoot$text[headFoot$pos == "left" & headFoot$head == "head"]) 
-    
-    if("center" %in% headerPos)
-      headNode <- paste0(headNode, "&amp;C",  headFoot$text[headFoot$pos == "center" & headFoot$head == "head"]) 
-    
-    if("right" %in% headerPos)
-      headNode <- paste0(headNode, "&amp;R",  headFoot$text[headFoot$pos == "right" & headFoot$head == "head"]) 
-    headNode <- paste0(headNode, "</oddHeader>")
-  }else{
-    headNode <- NULL
-  }
-  
-  
-  footerPos <- headFoot$pos[!is.na(headFoot$text) & headFoot$head == "foot"]
-  
-  if(length(footerPos) > 0){
-    footNode <- "<oddFooter>"
-    if("left" %in% footerPos)
-      footNode <- paste0(footNode, "&amp;L",  headFoot$text[headFoot$pos == "left" & headFoot$head == "foot"]) 
-    
-    if("center" %in% footerPos)
-      footNode <- paste0(footNode, "&amp;C",  headFoot$text[headFoot$pos == "center" & headFoot$head == "foot"]) 
-    
-    if("right" %in% footerPos)
-      footNode <- paste0(footNode, "&amp;R",  headFoot$text[headFoot$pos == "right" & headFoot$head == "foot"]) 
-    footNode <- paste0(footNode, "</oddFooter>")
-  }else{
-    footNode <- NULL
-  }
-  
-  worksheets[[1]]$headerFooter <<- paste0("<headerFooter>", headNode, footNode, "</headerFooter>")
-  
-})
 
 
 

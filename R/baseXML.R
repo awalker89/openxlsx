@@ -60,10 +60,27 @@ genBaseWorkbook <- function(){
   
 }
 
-genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL){
+genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL, oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter){
   
   if(!is.null(tabColour))
     tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
+  
+  naToNULLList <- function(x){
+    lapply(x, function(x) {
+      if(is.na(x))
+        return(NULL)
+      x})
+  }
+  
+  hf <- list(oddHeader = naToNULLList(oddHeader),
+             oddFooter = naToNULLList(oddFooter),
+             evenHeader = naToNULLList(evenHeader),
+             evenFooter = naToNULLList(evenFooter), 
+             firstHeader = naToNULLList(firstHeader),
+             firstFooter = naToNULLList(firstFooter))
+    
+  if(all(sapply(hf, length) == 0))
+    hf <- NULL
   
   ## list of all possible children
   tmp <- list(list(sheetPr = tabColour,
@@ -78,7 +95,7 @@ genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, t
                    hyperlinks = NULL,
                    pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
                    pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
-                   headerFooter = NULL,
+                   headerFooter = hf,
                    drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
                    tableParts = NULL,
                    extLst = NULL
@@ -105,7 +122,7 @@ genBaseStyleSheet <- function(dxfs = NULL){
     
     numFmts = NULL,
     
-    fonts = c('<font><sz val="11"/><color rgb="%s"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
+    fonts = c('<font><sz val="11"/><color rgb="FF000000"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
     
     fills = c('<fill><patternFill patternType="none"/></fill>',
               '<fill><patternFill patternType="gray125"/></fill>'),
