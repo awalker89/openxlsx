@@ -79,6 +79,8 @@ writeDataTable <- function(wb, sheet, x,
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
   }else if(tableName %in% attr(wb$tables, "tableName")){
     stop(sprintf("Table with name '%s' already exists!", tableName))
+  }else if(grepl("[^A-Z0-9_]", tableName[[1]], ignore.case = TRUE)){
+    stop("Invalid characters in tableName.")
   }else{
     tableName <- tableName[[1]]
   }

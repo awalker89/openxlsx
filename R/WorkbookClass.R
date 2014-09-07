@@ -14,7 +14,6 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "externalLinks",
                                                "externalLinksRels",
                                                "freezePane",
-                                               "headFoot",
                                                "hyperlinks",
                                                "media",
                                                "printerSettings",
@@ -74,7 +73,6 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   connections <<- NULL
   externalLinks <<- NULL
   externalLinksRels <<- NULL
-  headFoot <<- NULL
   printerSettings <<- list()
   hyperlinks <<- list()
   sheetOrder <<- NULL
