@@ -116,7 +116,7 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
 })
 
 
-Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL,
+Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL, zoom = 100,
                                          oddHeader = NULL, oddFooter = NULL,
                                          evenHeader = NULL, evenFooter = NULL,
                                          firstHeader = NULL, firstFooter = NULL){
@@ -127,7 +127,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, newSheetIndex, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour,
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour, zoom = zoom,
                                                  oddHeader = oddHeader, oddFooter = oddFooter,
                                                  evenHeader = evenHeader, evenFooter = evenFooter,
                                                  firstHeader = firstHeader, firstFooter = firstFooter))

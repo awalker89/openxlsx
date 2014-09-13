@@ -201,6 +201,7 @@ sheets <- function(wb){
 #' @param sheetName A name for the new worksheet
 #' @param gridLines A logical. If FALSE, the worksheet grid lines will be hidden.
 #' @param tabColour Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
+#' @param zoom A numeric. Worksheet zoom level.
 #' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
 #' @param footer document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
 #' @param evenHeader document header for even pages.
@@ -263,6 +264,7 @@ sheets <- function(wb){
 addWorksheet <- function(wb, sheetName,
                          gridLines = TRUE,
                          tabColour = NULL,
+                         zoom = 100,
                          header = NULL,
                          footer = NULL,
                          evenHeader = NULL,
@@ -284,6 +286,10 @@ addWorksheet <- function(wb, sheetName,
   
   if(!is.null(tabColour))
     tabColour <- validateColour(tabColour, "Invalid tabColour in addWorksheet.")
+  
+  if(!is.numeric(zoom))
+    stop("zoom must be numeric")
+  
   
   if(!is.character(sheetName))
     sheetName <- as.character(sheetName)
@@ -312,6 +318,7 @@ addWorksheet <- function(wb, sheetName,
   invisible(wb$addWorksheet(sheetName = sheetName, 
                             showGridLines = gridLines,
                             tabColour = tabColour,
+                            zoom = zoom[1],
                             oddHeader = headerFooterSub(header),
                             oddFooter = headerFooterSub(footer),
                             evenHeader = headerFooterSub(evenHeader),

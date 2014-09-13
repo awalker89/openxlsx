@@ -4,8 +4,8 @@
 \title{Add a worksheet to a workbook}
 \usage{
 addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
-  header = NULL, footer = NULL, evenHeader = NULL, evenFooter = NULL,
-  firstHeader = NULL, firstFooter = NULL)
+  zoom = 100, header = NULL, footer = NULL, evenHeader = NULL,
+  evenFooter = NULL, firstHeader = NULL, firstFooter = NULL)
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}
@@ -15,6 +15,8 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 \item{gridLines}{A logical. If FALSE, the worksheet grid lines will be hidden.}
 
 \item{tabColour}{Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
+
+\item{zoom}{A numeric. Worksheet zoom level.}
 
 \item{header}{document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
 

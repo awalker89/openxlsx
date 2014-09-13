@@ -60,7 +60,7 @@ genBaseWorkbook <- function(){
   
 }
 
-genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL, oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter){
+genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL, zoom = 100, oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter){
   
   if(!is.null(tabColour))
     tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
@@ -85,7 +85,7 @@ genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, t
   ## list of all possible children
   tmp <- list(list(sheetPr = tabColour,
                    dimension = '<dimension ref="A1"/>',
-                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" showGridLines="%s" tabSelected="TRUE"/></sheetViews>', as.integer(showGridLines)),
+                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" zoomScale="%s" showGridLines="%s" tabSelected="1"/></sheetViews>', as.integer(zoom), as.integer(showGridLines)),
                    sheetFormatPr = '<sheetFormatPr defaultRowHeight="15.0"/>',
                    cols = NULL,
                    sheetData = '<sheetData/>',
