@@ -4,7 +4,8 @@
 \title{Set page margins, orientation and print scaling}
 \usage{
 pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
-  right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3)
+  right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3,
+  fitToWidth = FALSE, fitToHeight = FALSE)
 }
 \arguments{
 \item{wb}{A workbook object}
@@ -26,6 +27,10 @@ pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
 \item{header}{header margin in inches}
 
 \item{footer}{footer margin in inches}
+
+\item{fitToWidth}{If TRUE, worksheet is scaled to fit to page width on printing.}
+
+\item{fitToHeight}{If TRUE, worksheet is scaled to fit to page height on printing.}
 }
 \description{
 Set page margins, orientation and print scaling

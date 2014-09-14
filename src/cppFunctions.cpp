@@ -1346,7 +1346,7 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
 
 
 // [[Rcpp::export]]
-CharacterVector buildTableXML(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle){
+CharacterVector buildTableXML(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle, bool withFilter){
   
   int n = colNames.size();
   std::string tableCols;
@@ -1356,8 +1356,11 @@ CharacterVector buildTableXML(std::string table, std::string ref, std::vector<st
   if(!showColNames){
     table += " headerRowCount=\"0\" totalsRowShown=\"0\">";
   }else{
-    table += " totalsRowShown=\"0\"><autoFilter ref=\"" + ref + "\"/>";
+    table += " totalsRowShown=\"0\">";
   }
+  
+  if(withFilter)
+    table += "<autoFilter ref=\"" + ref + "\"/>";
   
   
   for(int i = 0; i < n; i ++){

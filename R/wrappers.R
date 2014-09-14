@@ -1671,6 +1671,8 @@ setHeaderFooter <- function(wb, sheet,
 #' @param bottom bottom page margin in inches
 #' @param header header margin in inches
 #' @param footer footer margin in inches
+#' @param fitToWidth If TRUE, worksheet is scaled to fit to page width on printing.
+#' @param fitToHeight If TRUE, worksheet is scaled to fit to page height on printing.
 #' @export
 #' @examples
 #' wb <- createWorkbook()
@@ -1686,7 +1688,10 @@ setHeaderFooter <- function(wb, sheet,
 #' pageSetup(wb, sheet = 2, orientation = "portrait", scale = 300, left= 0.5, right = 0.5)
 #' 
 #' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
-pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100, left = 0.7, right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3){
+pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
+                      left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
+                      header = 0.3, footer = 0.3,
+                      fitToWidth = FALSE, fitToHeight = FALSE){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -1699,8 +1704,11 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100, left = 0
   
   sheet <- wb$validateSheet(sheet)
   
-  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                              orientation, scale)
+  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
+                                              orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+  
+  if(fitToHeight | fitToWidth)
+    wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
   
   wb$worksheets[[sheet]]$pageMargins <- 
     sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)

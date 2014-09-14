@@ -63,7 +63,10 @@ genBaseWorkbook <- function(){
 genBaseSheet <- function(sheetName, showGridLines = TRUE, tabSelected = FALSE, tabColour = NULL, zoom = 100, oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter){
   
   if(!is.null(tabColour))
-    tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
+    tabColour <- sprintf('<tabColor rgb="%s"/>', tabColour)
+  
+  
+  
   
   naToNULLList <- function(x){
     lapply(x, function(x) {

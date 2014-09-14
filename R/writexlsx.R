@@ -44,30 +44,23 @@
 #' @examples
 #' 
 #' ## write to working directory
-#' write.xlsx(iris, file = "writeXLSX1.xlsx", colNames = TRUE, borders = "rows")
-#' write.xlsx(iris, file = "writeXLSX2.xlsx", colNames = TRUE, borders = "columns",
-#'  borderStyle = "dashed")
-#' 
 #' options("openxlsx.borderColour" = "#4F80BD") ## set default border colour
-#' write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows",
-#'  sheetName = "Iris data", gridLines = FALSE)
+#' write.xlsx(iris, file = "writeXLSX1.xlsx", colNames = TRUE, borders = "columns")
+#' write.xlsx(iris, file = "writeXLSX2.xlsx", colNames = TRUE, borders = "surrounding")
 #' 
-#' options("openxlsx.borderStyle" = "dashDot")
-#' write.xlsx(iris, file = "writeXLSX4.xlsx", colNames = TRUE, borders = "rows",
-#'  gridLines = FALSE)
 #' 
-#' options("openxlsx.borderStyle" = "medium")
 #' hs <- createStyle(textDecoration = "BOLD", fontColour = "#FFFFFF", fontSize=12,
-#'  fontName="Arial Narrow", fgFill = "#4F80BD")
-#'  
-#' write.xlsx(iris, file = "writeXLSX5.xlsx", colNames = TRUE, borders = "rows",
-#'  headerStyle = hs)
+#'                   fontName="Arial Narrow", fgFill = "#4F80BD")
 #' 
-#' ## Lists elements are written to individual worksheets
-#' l <- list(iris, mtcars, matrix(runif(1000), ncol = 5))
-#' write.xlsx(l, "writeList.xlsx")
-#' names(l) <- c("IRIS", "MTCARS", "RUNIF")
-#' write.xlsx(l, "writeList2.xlsx")
+#' write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows", headerStyle = hs)
+#' 
+#' ## Lists elements are written to individual worksheets, using list names as sheet names if available
+#' l <- list("IRIS" = iris, "MTCATS" = mtcars, matrix(runif(1000), ncol = 5))
+#' write.xlsx(l, "writeList1.xlsx")
+#' 
+#' ## different sheets can be given different parameters
+#' write.xlsx(l, "writeList2.xlsx", startCol = c(1,2,3), startRow = 2,
+#'            asTable = c(TRUE, TRUE, FALSE), withFilter = c(TRUE, FALSE, FALSE))
 #' 
 #' @export
 write.xlsx <- function(x, file, asTable = FALSE, ...){
@@ -106,6 +99,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   ## tableStyle = "TableStyleLight9"
   ## tableName = NULL
   ## headerStyle = NULL
+  ## withFilter = TRUE
   
   #---saveWorkbook---#
   #   overwrite = TRUE
@@ -128,7 +122,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   gridLines <- TRUE
   if("gridLines" %in% names(params)){
-    if(is.logical(params$gridLines)){
+    if(all(is.logical(params$gridLines))){
       gridLines <- params$gridLines
     }else{
       stop("Argument gridLines must be TRUE or FALSE")
@@ -144,10 +138,18 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
   }
   
+  withFilter <- TRUE
+  if("withFilter" %in% names(params)){
+    if(is.logical(params$withFilter)){
+      withFilter <- params$withFilter
+    }else{
+      stop("Argument withFilter must be TRUE or FALSE")
+    }
+  }
   
   startRow <- 1
   if("startRow" %in% names(params)){
-    if(startRow > 0){
+    if(all(startRow > 0)){
       startRow <- params$startRow
     }else{
       stop("startRow must be a positive integer")
@@ -156,13 +158,12 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   startCol <- 1
   if("startCol" %in% names(params)){
-    if(startCol > 0){
+    if(all(startCol > 0)){
       startCol <- params$startCol
     }else{
       stop("startCol must be a positive integer")
     }
   }
-  
   
   colNames <- TRUE
   if("colNames" %in% names(params)){
@@ -211,17 +212,26 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   headerStyle <- NULL
   if("headerStyle" %in% names(params)){
-    if("Style" %in% class(params$headerStyle)){
-      headerStyle <- params$headerStyle
+    
+    if(length(params$headerStyle) == 1){
+      if("Style" %in% class(params$headerStyle)){
+        headerStyle <- params$headerStyle
+      }else{
+        stop("headerStyle must be a style object.")
+      }
     }else{
-      stop("headerStyle must be a style object.")
+      if(all(sapply(params$headerStyle, function(x) "Style" %in% class(x)))){
+        headerStyle <- params$headerStyle
+      }else{
+        stop("headerStyle must be a style object.")
+      }
     }
   }
   
   borders <- NULL
   if("borders" %in% names(params)){
     borders <- tolower(params$borders)
-    if(!borders %in% c("surrounding", "rows", "columns"))
+    if(!all(borders %in% c("surrounding", "rows", "columns")))
       stop("Invalid borders argument")
   }
   
@@ -231,7 +241,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   borderStyle <- getOption("openxlsx.borderStyle", "thin")
   if("borderStyle" %in% names(params)){
-    borderStyle <- validateBorderStyle(params$borderStyle)[[1]]
+    borderStyle <- validateBorderStyle(params$borderStyle)
   }
   
   tableStyle <- "TableStyleLight9"
@@ -250,46 +260,79 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
     if(is.null(nms)){
       nms <- paste("Sheet", 1:nSheets)
+    }else if(any("" %in% nms)){
+      nms[nms %in% ""] <- paste("Sheet", (1:nSheets)[nms %in% ""])
     }else{
       nms <- make.names(nms, unique  = TRUE)
     }
+    
+    ## make all inputs as long as the list
+    if(length(withFilter) != nSheets)
+      withFilter <- rep_len(withFilter, length.out = nSheets)
+    
+    if(length(colNames) != nSheets)
+      colNames <- rep_len(colNames, length.out = nSheets)
+    
+    if(length(rowNames) != nSheets)
+      rowNames <- rep_len(rowNames, length.out = nSheets)
+    
+    if(length(startRow) != nSheets)
+      startRow <- rep_len(startRow, length.out = nSheets)
+    
+    if(length(startCol) != nSheets)
+      startCol <- rep_len(startCol, length.out = nSheets)
+        
+    if(length(headerStyle) != nSheets & !is.null(headerStyle))
+      headerStyle <- rep_len(headerStyle, length.out = nSheets)
+    
+    if(length(borders) != nSheets & !is.null(borders))
+      borders <- rep_len(borders, length.out = nSheets)
+    
+    if(length(borderColour) != nSheets)
+      borderColour <- rep_len(borderColour, length.out = nSheets)
+    
+    if(length(borderStyle) != nSheets)
+      borderStyle <- rep_len(borderStyle, length.out = nSheets)
+    
+    if(length(asTable) != nSheets)
+      asTable <- rep_len(asTable, length.out = nSheets)
+    
+    if(length(tableStyle) != nSheets)
+      tableStyle <- rep_len(tableStyle, length.out = nSheets)
     
     for(i in 1:nSheets){
       
       wb$addWorksheet(nms[[i]], showGridLines = gridLines)
       
-      if(asTable){
-        
-        if(!all(sapply(x, function(df) "data.frame" %in% class(df))))
-          stop("All list elements must be a data.frame if asTable = TRUE")
-        
+      if(asTable[i]){
+                
         writeDataTable(wb = wb,
                        sheet = i,
                        x = x[[i]],
-                       startCol = startCol,
-                       startRow = startRow,
+                       startCol = startCol[i],
+                       startRow = startRow[i],
                        xy = xy,
-                       colNames = colNames,
-                       rowNames = rowNames,
-                       tableStyle = tableStyle,
+                       colNames = colNames[i],
+                       rowNames = rowNames[i],
+                       tableStyle = tableStyle[i],
                        tableName = NULL,
-                       headerStyle = headerStyle)
+                       headerStyle = headerStyle[i],
+                       withFilter = withFilter[i])
         
       }else{
-        
         
         writeData(wb = wb, 
                   sheet = i,
                   x = x[[i]],
-                  startCol = startCol,
-                  startRow = startRow, 
+                  startCol = startCol[i],
+                  startRow = startRow[i], 
                   xy = xy,
-                  colNames = colNames,
-                  rowNames = rowNames,
-                  headerStyle = headerStyle,
-                  borders = borders,
-                  borderColour = borderColour,
-                  borderStyle = borderStyle)
+                  colNames = colNames[i],
+                  rowNames = rowNames[i],
+                  headerStyle = headerStyle[i],
+                  borders = borders[i],
+                  borderColour = borderColour[i],
+                  borderStyle = borderStyle[i])
         
       }
       

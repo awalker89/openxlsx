@@ -13,6 +13,7 @@
 #' @param tableStyle Any excel table style name or "none".
 #' @param tableName name of table in workbook.
 #' @param headerStyle Custom style to apply to column names.
+#' @param withFilter If TRUE, columns with have filters in the first row.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
@@ -46,8 +47,9 @@
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
-#' ## Additional headerStyling
-#' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45))
+#' ## Additional headerStyling and remove filters
+#' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
+#' withFilter = FALSE)
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,
@@ -58,7 +60,8 @@ writeDataTable <- function(wb, sheet, x,
                            rowNames = FALSE,
                            tableStyle = "TableStyleLight9",
                            tableName = NULL,
-                           headerStyle= NULL){
+                           headerStyle= NULL,
+                           withFilter = TRUE){
   
     
   if(!is.null(xy)){
@@ -74,6 +77,7 @@ writeDataTable <- function(wb, sheet, x,
   if(!is.logical(colNames)) stop("colNames must be a logical.")
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
   if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
+  if(!is.logical(withFilter)) stop("withFilter must be a logical.")
   
   if(is.null(tableName)){
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
@@ -189,6 +193,6 @@ writeDataTable <- function(wb, sheet, x,
   colNames <- replaceIllegalCharacters(colNames)
   
   ## create table.xml and assign an id to worksheet tables
-  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle, tableName)
+  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle, tableName, withFilter[1])
   
 }

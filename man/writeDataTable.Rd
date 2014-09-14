@@ -5,7 +5,7 @@
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
-  tableName = NULL, headerStyle = NULL)
+  tableName = NULL, headerStyle = NULL, withFilter = TRUE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -30,6 +30,8 @@ A vector of the form c(startCol, startRow)}
 \item{tableName}{name of table in workbook.}
 
 \item{headerStyle}{Custom style to apply to column names.}
+
+\item{withFilter}{If TRUE, columns with have filters in the first row.}
 }
 \description{
 Write to a worksheet and format as a table
@@ -66,8 +68,9 @@ class(df$TinyNumbers) <- "scientific"
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 
-## Additional headerStyling
-writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45))
+## Additional headerStyling and remove filters
+writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
+withFilter = FALSE)
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 }

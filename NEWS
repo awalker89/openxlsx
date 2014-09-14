@@ -23,6 +23,12 @@ NEW FEATURES
 * Headers & footers extended, can now be set with addWorksheet and setHeaderFooter.
   setHeader & setFooter deprecated.  
 
+* "fitToWidth" and "fitToHeight" logicals in pageSetup.
+
+* "zoom" parameter in addWorksheet to set worksheet zoom level.
+
+* "withFilter"" parameter to writeDataTable to remove table filters
+
 VIGNETTE
 
 * section on write.xlsx in Introductory vignette

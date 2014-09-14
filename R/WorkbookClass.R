@@ -460,7 +460,7 @@ Workbook$methods(getSheetName = function(sheetIndex){
 
 
 
-Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle, tableName){
+Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle, tableName, withFilter){
   
   ## id will start at 3 and drawing will always be 1, printer Settings at 2 (printer settings has been removed)
   id <- as.character(length(tables) + 3L)
@@ -473,7 +473,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   tSheets <- attr(tables, "sheet")
   tNames <- attr(tables, "tableName") 
   
-  tables <<- c(tables, .Call("openxlsx_buildTableXML", table, ref, colNames, showColNames, tableStyle, PACKAGE = "openxlsx"))
+  tables <<- c(tables, .Call("openxlsx_buildTableXML", table, ref, colNames, showColNames, tableStyle, withFilter, PACKAGE = "openxlsx"))
   names(tables) <<- c(nms, ref)
   attr(tables, "sheet") <<- c(tSheets, sheet)
   attr(tables, "tableName") <<- c(tNames, tableName)
@@ -978,6 +978,9 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     ## Header footer
     if(!is.null(ws$headerFooter))
       ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
+    
+    if(!is.null(ws$sheetPr))
+      ws$sheetPr <- paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
     
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
