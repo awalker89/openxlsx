@@ -85,8 +85,10 @@ writeDataTable <- function(wb, sheet, x,
     stop(sprintf("Table with name '%s' already exists!", tableName))
   }else if(grepl("[^A-Z0-9_]", tableName[[1]], ignore.case = TRUE)){
     stop("Invalid characters in tableName.")
+  }else if(grepl('^[A-Z]{1,3}[0-9]+$', tableName)){
+    stop("tableName cannot look like a cell reference.")
   }else{
-    tableName <- tableName[[1]]
+    tableName <- tableName
   }
   
   ## increase scipen to avoid writing in scientific 

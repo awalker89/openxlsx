@@ -1702,16 +1702,20 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
   
-  sheet <- wb$validateSheet(sheet)
+  for(sheet in sheet){
   
-  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                              orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
-  
-  if(fitToHeight | fitToWidth)
-    wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
-  
-  wb$worksheets[[sheet]]$pageMargins <- 
-    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+    sheet <- wb$validateSheet(sheet)
+    
+    wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
+                                                orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+    
+    if(fitToHeight | fitToWidth)
+      wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
+    
+    wb$worksheets[[sheet]]$pageMargins <- 
+      sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+    
+  }
   
 }
 
