@@ -45,10 +45,6 @@ getRefs <- function(x, startRow) {
     .Call('openxlsx_getRefs', PACKAGE = 'openxlsx', x, startRow)
 }
 
-getRefsVals <- function(x, startRow) {
-    .Call('openxlsx_getRefsVals', PACKAGE = 'openxlsx', x, startRow)
-}
-
 getSharedStrings <- function(x) {
     .Call('openxlsx_getSharedStrings', PACKAGE = 'openxlsx', x)
 }
@@ -147,5 +143,9 @@ getCellsWithChildren <- function(xmlFile, emptyNodes) {
 
 quickBuildCellXML2 <- function(prior, post, sheetData, rowNumbers, rowHeights, R_fileName) {
     .Call('openxlsx_quickBuildCellXML2', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, rowHeights, R_fileName)
+}
+
+getRefsVals <- function(x, startRow) {
+    .Call('openxlsx_getRefsVals', PACKAGE = 'openxlsx', x, startRow)
 }
 

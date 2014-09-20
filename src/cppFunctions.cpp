@@ -413,96 +413,6 @@ SEXP getRefs(CharacterVector x, int startRow){
 
 
 // [[Rcpp::export]]
-SEXP getRefsVals(CharacterVector x, int startRow){
-  
-  int n = x.size();
-  std::string xml;
-  CharacterVector r(n);
-  CharacterVector v(n);
-  size_t pos = 0;
-  size_t endPos = 0;
-  
-  std::string rtag = "r=";
-  std::string rtagEnd = "\"";
-  
-  std::string vtag = "<v>";
-  std::string vtagEnd = "</v>";
-  
-  if(startRow == 1){
-    for(int i = 0; i < n; i++){ 
-      
-      // find r tag     
-      xml = x[i];
-      pos = xml.find(rtag, 0);  // find r=
-      endPos = xml.find(rtagEnd, pos+3);  // find r= "
-      r[i] = xml.substr(pos+3, endPos-pos-3).c_str();
-      
-      // find <v> tag and </v> end tag
-      pos = xml.find(vtag, endPos+1);
-      endPos = xml.find(vtagEnd, pos+3);
-      v[i] = xml.substr(pos+3, endPos-pos-3).c_str();
-      
-    }
-    
-  }else{
-    // if a startRow is specified
-    // loop throught v, if row is less than startRow, remove from r and v
-    int rowN;
-    std::string row;
-    bool below = true;
-    
-    for(int i = 0; i < n; i++){
-      
-      // find opening tag     
-      xml = x[i];
-      pos = xml.find(rtag, 0);
-      endPos = xml.find(rtagEnd, pos+3);
-      r[i] = xml.substr(pos+3, endPos-pos-3).c_str();
-      
-      if(below){
-        row = r[i];
-        // remove digits from string
-        row.erase(std::remove_if(row.begin(), row.end(), ::isalpha), row.end());
-        rowN = atoi(row.c_str());
-        
-        if(rowN < startRow){
-          r[i] = NA_STRING;
-          v[i] = NA_STRING;
-          
-        }else{
-          below = false;
-          pos = xml.find(vtag, endPos+1);
-          endPos = xml.find(vtagEnd, pos+3);
-          v[i] = xml.substr(pos+3, endPos-pos-3).c_str();
-        }
-        
-      }else{
-        pos = xml.find(vtag, endPos+1);
-        endPos = xml.find(vtagEnd, pos+3);
-        v[i] = xml.substr(pos+3, endPos-pos-3).c_str();        
-      }
-      
-    } // end of loop
-    
-    v = na_omit(v);
-    r = na_omit(r);
-    
-  } // end of else
-  
-  
-  
-  List res(2);
-  res[0] = r;
-  res[1] = v;
-  
-  return wrap(res) ;  
-  
-}
-
-
-
-
-// [[Rcpp::export]]
 CharacterVector getSharedStrings(CharacterVector x){
   
   int n = x.size();
@@ -1830,5 +1740,123 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
   xmlFile.close();
   
   return Rcpp::wrap(1);
+  
+}
+
+
+
+
+
+
+// [[Rcpp::export]]
+SEXP getRefsVals(CharacterVector x, int startRow){
+  
+  int n = x.size();
+  std::string xml;
+  CharacterVector r(n);
+  CharacterVector v(n);
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  std::string rtag = "r=";
+  std::string rtagEnd = "\"";
+  
+  std::string vtag = "<v>";
+  std::string vtag2 = "<v ";
+  std::string vtagEnd = "</v>";
+  
+  if(startRow == 1){
+    for(int i = 0; i < n; i++){ 
+      
+      // find r tag     
+      xml = x[i];
+      pos = xml.find(rtag, 0);  // find r=
+      endPos = xml.find(rtagEnd, pos + 3);  // find r= "
+      r[i] = xml.substr(pos + 3, endPos - pos - 3).c_str();
+      
+      // find <v> tag and </v> end tag
+      pos = xml.find(vtag, endPos+1);
+      
+      if(pos != std::string::npos){
+        endPos = xml.find(vtagEnd, pos + 3);
+        v[i] = xml.substr(pos + 3, endPos - pos - 3).c_str();
+      }else{
+        pos = xml.find(vtag2, endPos + 1);
+        pos = xml.find(">", pos + 1);
+        endPos = xml.find(vtagEnd, pos + 3);
+        v[i] = xml.substr(pos + 1, endPos - pos - 3).c_str();
+      }
+    }
+    
+  }else{
+    // if a startRow is specified
+    // loop throught v, if row is less than startRow, remove from r and v
+    int rowN;
+    std::string row;
+    bool below = true;
+    
+    for(int i = 0; i < n; i++){
+      
+      // find opening tag     
+      xml = x[i];
+      pos = xml.find(rtag, 0);
+      endPos = xml.find(rtagEnd, pos+3);
+      r[i] = xml.substr(pos+3, endPos-pos-3).c_str();
+      
+      if(below){
+        row = r[i];
+        // remove digits from string
+        row.erase(std::remove_if(row.begin(), row.end(), ::isalpha), row.end());
+        rowN = atoi(row.c_str());
+        
+        if(rowN < startRow){
+          r[i] = NA_STRING;
+          v[i] = NA_STRING;
+          
+        }else{
+          below = false;
+      // find <v> tag and </v> end tag
+          pos = xml.find(vtag, endPos+1);
+          
+          if(pos != std::string::npos){
+            endPos = xml.find(vtagEnd, pos + 3);
+            v[i] = xml.substr(pos + 3, endPos - pos - 3).c_str();
+          }else{
+            pos = xml.find(vtag2, endPos + 1);
+            pos = xml.find(">", pos + 1);
+            endPos = xml.find(vtagEnd, pos + 3);
+            v[i] = xml.substr(pos + 1, endPos - pos - 3).c_str();
+          }
+        }
+        
+      }else{
+      // find <v> tag and </v> end tag
+      pos = xml.find(vtag, endPos+1);
+      
+        if(pos != std::string::npos){
+          endPos = xml.find(vtagEnd, pos + 3);
+          v[i] = xml.substr(pos + 3, endPos - pos - 3).c_str();
+        }else{
+          pos = xml.find(vtag2, endPos + 1);
+          pos = xml.find(">", pos + 1);
+          endPos = xml.find(vtagEnd, pos + 3);
+          v[i] = xml.substr(pos + 1, endPos - pos - 3).c_str();
+      }       
+      }
+      
+    } // end of loop
+    
+    v = na_omit(v);
+    r = na_omit(r);
+    
+  } // end of else
+  
+  
+  
+  List res(2);
+  res[0] = r;
+  res[1] = v;
+  
+  return wrap(res) ;  
   
 }

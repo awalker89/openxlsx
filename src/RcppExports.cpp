@@ -174,22 +174,6 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// getRefsVals
-SEXP getRefsVals(CharacterVector x, int startRow);
-RcppExport SEXP openxlsx_getRefsVals(SEXP xSEXP, SEXP startRowSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
-        Rcpp::traits::input_parameter< int >::type startRow(startRowSEXP );
-        SEXP __result = getRefsVals(x, startRow);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
 // getSharedStrings
 CharacterVector getSharedStrings(CharacterVector x);
 RcppExport SEXP openxlsx_getSharedStrings(SEXP xSEXP) {
@@ -618,6 +602,22 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< List >::type rowHeights(rowHeightsSEXP );
         Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP );
         SEXP __result = quickBuildCellXML2(prior, post, sheetData, rowNumbers, rowHeights, R_fileName);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// getRefsVals
+SEXP getRefsVals(CharacterVector x, int startRow);
+RcppExport SEXP openxlsx_getRefsVals(SEXP xSEXP, SEXP startRowSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        Rcpp::traits::input_parameter< int >::type startRow(startRowSEXP );
+        SEXP __result = getRefsVals(x, startRow);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

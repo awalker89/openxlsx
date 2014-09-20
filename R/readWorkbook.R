@@ -108,8 +108,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   if(length(emptyStrs) == 0)
     emptyStrs <- ""
   
-  ## 0.75s
-  
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
   ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
@@ -117,7 +115,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
   v <- r_v[[2]]
-  
   
   nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   if(nRows == 0 | length(r) == 0){
@@ -167,11 +164,10 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     
     strRV <- .Call("openxlsx_getRefsVals",  ws[wsStrInds], startRow, PACKAGE = "openxlsx")
     uStrs <- unique(strRV[[2]])
+    uStrs[uStrs == "#N/A"] <- NA
     
     ## Match references of "str" cells to r, append these to stringInds
     strInds <- na.omit(match(strRV[[1]], r))
-    stringInds <- c(stringInds, strInds)
-    
     newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) - 1L) 
     
     ## replace strings in v with reference to sharedStrings, (now can convert v to numeric)
@@ -180,6 +176,14 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     ## append new strings to sharedStrings
     sharedStrings <- c(sharedStrings, uStrs)
     tR <- c(tR, strRV[[1]])
+    
+    if(tR[[1]] == -1L){
+      stringInds <- strInds
+      tR <- strRV[[1]]
+    }else{
+      stringInds <- c(stringInds, strInds)
+      tR <- c(tR, strRV[[1]])
+    }
     
   }
   
