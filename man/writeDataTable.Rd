@@ -27,7 +27,7 @@ A vector of the form c(startCol, startRow)}
 
 \item{tableStyle}{Any excel table style name or "none".}
 
-\item{tableName}{name of table in workbook.}
+\item{tableName}{name of table in workbook. The table name must be unique.}
 
 \item{headerStyle}{Custom style to apply to column names.}
 

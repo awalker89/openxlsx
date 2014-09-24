@@ -127,7 +127,9 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, newSheetIndex, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, tabColour = tabColour, zoom = zoom,
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, 
+                                                 tabSelected = newSheetIndex == 1, 
+                                                 tabColour = tabColour, zoom = zoom,
                                                  oddHeader = oddHeader, oddFooter = oddFooter,
                                                  evenHeader = evenHeader, evenFooter = evenFooter,
                                                  firstHeader = firstHeader, firstFooter = firstFooter))
@@ -964,7 +966,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
     
     if(length(freezePane[[i]]) > 0)
-      ws$sheetViews <- paste0('<sheetViews><sheetView workbookViewId=\"0\" tabSelected=\"TRUE\">', freezePane[[i]], '</sheetView></sheetViews>')
+      ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews)
     
     if(length(worksheets[[i]]$mergeCells) > 0)
       ws$mergeCells <- paste0(sprintf('<mergeCells count="%s">', length(worksheets[[i]]$mergeCells)), pxml(worksheets[[i]]$mergeCells), '</mergeCells>')
