@@ -32,8 +32,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
   
-  if(!grepl("xlsx$", xlsxFile))
-    stop("File must have extension .xlsx!")
+  if(grepl("\\.xls$|\\.xlm$", xlsxFile))
+    stop("openxlsx can not read .xls or .xlm files!")
   
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
@@ -209,6 +209,8 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   
   ## Build data.frame
   m = .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, PACKAGE = "openxlsx")
+  m
+  
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))

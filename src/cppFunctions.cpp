@@ -1032,18 +1032,29 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
   // Check if first row are all strings
   //get first row number
   
-  // convert first nCols r to firstRowNumbers
-  // convert get r for which firstRowNumbers == firstRowNumbers[0];
-  
   CharacterVector colNames(nCols);
   IntegerVector removeFlag;
   int pos = 0;
   
-  // If we are told colNames exist takle the first row and fill any gaps with X.i
+  // If we are told colNames exist take the first row and fill any gaps with X.i
   if(hasColNames){
+    
     char name[6];
-    for(int i =0; i < nCols; i++){
-      if(i == colNumbers[pos]){
+    std::vector<std::string> firstRowNumbers(nCols);
+    std::string ref;
+    
+    // convert first nCols r to firstRowNumbers
+    // get r for which firstRowNumbers == firstRowNumbers[0];
+    for(int i = 0; i < nCols; i++){
+      ref = r[i];
+      ref.erase(std::remove_if(ref.begin(), ref.end(), ::isalpha), ref.end());
+      firstRowNumbers[i] = ref;
+    }
+    
+    ref = firstRowNumbers[0];
+    
+    for(int i = 0; i < nCols; i++){
+      if(i == colNumbers[pos] & firstRowNumbers[pos] == ref){
         colNames[i] = v[pos];
         pos = pos + 1;
       }else{
@@ -1087,7 +1098,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
   bool allNumeric = false;
   
   if((tR.size() == 0) | (stringInds[0] == -1)) //If the new resized tR is length 0 there are no more strings
-  allNumeric = true;
+    allNumeric = true;
   
   // getRow numbers from r 
   IntegerVector rowNumbers(nCells);  
