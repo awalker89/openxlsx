@@ -442,7 +442,7 @@ CharacterVector getSharedStrings(CharacterVector x){
         emptyStrs.push_back(i); //this should only ever grow to length 1
       }else{
         pos = xml.find(tag, pos+1); // find where opening ttag ends
-        endPos = xml.find(tagEnd, pos+2); // find where the node ends </t> (closing tag)
+        endPos = xml.find(tagEnd, pos+1); // find where the node ends </t> (closing tag)
         strs[i] = xml.substr(pos+1, endPos-pos - 1).c_str();
       }
     }
@@ -494,7 +494,7 @@ CharacterVector getSharedStrings2(CharacterVector x){
         }else{
       
           pos = xml.find(tag, pos+1); // find where opening ttag ends
-          endPos = xml.find(tagEnd, pos+2); // find where the node ends </t> (closing tag)
+          endPos = xml.find(tagEnd, pos+1); // find where the node ends </t> (closing tag)
           strs[i] += xml.substr(pos+1, endPos-pos - 1).c_str(); 
           pos = xml.find(ttag, endPos); // find ttag    
         
@@ -1227,7 +1227,7 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
       cellXML += "<c r=\"" + cVal[0];
       
       if(attrs[2])
-      cellXML += "\" s=\"" + cVal[2];
+        cellXML += "\" s=\"" + cVal[2];
       
       //If we have a t value we must have a v value
       if(attrs[1]){
@@ -1871,3 +1871,118 @@ SEXP getRefsVals(CharacterVector x, int startRow){
   return wrap(res) ;  
   
 }
+
+
+
+
+
+
+
+
+// [[Rcpp::export]]
+SEXP quickBuildCellXMLKeepNA(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, std::string R_fileName){
+  
+  bool keepNA = true;
+  
+  // open file and write header XML
+  const char * s = R_fileName.c_str();
+  std::ofstream xmlFile;
+  xmlFile.open (s);
+  xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
+  
+  // If no data write childless node and return
+  if(sheetData.size() == 0){
+    xmlFile << prior;
+    xmlFile << "<sheetData/>";
+    xmlFile << post;
+    xmlFile.close();
+    return Rcpp::wrap(1);
+  }
+  
+  // write xml prior to stringData and opening tag
+  xmlFile << prior;
+  xmlFile << "<sheetData>";
+  
+  //NOTES ON WHY THIS WORKS
+  //If no row heights every row has children
+  //If data only added once, sheetData will be in order
+  // Thus all rows have children (all starting row tags are open) and no need to sort/find
+  
+  CharacterVector temp = sheetData.attr("names");    
+  std::vector<std::string> rows = as<std::vector<std::string> >(temp);
+  
+  CharacterVector temp2(sort_unique(rowNumbers));
+  std::vector<std::string> uniqueRows = as<std::vector<std::string> >(temp2);
+  
+  size_t n = temp.size();
+  size_t k = uniqueRows.size();
+  std::string xml;
+  
+  size_t j=0;
+  string currentRow = uniqueRows[0];
+  
+  for(size_t i = 0; i < k; i++){
+    
+    std::string r(uniqueRows[i]);
+    std::string cellXML;
+    std::vector<std::string> cVal;
+    
+    while(currentRow == r){
+      
+      CharacterVector cValtmp(sheetData[j]);
+      LogicalVector attrs = !is_na(cValtmp);
+      cVal = as<std::vector<std::string> >(cValtmp);
+      
+      // cVal[0] is r    
+      // cVal[1] is t        
+      // cVal[2] is s    
+      // cVal[3] is v    
+      // cVal[4] is f    
+      
+      //cell XML strings
+      cellXML += "<c r=\"" + cVal[0];
+      
+      if(attrs[2])
+        cellXML += "\" s=\"" + cVal[2];
+      
+      //If we have a t value we must have a v value
+      if(attrs[1]){
+        //If we have a c value we might have an f value
+        if(attrs[4]){
+          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[4] + "<v>" + cVal[3] + "</v></c>";
+        }else{
+          cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[3] + "</v></c>";
+        }
+        
+      }else if(keepNA){
+        cellXML += "\" t=\"e\"><v>#N/A</v></c>";
+      }else{
+        cellXML += "\"/>";
+      }
+      
+      j += 1;
+      
+      if(j == n)
+        break;
+      
+      currentRow = rows[j];
+    }
+    
+    xmlFile << "<row r=\"" + r + "\">" + cellXML + "</row>";
+    
+  }
+  
+  // write closing tag and XML post sheetData
+  xmlFile << "</sheetData>";
+  xmlFile << post;
+  
+  //close file
+  xmlFile.close();
+  
+  return Rcpp::wrap(1);
+  
+}
+
+
+
+

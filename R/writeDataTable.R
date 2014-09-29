@@ -11,7 +11,7 @@
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
 #' @param tableStyle Any excel table style name or "none".
-#' @param tableName name of table in workbook.
+#' @param tableName name of table in workbook. The table name must be unique.
 #' @param headerStyle Custom style to apply to column names.
 #' @param withFilter If TRUE, columns with have filters in the first row.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
