@@ -4,7 +4,7 @@
 \title{Read data from a worksheet into a data.frame}
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
-  skipEmptyRows = TRUE)
+  skipEmptyRows = TRUE, rowNames = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -18,6 +18,8 @@ regardless of the value of startRow.}
 
 \item{skipEmptyRows}{If TRUE, empty rows are skipped else empty rows after the first row containing data
 will return a row of NAs}
+
+\item{rowNames}{If TRUE, first column of data will be used as row names.}
 }
 \value{
 data.frame

@@ -7,7 +7,8 @@
 #' regardless of the value of startRow.
 #' @param colNames If TRUE, first row of data will be used as column names. 
 #' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
-#' will return a row of NAs
+#' will return a row of NAs.
+#' @param rowNames If TRUE, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
@@ -27,7 +28,7 @@
 #' df3$Symbol
 #' 
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE){
   
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -217,6 +218,11 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     colnames(m) <- gsub("[[:space:]]+", ".", colnames(m))
   }
   
+  if(rowNames){
+    rownames(m) <- m[[1]]
+    m[[1]] <- NULL
+  }
+  
   
   return(m)
   
@@ -236,6 +242,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
 #' @param colNames If TRUE, first row of data will be used as column names. 
 #' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
 #' will return a row of NAs
+#' @param rowNames If TRUE, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
@@ -245,6 +252,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE){
-  read.xlsx(xlsxFile = xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows)
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE){
+  read.xlsx(xlsxFile = xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames)
 }
