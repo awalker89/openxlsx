@@ -1054,7 +1054,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     ref = firstRowNumbers[0];
     
     for(int i = 0; i < nCols; i++){
-      if(i == colNumbers[pos] & firstRowNumbers[pos] == ref){
+      if((i == colNumbers[pos]) & (firstRowNumbers[pos] == ref)){
         colNames[i] = v[pos];
         pos = pos + 1;
       }else{
