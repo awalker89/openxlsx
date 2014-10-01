@@ -1069,7 +1069,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     CharacterVector toRemove(first, last);
     removeFlag = match(tR, toRemove);
     tR.erase(tR.begin(), tR.begin() + sum(!is_na(removeFlag)));
-    
+
     // remove elements that are now being used as colNames (there are int pos many of these)    
     //check we have some r left if not return a data.frame with zero rows
     r.erase(r.begin(), r.begin() +  pos); 
@@ -1086,7 +1086,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
     nRows--; // decrement number of rows as first row is now being used as colNames
     nCells = nCells - pos;
-    
+        
   }else{
     char name[6];
     for(int i =0; i < nCols; i++){
@@ -1099,7 +1099,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
   
   if((tR.size() == 0) | (stringInds[0] == -1)) //If the new resized tR is length 0 there are no more strings
     allNumeric = true;
-  
+    
   // getRow numbers from r 
   IntegerVector rowNumbers(nCells);  
   IntegerVector uRows;
@@ -1131,25 +1131,26 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     
     
     if(hasColNames) // remove elements that have been "used"
-    vn.erase(vn.begin(), vn.begin() + pos);
+      vn.erase(vn.begin(), vn.begin() + pos);
     
     m = buildMatrixNumeric(vn, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
     
-    if(hasColNames)// remove elements that have been "used"
-    v.erase(v.begin(), v.begin() + pos);
+    if(hasColNames)// remove elements that have been "used" (we have done this for r already)
+      v.erase(v.begin(), v.begin() + pos);
     
     // If it contains any strings it will be a character column
     IntegerVector charCols = match(tR, r);    
     
     int tRSize = tR.size();
     IntegerVector charColNumbers(tRSize);
-    
+
     for(int i = 0; i < tRSize; i++)
-    charColNumbers[i] = colNumbers[charCols[i]-1];
+      charColNumbers[i] = colNumbers[charCols[i]-1];
     
     charCols = unique(charColNumbers);
+
     m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols);
     
   }

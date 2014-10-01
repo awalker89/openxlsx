@@ -176,14 +176,13 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
     
     ## append new strings to sharedStrings
     sharedStrings <- c(sharedStrings, uStrs)
-    tR <- c(tR, strRV[[1]])
-    
     if(tR[[1]] == -1L){
       stringInds <- strInds
       tR <- strRV[[1]]
     }else{
       stringInds <- c(stringInds, strInds)
       tR <- c(tR, strRV[[1]])
+      tR <- tR[order(as.numeric(gsub("[A-Z]", "", tR)), nchar(tR))]   
     }
     
   }
