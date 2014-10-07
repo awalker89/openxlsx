@@ -21,7 +21,7 @@
 #' each column. If "\code{all}" all cell borders are drawn.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
-#' @param filter If TRUE, add filters to column name row. NOTE can only have one autoFilter per worksheet. 
+#' @param withFilter If TRUE, add filters to column name row. NOTE can only have one filter per worksheet. 
 #' \itemize{
 #'    \item{\bold{none}}{ no border}
 #'    \item{\bold{thin}}{ thin border}
@@ -38,7 +38,7 @@
 #'    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
-#' @param ...  Further arguments (for future use)
+#' @param keepNA If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @seealso \code{\link{writeDataTable}}
 #' @export writeData
 #' @rdname writeData
@@ -98,8 +98,8 @@ writeData <- function(wb,
                       borders = c("none","surrounding","rows","columns", "all"),
                       borderColour = getOption("openxlsx.borderColour", "black"),
                       borderStyle = getOption("openxlsx.borderStyle", "thin"),
-                      filter = FALSE,
-                      ...){
+                      withFilter = FALSE,
+                      keepNA = FALSE){
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- options("scipen")
@@ -290,7 +290,7 @@ writeData <- function(wb,
     return(invisible(0))
   
   ## write autoFilter, can only have a single filter per worksheet
-  if(filter)
+  if(withFilter)
     wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
@@ -303,7 +303,8 @@ writeData <- function(wb,
                startCol = startCol,
                startRow = startRow,
                colClasses = colClasses,
-               hlinkNames = hlinkNames)
+               hlinkNames = hlinkNames,
+               keepNA = keepNA)
   
   ## header style  
   if("Style" %in% class(headerStyle) & colNames)

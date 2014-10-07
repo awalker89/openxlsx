@@ -624,22 +624,3 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// quickBuildCellXMLKeepNA
-SEXP quickBuildCellXMLKeepNA(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, std::string R_fileName);
-RcppExport SEXP openxlsx_quickBuildCellXMLKeepNA(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP R_fileNameSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP );
-        Rcpp::traits::input_parameter< std::string >::type post(postSEXP );
-        Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP );
-        Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP );
-        Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP );
-        SEXP __result = quickBuildCellXMLKeepNA(prior, post, sheetData, rowNumbers, R_fileName);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}

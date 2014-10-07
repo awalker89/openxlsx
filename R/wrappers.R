@@ -1950,7 +1950,7 @@ names.Workbook <- function(x){
 #' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
 #' 
 #' ## Equivalently
-#' writeData(wb, 2, x = iris, filter = TRUE)
+#' writeData(wb, 2, x = iris, withFilter = TRUE)
 #' 
 #' ## Similarly
 #' writeDataTable(wb, 3, iris)
@@ -1991,7 +1991,7 @@ addFilter <- function(wb, sheet, rows, cols){
 #' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
 #' 
 #' ## Equivalently
-#' writeData(wb, 2, x = iris, filter = TRUE)
+#' writeData(wb, 2, x = iris, withFilter = TRUE)
 #' 
 #' ## Similarly
 #' writeDataTable(wb, 3, iris)

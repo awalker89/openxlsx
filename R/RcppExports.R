@@ -149,7 +149,3 @@ getRefsVals <- function(x, startRow) {
     .Call('openxlsx_getRefsVals', PACKAGE = 'openxlsx', x, startRow)
 }
 
-quickBuildCellXMLKeepNA <- function(prior, post, sheetData, rowNumbers, R_fileName) {
-    .Call('openxlsx_quickBuildCellXMLKeepNA', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, R_fileName)
-}
-

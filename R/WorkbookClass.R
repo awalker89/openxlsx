@@ -497,7 +497,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 
 
-Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames){
+Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames, keepNA){
     
   sheet <- validateSheet(sheet)
   nCols <- ncol(df)
@@ -563,9 +563,16 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ## cell values
   v <- as.character(t(as.matrix(df)))
-  v[is.na(v)] <- as.character(NA)
-  t[is.na(v)] <- as.character(NA)
   
+  if(keepNA){
+    t[is.na(v)] <- "e"
+    v[is.na(v)] <- "#N/A"
+  }else{
+    t[is.na(v)] <- as.character(NA)  
+    v[is.na(v)] <- as.character(NA)
+  }
+  
+
   #prepend column headers 
   if(colNames){
     t <- c(rep.int('s', nCols), t)
@@ -615,10 +622,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     .self$updateSharedStrings(uNewStr)  
     v[strFlag] <- match(newStrs, sharedStrings) - 1L
   }
-  
-  
-  
-  
+
   ## Create cell list of lists
   
   cells <- .Call("openxlsx_buildCellList", r , t ,v , PACKAGE="openxlsx")
@@ -1006,7 +1010,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       r <- sapply(sheetData[[i]], "[[", "r")      
       sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
       dataCount[[i]] <<- 1L
-    }    
+    }
     
     if(length(rowHeights[[i]]) == 0){
       

@@ -27,7 +27,9 @@ NEW FEATURES
 
 * "zoom" parameter in addWorksheet to set worksheet zoom level.
 
-* "withFilter"" parameter to writeDataTable to remove table filters
+* "withFilter"" parameter to writeDataTable and writeData to remove table filters
+
+* keepNa parameter to writeDataTable and writeData to write NA values as #N/A
 
 VIGNETTE
 
@@ -42,6 +44,8 @@ BUG FIXES
 * read.xlsx now correctly reads sharedStrings with inline styling
 
 * sharedStrings now exact matches true/false to determine logical values from workbooks.
+
+* fomulas in column caused openxlsx to crash. This has been fixed.
 
 openxlsx 2.0.15
 ----------------------------------------------------------------

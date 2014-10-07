@@ -13,7 +13,8 @@
 #' @param tableStyle Any excel table style name or "none".
 #' @param tableName name of table in workbook. The table name must be unique.
 #' @param headerStyle Custom style to apply to column names.
-#' @param filter If TRUE, columns with have filters in the first row.
+#' @param withFilter If TRUE, columns with have withFilters in the first row.
+#' @param keepNA If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
@@ -27,7 +28,7 @@
 #' addWorksheet(wb, "S2")
 #' addWorksheet(wb, "S3")
 #' 
-#' ## write data formatted as excel table with table filters
+#' ## write data formatted as excel table with table withFilters
 #' # default table style is "TableStyleMedium2"
 #' writeDataTable(wb, "S1", x = iris)
 #' 
@@ -47,9 +48,9 @@
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
 #' 
-#' ## Additional headerStyling and remove filters
+#' ## Additional headerStyling and remove withFilters
 #' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
-#' filter = FALSE)
+#' withFilter = FALSE)
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,
@@ -61,7 +62,8 @@ writeDataTable <- function(wb, sheet, x,
                            tableStyle = "TableStyleLight9",
                            tableName = NULL,
                            headerStyle= NULL,
-                           filter = TRUE){
+                           withFilter = TRUE,
+                           keepNA = FALSE){
   
     
   if(!is.null(xy)){
@@ -77,7 +79,7 @@ writeDataTable <- function(wb, sheet, x,
   if(!is.logical(colNames)) stop("colNames must be a logical.")
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
   if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
-  if(!is.logical(filter)) stop("filter must be a logical.")
+  if(!is.logical(withFilter)) stop("withFilter must be a logical.")
   
   if(is.null(tableName)){
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
@@ -189,12 +191,13 @@ writeDataTable <- function(wb, sheet, x,
                startRow = startRow,
                startCol = startCol,
                colClasses = colClasses,
-               hlinkNames = NULL)
+               hlinkNames = NULL,
+               keepNA = keepNA)
   
   ## replace invalid XML characters
   colNames <- replaceIllegalCharacters(colNames)
   
   ## create table.xml and assign an id to worksheet tables
-  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle, tableName, filter[1])
+  wb$buildTable(sheet, colNames, ref, showColNames, tableStyle, tableName, withFilter[1])
   
 }

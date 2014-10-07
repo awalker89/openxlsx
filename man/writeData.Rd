@@ -7,8 +7,8 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, headerStyle = NULL,
   borders = c("none", "surrounding", "rows", "columns", "all"),
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), filter = FALSE,
-  ...)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"),
+  withFilter = FALSE, keepNA = FALSE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -42,7 +42,7 @@ each column. If "\code{all}" all cell borders are drawn.}
 
 \item{borderStyle}{Border line style}
 
-\item{filter}{If TRUE, add filters to column name row. NOTE can only have one autoFilter per worksheet.
+\item{withFilter}{If TRUE, add filters to column name row. NOTE can only have one filter per worksheet.
 \itemize{
    \item{\bold{none}}{ no border}
    \item{\bold{thin}}{ thin border}
@@ -60,7 +60,7 @@ each column. If "\code{all}" all cell borders are drawn.}
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
 
-\item{...}{Further arguments (for future use)}
+\item{keepNA}{If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.}
 }
 \description{
 Write an object to worksheet with optional styling.
