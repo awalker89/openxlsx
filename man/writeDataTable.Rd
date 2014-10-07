@@ -5,7 +5,7 @@
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
-  tableName = NULL, headerStyle = NULL, withFilter = TRUE)
+  tableName = NULL, headerStyle = NULL, filter = TRUE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -31,7 +31,7 @@ A vector of the form c(startCol, startRow)}
 
 \item{headerStyle}{Custom style to apply to column names.}
 
-\item{withFilter}{If TRUE, columns with have filters in the first row.}
+\item{filter}{If TRUE, columns with have filters in the first row.}
 }
 \description{
 Write to a worksheet and format as a table
@@ -70,7 +70,7 @@ writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableS
 
 ## Additional headerStyling and remove filters
 writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
-withFilter = FALSE)
+filter = FALSE)
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 }
