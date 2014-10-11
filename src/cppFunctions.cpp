@@ -6,12 +6,111 @@
 using namespace Rcpp;
 using namespace std;
 
+
+// [[Rcpp::export]]
+IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
+  
+  // This function converts the Excel column letter to a integer
+  
+  std::vector<std::string> r = as<std::vector<std::string> >(x);
+  int n = r.size();
+  int k;
+  
+  std::string a;
+  IntegerVector colNums(n);
+  char A = 'A';
+  int aVal = (int)A - 1;
+  
+  for(int i = 0; i < n; i++){
+    a = r[i];
+    
+    // remove digits from string
+    a.erase(std::remove_if(a.begin()+1, a.end(), ::isdigit), a.end());
+    
+    int sum = 0;
+    k = a.length();
+    
+    for (int j = 0; j < k; j++){
+      sum *= 26;
+      sum += (a[j] - aVal);
+      
+    }
+    colNums[i] = sum;
+  }
+  
+  return colNums;
+  
+}
+
 string itos(int i) // convert int to string
 {
   stringstream s;
   s << i;
   return s.str();
 }
+
+
+
+
+// [[Rcpp::export]]
+SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, float width, float minW, float maxW){
+  
+  size_t n = sheetData.size();
+  
+  IntegerVector v(n);
+  CharacterVector r(n);
+  int nLen;
+  
+  std::vector<std::string> tmp;
+  
+  
+  // get widths of all values
+  for(size_t i = 0; i < n; i++){
+    
+    tmp = sheetData[i];
+    if(tmp[1] == "s"){
+      v[i] = sharedStrings[atoi(tmp[3].c_str())].length() - 16;
+    }else{
+      nLen = tmp[3].length();
+      v[i] = min(nLen, 11);
+      
+    }
+    
+    r[i] = tmp[0];
+      
+  }
+  
+  // get column for each value
+  IntegerVector colNumbers = RcppConvertFromExcelRef(r);
+  IntegerVector colGroups = match(colNumbers, autoColumns);
+  colNumbers = colNumbers[!is_na(colGroups)];
+  v = v[!is_na(colGroups)];
+  
+  IntegerVector uCols = sort_unique(colNumbers);
+  
+  size_t nUnique = uCols.size();
+  IntegerVector wTmp; // this will hold the widths for a specific column
+  
+  NumericVector columnWidths(nUnique);
+  
+  // for each unique column, get all widths for that column and take max
+  for(size_t i = 0; i < nUnique; i++){
+    wTmp = v[colNumbers == uCols[i]];
+    columnWidths[i] = floor((max(wTmp) * width + 5) / width * 256) / 256 + 0.72; 
+  }
+  
+  columnWidths[columnWidths < minW] = minW + 0.72; // really 8.43 (For some reason excel subtracts 0.72)
+  columnWidths[columnWidths > maxW] = maxW + 0.72;    
+
+  // assign column names
+  columnWidths.attr("names") = uCols;
+  
+  return(wrap(columnWidths));
+    
+}
+
+
+
 
 
 
@@ -557,41 +656,6 @@ List getNumValues(CharacterVector inFile, int n, std::string tagIn) {
   
 }
 
-
-
-
-// [[Rcpp::export]]
-IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
-  
-  std::vector<std::string> r = as<std::vector<std::string> >(x);
-  int n = r.size();
-  int k;
-  
-  std::string a;
-  IntegerVector colNums(n);
-  char A = 'A';
-  int aVal = (int)A - 1;
-  
-  for(int i = 0; i < n; i++){
-    a = r[i];
-    
-    // remove digits from string
-    a.erase(std::remove_if(a.begin()+1, a.end(), ::isdigit), a.end());
-    
-    int sum = 0;
-    k = a.length();
-    
-    for (int j = 0; j < k; j++){
-      sum *= 26;
-      sum += (a[j] - aVal);
-      
-    }
-    colNums[i] = sum;
-  }
-  
-  return colNums;
-  
-}
 
 
 

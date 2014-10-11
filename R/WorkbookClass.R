@@ -1072,52 +1072,43 @@ Workbook$methods(setColWidths = function(sheet){
   
   sheet = validateSheet(sheet)
   
-  widths <- unlist(lapply(colWidths[[sheet]], "[[", "width"))
-  cols <- unlist(lapply(colWidths[[sheet]], "[[", "col"))
+  widths <- unlist(lapply(wb$colWidths[[sheet]], "[[", "width"))
+  cols <- unlist(lapply(wb$colWidths[[sheet]], "[[", "col"))
+  names(widths) <- cols
   
-  autoColsInds <- which(widths == "auto")
+  autoColsInds <- widths == "auto"
   autoCols <- cols[autoColsInds]
-  if(any(widths != "auto"))
-    widths[widths != "auto"] <- as.numeric(widths[widths != "auto"]) + 0.71
   
+  ## If any not auto
+  if(any(!autoColsInds))
+    widths[!autoColsInds] <- as.numeric(widths[!autoColsInds]) + 0.71
   
+  ## If any auto
   if(length(autoCols) > 0){
     
-    ## get all cell values
-    vals <- unlist(lapply(sheetData[[sheet]], "[[", "v"))
-    colInds <- unlist(lapply(sheetData[[sheet]], "[[", "r"))
+    ## get width of base font
+    width <- 9.03
     
-    stringInds <- which(unlist(lapply(sheetData[[sheet]], "[[", "t")) == "s")
-    numericInds <- unlist(lapply(sheetData[[sheet]], "[[", "t")) == "n"
+    ## only run if data on worksheet
+    if(length(sheetData[[sheet]]) == 0){
+      missingAuto <- autoCols
+    }else{
+      
+      calculatedWidths <- .Call("openxlsx_calcColumnWidths",
+                                sheetData = sheetData[[sheet]],
+                                sharedStrings = unlist(wb$sharedStrings),
+                                columnInds = as.integer(autoCols),
+                                width = width,
+                                minW = getOption("openxlsx.minWidth", 3.3),
+                                maxW = getOption("openxlsx.maxWidth", 50))
+      
+      missingAuto <- autoCols[!autoCols %in% names(calculatedWidths)]
     
-    ## replace string values and remove sharedString tags
-    vals[stringInds] <- sharedStrings[(as.integer(vals[stringInds]) + 1L)]
+    }
+
+    widths[names(calculatedWidths)] <- calculatedWidths
+    widths[missingAuto] <- 9.15
     
-    ## charLengths
-    charLengths <- nchar(vals)
-    
-    ## truncate long numerics to 11 characters
-    charLengths[charLengths > 11 & numericInds] <- 11
-    names(charLengths) <- .Call("openxlsx_RcppConvertFromExcelRef", gsub("[0-9]+", "", colInds))
-    
-    
-    #     ##get Cell Styles
-    #     styleInd <- unlist(lapply(sheetData[[sheet]], "[[", "s"))
-    #     size <- list()
-    #     size[which(styleInd == NULL)] <- 11 
-    
-    calcWidths <- round(floor((charLengths*9 + 5)*256 / 9) / 256, 4) + 0.8 ## 0.8 My own adjustment 
-    calcWidths <- calcWidths[!is.na(names(calcWidths))]
-    
-    
-    calcWidths <- lapply(unique(names(calcWidths)), function(x) calcWidths[names(calcWidths) == x])
-    
-    
-    maxWidths <- lapply(calcWidths, max)
-    maxWidths[maxWidths < 8.43] <- 9.15 ## really 8.43 (For some reason excel subtracts 0.72)
-    maxWidths[maxWidths > 50] <- 50.72    
-    
-    widths[autoColsInds] <- maxWidths[autoColsInds]
   }
   
   ## Calculate width of auto

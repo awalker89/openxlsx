@@ -1123,11 +1123,20 @@ setRowHeights <- function(wb, sheet, rows, heights){
 
 #' @name setColWidths
 #' @title Set worksheet column widths
+#' @description Set worksheet column widths to specific width or "auto".
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols Indices of cols to set width
-#' @param widths widths to set rows to specified in Excel column width units.
+#' @param widths widths to set rows to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
+#' recycled to the length of cols.
+#' @details The global min and max column width for "auto" columns is set by (default values show):
+#' \itemize{
+#'   \item{options("openxlsx.minWidth" = 3.3)}
+#'   \item{options("openxlsx.maxWidth" = 50)}
+#' }
+#' NOTE: The calculation of column widths can be slow for large worksheets.
+#' 
 #' @seealso \code{\link{removeColWidths}}
 #' @export
 #' @examples
@@ -1137,9 +1146,15 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #' ## Add a worksheet
 #' addWorksheet(wb, "Sheet 1") 
 #'
+#'
 #' ## set col widths
 #' setColWidths(wb, 1, cols = c(1,4,6,7,9), widths = c(16,15,12,18,33))
-#' 
+#'
+#' ## auto columns
+#' addWorksheet(wb, "Sheet 2")
+#' writeData(wb, sheet = 2, x = iris)
+#' setColWidths(wb, sheet = 2, cols = 1:5, widths = "auto")
+#'   
 #' ## Save workbook
 #' saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
 setColWidths <- function(wb, sheet, cols, widths){
@@ -1845,14 +1860,14 @@ convertToDate <- function(x, origin = "1970-1-1"){
 
 
 #' @name convertToDateTime
-#' @title Convert from excel time number to R as.POSIXct
+#' @title Convert from excel time number to R POSIXct type.
 #' @param x A numeric vector
 #' @param origin date. Default value is for Windows Excel 2010
 #' @details Excel stores dates as number of days from some origin day
 #' (this origin is "1970-1-1" for Excel 2010).
 #' @export
 #' @examples
-#' ##2014 April 21st to 25th
+#' ## 2014-07-01 & 2014-06-30
 #' x <- c(41821.8127314815, 41820.8127314815) 
 #' convertToDateTime(x)
 convertToDateTime <- function(x, origin = "1970-1-1"){

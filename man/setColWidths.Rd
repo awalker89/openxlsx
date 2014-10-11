@@ -12,10 +12,19 @@ setColWidths(wb, sheet, cols, widths)
 
 \item{cols}{Indices of cols to set width}
 
-\item{widths}{widths to set rows to specified in Excel column width units.}
+\item{widths}{widths to set rows to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
+recycled to the length of cols.}
 }
 \description{
-Set worksheet column widths
+Set worksheet column widths to specific width or "auto".
+}
+\details{
+The global min and max column width for "auto" columns is set by (default values show):
+\itemize{
+  \item{options("openxlsx.minWidth" = 3.3)}
+  \item{options("openxlsx.maxWidth" = 50)}
+}
+NOTE: The calculation of column widths can be slow for large worksheets.
 }
 \examples{
 ## Create a new workbook
@@ -24,8 +33,14 @@ wb <- createWorkbook()
 ## Add a worksheet
 addWorksheet(wb, "Sheet 1")
 
+
 ## set col widths
 setColWidths(wb, 1, cols = c(1,4,6,7,9), widths = c(16,15,12,18,33))
+
+## auto columns
+addWorksheet(wb, "Sheet 2")
+writeData(wb, sheet = 2, x = iris)
+setColWidths(wb, sheet = 2, cols = 1:5, widths = "auto")
 
 ## Save workbook
 saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)

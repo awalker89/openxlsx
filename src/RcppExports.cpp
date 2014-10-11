@@ -5,6 +5,41 @@
 
 using namespace Rcpp;
 
+// RcppConvertFromExcelRef
+IntegerVector RcppConvertFromExcelRef(CharacterVector x);
+RcppExport SEXP openxlsx_RcppConvertFromExcelRef(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        IntegerVector __result = RcppConvertFromExcelRef(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// calcColumnWidths
+SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, float width, float minW, float maxW);
+RcppExport SEXP openxlsx_calcColumnWidths(SEXP sheetDataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP );
+        Rcpp::traits::input_parameter< std::vector<std::string> >::type sharedStrings(sharedStringsSEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type autoColumns(autoColumnsSEXP );
+        Rcpp::traits::input_parameter< float >::type width(widthSEXP );
+        Rcpp::traits::input_parameter< float >::type minW(minWSEXP );
+        Rcpp::traits::input_parameter< float >::type maxW(maxWSEXP );
+        SEXP __result = calcColumnWidths(sheetData, sharedStrings, autoColumns, width, minW, maxW);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // cppReadFile
 std::string cppReadFile(std::string xmlFile);
 RcppExport SEXP openxlsx_cppReadFile(SEXP xmlFileSEXP) {
@@ -215,21 +250,6 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< int >::type n(nSEXP );
         Rcpp::traits::input_parameter< std::string >::type tagIn(tagInSEXP );
         List __result = getNumValues(inFile, n, tagIn);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// RcppConvertFromExcelRef
-IntegerVector RcppConvertFromExcelRef(CharacterVector x);
-RcppExport SEXP openxlsx_RcppConvertFromExcelRef(SEXP xSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
-        IntegerVector __result = RcppConvertFromExcelRef(x);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
