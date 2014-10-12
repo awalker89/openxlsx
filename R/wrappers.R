@@ -1132,9 +1132,10 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #' recycled to the length of cols.
 #' @details The global min and max column width for "auto" columns is set by (default values show):
 #' \itemize{
-#'   \item{options("openxlsx.minWidth" = 3.3)}
-#'   \item{options("openxlsx.maxWidth" = 50)}
+#'   \item{options("openxlsx.minWidth" = 3)}
+#'   \item{options("openxlsx.maxWidth" = 250)} ## This is the maximum width allowed in Excel
 #' }
+#' 
 #' NOTE: The calculation of column widths can be slow for large worksheets.
 #' 
 #' @seealso \code{\link{removeColWidths}}

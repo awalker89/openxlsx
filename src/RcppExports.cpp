@@ -21,8 +21,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calcColumnWidths
-SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, float width, float minW, float maxW);
-RcppExport SEXP openxlsx_calcColumnWidths(SEXP sheetDataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
+SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
+RcppExport SEXP openxlsx_calcColumnWidths(SEXP sheetDataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthsSEXP, SEXP baseFontCharWidthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -30,10 +30,11 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP );
         Rcpp::traits::input_parameter< std::vector<std::string> >::type sharedStrings(sharedStringsSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type autoColumns(autoColumnsSEXP );
-        Rcpp::traits::input_parameter< float >::type width(widthSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type widths(widthsSEXP );
+        Rcpp::traits::input_parameter< float >::type baseFontCharWidth(baseFontCharWidthSEXP );
         Rcpp::traits::input_parameter< float >::type minW(minWSEXP );
         Rcpp::traits::input_parameter< float >::type maxW(maxWSEXP );
-        SEXP __result = calcColumnWidths(sheetData, sharedStrings, autoColumns, width, minW, maxW);
+        SEXP __result = calcColumnWidths(sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

@@ -5,8 +5,8 @@ RcppConvertFromExcelRef <- function(x) {
     .Call('openxlsx_RcppConvertFromExcelRef', PACKAGE = 'openxlsx', x)
 }
 
-calcColumnWidths <- function(sheetData, sharedStrings, autoColumns, width, minW, maxW) {
-    .Call('openxlsx_calcColumnWidths', PACKAGE = 'openxlsx', sheetData, sharedStrings, autoColumns, width, minW, maxW)
+calcColumnWidths <- function(sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW) {
+    .Call('openxlsx_calcColumnWidths', PACKAGE = 'openxlsx', sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW)
 }
 
 cppReadFile <- function(xmlFile) {

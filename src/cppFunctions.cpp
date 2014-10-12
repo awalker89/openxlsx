@@ -53,7 +53,7 @@ string itos(int i) // convert int to string
 
 
 // [[Rcpp::export]]
-SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, float width, float minW, float maxW){
+SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW){
   
   size_t n = sheetData.size();
   
@@ -80,27 +80,36 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
       
   }
   
+
   // get column for each value
   IntegerVector colNumbers = RcppConvertFromExcelRef(r);
   IntegerVector colGroups = match(colNumbers, autoColumns);
-  colNumbers = colNumbers[!is_na(colGroups)];
-  v = v[!is_na(colGroups)];
+  
+  // reducing to only the columns that are auto
+  LogicalVector notNA = !is_na(colGroups);
+  colNumbers = colNumbers[notNA];
+  v = v[notNA];
+  widths = widths[notNA];
   
   IntegerVector uCols = sort_unique(colNumbers);
   
   size_t nUnique = uCols.size();
-  IntegerVector wTmp; // this will hold the widths for a specific column
+  NumericVector wTmp; // this will hold the widths for a specific column
   
   NumericVector columnWidths(nUnique);
+  NumericVector thisColWidths;
   
   // for each unique column, get all widths for that column and take max
   for(size_t i = 0; i < nUnique; i++){
     wTmp = v[colNumbers == uCols[i]];
-    columnWidths[i] = floor((max(wTmp) * width + 5) / width * 256) / 256 + 0.72; 
+    thisColWidths = widths[colNumbers == uCols[i]];
+    columnWidths[i] = max(wTmp * thisColWidths / baseFontCharWidth); 
   }
   
-  columnWidths[columnWidths < minW] = minW + 0.72; // really 8.43 (For some reason excel subtracts 0.72)
-  columnWidths[columnWidths > maxW] = maxW + 0.72;    
+  
+  
+  columnWidths[columnWidths < minW] = minW;
+  columnWidths[columnWidths > maxW] = maxW;    
 
   // assign column names
   columnWidths.attr("names") = uCols;
