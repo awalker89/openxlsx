@@ -31,6 +31,8 @@ NEW FEATURES
 
 * keepNa parameter to writeDataTable and writeData to write NA values as #N/A
 
+* auto column widths can now be set with width = "auto"
+
 VIGNETTE
 
 * section on write.xlsx in Introductory vignette
