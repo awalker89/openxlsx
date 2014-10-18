@@ -1,7 +1,7 @@
 Package: openxlsx
 Type: Package
-Title: .xlsx reading, writing and editing.
-Version: 2.1.11
+Title: Read, Write and Edit XLSX Files.
+Version: 2.2.1
 Date: 2014-05-29
 Authors@R: c(
     person("Alexander", "Walker",
@@ -10,7 +10,7 @@ Authors@R: c(
 URL: https://github.com/awalker89/openxlsx
 BugReports: https://github.com/awalker89/openxlsx/issues
 Maintainer: Alexander Walker <Alexander.Walker1989@gmail.com>
-Description: This package simplifies the creation of .xlsx files by providing a
+Description: Simplifies the creation of .xlsx files by providing a
     high level interface to writing, styling and editing worksheets. Through
     the use of Rcpp, read/write times are comparable to the xlsx and XLConnect
     packages with the added benefit of removing the dependency on Java.

@@ -556,8 +556,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[,i]) <- "character"
   }
   
-  
-  
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
   
@@ -1194,11 +1192,6 @@ Workbook$methods(setColWidths = function(sheet){
   
   ## Calculate width of auto
   colNodes <- sprintf('<col min="%s" max="%s" width="%s" customWidth="1"/>', cols, cols, widths)
-  
-  ## Remove any existing widths that appear in cols
-  flag <- !worksheets[[sheet]]$cols %in% cols
-  if(any(flag))
-    worksheets[[sheet]]$cols <<- worksheets[[sheet]]$cols[flag]
   
   ## Append new col widths XML to worksheets[[sheet]]$cols
   worksheets[[sheet]]$cols <<- append(worksheets[[sheet]]$cols, colNodes)
