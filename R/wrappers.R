@@ -605,8 +605,12 @@ createStyle <- function(fontName = NULL,
   ######################### error checking complete #############################
   style <- Style$new()
   
-  style$fontName <- list(val = fontName)
-  style$fontSize <- list(val = fontSize)
+  if(!is.null(fontName))
+    style$fontName <- list("val" = fontName)
+  
+  if(!is.null(fontSize))
+    style$fontSize <- list("val" = fontSize)
+  
   if(!is.null(fontColour))
     style$fontColour <- list("rgb" =  fontColour)
   
@@ -673,9 +677,14 @@ createStyle <- function(fontName = NULL,
   }
   
   ## other fields
-  style$halign <- halign
-  style$valign <- valign
-  style$wrapText <- wrapText[[1]]
+  if(!is.null(halign))
+    style$halign <- halign
+  
+  if(!is.null(valign))
+    style$valign <- valign
+
+  if(wrapText)
+    style$wrapText <- TRUE
   
   if(!is.null(textRotation)){
     if(!is.numeric(textRotation))

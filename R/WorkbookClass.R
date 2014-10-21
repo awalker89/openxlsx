@@ -663,16 +663,130 @@ Workbook$methods(updateCellStyles = function(sheet, rows, cols, styleId){
 })
 
 
+Workbook$methods(updateStyles2 = function(style){
+  
+  
+  ## Updates styles.xml
+  xfNode <- list(numFmtId = 0,
+                 fontId = 0,
+                 fillId = 0,
+                 borderId = 0,
+                 xfId = 0)
+  
+  baseFont <- .self$getBaseFont()
+  defaultFontSize <- sprintf('<sz %s=\"%s\"/>', names(baseFont$size), baseFont$size)
+  defaultFontColour <- sprintf('<color %s=\"%s\"/>', names(baseFont$colour), baseFont$colour)
+  defaultFontName <- sprintf('<name %s=\"%s\"/>', names(baseFont$name), baseFont$name)
+  
+  style <- style$as.list()
+  alignmentFlag <- FALSE
+  
+  ## Font
+  if(!is.null(style$fontName) | !is.null(style$fontSize) |  !is.null(style$fontColour) | !is.null(style$fontDecoration)){
+    
+    if(!is.null(style$fontSize$val))
+      style$fontSize$val <- as.character(style$fontSize$val)
+    
+    if(!is.null(style$fontDecoration))
+      style$fontDecoration <- c("BOLD", "ITALIC", "UNDERLINE", "UNDERLINE2", "STRIKEOUT")[c("BOLD", "ITALIC", "UNDERLINE", "UNDERLINE2", "STRIKEOUT") %in% style$fontDecoration]
+    
+    fontNode <- .Call("openxlsx_createFontNode", style, defaultFontSize, defaultFontColour, defaultFontName)
+    fontId <- which(styles$font == fontNode) - 1L
+
+    if(length(fontId) == 0){
+      
+      fontId <- length(styles$fonts)
+      styles$fonts <<- c(styles[["fonts"]], fontNode)        
+      
+    }
+    
+    xfNode$fontId <- fontId
+    xfNode <- append(xfNode, list("applyFont" = "1"))
+  }
+  
+  
+  ## numFmt
+  if(as.integer(style$numFmt$numFmtId) > 0){
+    
+    style$numFmt$numFmtId <- as.character(style$numFmt$numFmtId)
+    numFmtId <- style$numFmt$numFmtId
+    
+    if(as.integer(numFmtId) > 163L){
+      
+      tmp <- style$numFmt$formatCode
+      styles$numFmts <<- unique(c(styles$numFmts, sprintf('<numFmt numFmtId="%s" formatCode="%s"/>', numFmtId, tmp)))
+      
+    }
+    
+    xfNode$numFmtId <- numFmtId
+    xfNode <- append(xfNode, list("applyNumberFormat" = "1"))
+    
+  }
+  
+  ## Fill
+  if(!is.null(style$fillFg) | !is.null(style$fillBg)){
+    
+    fillNode <- .Call("openxlsx_createFillNode", style)
+    fillId <- which(styles$fill == fillNode) - 1L
+    
+    if(length(fillId) == 0){      
+      fillId <- length(styles$fills)
+      styles$fills <<- c(styles$fills, fillNode)
+    }
+    
+    xfNode$fillId <- fillId
+    xfNode <- append(xfNode, list("applyFill" = "1"))
+  }
+  
+  ## Border
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+    
+    borderNode <-  .Call("openxlsx_createBorderNode", style, c("borderLeft", "borderRight", "borderTop", "borderBottom"))
+    borderId <- which(styles$borders == borderNode) - 1L
+    
+    if(length(borderId) == 0){
+      borderId <- length(styles$borders)
+      styles$borders <<- c(styles$borders, borderNode)
+    }
+    
+    xfNode$borderId <- borderId
+    xfNode <- append(xfNode, list("applyBorder" = "1"))
+  }
+  
+  ## Alignment
+  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation)){
+    
+    if(!is.null(style$textRotation))
+      style$textRotation <- as.character(style$textRotation)
+    alignmentFlag <- TRUE
+    
+    alignNode <- .Call("openxlsx_createAlignmentNode", style)
+    xfNode <- append(xfNode, list("applyAlignment" = "1"))
+  }
+  
+  if(alignmentFlag){
+    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="', xfNode, '"'), collapse = " "), ">", alignNode, '</xf>')  
+  }else{
+    xfNode <- paste0("<xfv", paste(paste0(names(xfNode), '="', xfNode, '"'), collapse = " "), "/>")
+  }
+  
+  styleId <- which(styles$cellXfs == xfNode) - 1L
+  if(length(styleId) == 0){
+    styleId <- length(styles$cellXfs)
+    styles$cellXfs <<- c(styles$cellXfs, xfNode)
+  }
+  
+  
+  return(as.integer(styleId))
+  
+})
+
+
+
 Workbook$methods(updateStyles = function(style){
   
   
   ## Updates styles.xml
-  numFmtId <- 0
-  fontId <- 0
-  fillId <- 0
-  borderId <- 0
-  xfId <- 0
-  
   xfNode <- list(numFmtId = 0,
                  fontId = 0,
                  fillId = 0,
@@ -720,7 +834,7 @@ Workbook$methods(updateStyles = function(style){
   ## Fill
   if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg)){
     
-    fillNode <- .self$createFillNode(style$fill)
+    fillNode <- .self$createFillNode(style)
     fillId <- which(styles$fill == fillNode) - 1L
     
     if(length(fillId) == 0){      
@@ -761,8 +875,11 @@ Workbook$methods(updateStyles = function(style){
     if(!is.null(style$valign))
       alignNode <- paste(alignNode, sprintf('vertical="%s"', style$valign))
     
-    if(style$wrapText)
-      alignNode <- paste(alignNode, 'wrapText="1"')
+    if(!is.null(style$wrapText)){
+      if(style$wrapText)
+        alignNode <- paste(alignNode, 'wrapText="1"')
+    }
+      
     
     alignNode <- paste0(alignNode, "/>")
     
@@ -770,12 +887,10 @@ Workbook$methods(updateStyles = function(style){
     xfNode <- append(xfNode, list("applyAlignment" = "1"))
   }
   
-  styleId <- length(styles$cellXfs)
-  
   if(alignmentFlag){
     xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), ">", alignNode, '</xf>')  
   }else{
-    xfNode <- paste0("<xfv", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
+    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
   }
   
   styleId <- which(styles$cellXfs == xfNode) - 1L
@@ -796,8 +911,16 @@ Workbook$methods(getBaseFont = function(){
   
   sz <- getAttrs(baseFont, "<sz ")
   colour <- getAttrs(baseFont, "<color ")
-  name <- getAttrs(baseFont, "<name ")
-  family <- getAttrs(baseFont, "<family ")
+  name <- getAttrs(baseFont, "<name ")  
+  
+  if(length(sz[[1]]) == 0)
+    sz <- list("val" = "10")
+  
+  if(length(colour[[1]]) == 0)
+    colour <- list("rgb" = "#000000")
+  
+  if(length(name[[1]]) == 0)
+    name <- list("val" = "Calibri")
   
   list("size" = sz,
        "colour" = colour,
@@ -850,10 +973,10 @@ Workbook$methods(createFontNode = function(style){
     fontNode <- paste0(fontNode, '<i/>')
   
   if("UNDERLINE" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<u val = "single"/>')
+    fontNode <- paste0(fontNode, '<u val="single"/>')
   
   if("UNDERLINE2" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<u val = "double"/>')
+    fontNode <- paste0(fontNode, '<u val="double"/>')
   
   if("STRIKEOUT" %in% style$fontDecoration)
     fontNode <- paste0(fontNode, '<strike/>')
@@ -884,12 +1007,11 @@ Workbook$methods(createBorderNode = function(style){
 })
 
 
-Workbook$methods(createFillNode = function(fill, patternType="solid"){
+Workbook$methods(createFillNode = function(style, patternType="solid"){
   
+  fill <- style$fill
   fillNode <- '<fill>'
   fillNode <- paste0(fillNode, sprintf('<patternFill patternType="%s">', patternType))
-  
-  
   
   
   if(!is.null(fill$fillFg))

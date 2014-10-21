@@ -1951,5 +1951,208 @@ SEXP getRefsVals(CharacterVector x, int startRow){
 
 
 
+// [[Rcpp::export]]
+std::string createAlignmentNode(List style){
+  
+  std::vector<std::string> nms = style.attr("names");
+  std::string alignNode = "<alignment";
+  
+  // textRotation
+  if(std::find(nms.begin(), nms.end(), "textRotation") != nms.end())
+    alignNode += " textRotation=\""+ as<std::string>(style["textRotation"]) + "\"";
+  
+  // horizontal
+  if(std::find(nms.begin(), nms.end(), "halign") != nms.end())
+    alignNode += " horizontal=\""+ as<std::string>(style["halign"]) + "\"";
+  
+  // vertical
+  if(std::find(nms.begin(), nms.end(), "valign") != nms.end())
+    alignNode += " vertical=\""+ as<std::string>(style["valign"]) + "\"";
+  
+  if(std::find(nms.begin(), nms.end(), "wrapText") != nms.end())
+    alignNode += " wrapText=\"1\"";
+  
+  alignNode += "/>";
+  
+  return alignNode;
+  
+}
+
+
+
+// [[Rcpp::export]]
+std::string createFillNode(List style){
+  
+  std::vector<std::string> nms = style.attr("names");
+  std::string fillNode = "<fill><patternFill patternType=\"solid\">";
+  List tmp;
+  List nm;
+    
+  // foreground
+  if(std::find(nms.begin(), nms.end(), "fillFg") != nms.end()){
+    tmp = style["fillFg"];
+    nm = tmp.attr("names");
+    int n = tmp.size();
+    fillNode += "<fgColor";
+    
+    for(int i = 0; i < n; i ++)
+      fillNode +=  " " +as<std::string>(nm[i]) +"=\"" +  as<std::string>(tmp[i]) + "\"";
+    
+    fillNode += "/>";
+  }
+  
+  // background
+  if(std::find(nms.begin(), nms.end(), "fillBg") != nms.end()){
+    tmp = style["fillBg"];
+    nm = tmp.attr("names");
+    int n = tmp.size();
+    fillNode += "<bgColor";
+    
+    for(int i = 0; i < n; i ++)
+      fillNode +=  " " + as<std::string>(nm[i]) +"=\"" +  as<std::string>(tmp[i]) + "\"";
+    
+    fillNode += "/>";
+  }
+  
+  fillNode += "</patternFill></fill>";
+  
+  return fillNode;
+  
+}
+
+
+
+
+
+
+
+// [[Rcpp::export]]
+std::string createFontNode(List style, std::string defaultFontSize, std::string defaultFontColour, std::string defaultFontName){
+  
+  std::vector<std::string> nms = style.attr("names");
+  std::string fontNode = "<font>";
+  List tmp;
+  std::string nm;
+    
+  // size
+  if(std::find(nms.begin(), nms.end(), "fontSize") != nms.end()){
+    tmp = style["fontSize"];
+    nm = as<std::string>(tmp.attr("names"));
+    fontNode +=  "<sz "+ nm +"=\"" +  as<std::string>(tmp[0]) + "\"/>";
+  }else{
+    fontNode += defaultFontSize;
+  }
+  
+  // colour
+  if(std::find(nms.begin(), nms.end(), "fontColour") != nms.end()){
+    tmp = style["fontColour"];
+    nm = as<std::string>(tmp.attr("names"));
+    fontNode +=  "<color "+ nm +"=\"" +  as<std::string>(tmp[0]) + "\"/>";
+  }else{
+    fontNode += defaultFontColour;
+  }
+  
+  // name
+  if(std::find(nms.begin(), nms.end(), "fontName") != nms.end()){
+    tmp = style["fontName"];
+    nm = as<std::string>(tmp.attr("names"));
+    fontNode +=  "<name "+ nm +"=\"" +  as<std::string>(tmp[0]) + "\"/>";
+  }else{
+    fontNode += defaultFontName;
+  }
+  
+  
+  // fontFamily
+  if(std::find(nms.begin(), nms.end(), "fontFamily") != nms.end()){
+   tmp = style["fontFamily"];
+   fontNode +=  "<family val=\"" +  as<std::string>(tmp[0]) + "\"/>";
+  }
+  
+  // font scheme
+  if(std::find(nms.begin(), nms.end(), "fontScheme") != nms.end()){
+    tmp = style["fontScheme"];
+    fontNode +=  "<scheme val=\"" +  as<std::string>(tmp[0]) + "\"/>";
+  }
+  
+  // Font decorations
+  if(std::find(nms.begin(), nms.end(), "fontDecoration") != nms.end()){
+    
+    tmp = style["fontDecoration"];
+    int n = tmp.size();
+    string d;
+    
+    for(int i = 0;i < n; i++){
+       
+      d = as<std::string>(tmp[i]);
+      if(d == "BOLD")
+        fontNode += "<b/>";
+        
+      if(d == "ITALIC")
+        fontNode += "<i/>";
+        
+      if(d == "UNDERLINE")
+        fontNode += "<u val=\"single\"/>";;
+        
+      if(d == "UNDERLINE2")
+        fontNode += "<u val=\"double\"/>";;
+        
+      if(d == "STRIKEOUT")
+        fontNode += "<strike/>";
+      
+    }
+  }
+  
+  // Create new font and return Id  
+
+  fontNode += "</font>";
+    
+  return fontNode;
+  
+}
+
+
+
+
+// [[Rcpp::export]]
+std::string createBorderNode(List style, CharacterVector borders){
+  
+  std::vector<std::string> nms = style.attr("names");
+  std::string borderNode = "<border>";
+  List tmp;
+  std::string colourName;
+  
+  if(std::find(nms.begin(), nms.end(), "borderLeft") != nms.end()){
+    tmp = style["borderLeftColour"];
+    colourName = as<std::string>(tmp.attr("names"));
+    borderNode +=  "<left style=\"" + as<std::string>(style["borderLeft"]) + "\"><color " + colourName + "=\"" +  as<std::string>(tmp[0]) + "\"/></left>";
+  }    
+  
+  if(std::find(nms.begin(), nms.end(), "borderRight") != nms.end()){
+    tmp = style["borderRightColour"];
+    colourName = as<std::string>(tmp.attr("names"));
+    borderNode +=  "<right style=\"" + as<std::string>(style["borderRight"]) + "\"><color " + colourName + "=\"" +  as<std::string>(tmp[0]) + "\"/></right>";
+  }  
+  
+  if(std::find(nms.begin(), nms.end(), "borderTop") != nms.end()){
+    tmp = style["borderTopColour"];
+    colourName = as<std::string>(tmp.attr("names"));
+    borderNode +=  "<top style=\"" + as<std::string>(style["borderTop"]) + "\"><color " + colourName + "=\"" +  as<std::string>(tmp[0]) + "\"/></top>";
+  }  
+  
+  if(std::find(nms.begin(), nms.end(), "borderBottom") != nms.end()){
+    tmp = style["borderBottomColour"];
+    colourName = as<std::string>(tmp.attr("names"));
+    borderNode +=  "<bottom style=\"" + as<std::string>(style["borderBottom"]) + "\"><color " + colourName + "=\"" +  as<std::string>(tmp[0]) + "\"/></bottom>";
+  }  
+    
+  borderNode += "</border>";
+    
+  return borderNode;
+  
+}
+
+
+
+
 
 

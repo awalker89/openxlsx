@@ -50,7 +50,7 @@ Style$methods(initialize = function(){
   textRotation <<- NULL
   numFmt <<- list("numFmtId" = 0)
   fill <<- NULL
-  wrapText <<- FALSE
+  wrapText <<- NULL
 })
 
 
@@ -124,4 +124,36 @@ Style$methods(show = function(print = TRUE){
 })
   
 
-                 
+          
+
+Style$methods(as.list = function(){
+  
+  l <- list(
+  "fontName" = fontName,
+  "fontColour" = fontColour,
+  "fontSize" = fontSize,
+  "fontFamily" = fontFamily,
+  "fontScheme" = fontScheme,
+  "fontDecoration" = fontDecoration,
+  
+  "borderTop" = borderTop,
+  "borderLeft" = borderLeft,
+  "borderRight" = borderRight,
+  "borderBottom" = borderBottom,
+  "borderTopColour" = borderTopColour,
+  "borderLeftColour" = borderLeftColour,
+  "borderRightColour" = borderRightColour,
+  "borderBottomColour" = borderBottomColour,
+  
+  "halign" = halign,
+  "valign" = valign,
+  "textRotation" = textRotation,
+  "numFmt" = numFmt,
+  "fillFg" = fill$fillFg,
+  "fillBg" = fill$fillBg,
+  "wrapText" = wrapText
+  )
+  
+  l[sapply(l, length) > 0]
+  
+})

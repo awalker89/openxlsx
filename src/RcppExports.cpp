@@ -645,3 +645,67 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// createAlignmentNode
+std::string createAlignmentNode(List style);
+RcppExport SEXP openxlsx_createAlignmentNode(SEXP styleSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List >::type style(styleSEXP );
+        std::string __result = createAlignmentNode(style);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// createFillNode
+std::string createFillNode(List style);
+RcppExport SEXP openxlsx_createFillNode(SEXP styleSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List >::type style(styleSEXP );
+        std::string __result = createFillNode(style);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// createFontNode
+std::string createFontNode(List style, std::string defaultFontSize, std::string defaultFontColour, std::string defaultFontName);
+RcppExport SEXP openxlsx_createFontNode(SEXP styleSEXP, SEXP defaultFontSizeSEXP, SEXP defaultFontColourSEXP, SEXP defaultFontNameSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List >::type style(styleSEXP );
+        Rcpp::traits::input_parameter< std::string >::type defaultFontSize(defaultFontSizeSEXP );
+        Rcpp::traits::input_parameter< std::string >::type defaultFontColour(defaultFontColourSEXP );
+        Rcpp::traits::input_parameter< std::string >::type defaultFontName(defaultFontNameSEXP );
+        std::string __result = createFontNode(style, defaultFontSize, defaultFontColour, defaultFontName);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// createBorderNode
+std::string createBorderNode(List style, CharacterVector borders);
+RcppExport SEXP openxlsx_createBorderNode(SEXP styleSEXP, SEXP bordersSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List >::type style(styleSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type borders(bordersSEXP );
+        std::string __result = createBorderNode(style, borders);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

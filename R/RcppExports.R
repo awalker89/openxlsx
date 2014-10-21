@@ -153,3 +153,19 @@ getRefsVals <- function(x, startRow) {
     .Call('openxlsx_getRefsVals', PACKAGE = 'openxlsx', x, startRow)
 }
 
+createAlignmentNode <- function(style) {
+    .Call('openxlsx_createAlignmentNode', PACKAGE = 'openxlsx', style)
+}
+
+createFillNode <- function(style) {
+    .Call('openxlsx_createFillNode', PACKAGE = 'openxlsx', style)
+}
+
+createFontNode <- function(style, defaultFontSize, defaultFontColour, defaultFontName) {
+    .Call('openxlsx_createFontNode', PACKAGE = 'openxlsx', style, defaultFontSize, defaultFontColour, defaultFontName)
+}
+
+createBorderNode <- function(style, borders) {
+    .Call('openxlsx_createBorderNode', PACKAGE = 'openxlsx', style, borders)
+}
+

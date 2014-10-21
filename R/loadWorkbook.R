@@ -144,17 +144,6 @@ loadWorkbook <- function(xlsxFile){
       caches[i] <- gsub('"rId[0-9]+"', sprintf('"rId%s"', rIds[i]), caches[i])
     
     wb$workbook$pivotCaches <- paste0('<pivotCaches>', paste(caches, collapse = ""), '</pivotCaches>')
-      
-    ## worksheet rels (which pivotTable belongs on which worksheet)
-    
-#     wb$worksheets_rels
-    
-#     wb$worksheets_rels
-#     <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable" Target="../pivotTables/pivotTable1.xml"/>
-      
-    
-#       <Relationship Id="rId99" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable" Target="../pivotTables/pivotTable1.xml"/>
-      
     
   }
   
