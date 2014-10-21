@@ -6,7 +6,6 @@
 using namespace Rcpp;
 using namespace std;
 
-
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
@@ -67,7 +66,7 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
   // get widths of all values
   for(size_t i = 0; i < n; i++){
     
-    tmp = sheetData[i];
+    tmp = as<std::vector<std::string> >(sheetData[i]);
     if(tmp[1] == "s"){
       v[i] = sharedStrings[atoi(tmp[3].c_str())].length() - 16;
     }else{
