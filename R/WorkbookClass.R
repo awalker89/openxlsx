@@ -1237,25 +1237,19 @@ Workbook$methods(setColWidths = function(sheet){
       baseFontCharWidth <- openxlsxFontSizeLookupTable[[baseFontName]][baseFontSize - 7]
       allCharWidths <- rep(baseFontCharWidth, length(sheetData[[sheet]]))
       #########----------------------------------------------------------------
-      
+
       ## get char widths for each style object
       if(length(styleObjects) > 0){
+        
         thisSheetName <- names(worksheets)[sheet]
         
-        # subset styleObjects to this worksheet
-        styleCells <- lapply(styleObjects, "[[", "cells")
-        
-        onSheetInds <- sapply(styleCells, function(x) thisSheetName %in% sapply(x, "[[", "sheet"))
-        stySubset <- lapply(styleObjects[onSheetInds], "[[", "style")
-        styIds <- sapply(styleObjects[onSheetInds], "[[", "id")
-        
-        dupFlag <- duplicated(styIds)
-        styIds <- styIds[!dupFlag]
-        stySubset <- stySubset[!dupFlag]
-        names(stySubset) <- styIds
+        ## Calc font width for all styles on this worksheet
+        styleIds <- styleInds[[sheet]]
+        styObSubet <- styleObjects[sort(unique(styleIds))]
+        stySubset <- lapply(styObSubet, "[[", "style") 
         
         ## loop through stlye objects assignin a charWidth else baseFontCharWidth
-        styleCharWidths <- sapply(stySubset, function(thisStyle){
+        styleCharWidths <- unlist(lapply(stySubset, function(thisStyle){
           
           fN <- unlist(thisStyle$fontName, use.names = FALSE)
           if(is.null(fN)){
@@ -1283,16 +1277,12 @@ Workbook$methods(setColWidths = function(sheet){
           
           styleMaxCharWidth
           
-        })
-        
-        ## Now we can loop through every cell and calculate assign a character width
-        stop("NEED TO FIX THIS CODE!!!!!!!!!!!!!")
-        styRef <- as.numeric(unname(sapply(sheetData[[sheet]], "[[", "s", USE.NAMES = FALSE)))
-        
-        for(i in 1:length(styleCharWidths))
-          allCharWidths[styRef == names(styleCharWidths)[[i]]] <- styleCharWidths[[i]]
+        }), use.names = FALSE)
         
         
+        ## Now assign all cells a character width
+        allCharWidths <- styleCharWidths[styleInds[[sheet]]]
+        allCharWidths[is.na(allCharWidths)] <- baseFontCharWidth
       }
       
       ## Now that we have the max character width for the largest font on the page calculate the column widths
@@ -1738,6 +1728,7 @@ Workbook$methods(preSaveCleanUp = function(){
       ## convert sheet name to index
       sheet <- which(names(worksheets) == x$sheet)
       sId <- .self$updateStyles(this.sty) ## this creates the XML for styles.XML
+      x$id <- sId
       
       ## In here we create any styleInds that don't yet have a sheetData
       refsToStyle <- paste0(.Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', x$cols, LETTERS), x$rows)

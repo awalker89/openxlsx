@@ -61,17 +61,17 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
   int nLen;
   
   std::vector<std::string> tmp;
-  
+  //** tmp[2] is element "v" of sheetData
   
   // get widths of all values
   for(size_t i = 0; i < n; i++){
     
     tmp = as<std::vector<std::string> >(sheetData[i]);
     if(tmp[1] == "s"){
-      v[i] = sharedStrings[atoi(tmp[3].c_str())].length() - 16;
+      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 16; //-16 for shared string tags around text
     }else{
-      nLen = tmp[3].length();
-      v[i] = min(nLen, 11);
+      nLen = tmp[2].length();
+      v[i] = min(nLen, 11); // For numerics - max width is 11
       
     }
     
@@ -104,8 +104,6 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
     thisColWidths = widths[colNumbers == uCols[i]];
     columnWidths[i] = max(wTmp * thisColWidths / baseFontCharWidth); 
   }
-  
-  
   
   columnWidths[columnWidths < minW] = minW;
   columnWidths[columnWidths > maxW] = maxW;    
