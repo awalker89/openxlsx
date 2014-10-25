@@ -3,7 +3,7 @@
 \alias{addStyle}
 \title{Add a style to a set of cells}
 \usage{
-addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE)
+addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = FALSE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -17,6 +17,9 @@ addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE)
 \item{cols}{columns to apply style to.}
 
 \item{gridExpand}{If TRUE, style will be applied to all combinations of rows and cols.}
+
+\item{stack}{If TRUE, style is merged with existing cell styles,
+else any existing style is complete replaced by the new style.}
 }
 \description{
 Function adds a style to a specified set of cells.

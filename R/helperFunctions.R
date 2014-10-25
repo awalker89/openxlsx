@@ -6,7 +6,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
   
   sheet = wb$validateSheet(sheet)
   allColClasses <- unlist(colClasses, use.names = FALSE)
-  rowInds <- 1:nRow + startRow + colNames - 1L
+  rowInds <- (1 + startRow + colNames - 1L):(nRow + startRow + colNames - 1L)
   startCol <- startCol - 1L
   
   newStylesElements <- NULL
@@ -19,24 +19,24 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)   
     hyperlinkstyle <- createStyle(textDecoration = "underline")
     hyperlinkstyle$fontColour <- list("theme"="10")
-    styleElements <- list(style = hyperlinkstyle,
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = hyperlinkstyle,
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
     
   }
-
+  
   if("date" %in% allColClasses){
-
+    
     ## style dates
     inds <- which(sapply(colClasses, function(x) "date" %in% x)) 
     coords <- expand.grid(rowInds, inds +startCol)   
-    styleElements <- list(style = createStyle(numFmt = "date"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "date"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
     
@@ -48,10 +48,10 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     coords <- expand.grid(rowInds, inds +startCol)   
     
-    styleElements <- list(style = createStyle(numFmt = "LONGDATE"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "LONGDATE"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
     
@@ -63,10 +63,10 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "currency" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)  
     
-    styleElements <- list(style = createStyle(numFmt = "CURRENCY"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "CURRENCY"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
@@ -76,10 +76,10 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "accounting" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)  
     
-    styleElements <- list(style = createStyle(numFmt = "ACCOUNTING"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "ACCOUNTING"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
     
@@ -90,10 +90,10 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "percentage" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)  
     
-    styleElements <- list(style = createStyle(numFmt = "percentage"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "percentage"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
@@ -103,10 +103,10 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "scientific" %in% x))
     coords <- expand.grid(rowInds, inds +startCol)  
     
-    styleElements <- list(style = createStyle(numFmt = "scientific"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = "scientific"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
@@ -116,23 +116,23 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "3" %in% tolower(x) | "comma" %in% tolower(x)))
     coords <- expand.grid(rowInds, inds +startCol)  
     
-    styleElements <- list(style = createStyle(numFmt = "3"),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
-   
+    styleElements <- list("style" = createStyle(numFmt = "3"),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
+    
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
-
+  
   ## numeric sigfigs (Col must be numeric and numFmt options must only have 0s and \\.)
   if("numeric" %in% allColClasses & !grepl("[^0\\.,#\\$\\* ]", getOption("openxlsx.numFmt", "GENERAL")) ){
     inds <- which(sapply(colClasses, function(x) "numeric" %in% tolower(x)))
     coords <- expand.grid(rowInds, inds +startCol)
     
-    styleElements <- list(style = createStyle(numFmt = getOption("openxlsx.numFmt", "0")),
-                          cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                            rows = coords[[1]],
-                                            cols = coords[[2]])))
+    styleElements <- list("style" = createStyle(numFmt = getOption("openxlsx.numFmt", "0")),
+                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "rows" = coords[[1]],
+                          "cols" = coords[[2]])
     
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
@@ -207,7 +207,7 @@ headerFooterSub <- function(x){
 
 
 replaceIllegalCharacters <- function(v){
-
+  
   vEnc <- Encoding(v)
   if("UTF-8" %in% vEnc){
     fromEnc <- "UTF-8"
@@ -268,7 +268,7 @@ validateBorderStyle <- function(borderStyle){
     stop("Invalid borderStyle", call. = FALSE)
   
   return(valid[ind])
-
+  
 }
 
 

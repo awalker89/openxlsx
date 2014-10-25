@@ -456,8 +456,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // quickBuildCellXML
-SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, std::string R_fileName);
-RcppExport SEXP openxlsx_quickBuildCellXML(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP R_fileNameSEXP) {
+SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, std::string R_fileName);
+RcppExport SEXP openxlsx_quickBuildCellXML(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP styleIndsSEXP, SEXP R_fileNameSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -466,8 +466,9 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< std::string >::type post(postSEXP );
         Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type styleInds(styleIndsSEXP );
         Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP );
-        SEXP __result = quickBuildCellXML(prior, post, sheetData, rowNumbers, R_fileName);
+        SEXP __result = quickBuildCellXML(prior, post, sheetData, rowNumbers, styleInds, R_fileName);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -610,8 +611,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // quickBuildCellXML2
-SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, List rowHeights, std::string R_fileName);
-RcppExport SEXP openxlsx_quickBuildCellXML2(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP rowHeightsSEXP, SEXP R_fileNameSEXP) {
+SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, CharacterVector rowHeights, std::string R_fileName);
+RcppExport SEXP openxlsx_quickBuildCellXML2(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP styleIndsSEXP, SEXP rowHeightsSEXP, SEXP R_fileNameSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -620,9 +621,10 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< std::string >::type post(postSEXP );
         Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP );
-        Rcpp::traits::input_parameter< List >::type rowHeights(rowHeightsSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type styleInds(styleIndsSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type rowHeights(rowHeightsSEXP );
         Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP );
-        SEXP __result = quickBuildCellXML2(prior, post, sheetData, rowNumbers, rowHeights, R_fileName);
+        SEXP __result = quickBuildCellXML2(prior, post, sheetData, rowNumbers, styleInds, rowHeights, R_fileName);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

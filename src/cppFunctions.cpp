@@ -708,7 +708,6 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
           Named("t") = t[i],
-          Named("s") = NA_STRING,
           Named("v") = v[i],
           Named("f") = NA_STRING); 
       }else{
@@ -717,16 +716,15 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
           Named("t") = NA_STRING,
-          Named("s") = NA_STRING,
           Named("v") = NA_STRING,
           Named("f") = NA_STRING); 
       }
+      
     }else{
       
       cells[i] = CharacterVector::create(
         Named("r") = NA_STRING,
         Named("t") = NA_STRING,
-        Named("s") = NA_STRING,
         Named("v") = NA_STRING,
         Named("f") = NA_STRING);  
     }
@@ -762,7 +760,6 @@ SEXP buildLoadCellList( CharacterVector r, CharacterVector t, CharacterVector v,
       cells[i] = CharacterVector::create(
         Named("r") = r[i],
         Named("t") = t[i],
-        Named("s") = NA_STRING,
         Named("v") = v[i],
         Named("f") = f[i]); 
         
@@ -772,7 +769,6 @@ SEXP buildLoadCellList( CharacterVector r, CharacterVector t, CharacterVector v,
       cells[i] = CharacterVector::create(
         Named("r") = r[i],
         Named("t") = t[i],
-        Named("s") = NA_STRING,
         Named("v") = v[i],
         Named("f") = NA_STRING); 
         
@@ -780,7 +776,6 @@ SEXP buildLoadCellList( CharacterVector r, CharacterVector t, CharacterVector v,
     cells[i] = CharacterVector::create(
       Named("r") = r[i],
       Named("t") = NA_STRING,
-      Named("s") = NA_STRING,
       Named("v") = NA_STRING,
       Named("f") = NA_STRING);
     }
@@ -830,7 +825,6 @@ SEXP constructCellData(IntegerVector cols, std::vector<std::string> LETTERS, std
       cells[c] = CharacterVector::create(
         Named("r") = res[j] + rows[i],
         Named("t") = t[c],
-        Named("s") = NA_STRING,
         Named("v") = v[c]);
         c++; 
     }
@@ -1238,7 +1232,7 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
 
 
 // [[Rcpp::export]]
-SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, std::string R_fileName){
+SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, std::string R_fileName){
   
   // open file and write header XML
   const char * s = R_fileName.c_str();
@@ -1265,50 +1259,42 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
   //If data only added once, sheetData will be in order
   // Thus all rows have children (all starting row tags are open) and no need to sort/find
   
-  CharacterVector temp = sheetData.attr("names");    
-  std::vector<std::string> rows = as<std::vector<std::string> >(temp);
-  
-  CharacterVector temp2(sort_unique(rowNumbers));
-  std::vector<std::string> uniqueRows = as<std::vector<std::string> >(temp2);
-  
-  size_t n = temp.size();
+  CharacterVector rows = sheetData.attr("names");    
+  CharacterVector uniqueRows(sort_unique(rowNumbers));
+
+  size_t n = rows.size();
   size_t k = uniqueRows.size();
   std::string xml;
   
-  size_t j=0;
-  string currentRow = uniqueRows[0];
+  LogicalVector hasStyle = !is_na(styleInds);
+  CharacterVector cVal;
   
+  // write sheetData
+  size_t j = 0;
+  String currentRow = uniqueRows[0];
   for(size_t i = 0; i < k; i++){
     
-    std::string r(uniqueRows[i]);
     std::string cellXML;
-    std::vector<std::string> cVal;
     
-    while(currentRow == r){
+    while(currentRow == uniqueRows[i]){
       
-      CharacterVector cValtmp(sheetData[j]);
-      LogicalVector attrs = !is_na(cValtmp);
-      cVal = as<std::vector<std::string> >(cValtmp);
-      
-      // cVal[0] is r    
-      // cVal[1] is t        
-      // cVal[2] is s    
-      // cVal[3] is v    
-      // cVal[4] is f    
+      cVal = sheetData[j];
+      LogicalVector attrs = !is_na(cVal);
       
       //cell XML strings
       cellXML += "<c r=\"" + cVal[0];
       
-      if(attrs[2])
-        cellXML += "\" s=\"" + cVal[2];
+      if(hasStyle[j])
+        cellXML += "\" s=\""+ styleInds[j];
       
       //If we have a t value we must have a v value
       if(attrs[1]){
+        
         //If we have a c value we might have an f value
-        if(attrs[4]){
-          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[4] + "<v>" + cVal[3] + "</v></c>";
+        if(attrs[3]){
+          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
         }else{
-          cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[3] + "</v></c>";
+          cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
         
       }else{
@@ -1323,7 +1309,7 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
       currentRow = rows[j];
     }
     
-    xmlFile << "<row r=\"" + r + "\">" + cellXML + "</row>";
+    xmlFile << "<row r=\"" + uniqueRows[i] + "\">" + cellXML + "</row>";
     
   }
   
@@ -1470,6 +1456,7 @@ SEXP getHyperlinkRefs(CharacterVector x){
 List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, String styleId, std::vector<std::string> LETTERS){
   
   
+  
   int nStyleCells = rows.size();
   int n = sheetData.size();
   CharacterVector exCellNames = "";
@@ -1481,7 +1468,7 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   //new cell names will be elements of rows where styleCell doesn't exist  
     
   // create cellRefs from rows & cols
-  CharacterVector styleCells(nStyleCells);
+  CharacterVector cellRefsToBeStyled(nStyleCells);
   CharacterVector colNames = convert2ExcelRef(cols, LETTERS);
   
   std::string r;
@@ -1490,7 +1477,7 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   for(int i = 0; i < nStyleCells; i++){
     r = rows[i];
     c = colNames[i];
-    styleCells[i] = c + r; 
+    cellRefsToBeStyled[i] = c + r; 
   }
 
   // get refs of existing cells
@@ -1502,10 +1489,10 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
   }
   
   // get all existing cells that need to be styled with this ID
-  IntegerVector exPos = match(exCells, styleCells);
+  IntegerVector exPos = match(exCells, cellRefsToBeStyled);
   LogicalVector toApply = !is_na(exPos);
     
-  IntegerVector stylePos = match(styleCells, exCells);
+  IntegerVector stylePos = match(cellRefsToBeStyled, exCells);
   LogicalVector isNewCell = is_na(stylePos);
   int nNewCells = sum(isNewCell); 
   
@@ -1532,7 +1519,7 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
     
     if(isNewCell[i]){
       newSheetData[j] = CharacterVector::create(
-        Named("r") = styleCells[i],
+        Named("r") = cellRefsToBeStyled[i],
         Named("t") = NA_STRING,
         Named("s") = styleId,
         Named("v") = NA_STRING,
@@ -1708,7 +1695,7 @@ CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyN
 
 
 // [[Rcpp::export]]
-SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, List rowHeights, std::string R_fileName){
+SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, CharacterVector rowHeights, std::string R_fileName){
   
   // open file and write header XML
   const char * s = R_fileName.c_str();
@@ -1731,45 +1718,41 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
   
   // sheetData will be in order, jsut need to check for rowHeights
   
-  CharacterVector temp = sheetData.attr("names");    
-  std::vector<std::string> rows = as<std::vector<std::string> >(temp);
-  
-  CharacterVector temp2(sort_unique(rowNumbers));
-  std::vector<std::string> uniqueRows = as<std::vector<std::string> >(temp2);
-  
+  CharacterVector rows = sheetData.attr("names");    
+  CharacterVector uniqueRows(sort_unique(rowNumbers));
+
   CharacterVector rowHeightRows = rowHeights.attr("names");
   size_t nRowHeights = rowHeights.size();
   
-  size_t n = temp.size();
+  size_t n = rows.size();
   size_t k = uniqueRows.size();
   std::string xml;
   
   size_t j = 0;
   size_t h = 0;
-  string currentRow = uniqueRows[0];
+  String currentRow = uniqueRows[0];
+  
+  LogicalVector hasStyle = !is_na(styleInds);
+  CharacterVector cVal;
   
   for(size_t i = 0; i < k; i++){
     
-    std::string r(uniqueRows[i]);
     std::string cellXML;
-    std::vector<std::string> cVal;
     bool hasRowData = true;
     
-    while(currentRow == r){
+    while(currentRow == uniqueRows[i]){
       
-      CharacterVector cValtmp(sheetData[j]);
-      LogicalVector attrs = !is_na(cValtmp);
-      cVal = as<std::vector<std::string> >(cValtmp);
+      cVal = sheetData[j];
+      LogicalVector attrs = !is_na(cVal);
       hasRowData = true;
       
-       j += 1;
-       
+      j += 1;
       if(!attrs[0]){ //If r IS NA we have no row data we only have a rowHeight
         hasRowData = false;
         
         if(j == n)
-          break;
-        
+         break;
+              
         currentRow = rows[j];
         break;
       }
@@ -1777,16 +1760,16 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       //cell XML strings
       cellXML += "<c r=\"" + cVal[0];
       
-      if(attrs[2])
-      cellXML += "\" s=\"" + cVal[2];
+      if(hasStyle[j])
+        cellXML += "\" s=\"" + styleInds[j-1];
       
       //If we have a t value we must have a v value
       if(attrs[1]){
         //If we have a c value we might have an f value
-        if(attrs[4]){
-          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[4] + "<v>" + cVal[3] + "</v></c>";
+        if(attrs[3]){
+          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
         }else{
-          cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[3] + "</v></c>";
+          cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
         
       }else{
@@ -1800,18 +1783,28 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       
     }
     
+    
     if(h < nRowHeights){
-      if((r == as<std::string>(rowHeightRows[h])) & hasRowData){ // this row has a row height and cellXML data
-        xmlFile << "<row r=\"" + r + "\" ht=\"" + as<std::string>(rowHeights[h]) + "\" customHeight=\"1\">" + cellXML + "</row>";   
+      
+      if((uniqueRows[i] == rowHeightRows[h]) & hasRowData){ // this row has a row height and cellXML data
+        
+        xmlFile << "<row r=\"" + uniqueRows[i] + "\" ht=\"" + rowHeights[h] + "\" customHeight=\"1\">" + cellXML + "</row>";   
         h++;
+        
       }else if(hasRowData){
-        xmlFile << "<row r=\"" + r + "\">" + cellXML + "</row>";
+
+        xmlFile << "<row r=\"" + uniqueRows[i] + "\">" + cellXML + "</row>";
+      
       }else{
-        xmlFile << "<row r=\"" + r + "\" ht=\"" + as<std::string>(rowHeights[h]) + "\" customHeight=\"1\"/>"; 
+
+        xmlFile << "<row r=\"" + uniqueRows[i] + "\" ht=\"" + rowHeights[h] + "\" customHeight=\"1\"/>"; 
         h++;
       }
+      
     }else{
-      xmlFile << "<row r=\"" + r + "\">" + cellXML + "</row>";
+      
+      xmlFile << "<row r=\"" + uniqueRows[i] + "\">" + cellXML + "</row>";
+      
     }
         
   }
@@ -1823,7 +1816,7 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
   //close file
   xmlFile.close();
   
-  return Rcpp::wrap(1);
+  return wrap(1);
   
 }
 

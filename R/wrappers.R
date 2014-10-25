@@ -692,10 +692,12 @@ createStyle <- function(fontName = NULL,
     style$textRotation <- round(textRotation[[1]], 0)
   }
   
-  if(numFmt %in% validNumFmt){
-    style$numFmt <- numFmtMapping[[numFmt[[1]]]]
-  }else{
-    style$numFmt <- list("numFmtId" = 9999, formatCode = numFmt)  ## Custom numFmt
+  if(numFmt != "general"){
+    if(numFmt %in% validNumFmt){
+      style$numFmt <- numFmtMapping[[numFmt[[1]]]]
+    }else{
+      style$numFmt <- list("numFmtId" = 9999, formatCode = numFmt)  ## Custom numFmt
+    }
   }
   
   return(style)
@@ -713,6 +715,8 @@ createStyle <- function(fontName = NULL,
 #' @param rows Rows to apply style to.
 #' @param cols columns to apply style to.
 #' @param gridExpand If TRUE, style will be applied to all combinations of rows and cols.
+#' @param stack If TRUE, style is merged with existing cell styles, 
+#' else any existing style is complete replaced by the new style.
 #' @seealso \code{\link{createStyle}}
 #' @seealso expand.grid
 #' @export
@@ -740,7 +744,7 @@ createStyle <- function(fontName = NULL,
 #' setColWidths(wb, 1, cols=1, widths = 21) ## set column width for row names column
 #' 
 #' saveWorkbook(wb, "addStyleExample.xlsx", overwrite = TRUE)
-addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
+addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = FALSE){
   
   sheet <- wb$validateSheet(sheet)
   
@@ -749,6 +753,9 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
   
   if(!"Style" %in% class(style))
     stop("style argument must be a Style object.")
+  
+  if(!is.logical(stack))
+    stop("stack parameter must be a logical!")
   
   cols <- convertFromExcelRef(cols)
   rows <- as.integer(rows)
@@ -764,12 +771,8 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE){
     stop("Length of rows and cols must be equal.")
   }
   
-  styleElements <- list(style = style,
-                        cells = list(list(sheet =  names(wb$worksheets)[[sheet]],
-                                          rows = rows,
-                                          cols = cols)))
   
-  invisible(wb$styleObjects <- append(wb$styleObjects, list(styleElements)))
+  wb$addStyle(sheet = sheet, style = style, rows = rows, cols = cols, stack = stack)
   
 }
 

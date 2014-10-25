@@ -124,7 +124,7 @@ loadWorkbook <- function(xlsxFile){
     pivotDefXML       <- pivotDefXML[order(nchar(pivotDefXML), pivotDefXML)]
     pivotDefRelsXML   <- pivotDefRelsXML[order(nchar(pivotDefRelsXML), pivotDefRelsXML)]
     pivotRecordsXML   <- pivotRecordsXML[order(nchar(pivotRecordsXML), pivotRecordsXML)]
-  
+    
     wb$pivotTables <- unlist(lapply(pivotTableXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
     wb$pivotTables.xml.rels <- unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
     wb$pivotDefinitions <- unlist(lapply(pivotDefXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
@@ -136,7 +136,7 @@ loadWorkbook <- function(xlsxFile){
     
     ## workbook rels
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
-      sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:nPivotTables)
+                              sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:nPivotTables)
     )
     
     caches <- .Call("openxlsx_getChildlessNode", workbook, "<pivotCache ", PACKAGE = "openxlsx")
@@ -306,15 +306,13 @@ loadWorkbook <- function(xlsxFile){
         
       } ## end if !all(s == "0)
       
+      ## we need to skip the first one as this is used as the base style
       if(flag)
-        styleObjects <- append(styleObjects , list(list(style = style, cells = list())))
+        styleObjects <- append(styleObjects , list(style))
       
       flag <- TRUE
       
     }  ## end of for loop through styles s in ...
-    
-    if(length(styleObjects) > 0)
-      wb$styleObjects <- styleObjects
     
   }  ## end of if length(styleXML) > 0
   
@@ -527,37 +525,47 @@ loadWorkbook <- function(xlsxFile){
     
   }
   
+  ##*----------------------------------------------------------------------------------------------*##
+  ### READING IN WORKSHEET DATA COMPLETE
+  ##*----------------------------------------------------------------------------------------------*##
+  
   
   ## styles
+  wbstyleObjects <- list()
   for(i in 1:nSheets){
+    
+    thisSheetName <- names(wb$worksheets)[[i]]
     
     ## Sheet Data
     if(length(s[[i]]) > 0){
       
       ## write style coords to styleObjects (will be in order)
       sx <- s[[i]]
-      
       if(any(!is.na(sx))){
-        sRef <- lapply(as.integer(unique(sx[!is.na(sx)])), function(styleInd){ 
+        
+        uStyleInds <- as.integer(unique(sx[!is.na(sx)]))
+        for(styleInd in uStyleInds){
           
-          if(styleInd > 0){
-            sRef <- styleRefs[[i]][sx == styleInd & !is.na(sx)]        
-            rows <- as.integer(gsub("[^0-9]", "", sRef))
-            cols <- .Call("openxlsx_RcppConvertFromExcelRef", sRef)
-            
-            wb$styleObjects[[styleInd]]$cells <- append(wb$styleObjects[[styleInd]]$cells, 
-                                                        list(list(sheet = wb$getSheetName(1:nSheets)[[i]],
-                                                                  rows = rows,
-                                                                  cols = cols)))
-          }
-        })
-      }
+          sRef <- styleRefs[[i]][sx == styleInd & !is.na(sx)]        
+          rows <- as.integer(gsub("[^0-9]", "", sRef))
+          cols <- .Call("openxlsx_RcppConvertFromExcelRef", sRef)
+          
+          styleElement <- list(style = styleObjects[[styleInd]],
+                               sheet =  thisSheetName,
+                               rows = rows,
+                               cols = cols)
+          
+          wbstyleObjects <- append(wbstyleObjects, list(styleElement))
+          
+        }
+        
+      } 
     }
   }
   
-  ##*----------------------------------------------------------------------------------------------*##
-  ### READING IN WORKSHEET DATA COMPLETE
-  ##*----------------------------------------------------------------------------------------------*##
+  wb$styleObjects <- wbstyleObjects
+
+  
   
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   
@@ -595,7 +603,7 @@ loadWorkbook <- function(xlsxFile){
         
         names(tablesXML) <- basename(tablesXML)
         tablesXML <-tablesXML[sprintf("table%s.xml", unlist(tables))]
-
+        
         wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
         
         ## pull out refs and attach names
@@ -680,7 +688,7 @@ loadWorkbook <- function(xlsxFile){
         
       }     
     }
-  
+    
     ## pivot tables
     if(length(pivotTableXML) > 0){
       
@@ -697,8 +705,8 @@ loadWorkbook <- function(xlsxFile){
       }
       
     }
-  
-  
+    
+    
   } ## end of worksheetRels
   
   ## table rels

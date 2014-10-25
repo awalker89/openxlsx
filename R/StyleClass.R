@@ -48,10 +48,88 @@ Style$methods(initialize = function(){
   halign <<- NULL
   valign <<- NULL
   textRotation <<- NULL
-  numFmt <<- list("numFmtId" = 0)
+  numFmt <<- NULL
   fill <<- NULL
   wrapText <<- NULL
 })
+
+
+
+mergeStyle = function(oldStyle, newStyle){
+
+  ## This function is used to merge an existing cell style with a new style to create a stacked style.
+  
+  oldStyle <- oldStyle$copy()
+  
+  if(!is.null(newStyle$fontName))
+    oldStyle$fontName <- newStyle$fontName
+  
+  if(!is.null(newStyle$fontColour))
+    oldStyle$fontColour <- newStyle$fontColour
+
+  if(!is.null(newStyle$fontSize))
+    oldStyle$fontSize <- newStyle$fontSize
+  
+  if(!is.null(newStyle$fontFamily))
+    oldStyle$fontFamily <- newStyle$fontFamily
+  
+  if(!is.null(newStyle$fontScheme))
+    oldStyle$fontScheme <- newStyle$fontScheme
+  
+  if(!is.null(newStyle$fontDecoration))
+    oldStyle$fontDecoration <- newStyle$fontDecoration
+  
+  ## borders
+  if(!is.null(newStyle$borderTop))
+    oldStyle$borderTop <- newStyle$borderTop
+  
+  if(!is.null(newStyle$borderLeft))
+    oldStyle$borderLeft <- newStyle$borderLeft
+  
+  if(!is.null(newStyle$borderRight))
+    oldStyle$borderRight <- newStyle$borderRight
+  
+  if(!is.null(newStyle$borderBottom))
+    oldStyle$borderBottom <- newStyle$borderBottom
+  
+  if(!is.null(newStyle$borderTopColour))
+    oldStyle$borderTopColour <- newStyle$borderTopColour
+  
+  if(!is.null(newStyle$borderLeftColour))
+    oldStyle$borderLeftColour <- newStyle$borderLeftColour
+  
+  if(!is.null(newStyle$borderRightColour))
+    oldStyle$borderRightColour <- newStyle$borderRightColour
+  
+  if(!is.null(newStyle$borderBottomColour))
+    oldStyle$borderBottomColour <- newStyle$borderBottomColour
+  
+  ## other
+  if(!is.null(newStyle$halign))
+    oldStyle$halign <- newStyle$halign
+  
+  if(!is.null(newStyle$valign))
+    oldStyle$valign <- newStyle$valign
+  
+  if(!is.null(newStyle$textRotation))
+    oldStyle$textRotation <- newStyle$textRotation
+  
+  if(!is.null(newStyle$numFmt))
+    oldStyle$numFmt <- newStyle$numFmt
+  
+  if(!is.null(newStyle$fill))
+    oldStyle$fill <- newStyle$fill
+  
+  if(!is.null(newStyle$wrapText))
+    oldStyle$wrapText <- newStyle$wrapText
+    
+    
+    return(oldStyle)
+
+}
+
+
+
 
 
 Style$methods(show = function(print = TRUE){
@@ -68,10 +146,14 @@ Style$methods(show = function(print = TRUE){
   
   validNumFmt <- c("GENERAL", "NUMBER", "CURRENCY", "ACCOUNTING", "DATE", "TIME", "PERCENTAGE", "SCIENTIFIC", "TEXT")
   
-  if(as.integer(numFmt$numFmtId) %in% unlist(numFmtMapping)){
-    numFmtStr <- validNumFmt[unlist(numFmtMapping) == as.integer(numFmt$numFmtId)]
+  if(!is.null(numFmt)){
+    if(as.integer(numFmt$numFmtId) %in% unlist(numFmtMapping)){
+      numFmtStr <- validNumFmt[unlist(numFmtMapping) == as.integer(numFmt$numFmtId)]
+    }else{
+      numFmtStr <- sprintf('"%s"', numFmt$formatCode)
+    }
   }else{
-    numFmtStr <- sprintf('"%s"', numFmt$formatCode)
+    numFmtStr <- "GENERAL"
   }
   
   borders <- c(sprintf("Top: %s", borderTop), sprintf("Bottom: %s", borderBottom), sprintf("Left: %s", borderLeft), sprintf("Right: %s", borderRight))

@@ -109,8 +109,8 @@ readWorkbook <- function(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmpty
     .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows)
 }
 
-quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, R_fileName) {
-    .Call('openxlsx_quickBuildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, R_fileName)
+quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, styleInds, R_fileName) {
+    .Call('openxlsx_quickBuildCellXML', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, styleInds, R_fileName)
 }
 
 buildTableXML <- function(table, ref, colNames, showColNames, tableStyle, withFilter) {
@@ -145,8 +145,8 @@ getCellsWithChildren <- function(xmlFile, emptyNodes) {
     .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
 }
 
-quickBuildCellXML2 <- function(prior, post, sheetData, rowNumbers, rowHeights, R_fileName) {
-    .Call('openxlsx_quickBuildCellXML2', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, rowHeights, R_fileName)
+quickBuildCellXML2 <- function(prior, post, sheetData, rowNumbers, styleInds, rowHeights, R_fileName) {
+    .Call('openxlsx_quickBuildCellXML2', PACKAGE = 'openxlsx', prior, post, sheetData, rowNumbers, styleInds, rowHeights, R_fileName)
 }
 
 getRefsVals <- function(x, startRow) {
