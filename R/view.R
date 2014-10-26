@@ -10,7 +10,7 @@
 #' }
 #' @export
 view <- function(...)  {
-  wb <- openxlsx::createWorkbook()
+  wb <- createWorkbook()
   objList <- list(...)
   objNames <- lapply(as.list(match.call(expand.dots = TRUE))[-1],
                      as.character)
@@ -21,7 +21,7 @@ view <- function(...)  {
          sheet = objNames,
          x = objList,
          MoreArgs = list(wb = wb)) 
-  openxlsx::openXL(wb)
+  openXL(wb)
 }
 
 
