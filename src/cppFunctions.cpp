@@ -9,7 +9,7 @@ using namespace std;
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
-  // This function converts the Excel column letter to a integer
+  // This function converts the Excel column letter to an integer
   
   std::vector<std::string> r = as<std::vector<std::string> >(x);
   int n = r.size();

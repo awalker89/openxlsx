@@ -404,7 +404,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   zipWorkbook(tmpFile, list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
   
-  ## reset styles
+  ## reset styles - maintain any changes to base font
   baseFont <- styles$fonts[[1]]
   styles <<- genBaseStyleSheet(styles$dxfs)
   styles$fonts[[1]] <<- baseFont
@@ -537,6 +537,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if("hyperlink" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
       class(df[,i]) <- "hyperlink"
+    
+    colNames <- FALSE
   }
   
   ## convert scientific
@@ -1714,7 +1716,7 @@ Workbook$methods(preSaveCleanUp = function(){
   })
   
   for(x in styleObjects){
-    if(length(x$rows) > 0){
+    if(length(x$rows) > 0 & length(x$cols) > 0){
       
       this.sty <- x$style$copy()  
       
@@ -1728,7 +1730,6 @@ Workbook$methods(preSaveCleanUp = function(){
       ## convert sheet name to index
       sheet <- which(names(worksheets) == x$sheet)
       sId <- .self$updateStyles(this.sty) ## this creates the XML for styles.XML
-      x$id <- sId
       
       ## In here we create any styleInds that don't yet have a sheetData
       refsToStyle <- paste0(.Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', x$cols, LETTERS), x$rows)
@@ -1740,7 +1741,7 @@ Workbook$methods(preSaveCleanUp = function(){
         names(tmp) <- toAppend
         styleInds[[sheet]] <<- c(styleInds[[sheet]], tmp)
         
-        ## Now update sheetData
+        ## Now append new cells to sheetData - incremenet dataCount so sorting will take place
         newCells <- .Call("openxlsx_buildCellList", toAppend , rep(as.character(NA), length(toAppend)) , rep(as.character(NA), length(toAppend)), PACKAGE="openxlsx")
         names(newCells) <- gsub("[A-Z]", "", toAppend)
         sheetData[[sheet]] <<- append(sheetData[[sheet]], newCells)
