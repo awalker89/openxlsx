@@ -10,7 +10,8 @@ openxlsxCoerce <- function(x, rowNames){
 
 openxlsxCoerce.default <- function(x, rowNames){
   
-  ## data.frame, data.table
+  ## data.frame, data.table, vectors
+  x <- as.data.frame(x)
   
   ## cbind rownames to x
   if(rowNames){
