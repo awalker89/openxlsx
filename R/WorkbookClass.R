@@ -537,8 +537,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if("hyperlink" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
       class(df[,i]) <- "hyperlink"
-    
-    colNames <- FALSE
   }
   
   ## convert scientific

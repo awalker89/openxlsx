@@ -217,18 +217,11 @@ openxlsxCoerce.cox.zph <- function(x, rowNames){
 }
 
 
-
-
-
-
 openxlsxCoerce.hyperlink <- function(x, rowNames){
   
   ## vector of hyperlinks
-  hlinkNames <- names(x)
   class(x) <- c("character", "hyperlink") 
-  
   x <- as.data.frame(x, stringsAsFactors = FALSE)
-  rowNames <- FALSE
   
 }
 

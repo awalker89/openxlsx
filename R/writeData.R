@@ -134,6 +134,12 @@ writeData <- function(wb,
   borderColour <- validateColour(borderColour, "Invalid border colour")
   borderStyle <- validateBorderStyle(borderStyle)[[1]]
     
+  ## special case - vector of hyperlinks
+  if("hyperlink" %in% class(x)){
+    hlinkNames <- names(x)
+    colNames = FALSE
+  }
+  
   ## Coerce to data.frame
   x <- openxlsxCoerce(x, rowNames)
     
