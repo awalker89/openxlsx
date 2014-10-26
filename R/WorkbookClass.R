@@ -1406,9 +1406,9 @@ Workbook$methods(addDXFS = function(style){
   fillNode <- NULL
   
   if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg))
-    dxf <- paste0(dxf, createFillNode(style$fill))
+    dxf <- paste0(dxf, createFillNode(style))
   
-  if(any(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom))
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom))))
     dxf <- paste0(dxf, createBorderNode(style))
   
   dxf <- paste(dxf, "</dxf>")

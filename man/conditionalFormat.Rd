@@ -44,27 +44,27 @@ posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
 ## rule applies to all each cell in range
 writeData(wb, 1, -5:5)
 writeData(wb, 1, LETTERS[1:11], startCol=2)
-conditionalFormat(wb, 1, cols=1, rows=1:11, rule="!=0", style = negStyle)
-conditionalFormat(wb, 1, cols=1, rows=1:11, rule="==0", style = posStyle)
+conditionalFormat(wb, 1, cols=1, rows=2:12, rule="!=0", style = negStyle)
+conditionalFormat(wb, 1, cols=1, rows=2:12, rule="==0", style = posStyle)
 
 ## highlight row dependent on first cell in row
 writeData(wb, 2, -5:5)
 writeData(wb, 2, LETTERS[1:11], startCol=2)
-conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
-conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
+conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1<0", style = negStyle)
+conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1>0", style = posStyle)
 
 ## highlight column dependent on first cell in column
 writeData(wb, 3, -5:5)
 writeData(wb, 3, LETTERS[1:11], startCol=2)
-conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
-conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
+conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1<0", style = negStyle)
+conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1>0", style = posStyle)
 
 
 ## highlight entire range cols X rows dependent only on cell A1
 writeData(wb, 4, -5:5)
 writeData(wb, 4, LETTERS[1:11], startCol=2)
-conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
-conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1<0", style = negStyle)
+conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1>0", style = posStyle)
 
 ## colourscale colours cells based on cell value
 
