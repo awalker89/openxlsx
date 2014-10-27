@@ -9,8 +9,28 @@ openxlsxCoerce <- function(x, rowNames){
 }
 
 openxlsxCoerce.default <- function(x, rowNames){
+
+  x <- as.data.frame(x)
+  return(x)
+
+}
+
+
+openxlsxCoerce.data.frame <- function(x, rowNames){
   
-  ## data.frame, data.table, vectors
+  ## cbind rownames to x
+  if(rowNames){
+    x <- cbind(data.frame("row names" = rownames(x)), x)
+    names(x)[[1]] <- ""
+  }
+  
+  return(x)
+  
+}
+
+
+openxlsxCoerce.data.table <- function(x, rowNames){
+
   x <- as.data.frame(x)
   
   ## cbind rownames to x
@@ -20,8 +40,9 @@ openxlsxCoerce.default <- function(x, rowNames){
   }
   
   return(x)
-
+  
 }
+
 
 openxlsxCoerce.matrix <- function(x, rowNames){
   

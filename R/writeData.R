@@ -140,6 +140,9 @@ writeData <- function(wb,
     colNames = FALSE
   }
   
+  if(is.vector(x) | is.factor(x))
+    colNames <- FALSE ## this will go to coerce.default and rowNames will be ignored 
+  
   ## Coerce to data.frame
   x <- openxlsxCoerce(x, rowNames)
     
