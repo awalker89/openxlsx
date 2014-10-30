@@ -1758,7 +1758,7 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       //cell XML strings
       cellXML += "<c r=\"" + cVal[0];
       
-      if(hasStyle[j])
+      if(hasStyle[j-1]) // Style is j-1 because sheet data is set as j before j is incremented
         cellXML += "\" s=\"" + styleInds[j-1];
       
       //If we have a t value we must have a v value
