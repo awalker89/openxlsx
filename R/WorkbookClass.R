@@ -786,7 +786,12 @@ Workbook$methods(updateStyles = function(style){
   alignmentFlag <- FALSE
   
   ## Font
-  if(!is.null(style$fontName) | !is.null(style$fontSize) |  !is.null(style$fontColour)){
+  if(!is.null(style$fontName) |
+       !is.null(style$fontSize) |
+       !is.null(style$fontColour) |
+       !is.null(style$fontDecoration) | 
+       !is.null(style$fontFamily) | 
+       !is.null(style$fontScheme)){
     
     fontNode <- .self$createFontNode(style)
     fontId <- which(styles$font == fontNode) - 1L
