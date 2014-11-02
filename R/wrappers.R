@@ -61,8 +61,8 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  if(!grepl("\\.xlsx", file))
-    file <- paste0(file, ".xlsx")
+#   if(!grepl("\\.xlsx", file))
+#     file <- paste0(file, ".xlsx")
   
   if(!is.logical(overwrite))
     overwrite = FALSE

@@ -3,10 +3,10 @@
 \alias{loadWorkbook}
 \title{Load an exisiting .xlsx file}
 \usage{
-loadWorkbook(xlsxFile)
+loadWorkbook(file)
 }
 \arguments{
-\item{xlsxFile}{A path to an existing .xlsx file}
+\item{file}{A path to an existing .xlsx or .xlsm file}
 }
 \value{
 Workbook object.
@@ -17,7 +17,7 @@ formatting of the original .xlsx file.
 }
 \examples{
 ## load existing workbook from package folder
-wb <- loadWorkbook(xlsxFile = system.file("loadExample.xlsx", package= "openxlsx"))
+wb <- loadWorkbook(file = system.file("loadExample.xlsx", package= "openxlsx"))
 names(wb)  #list worksheets
 wb ## view object
 ## Add a worksheet

@@ -4,7 +4,7 @@
 #' @name loadWorkbook 
 #' @title Load an exisiting .xlsx file
 #' @author Alexander Walker
-#' @param xlsxFile A path to an existing .xlsx file
+#' @param file A path to an existing .xlsx or .xlsm file
 #' @description  loadWorkbook returns a workbook object conserving styles and 
 #' formatting of the original .xlsx file. 
 #' @return Workbook object. 
@@ -12,7 +12,7 @@
 #' @seealso \code{\link{removeWorksheet}}
 #' @examples
 #' ## load existing workbook from package folder
-#' wb <- loadWorkbook(xlsxFile = system.file("loadExample.xlsx", package= "openxlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package= "openxlsx"))
 #' names(wb)  #list worksheets
 #' wb ## view object
 #' ## Add a worksheet
@@ -25,9 +25,9 @@
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
-loadWorkbook <- function(xlsxFile){
+loadWorkbook <- function(file){
   
-  if(!file.exists(xlsxFile))
+  if(!file.exists(file))
     stop("File does not exist.")
   
   wb <- createWorkbook()
@@ -36,7 +36,7 @@ loadWorkbook <- function(xlsxFile){
   xmlDir <- paste0(tempdir(),  tempfile(tmpdir = ""), "_openxlsx_loadWorkbook")
   
   ## Unzip files to temp directory
-  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  xmlFiles <- unzip(file, exdir = xmlDir)
   
   .relsXML          <- xmlFiles[grepl("_rels/.rels$", xmlFiles, perl = TRUE)]
   drawingsXML       <- xmlFiles[grepl("drawing[0-9]+.xml$", xmlFiles, perl = TRUE)]
@@ -64,6 +64,9 @@ loadWorkbook <- function(xlsxFile){
   pivotDefXML       <- xmlFiles[grepl("pivotCacheDefinition[0-9]+.xml$", xmlFiles, perl = TRUE)]
   pivotDefRelsXML   <- xmlFiles[grepl("pivotCacheDefinition[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   pivotRecordsXML   <- xmlFiles[grepl("pivotCacheRecords[0-9]+.xml$", xmlFiles, perl = TRUE)]
+  
+  ## VBA Macro
+  vbaProject        <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
   
   nSheets <- length(worksheetsXML)
@@ -147,6 +150,13 @@ loadWorkbook <- function(xlsxFile){
     
   }
   
+  ## xl\vbaProject
+  if(length(vbaProject) > 0){
+    wb$vbaProject <- vbaProject
+    wb$Content_Types[grepl('<Override PartName="/xl/workbook.xml" ', wb$Content_Types)] <- '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.ms-excel.sheet.macroEnabled.main+xml"/>'
+    wb$Content_Types <- c(wb$Content_Types, '<Override PartName="/xl/vbaProject.bin" ContentType="application/vnd.ms-office.vbaProject"/>')    
+  }
+    
   ## xl\styles
   if(length(stylesXML) > 0){
     

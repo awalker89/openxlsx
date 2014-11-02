@@ -35,6 +35,9 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "tables",
                                                "tables.xml.rels",
                                                "theme",
+                                               
+                                               "vbaProject",
+                                               
                                                "workbook",
                                                "workbook.xml.rels",
                                                "worksheets",
@@ -88,6 +91,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   pivotDefinitions <<- NULL
   pivotRecords <<- NULL
   pivotDefinitionsRels <<- NULL
+  
+  vbaProject <<- NULL
   
   attr(sharedStrings, "uniqueCount") <<- 0
   
@@ -345,6 +350,10 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     writeBin(charToRaw(pxml(theme[[i]])), con)
     close(con)        
   })
+  
+  ## VBA Macro
+  if(!is.null(vbaProject))
+    file.copy(vbaProject, xlDir)
   
   ## write worksheet, worksheet_rels, drawings, drawing_rels
   .self$writeSheetDataXML(xldrawingsDir, xldrawingsRelsDir, xlworksheetsDir, xlworksheetsRelsDir)
@@ -1107,7 +1116,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
     
     if(!is.null(ws$sheetPr))
-      ws$sheetPr <- paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
+      ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
     
     if(length(worksheets[[i]]$tableParts) > 0)
       ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
@@ -1694,6 +1703,10 @@ Workbook$methods(preSaveCleanUp = function(){
   }))
   
   workbook.xml.rels <<- c(workbook.xml.rels, pivotNode)
+  
+  if(!is.null(vbaProject))
+    workbook.xml.rels <<- c(workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2006/relationships/vbaProject" Target="vbaProject.bin"/>', 1L + length(workbook.xml.rels)))
+  
   
   ## Reassign rId to workbook sheet elements, (order sheets by sheetId first)
   sId <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE))))
