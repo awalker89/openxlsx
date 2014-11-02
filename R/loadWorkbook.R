@@ -85,7 +85,13 @@ loadWorkbook <- function(file){
     calcPr <- .Call("openxlsx_getChildlessNode", workbook, "<calcPr ", PACKAGE = "openxlsx")
     if(length(calcPr) > 0)
       wb$workbook$calcPr <- calcPr
+
     
+    workbookPr <- .Call("openxlsx_getChildlessNode", workbook, "<workbookPr ", PACKAGE = "openxlsx")
+    if(length(calcPr) > 0)
+      wb$workbook$workbookPr <- workbookPr
+
+  
     ## Make sure sheets are in order
     sheetNames <- sheetNames[order(sheetrId)]
     sheetNames <- replaceXMLEntities(sheetNames)
@@ -485,10 +491,19 @@ loadWorkbook <- function(file){
       wb$worksheets[[i]]$autoFilter <- autoFilter      
     }
     
-    ## tab colour (sheetPR)
-    tabColour <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<tabColor ", PACKAGE = "openxlsx")
-    if(length(tabColour) > 0)
-      wb$worksheets[[i]]$sheetPr <- sprintf('<sheetPr>%s</sheetPr>', tabColour)
+
+    ## sheetPR
+    sheetPr <- .Call("openxlsx_getNodes", wsData[[i]], "<sheetPr>", PACKAGE = "openxlsx")
+    if(length(sheetPr) > 0){
+      wb$worksheets[[i]]$sheetPr <- sheetPr
+    }else{
+      
+      sheetPr <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<sheetPr ", PACKAGE = "openxlsx")
+      if(length(sheetPr) > 0)
+        wb$worksheets[[i]]$sheetPr <- sheetPr
+      
+    }
+
     
     ## hyperlinks
     hyperlinks <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<hyperlink ", PACKAGE = "openxlsx")
