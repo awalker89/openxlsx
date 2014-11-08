@@ -3,10 +3,12 @@
 \alias{loadWorkbook}
 \title{Load an exisiting .xlsx file}
 \usage{
-loadWorkbook(file)
+loadWorkbook(file, xlsxFile = NULL)
 }
 \arguments{
 \item{file}{A path to an existing .xlsx or .xlsm file}
+
+\item{xlsxFile}{alias for file}
 }
 \value{
 Workbook object.

@@ -1140,13 +1140,13 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
       sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
       dataCount[[i]] <<- 1L
-        
+      
       if(length(styleInds[[i]]) > 0)
         styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
     }
-  
+    
     if(length(rowHeights[[i]]) == 0){
-
+      
       .Call("openxlsx_quickBuildCellXML",
             prior,
             post,
@@ -1251,7 +1251,7 @@ Workbook$methods(setColWidths = function(sheet){
       baseFontCharWidth <- openxlsxFontSizeLookupTable[[baseFontName]][baseFontSize - 7]
       allCharWidths <- rep(baseFontCharWidth, length(sheetData[[sheet]]))
       #########----------------------------------------------------------------
-
+      
       ## get char widths for each style object
       if(length(styleObjects) > 0){
         
@@ -1437,7 +1437,9 @@ Workbook$methods(addDXFS = function(style){
 
 
 
-Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type){
+
+
+Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type, values){
   
   sheet = validateSheet(sheet)
   sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
@@ -1450,13 +1452,49 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
   
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
   
-  if(type == "expression"){
+  if(type == "colorScale"){
     
-    cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
+    ## formula contains the colours
+    ## values contains numerics or is NULL
+    ## dxfId is ignored
+    
+    if(is.null(values)){
+      
+      if(length(formula) == 2L){
+        cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale>
+                             <cfvo type="min"/><cfvo type="max"/>
+                             <color rgb="%s"/><color rgb="%s"/>
+                           </colorScale></cfRule>', formula[[1]], formula[[2]])
+      }else{
+        cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale>
+                             <cfvo type="min"/><cfvo type="percentile" val="50"/><cfvo type="max"/>
+                             <color rgb="%s"/><color rgb="%s"/><color rgb="%s"/>
+                           </colorScale></cfRule>', formula[[1]], formula[[2]], formula[[3]])
+      }
+      
+    }else{
+      
+      if(length(formula) == 2L){
+        cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale>
+                            <cfvo type="num" val="%s"/><cfvo type="num" val="%s"/>
+                            <color rgb="%s"/><color rgb="%s"/>
+                           </colorScale></cfRule>', values[[1]], values[[2]], formula[[1]], formula[[2]])
+      }else{
+        cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale>
+                            <cfvo type="num" val="%s"/><cfvo type="num" val="%s"/><cfvo type="num" val="%s"/>
+                            <color rgb="%s"/><color rgb="%s"/><color rgb="%s"/>
+                           </colorScale></cfRule>', values[[1]], values[[2]], values[[3]], formula[[1]], formula[[2]], formula[[3]])
+      }
+      
+    }
+    
     
   }else if(type == "dataBar"){
     
-    if(length(formula) == 2){
+    # forumula is a vector of colours of length 1 or 2
+    # values is NULL or a numeric vector of equal length as formula
+
+    if(length(formula) == 2L){
       negColour <- formula[[1]]
       posColour <- formula[[2]]
     }else{
@@ -1465,16 +1503,46 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
     }
     
     guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
-    cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
-    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, genExtLst(guid, sqref, posColour, negColour))
     
-  }else if(length(formula) == 2L){
+    if(is.null(values)){
+      
+      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar>
+                          <cfvo type="min"/><cfvo type="max"/>
+                          <color rgb="%s"/>
+                          </dataBar>
+                          <extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
+      
+    }else{
+      
+      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar>
+                            <cfvo type="num" val="%s"/><cfvo type="num" val="%s"/>
+                            <color rgb="%s"/>
+                            </dataBar>
+                            <extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
+                            <x14:id>{%s}</x14:id></ext></extLst></cfRule>', values[[1]], values[[2]], posColour, guid)
+      
+    }
     
-    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]])
+    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, genExtLst(guid, sqref, posColour, negColour, values = values))
     
-  }else{
     
-    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="percentile" val="50"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]], formula[[3]])
+  }else if(type == "expression"){
+    
+    cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
+    
+
+  }else if(type == "duplicatedValues"){
+    
+    cfRule <- sprintf('<cfRule type="duplicateValues" dxfId="%s" priority="1"/>', dxfId)
+
+    
+    
+  }else if(type == "containsText"){
+    
+    cfRule <- sprintf('<cfRule type="containsText" dxfId="%s" priority="1" operator="containsText" text="%s">
+                        	<formula>NOT(ISERROR(SEARCH("%s", %s)))</formula>
+                       </cfRule>', dxfId, values, values, unlist(strsplit(sqref, split = ":"))[[1]])
+    
   }
   
   worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              
@@ -1766,7 +1834,7 @@ Workbook$methods(preSaveCleanUp = function(){
       }
       
     }
-        
+    
   }
   
   
@@ -2405,3 +2473,57 @@ openxlsxFontSizeLookupTableBold <-
               "wide.latin"= c(2.25, 2.42875, 2.875, 3.07125, 3.21375, 3.69625, 3.83875, 3.9825, 4.32125, 4.6075, 4.7675, 5.08875, 5.3925, 5.57125, 5.875, 6.19625, 6.3575, 6.6425, 6.9825, 7.125, 7.46375, 7.6075, 7.8925, 8.2325, 8.375, 8.71375, 9, 9.16, 9.4825))
 
 
+
+
+
+
+
+
+
+## TO BE DEPRECATED
+Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type){
+  
+  sheet = validateSheet(sheet)
+  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  
+  ## Increment priority of conditional formatting rule
+  if(length((worksheets[[sheet]]$conditionalFormatting)) > 0){
+    for(i in length(worksheets[[sheet]]$conditionalFormatting):1)
+      worksheets[[sheet]]$conditionalFormatting[[i]] <<- gsub('(?<=priority=")[0-9]+', i+1L, worksheets[[sheet]]$conditionalFormatting[[i]], perl = TRUE)
+  }
+  
+  nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
+  
+  if(type == "expression"){
+    
+    cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
+    
+  }else if(type == "dataBar"){
+    
+    if(length(formula) == 2){
+      negColour <- formula[[1]]
+      posColour <- formula[[2]]
+    }else{
+      posColour <- formula
+      negColour <- "FFFF0000"
+    }
+    
+    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
+    cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
+    
+  }else if(length(formula) == 2L){
+    
+    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]])
+    
+  }else{
+    
+    cfRule <- sprintf('<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min"/><cfvo type="percentile" val="50"/><cfvo type="max"/><color rgb="%s"/><color rgb="%s"/><color rgb="%s"/></colorScale></cfRule>', formula[[1]], formula[[2]], formula[[3]])
+  }
+  
+  worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              
+  
+  names(worksheets[[sheet]]$conditionalFormatting) <<- nms
+  
+  invisible(0)
+  
+})

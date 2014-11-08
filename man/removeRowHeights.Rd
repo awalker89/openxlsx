@@ -17,7 +17,7 @@ Remove custom row heights from a worksheet
 }
 \examples{
 ## Create a new workbook
-wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 
 ## remove any custom row heights in rows 1 to 10
 removeRowHeights(wb, 1, rows = 1:10)

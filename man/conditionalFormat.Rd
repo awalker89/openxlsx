@@ -23,9 +23,11 @@ conditionalFormat(wb, sheet, cols, rows, rule = NULL, style = NULL,
 by a formula.  If colorScale cells are coloured based on cell value. See examples.}
 }
 \description{
-Add conditional formatting to cells
+DEPRECATED! USE \code{\link{conditionalFormatting}}
 }
 \details{
+DEPRECATED! USE \code{\link{conditionalFormatting}}
+
 Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 }

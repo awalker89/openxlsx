@@ -5,6 +5,7 @@
 #' @title Load an exisiting .xlsx file
 #' @author Alexander Walker
 #' @param file A path to an existing .xlsx or .xlsm file
+#' @param xlsxFile alias for file
 #' @description  loadWorkbook returns a workbook object conserving styles and 
 #' formatting of the original .xlsx file. 
 #' @return Workbook object. 
@@ -25,7 +26,10 @@
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
-loadWorkbook <- function(file){
+loadWorkbook <- function(file, xlsxFile = NULL){
+  
+  if(!is.null(xlsxFile))
+    file <- xlsxFile
   
   if(!file.exists(file))
     stop("File does not exist.")

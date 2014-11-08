@@ -13,7 +13,7 @@ Returns a list of all styles in the workbook
 }
 \examples{
 ## load a workbook
-wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 getStyles(wb)
 }
 \author{

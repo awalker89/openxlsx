@@ -17,7 +17,7 @@ Replace a style object
 }
 \examples{
 ## load a workbook
-wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 
 ## create a new style and replace style 2
 

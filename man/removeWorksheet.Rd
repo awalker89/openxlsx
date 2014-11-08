@@ -15,7 +15,7 @@ Remove a worksheet from a workbook
 }
 \examples{
 ## load a workbook
-wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 
 ## Remove sheet 2
 removeWorksheet(wb, 2)

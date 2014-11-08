@@ -788,154 +788,12 @@ getCellRefs <- function(cellCoords){
 }
 
 
-#' @name conditionalFormat
-#' @title Add conditional formatting to cells
-#' @author Alexander Walker
-#' @param wb A workbook object
-#' @param sheet A name or index of a worksheet
-#' @param cols Columns to apply conditional formatting to
-#' @param rows Rows to apply conditional formatting to
-#' @param rule The condition under which to apply the formatting or a vector of colours. See examples.
-#' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
-#' @details Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
-#' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-#' @param type Either 'expression', 'colorscale' or 'databar'. If 'expression' the formatting is determined
-#' by a formula.  If colorScale cells are coloured based on cell value. See examples.
-#' @seealso \code{\link{createStyle}}
-#' @export
-#' @examples
-#' wb <- createWorkbook()
-#' addWorksheet(wb, "cellIs")
-#' addWorksheet(wb, "moving Row")
-#' addWorksheet(wb, "moving Col")
-#' addWorksheet(wb, "Dependent on 1")
-#' addWorksheet(wb, "colourScale 2 Colours")
-#' addWorksheet(wb, "databar")
-#' 
-#' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-#' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
-#' 
-#' ## rule applies to all each cell in range
-#' writeData(wb, 1, -5:5)
-#' writeData(wb, 1, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 1, cols=1, rows=2:12, rule="!=0", style = negStyle)
-#' conditionalFormat(wb, 1, cols=1, rows=2:12, rule="==0", style = posStyle)
-#' 
-#' ## highlight row dependent on first cell in row
-#' writeData(wb, 2, -5:5)
-#' writeData(wb, 2, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1<0", style = negStyle)
-#' conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1>0", style = posStyle)
-#' 
-#' ## highlight column dependent on first cell in column
-#' writeData(wb, 3, -5:5)
-#' writeData(wb, 3, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1<0", style = negStyle)
-#' conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1>0", style = posStyle)
-#' 
-#' 
-#' ## highlight entire range cols X rows dependent only on cell A1
-#' writeData(wb, 4, -5:5)
-#' writeData(wb, 4, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1<0", style = negStyle)
-#' conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1>0", style = posStyle)
-#' 
-#' ## colourscale colours cells based on cell value
-#' 
-#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
-#' writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
-#' 
-#' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
-#' conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
-#'    rule =c("black", "white"), type = "colourScale")
-#'    
-#' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
-#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
-#'
-#' ## Databars
-#' writeData(wb, "databar", -5:5)
-#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
-#' 
-#' writeData(wb, "databar", -5:5, startCol = 2)
-#' ## set negative and positive colours
-#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
-#'  rule = c("yellow", "green"), type = "databar")
-#' 
-#' ## Save workbook
-#' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
-conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
-  
-  
-  ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
-  ## Rule for "databar" and colourscale are colours of length 2/3 or 1 respectively.
-  
-  type <- tolower(type)
-  if(tolower(type) %in% c("colorscale", "colourscale")){
-    type <- "colorScale"
-  }else if(type == "databar"){
-    type <- "dataBar"
-  }else if(type != "expression"){
-    stop("Invalid type argument.  Type must be 'expression', 'colourScale' or 'databar'")
-  }
-  
-  ## rows and cols
-  if(!is.numeric(cols))
-    cols <- convertFromExcelRef(cols)  
-  rows <- as.integer(rows)
-  
-  ## check valid rule
-  if(type == "colorScale"){
-    if(!length(rule) %in% 2:3)
-      stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
-    
-    rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
-    dxfId <- NULL
-    
-  }else if(type == "dataBar"){
-    
-    ## If rule is NULL use default colour
-    if(is.null(rule)){
-      rule <- "FF638EC6"
-    }else{
-      rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
-    }
-    
-    dxfId <- NULL
-    
-  }else{ ## else type == "expression"
-    
-    rule <- toupper(gsub(" ", "", rule))
-    rule <- replaceIllegalCharacters(rule)
-    rule <- gsub("!=", "&lt;&gt;", rule)
-    rule <- gsub("==", "=", rule)
-    
-    if(!grepl("[A-Z]", substr(rule, 1, 2))){
-      
-      ## formula looks like "operatorX" , attach top left cell to rule    
-      rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
-      
-    } ## else, there is a letter in the formula and apply as is
-    
-    if(is.null(style))
-      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-    
-    invisible(dxfId <- wb$addDXFS(style))
-    
-  }
-  
-  
-  invisible(wb$conditionalFormatCell(sheet,
-                                     startRow = min(rows),
-                                     endRow = max(rows),
-                                     startCol = min(cols),
-                                     endCol = max(cols),
-                                     dxfId,
-                                     formula = rule,
-                                     type = type))
-  
-  invisible(0)
-  
-}
+
+
+
+
+
+
 
 
 
@@ -1214,7 +1072,7 @@ setColWidths <- function(wb, sheet, cols, widths){
 #' @export
 #' @examples
 #' ## Create a new workbook
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' 
 #' ## remove column widths in columns 1 to 10
 #' removeColWidths(wb, 1, cols = 1:10)
@@ -1245,7 +1103,7 @@ removeColWidths <- function(wb, sheet, cols){
 #' @export
 #' @examples
 #' ## Create a new workbook
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #'
 #' ## remove any custom row heights in rows 1 to 10
 #' removeRowHeights(wb, 1, rows = 1:10)
@@ -1366,7 +1224,7 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 #' @seealso \code{\link{getStyles}}
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' 
 #' ## create a new style and replace style 2
 #' 
@@ -1404,7 +1262,7 @@ replaceStyle <- function(wb, index, newStyle){
 #' @seealso \code{\link{replaceStyle}}
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' getStyles(wb)
 getStyles <- function(wb){
   
@@ -1429,7 +1287,7 @@ getStyles <- function(wb){
 #' @export
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' 
 #' ## Remove sheet 2
 #' removeWorksheet(wb, 2)
@@ -1758,7 +1616,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
 #' @param showGridLines A logical. If TRUE, grid lines are hidden.
 #' @export
 #' @examples
-#' wb <- loadWorkbook(xlsxFile = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' names(wb) ## list worksheets in workbook
 #' showGridLines(wb, 1, showGridLines = FALSE)
 #' showGridLines(wb, "Empty sheet", showGridLines = FALSE)
@@ -2132,3 +1990,439 @@ setFooter <- function(wb, text, position = "center"){
   wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "foot"] <- as.character(text)
   
 }
+
+
+
+
+#' @name conditionalFormatting
+#' @title Add conditional formatting to cells
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to apply conditional formatting to
+#' @param rows Rows to apply conditional formatting to
+#' @param rule The condition under which to apply the formatting. See examples.
+#' @param style A style to apply to those cells that satisify the rule. Default is createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' @param type Either 'expression', 'colorscale', 'databar', 'duplicates' or "contains' (case insensitive).
+#' @details See Examples.
+#' 
+#' If type == "expression"
+#' \itemize{
+#'   \item{style is a Style object. See \code{\link{createStyle}}}
+#'   \item{rule is an expression. Valid operators are "<", "<=", ">", ">=", "==", "!=".}
+#' }
+#' 
+#' If type == "colourScale"
+#' \itemize{
+#'   \item{style is a vector of colours with length 2 or 3}
+#'   \item{rule can be NULL or a vector of colours of equal length to styles}
+#' }
+#' 
+#' If type == "databar"
+#' \itemize{
+#'   \item{style is a vector of colours with length 2 or 3}
+#'   \item{rule is a numeric vector sepcifiying the range of the databar colours. Must be equal length to style}
+#' }
+#' 
+#' If type == "duplicates"
+#' \itemize{
+#'   \item{style is a Style object. See \code{\link{createStyle}}}
+#'   \item{rule is ignored.}
+#' }
+#' 
+#' If type == "contains"
+#' \itemize{
+#'   \item{style is a Style object. See \code{\link{createStyle}}}
+#'   \item{rule is the text to look for within cells}
+#' }
+#' 
+#' @seealso \code{\link{createStyle}}
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "cellIs")
+#' addWorksheet(wb, "Moving Row")
+#' addWorksheet(wb, "Moving Col")
+#' addWorksheet(wb, "Dependent on 1")
+#' addWorksheet(wb, "Duplicates")
+#' addWorksheet(wb, "containsText")
+#' addWorksheet(wb, "colourScale", zoom = 30)
+#' addWorksheet(wb, "databar")
+#' 
+#' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
+#' 
+#' ## rule applies to all each cell in range
+#' writeData(wb, "cellIs", -5:5)
+#' writeData(wb, "cellIs", LETTERS[1:11], startCol=2)
+#' conditionalFormatting(wb, "cellIs", cols=1, rows=2:12, rule="!=0", style = negStyle)
+#' conditionalFormatting(wb, "cellIs", cols=1, rows=2:12, rule="==0", style = posStyle)
+#' 
+#' ## highlight row dependent on first cell in row
+#' writeData(wb, "Moving Row", -5:5)
+#' writeData(wb, "Moving Row", LETTERS[1:11], startCol=2)
+#' conditionalFormatting(wb, "Moving Row", cols=1:2, rows=2:12, rule="$A1<0", style = negStyle)
+#' conditionalFormatting(wb, "Moving Row", cols=1:2, rows=2:12, rule="$A1>0", style = posStyle)
+#' 
+#' ## highlight column dependent on first cell in column
+#' writeData(wb, "Moving Col", -5:5)
+#' writeData(wb, "Moving Col", LETTERS[1:11], startCol=2)
+#' conditionalFormatting(wb, "Moving Col", cols=1:2, rows=2:12, rule="A$1<0", style = negStyle)
+#' conditionalFormatting(wb, "Moving Col", cols=1:2, rows=2:12, rule="A$1>0", style = posStyle)
+#' 
+#' ## highlight entire range cols X rows dependent only on cell A1
+#' writeData(wb, "Dependent on 1", -5:5)
+#' writeData(wb, "Dependent on 1", LETTERS[1:11], startCol=2)
+#' conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=2:12, rule="$A$1<0", style = negStyle)
+#' conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=2:12, rule="$A$1>0", style = posStyle)
+#' 
+#' ## highlight duplicates using default style
+#' writeData(wb, "Duplicates", sample(LETTERS[1:15], size = 10, replace = TRUE))
+#' conditionalFormatting(wb, "Duplicates", cols = 1, rows = 1:10, type = "duplicates")
+#' 
+#' ## cells containing text
+#' fn <- function(x) paste(sample(LETTERS, 10), collapse = "-")
+#' writeData(wb, "containsText", sapply(1:10, fn))
+#' conditionalFormatting(wb, "containsText", cols = 1, rows = 1:10, type = "contains", rule = "A")
+#' 
+#' ## colourscale colours cells based on cell value
+#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+#' writeData(wb, "colourScale", df, colNames=FALSE)  ## write data.frame
+#' 
+#' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
+#' ## If rule is NULL, min and max of cells is used. Rule must be the same length as style or NULL.
+#' conditionalFormatting(wb, "colourScale", cols=1:ncol(df), rows=1:nrow(df),
+#'    style = c("black", "white"), 
+#'    rule = c(0, 255), 
+#'    type = "colourScale")
+#' 
+#' setColWidths(wb, "colourScale", cols = 1:ncol(df), widths = 1.07)
+#' setRowHeights(wb, "colourScale", rows = 1:nrow(df), heights = 7.5) 
+#' 
+#' ## Databars
+#' writeData(wb, "databar", -5:5)
+#' conditionalFormatting(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
+#' 
+#' saveWorkbook(wb, "conditionalFormattingExample.xlsx", TRUE)
+conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
+  
+  type <- tolower(type)
+  
+  if(type %in% c("colorscale", "colourscale")){
+    type <- "colorScale"
+    
+  }else if(type == "databar"){
+    type <- "dataBar"
+    
+  }else if(type == "duplicates"){
+    type <- "duplicatedValues"
+    
+  }else if(type == "contains"){
+    type <- "containsText"
+    
+  }else if(type != "expression"){
+    stop("Invalid type argument.  Type must be one of 'expression', 'colourScale', 'databar', 'duplicates' or 'contains'")
+  }
+  
+  ## rows and cols
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)  
+  rows <- as.integer(rows)
+  
+  
+  ## check valid rule
+  values <- NULL
+  dxfId <- NULL
+  
+  if(type == "colorScale"){
+    
+    # type == "colourScale"
+    # - style is a vector of colours with length 2 or 3
+    # - rule specifies the quantiles (numeric vector of length 2 or 3), if NULL min and max are used
+    
+    if(is.null(style))
+      stop("If type == 'colourScale', style must be a vector of colours of length 2 or 3.")
+    
+    if(class(style) != "character")
+      stop("If type == 'colourScale', style must be a vector of colours of length 2 or 3.")
+    
+    if(!length(style) %in% 2:3)
+      stop("If type == 'colourScale', style must be a vector of length 2 or 3.")
+    
+    if(!is.null(rule)){
+      if(length(rule) != length(style))
+        stop("If type == 'colourScale', rule and style must have equal lengths.")
+    }
+    
+    style <- validateColour(style, errorMsg="Invalid colour specified in style.")
+    
+    values <- rule
+    rule <- style
+    
+  }else if(type == "dataBar"){
+    
+    # type == "databar"
+    # - style is a vector of colours of length 2 or 3
+    # - rule specifies the quantiles (numeric vector of length 2 or 3), if NULL min and max are used
+    
+    if(is.null(style))
+      style <- "#638EC6"
+      
+    if(class(style) != "character")
+      stop("If type == 'dataBar', style must be a vector of colours of length 1 or 2.")
+    
+    if(!length(style) %in% 1:2)
+      stop("If type == 'dataBar', style must be a vector of length 1 or 2.")
+    
+    if(!is.null(rule)){
+      if(length(rule) != length(style))
+        stop("If type == 'dataBar', rule and style must have equal lengths.")
+    }
+    
+    style <- validateColour(style, errorMsg="Invalid colour specified in style.")
+    
+    values <- rule
+    rule <- style
+    
+  }else if(type == "expression"){
+    
+    # type == "expression"
+    # - style = createStyle()
+    # - rule is an expression to evaluate
+    
+    rule <- toupper(gsub(" ", "", rule))
+    rule <- replaceIllegalCharacters(rule)
+    rule <- gsub("!=", "&lt;&gt;", rule)
+    rule <- gsub("==", "=", rule)
+    
+    if(!grepl("[A-Z]", substr(rule, 1, 2))){
+      
+      ## formula looks like "operatorX" , attach top left cell to rule    
+      rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
+      
+    } ## else, there is a letter in the formula and apply as is
+    
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    if(!"Style" %in% class(style))
+      stop("If type == 'expression', style must be a Style object.")
+    
+    invisible(dxfId <- wb$addDXFS(style))
+    
+  }else if(type == "duplicatedValues"){
+    
+    # type == "duplicatedValues"
+    # - style is a Style object
+    # - rule is ignored
+    
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    if(!"Style" %in% class(style))
+      stop("If type == 'duplicates', style must be a Style object.")
+    
+    invisible(dxfId <- wb$addDXFS(style))
+    rule <- style
+    
+  }else if(type == "containsText"){
+    
+    # type == "contains"
+    # - style is Style object
+    # - rule is text to look for
+    
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    if(!"character" %in% class(rule))
+      stop("If type == 'contains', rule must be a character vector of length 1.")
+    
+    if(!"Style" %in% class(style))
+      stop("If type == 'contains', style must be a Style object.")
+    
+    invisible(dxfId <- wb$addDXFS(style))
+    values <- rule
+    rule <- style
+    
+  }
+  
+  
+  
+  invisible(wb$conditionalFormatting(sheet,
+                                     startRow = min(rows),
+                                     endRow = max(rows),
+                                     startCol = min(cols),
+                                     endCol = max(cols),
+                                     dxfId = dxfId,
+                                     formula = rule,
+                                     type = type,
+                                     values = values))
+  
+  invisible(0)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#' @name conditionalFormat
+#' @title Add conditional formatting to cells
+#' @description DEPRECATED! USE \code{\link{conditionalFormatting}}
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to apply conditional formatting to
+#' @param rows Rows to apply conditional formatting to
+#' @param rule The condition under which to apply the formatting or a vector of colours. See examples.
+#' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
+#' @details DEPRECATED! USE \code{\link{conditionalFormatting}}
+#' 
+#' Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
+#' Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' @param type Either 'expression', 'colorscale' or 'databar'. If 'expression' the formatting is determined
+#' by a formula.  If colorScale cells are coloured based on cell value. See examples.
+#' @seealso \code{\link{createStyle}}
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "cellIs")
+#' addWorksheet(wb, "moving Row")
+#' addWorksheet(wb, "moving Col")
+#' addWorksheet(wb, "Dependent on 1")
+#' addWorksheet(wb, "colourScale 2 Colours")
+#' addWorksheet(wb, "databar")
+#' 
+#' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
+#' 
+#' ## rule applies to all each cell in range
+#' writeData(wb, 1, -5:5)
+#' writeData(wb, 1, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 1, cols=1, rows=2:12, rule="!=0", style = negStyle)
+#' conditionalFormat(wb, 1, cols=1, rows=2:12, rule="==0", style = posStyle)
+#' 
+#' ## highlight row dependent on first cell in row
+#' writeData(wb, 2, -5:5)
+#' writeData(wb, 2, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1<0", style = negStyle)
+#' conditionalFormat(wb, 2, cols=1:2, rows=2:12, rule="$A1>0", style = posStyle)
+#' 
+#' ## highlight column dependent on first cell in column
+#' writeData(wb, 3, -5:5)
+#' writeData(wb, 3, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1<0", style = negStyle)
+#' conditionalFormat(wb, 3, cols=1:2, rows=2:12, rule="A$1>0", style = posStyle)
+#' 
+#' 
+#' ## highlight entire range cols X rows dependent only on cell A1
+#' writeData(wb, 4, -5:5)
+#' writeData(wb, 4, LETTERS[1:11], startCol=2)
+#' conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1<0", style = negStyle)
+#' conditionalFormat(wb, 4, cols=1:2, rows=2:12, rule="$A$1>0", style = posStyle)
+#' 
+#' ## colourscale colours cells based on cell value
+#' 
+#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+#' writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
+#' 
+#' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
+#' conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
+#'    rule =c("black", "white"), type = "colourScale")
+#'    
+#' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
+#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
+#'
+#' ## Databars
+#' writeData(wb, "databar", -5:5)
+#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 2)
+#' ## set negative and positive colours
+#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
+#'  rule = c("yellow", "green"), type = "databar")
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
+conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
+  
+  
+  ## Rule always applies to top left of sqref, $ determine which cells the rule depends on
+  ## Rule for "databar" and colourscale are colours of length 2/3 or 1 respectively.
+  
+  type <- tolower(type)
+  if(tolower(type) %in% c("colorscale", "colourscale")){
+    type <- "colorScale"
+  }else if(type == "databar"){
+    type <- "dataBar"
+  }else if(type != "expression"){
+    stop("Invalid type argument.  Type must be 'expression', 'colourScale' or 'databar'")
+  }
+  
+  ## rows and cols
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)  
+  rows <- as.integer(rows)
+  
+  ## check valid rule
+  if(type == "colorScale"){
+    if(!length(rule) %in% 2:3)
+      stop("rule must be a vector containing 2 or 3 colours if type is 'colorScale'")
+    
+    rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
+    dxfId <- NULL
+    
+  }else if(type == "dataBar"){
+    
+    ## If rule is NULL use default colour
+    if(is.null(rule)){
+      rule <- "FF638EC6"
+    }else{
+      rule <- validateColour(rule, errorMsg="Invalid colour specified in rule.")
+    }
+    
+    dxfId <- NULL
+    
+  }else{ ## else type == "expression"
+    
+    rule <- toupper(gsub(" ", "", rule))
+    rule <- replaceIllegalCharacters(rule)
+    rule <- gsub("!=", "&lt;&gt;", rule)
+    rule <- gsub("==", "=", rule)
+    
+    if(!grepl("[A-Z]", substr(rule, 1, 2))){
+      
+      ## formula looks like "operatorX" , attach top left cell to rule    
+      rule <- paste0( getCellRefs(data.frame("x" = min(rows), "y" = min(cols))), rule)
+      
+    } ## else, there is a letter in the formula and apply as is
+    
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    invisible(dxfId <- wb$addDXFS(style))
+    
+  }
+  
+  
+  invisible(wb$conditionalFormatCell(sheet,
+                                     startRow = min(rows),
+                                     endRow = max(rows),
+                                     startCol = min(cols),
+                                     endCol = max(cols),
+                                     dxfId,
+                                     formula = rule,
+                                     type = type))
+  
+  invisible(0)
+  
+}
+
+
