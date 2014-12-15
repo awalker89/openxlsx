@@ -83,13 +83,12 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
   // get column for each value
   IntegerVector colNumbers = RcppConvertFromExcelRef(r);
   IntegerVector colGroups = match(colNumbers, autoColumns);
-  
+
   // reducing to only the columns that are auto
   LogicalVector notNA = !is_na(colGroups);
   colNumbers = colNumbers[notNA];
   v = v[notNA];
   widths = widths[notNA];
-  
   IntegerVector uCols = sort_unique(colNumbers);
   
   size_t nUnique = uCols.size();

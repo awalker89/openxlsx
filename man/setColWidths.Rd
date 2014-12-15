@@ -3,7 +3,7 @@
 \alias{setColWidths}
 \title{Set worksheet column widths}
 \usage{
-setColWidths(wb, sheet, cols, widths)
+setColWidths(wb, sheet, cols, widths, ignoreMergedCells = FALSE)
 }
 \arguments{
 \item{wb}{A workbook object}
@@ -14,6 +14,8 @@ setColWidths(wb, sheet, cols, widths)
 
 \item{widths}{widths to set rows to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
 recycled to the length of cols.}
+
+\item{ignoreMergedCells}{Ignore any cells that have been merged with other cells in the calculation of "auto" column widths.}
 }
 \description{
 Set worksheet column widths to specific width or "auto".

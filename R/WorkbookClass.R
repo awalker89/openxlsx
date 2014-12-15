@@ -1211,7 +1211,7 @@ Workbook$methods(setColWidths = function(sheet){
   cols <- unlist(lapply(colWidths[[sheet]], "[[", "col"))
   names(widths) <- cols
   
-  autoColsInds <- widths == "auto"
+  autoColsInds <- widths %in% c("auto", "auto2")
   autoCols <- cols[autoColsInds]
   
   ## If any not auto
@@ -1299,9 +1299,46 @@ Workbook$methods(setColWidths = function(sheet){
         allCharWidths[is.na(allCharWidths)] <- baseFontCharWidth
       }
       
+      ## Now check for columns that are auto2
+      auto2Inds <- which(widths %in% "auto2")
+      if(length(auto2Inds) > 0 & length(worksheets[[sheet]]$mergeCells) > 0){
+        
+        sd <- sheetData[[sheet]]
+        
+        ## get cell merges
+        
+        exMerges <- regmatches(worksheets[[sheet]]$mergeCells, regexpr("[A-Z0-9]+:[A-Z0-9]+", worksheets[[sheet]]$mergeCells))
+        
+        comps <- lapply(exMerges, function(rectCoords) unlist(strsplit(rectCoords, split = ":")))  
+        col <- lapply(comps, convertFromExcelRef)
+        col <- lapply(col, function(x) x[x %in% cols[auto2Inds]]) ## subset to auto2Inds
+        
+        rows <- lapply(comps, function(x) as.numeric(gsub("[A-Z]", "", x)))
+        rows <- rows[sapply(col, length) > 0]
+        col <- col[sapply(col, length) > 0]
+        
+        if(length(col) > 0){
+
+          allCells <- lapply(1:length(col), function(i) expand.grid( min(col[[i]]):max(col[[i]]),  min(rows[[i]]):max(rows[[i]])))
+          allCells <- do.call("rbind", allCells)
+          allCells <- paste0(convert2ExcelRef(allCells[[1]], LETTERS), allCells[[2]])
+          
+          r <- lapply(sheetData[[sheet]], "[[", "r")
+          sd <-  sheetData[[sheet]][!r %in% allCells]
+          allCharWidths <- allCharWidths[!r %in% allCells]
+          
+        }else{
+          sd <- sheetData[[sheet]] 
+        }
+        
+        
+      }else{
+        sd <- sheetData[[sheet]]
+      }
+      
       ## Now that we have the max character width for the largest font on the page calculate the column widths
       calculatedWidths <- .Call("openxlsx_calcColumnWidths",
-                                sheetData = sheetData[[sheet]],
+                                sheetData = sd,
                                 sharedStrings = unlist(sharedStrings, use.names = FALSE),
                                 columnInds = as.integer(autoCols),
                                 width = allCharWidths,
@@ -1493,7 +1530,7 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
     
     # forumula is a vector of colours of length 1 or 2
     # values is NULL or a numeric vector of equal length as formula
-
+    
     if(length(formula) == 2L){
       negColour <- formula[[1]]
       posColour <- formula[[2]]
@@ -1530,11 +1567,11 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
     
     cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)
     
-
+    
   }else if(type == "duplicatedValues"){
     
     cfRule <- sprintf('<cfRule type="duplicateValues" dxfId="%s" priority="1"/>', dxfId)
-
+    
     
     
   }else if(type == "containsText"){

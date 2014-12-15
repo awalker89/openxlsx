@@ -1000,6 +1000,7 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #' @param cols Indices of cols to set width
 #' @param widths widths to set rows to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
 #' recycled to the length of cols.
+#' @param ignoreMergedCells Ignore any cells that have been merged with other cells in the calculation of "auto" column widths.
 #' @details The global min and max column width for "auto" columns is set by (default values show):
 #' \itemize{
 #'   \item{options("openxlsx.minWidth" = 3)}
@@ -1028,7 +1029,7 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #'   
 #' ## Save workbook
 #' saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
-setColWidths <- function(wb, sheet, cols, widths){
+setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
   
   sheet <- wb$validateSheet(sheet)
   
@@ -1036,6 +1037,8 @@ setColWidths <- function(wb, sheet, cols, widths){
     stop("First argument must be a Workbook.")
   
   widths <- tolower(widths)  ## possibly "auto"
+  if(ignoreMergedCells)
+    widths[widths == "auto"] <- "auto2"
   
   if(length(widths) > length(cols))
     stop("More widths than columns supplied.")
