@@ -2089,7 +2089,7 @@ setFooter <- function(wb, text, position = "center"){
 #' conditionalFormatting(wb, "containsText", cols = 1, rows = 1:10, type = "contains", rule = "A")
 #' 
 #' ## colourscale colours cells based on cell value
-#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 4)
 #' writeData(wb, "colourScale", df, colNames=FALSE)  ## write data.frame
 #' 
 #' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
@@ -2333,7 +2333,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
 #' 
 #' ## colourscale colours cells based on cell value
 #' 
-#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 5)
+#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 4)
 #' writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
 #' 
 #' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
