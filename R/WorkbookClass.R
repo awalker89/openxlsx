@@ -358,7 +358,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## write worksheet, worksheet_rels, drawings, drawing_rels
   .self$writeSheetDataXML(xldrawingsDir, xldrawingsRelsDir, xlworksheetsDir, xlworksheetsRelsDir)
   
-  ## write shareStrings.xml
+  ## write sharedStrings.xml
   ct <- Content_Types
   if(length(sharedStrings) > 0){
     .Call("openxlsx_writeFile",
@@ -625,7 +625,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   strFlag <- which(t == "s")
   newStrs <- v[strFlag]
   if(length(newStrs) > 0){
-    
+
     newStrs <- replaceIllegalCharacters(newStrs)
     newStrs <- paste0("<si><t>", newStrs, "</t></si>")
     
@@ -1144,7 +1144,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(length(styleInds[[i]]) > 0)
         styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
     }
-    
+
     if(length(rowHeights[[i]]) == 0){
       
       .Call("openxlsx_quickBuildCellXML",

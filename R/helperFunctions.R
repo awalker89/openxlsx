@@ -209,13 +209,19 @@ headerFooterSub <- function(x){
 replaceIllegalCharacters <- function(v){
   
   vEnc <- Encoding(v)
-  if("UTF-8" %in% vEnc){
-    fromEnc <- "UTF-8"
-  }else{
-    fromEnc <- ""
-  }
+  v <- as.character(v)
   
-  v <- iconv(as.character(v), from = fromEnc, to = "UTF-8")
+#   if("UTF-8" %in% vEnc){
+#     fromEnc <- "UTF-8"
+#   }else{
+#     fromEnc <- ""
+#   }
+#   v <- iconv(as.character(v), from = fromEnc, to = "UTF-8")
+
+  flg <- vEnc != "UTF-8"
+  if(any(flg))
+    v[flg] <- iconv(v[flg], from = "", to = "UTF-8")
+  
   v <- gsub('&', "&amp;", v)
   v <- gsub('"', "&quot;", v)
   v <- gsub("'", "&apos;", v)
