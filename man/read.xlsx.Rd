@@ -39,9 +39,6 @@ df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow=1, skipEmptyRows=TRUE,
 df2$Date <- convertToDate(df2$Date)
 sapply(df2, class)
 head(df2)
-
-df3 <- read.xlsx(xlsxFile = xlsxFile, sheet = 4, startRow=1, skipEmptyRows=TRUE, colNames=TRUE)
-df3$Symbol
 }
 \author{
 Alexander Walker

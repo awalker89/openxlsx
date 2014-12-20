@@ -24,9 +24,6 @@
 #' sapply(df2, class)
 #' head(df2)
 #' 
-#' df3 <- read.xlsx(xlsxFile = xlsxFile, sheet = 4, startRow=1, skipEmptyRows=TRUE, colNames=TRUE)
-#' df3$Symbol
-#' 
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE){
   
