@@ -283,8 +283,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
       startCol <- rep_len(startCol, length.out = nSheets)
         
     if(length(headerStyle) != nSheets & !is.null(headerStyle))
-      headerStyle <- rep_len(headerStyle, length.out = nSheets)
-    
+      headerStyle <- lapply(1:nSheets, function(x) headerStyle)
+        
     if(length(borders) != nSheets & !is.null(borders))
       borders <- rep_len(borders, length.out = nSheets)
     
@@ -309,30 +309,30 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
         writeDataTable(wb = wb,
                        sheet = i,
                        x = x[[i]],
-                       startCol = startCol[i],
-                       startRow = startRow[i],
+                       startCol = startCol[[i]],
+                       startRow = startRow[[i]],
                        xy = xy,
-                       colNames = colNames[i],
-                       rowNames = rowNames[i],
-                       tableStyle = tableStyle[i],
+                       colNames = colNames[[i]],
+                       rowNames = rowNames[[i]],
+                       tableStyle = tableStyle[[i]],
                        tableName = NULL,
-                       headerStyle = headerStyle[i],
-                       withFilter = withFilter[i])
+                       headerStyle = headerStyle[[i]],
+                       withFilter = withFilter[[i]])
         
       }else{
         
         writeData(wb = wb, 
                   sheet = i,
                   x = x[[i]],
-                  startCol = startCol[i],
-                  startRow = startRow[i], 
+                  startCol = startCol[[i]],
+                  startRow = startRow[[i]], 
                   xy = xy,
-                  colNames = colNames[i],
-                  rowNames = rowNames[i],
-                  headerStyle = headerStyle[i],
-                  borders = borders[i],
-                  borderColour = borderColour[i],
-                  borderStyle = borderStyle[i])
+                  colNames = colNames[[i]],
+                  rowNames = rowNames[[i]],
+                  headerStyle = headerStyle[[i]],
+                  borders = borders[[i]],
+                  borderColour = borderColour[[i]],
+                  borderStyle = borderStyle[[i]])
         
       }
       

@@ -135,6 +135,7 @@ writeData <- function(wb,
   borderStyle <- validateBorderStyle(borderStyle)[[1]]
     
   ## special case - vector of hyperlinks
+  hlinkNames <- NULL
   if("hyperlink" %in% class(x)){
     hlinkNames <- names(x)
     colNames = FALSE

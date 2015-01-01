@@ -77,7 +77,7 @@ options("openxlsx.dateFormat" = "mm/dd/yyyy")
 options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")
 options("openxlsx.numFmt" = NULL) ## For default style rounding of numeric columns
 
-df <- data.frame("Date" = Sys.Date()-0:19, "LogicalT" = TRUE
+df <- data.frame("Date" = Sys.Date()-0:19, "LogicalT" = TRUE,
                  "Time" = Sys.time()-0:19*60*60,
                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
                  "hLink" = "http://cran.r-project.org/",
@@ -448,7 +448,7 @@ startRow <- rep(c(2, 24), each = 3)
 startCol <- rep(c("B", "H", "N"), 2)
 
 ## create a worksheet to save reconstructed images to
-addWorksheet(wb, "Reconstructed Images")
+addWorksheet(wb, "Reconstructed Images", zoom = 90)
 
 for(i in 1:length(nPCs)){
 
