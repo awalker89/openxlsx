@@ -4,13 +4,13 @@
 #' @param wb A Workbook object containing a worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
 #' @param x A dataframe.
-#' @param startCol A vector specifiying the starting columns(s) to write df
-#' @param startRow A vector specifiying the starting row(s) to write df
+#' @param startCol A vector specifiying the starting column to write df
+#' @param startRow A vector specifiying the starting row to write df
 #' @param xy An alternative to specifying startCol and startRow individually.  
 #' A vector of the form c(startCol, startRow)
 #' @param colNames If TRUE, column names of x are written.
 #' @param rowNames If TRUE, row names of x are written.
-#' @param tableStyle Any excel table style name or "none".
+#' @param tableStyle Any excel table style name or "none" (see "formatting" vignette).
 #' @param tableName name of table in workbook. The table name must be unique.
 #' @param headerStyle Custom style to apply to column names.
 #' @param withFilter If TRUE, columns with have withFilters in the first row.

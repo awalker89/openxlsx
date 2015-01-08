@@ -16,9 +16,9 @@ writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 
 \item{x}{A dataframe.}
 
-\item{startCol}{A vector specifiying the starting columns(s) to write df}
+\item{startCol}{A vector specifiying the starting column to write df}
 
-\item{startRow}{A vector specifiying the starting row(s) to write df}
+\item{startRow}{A vector specifiying the starting row to write df}
 
 \item{xy}{An alternative to specifying startCol and startRow individually.
 A vector of the form c(startCol, startRow)}
@@ -27,7 +27,7 @@ A vector of the form c(startCol, startRow)}
 
 \item{rowNames}{If TRUE, row names of x are written.}
 
-\item{tableStyle}{Any excel table style name or "none".}
+\item{tableStyle}{Any excel table style name or "none" (see "formatting" vignette).}
 
 \item{tableName}{name of table in workbook. The table name must be unique.}
 

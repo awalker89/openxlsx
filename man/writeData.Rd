@@ -18,9 +18,9 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 
 \item{x}{Object to be written. For classes supported look at the examples.}
 
-\item{startCol}{A vector specifiying the starting columns(s) to write to.}
+\item{startCol}{A vector specifiying the starting column to write to.}
 
-\item{startRow}{A vector specifiying the starting row(s) to write to.}
+\item{startRow}{A vector specifiying the starting row to write to.}
 
 \item{xy}{An alternative to specifying \code{startCol} and
 \code{startRow} individually.  A vector of the form
@@ -41,9 +41,7 @@ each column. If "\code{all}" all cell borders are drawn.}
 
 \item{borderColour}{Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).}
 
-\item{borderStyle}{Border line style}
-
-\item{withFilter}{If TRUE, add filters to column name row. NOTE can only have one filter per worksheet.
+\item{borderStyle}{Border line style
 \itemize{
    \item{\bold{none}}{ no border}
    \item{\bold{thin}}{ thin border}
@@ -60,6 +58,8 @@ each column. If "\code{all}" all cell borders are drawn.}
    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
+
+\item{withFilter}{If TRUE, add filters to column name row. NOTE can only have one filter per worksheet.}
 
 \item{keepNA}{If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.}
 }

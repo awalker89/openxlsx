@@ -5,8 +5,8 @@
 #' @param wb A Workbook object containing a worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
 #' @param x Object to be written. For classes supported look at the examples.
-#' @param startCol A vector specifiying the starting columns(s) to write to.
-#' @param startRow A vector specifiying the starting row(s) to write to.
+#' @param startCol A vector specifiying the starting column to write to.
+#' @param startRow A vector specifiying the starting row to write to.
 #' @param xy An alternative to specifying \code{startCol} and
 #' \code{startRow} individually.  A vector of the form
 #' \code{c(startCol, startRow)}.
@@ -21,7 +21,6 @@
 #' each column. If "\code{all}" all cell borders are drawn.
 #' @param borderColour Colour of cell border.  A valid colour (belonging to \code{colours()} or a hex colour code, eg see \href{http://www.colorpicker.com}{here}).
 #' @param borderStyle Border line style
-#' @param withFilter If TRUE, add filters to column name row. NOTE can only have one filter per worksheet. 
 #' \itemize{
 #'    \item{\bold{none}}{ no border}
 #'    \item{\bold{thin}}{ thin border}
@@ -38,6 +37,7 @@
 #'    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
+#' @param withFilter If TRUE, add filters to column name row. NOTE can only have one filter per worksheet. 
 #' @param keepNA If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @seealso \code{\link{writeDataTable}}
 #' @export writeData
