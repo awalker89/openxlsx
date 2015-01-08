@@ -1769,7 +1769,7 @@ Workbook$methods(preSaveCleanUp = function(){
   
   ## add a worksheet if none added
   if(nSheets == 0){
-    warning("Workbook does not contain any worksheets. A worksheet will be added.")
+    warning("Workbook does not contain any worksheets. A worksheet will be added.", call. = FALSE)
     .self$addWorksheet("Sheet 1")
     nSheets <- 1L
   }
@@ -1779,7 +1779,7 @@ Workbook$methods(preSaveCleanUp = function(){
   splitRels <- strsplit(workbook.xml.rels, split = " ")
   nms <- lapply(splitRels, function(x) gsub("(.*)=(.*)", "\\1", x[2:length(x)]))
   rAttrs <- lapply(splitRels, function(x) gsub("/>$", "", gsub('(.*)="(.*)"', "\\2", x[2:length(x)])))   
-  rAttrs <- lapply(nChildren, function(i) {names(rAttrs[[i]]) <- nms[[i]]; return(rAttrs[[i]])})
+  rAttrs <- lapply(nChildren, function(i) { names(rAttrs[[i]]) <- nms[[i]]; return(rAttrs[[i]]) })
   
   rIds <- paste0("rId", nChildren)
   targets <- unlist(lapply(rAttrs, "[[", "Target"))
@@ -1916,13 +1916,18 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
     ## ********** Assume all styleObjects cells have one a single worksheet **********
     ## Loop through existing styleObjects
     newInds <- 1:length(rows)
+    keepStyle <- rep(TRUE, nStyles) 
     for(i in 1:nStyles){
       
       if(sheet == styleObjects[[i]]$sheet){
         
         ## Now check rows and cols intersect
-        
-        toRemoveInds <- which(match(styleObjects[[i]]$rows, rows) == match(styleObjects[[i]]$cols, cols))
+        ## toRemove are the elements that will be used in the merge
+        ## mergeInds are the intersection of the two styles that will need to merge
+        ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
+                
+        toRemoveInds <- which(styleObjects[[i]]$rows %in% rows & styleObjects[[i]]$cols %in% cols) 
+        #which(!is.na(match(styleObjects[[i]]$rows, rows)) & !is.na(match(styleObjects[[i]]$cols, cols)))
         mergeInds <- which(rows %in% styleObjects[[i]]$rows & cols %in% styleObjects[[i]]$cols)
         newInds <- newInds[!newInds %in% mergeInds]
         
@@ -1932,10 +1937,16 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
           styleObjects[[i]]$rows <<- styleObjects[[i]]$rows[-toRemoveInds]
           styleObjects[[i]]$cols <<- styleObjects[[i]]$cols[-toRemoveInds]
           
+          if(length(styleObjects[[i]]$rows) == 0 | length(styleObjects[[i]]$cols) == 0)
+            keepStyle[[i]] <- FALSE
+          
+          
         }
         
         ## append style object for intersecting cells
         if(length(mergeInds) > 0){
+          
+          keepStyle <- c(keepStyle, TRUE)
           
           styleObjects <<- append(styleObjects, list(list(style = mergeStyle(styleObjects[[i]]$style, newStyle = style),
                                                           sheet =  sheet,
@@ -1948,6 +1959,9 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
       
       
     } ## End of loop through styles
+ 
+    ## remove any styles that no longer have any affect
+    styleObjects <<- styleObjects[keepStyle]
     
     ## append style object for non-intersecting cells
     if(length(newInds) > 0){
@@ -1960,7 +1974,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
     }
     
     
-  }else{
+  }else{ ## else we are not stacking
     
     styleObjects <<- append(styleObjects, list(list(style = style,
                                                     sheet =  sheet,

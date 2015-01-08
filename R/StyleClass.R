@@ -58,7 +58,6 @@ Style$methods(initialize = function(){
 mergeStyle = function(oldStyle, newStyle){
 
   ## This function is used to merge an existing cell style with a new style to create a stacked style.
-  
   oldStyle <- oldStyle$copy()
   
   if(!is.null(newStyle$fontName))
@@ -76,8 +75,16 @@ mergeStyle = function(oldStyle, newStyle){
   if(!is.null(newStyle$fontScheme))
     oldStyle$fontScheme <- newStyle$fontScheme
   
-  if(!is.null(newStyle$fontDecoration))
-    oldStyle$fontDecoration <- newStyle$fontDecoration
+  if(length(newStyle$fontDecoration) > 0){
+    
+    if(length(oldStyle$fontDecoration) == 0){
+      oldStyle$fontDecoration <- newStyle$fontDecoration
+    }else{
+      oldStyle$fontDecoration <- c(oldStyle$fontDecoration, newStyle$fontDecoration)
+    }
+    
+  }
+    
   
   ## borders
   if(!is.null(newStyle$borderTop))
