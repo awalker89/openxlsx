@@ -1389,18 +1389,19 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove highest sheet from Content_Types
   # Remove drawings element
   # Remove drawings_rels element
-  # Remove rowheights element
+  # Remove rowHeights element
   # Remove sheetData
   # Remove styleObjects on sheet
   # Remove last sheet element from workbook
   # Remove last sheet element from workbook.xml.rels
   # Remove element from worksheets
   # Remove element from worksheets_rels
-  # Remove Freeze Pane
+  # Remove freezePane
   # Remove dataCount
   # Remove hyperlinks
   # Reduce calcChain i attributes & remove calcs on sheet
   # Remove sheet from sheetOrder
+  # Remove styleInds element
   
   sheet <- validateSheet(sheet)
   sheetNames <- names(worksheets)
@@ -1420,25 +1421,35 @@ Workbook$methods(deleteWorksheet = function(sheet){
   rowHeights[[sheet]] <<- NULL
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL
+  styleInds[[sheet]] <<- NULL
   sheetOrder <<- c(sheetOrder[sheetOrder < sheet], sheetOrder[sheetOrder > sheet] - 1L)
   
   ## remove styleObjects
   if(length(styleObjects) > 0)
-    styleObjects <<-styleObjects[unlist(lapply(styleObjects, "[[", "sheet"), use.names = FALSE) != sheetName]
+    styleObjects <<- styleObjects[unlist(lapply(styleObjects, "[[", "sheet"), use.names = FALSE) != sheetName]
   
   ## wont't remove tables and then won't need to reassign table r:id's
   worksheets[[sheet]] <<- NULL
   worksheets_rels[[sheet]] <<- NULL
   
   ## drawing will always be the first relationship and printerSettings second
-  for(i in 1:(nSheets-1L))
-    worksheets_rels[[i]][1:2] <<- genBaseSheetRels(i)
+  if(nSheets > 1){
+    for(i in 1:(nSheets-1L))
+      worksheets_rels[[i]][1:2] <<- genBaseSheetRels(i)
+  }else{
+    worksheets_rels <<- list()
+  }
   
-  
+  ## remove sheet
   workbook$sheets <<- workbook$sheets[!grepl(sprintf('name="%s"', sheetName), workbook$sheets)]
+  
   ## Reset rIds
-  for(i in (sheet+1L):nSheets)
-    workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets)
+  if(nSheets > 1){
+    for(i in (sheet+1L):nSheets)
+      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets)
+  }else{
+    workbook$sheets <<- NULL
+  }
   
   ## Can remove highest sheet
   workbook.xml.rels <<- workbook.xml.rels[!grepl(sprintf("sheet%s.xml", nSheets), workbook.xml.rels)]
