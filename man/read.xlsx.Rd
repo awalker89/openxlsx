@@ -5,7 +5,7 @@
 \title{Read data from a worksheet into a data.frame}
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
-  skipEmptyRows = TRUE, rowNames = FALSE)
+  skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -21,6 +21,8 @@ regardless of the value of startRow.}
 will return a row of NAs.}
 
 \item{rowNames}{If TRUE, first column of data will be used as row names.}
+
+\item{keepNewLine}{If TRUE, new line characters are maintained.}
 }
 \value{
 data.frame

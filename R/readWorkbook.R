@@ -9,6 +9,7 @@
 #' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
 #' will return a row of NAs.
 #' @param rowNames If TRUE, first column of data will be used as row names.
+#' @param keepNewLine If TRUE, keep new line characters embedded in strings.
 #' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
@@ -25,7 +26,7 @@
 #' head(df2)
 #' 
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
   
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -72,8 +73,15 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
   if(length(sharedStringsFile) > 0){
     
     ## read in, get si tags, get t tag value
-    ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
-    sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")
+    if(keepNewLine){
+      ss <- paste(readLines(sharedStringsFile, warn = FALSE), collapse = "\n")
+      ss <- gsub("\n<", "", ss)
+    }else{
+      ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
+    }
+    
+    sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")  
+    
     
     ## Need to remove any inline styling
     formattingFlag <- grepl("<rPr>", ss)
@@ -238,6 +246,7 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
 #' will return a row of NAs
 #' @param rowNames If TRUE, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
+#' @param keepNewLine If TRUE, keep new line characters embedded in strings.
 #' @author Alexander Walker
 #' @return data.frame
 #' @export
@@ -246,6 +255,6 @@ read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEm
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE){
-  read.xlsx(xlsxFile = xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames)
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
+  read.xlsx(xlsxFile = xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames, keepNewLine = keepNewLine)
 }
