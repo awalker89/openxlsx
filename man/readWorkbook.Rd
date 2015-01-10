@@ -22,7 +22,7 @@ will return a row of NAs}
 
 \item{rowNames}{If TRUE, first column of data will be used as row names.}
 
-\item{keepNewLine}{If TRUE, new line characters are maintained.}
+\item{keepNewLine}{If TRUE, keep new line characters embedded in strings.}
 }
 \value{
 data.frame

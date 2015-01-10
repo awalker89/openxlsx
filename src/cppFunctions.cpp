@@ -1084,7 +1084,15 @@ List buildCellMerges(List comps){
 
 
 // [[Rcpp::export]]
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows){
+SEXP readWorkbook(CharacterVector v,
+                  NumericVector vn,
+                  IntegerVector stringInds,
+                  CharacterVector r,
+                  CharacterVector tR,
+                  int nRows,
+                  bool hasColNames,
+                  bool skipEmptyRows
+                  ){
   
   // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
   int nCells = r.size();
@@ -1539,6 +1547,9 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
 SEXP calcNRows(CharacterVector x, bool skipEmptyRows){
   
   int n = x.size();
+  if(n == 0)
+    return(wrap(0));
+  
   int nRows;
   
   if(skipEmptyRows){

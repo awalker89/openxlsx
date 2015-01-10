@@ -2,51 +2,52 @@
 % Please edit documentation in R/readWorkbook.R
 \name{read.xlsx}
 \alias{read.xlsx}
-\title{Read data from a worksheet into a data.frame}
+\title{Read data from a worksheet or Workbook object into a data.frame}
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE)
 }
 \arguments{
-\item{xlsxFile}{An xlsx file}
+\item{xlsxFile}{An xlsx file or Workbook object}
 
-\item{sheet}{The name or index of the sheet to read data}
+\item{sheet}{The name or index of the sheet to read data from.}
 
-\item{startRow}{first row to begin looking for data.  Empty rows before any data is found are skipped.
+\item{startRow}{first row to begin looking for data.  Empty rows at the top of a file are always skipped,
 regardless of the value of startRow.}
 
-\item{colNames}{If TRUE, first row of data will be used as column names.}
+\item{colNames}{If TRUE, the first row of data will be used as column names.}
 
 \item{skipEmptyRows}{If TRUE, empty rows are skipped else empty rows after the first row containing data
 will return a row of NAs.}
 
 \item{rowNames}{If TRUE, first column of data will be used as row names.}
 
-\item{keepNewLine}{If TRUE, new line characters are maintained.}
+\item{keepNewLine}{If TRUE, keep new line characters embedded in strings.}
 }
 \value{
 data.frame
 }
 \description{
-Read data from a worksheet into a data.frame
+Read data from a worksheet or Workbook object into a data.frame
 }
 \details{
-Creates a data.frame of all data in worksheet.
+Creates a data.frame of all the data on a worksheet.
 }
 \examples{
 xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
-df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1, startRow=1, skipEmptyRows=FALSE, colNames=TRUE)
+df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1, startRow = 1, skipEmptyRows = FALSE)
 sapply(df1, class)
 
-df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow=1, skipEmptyRows=TRUE, colNames=TRUE)
+df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow = 1, skipEmptyRows = TRUE)
 df2$Date <- convertToDate(df2$Date)
 sapply(df2, class)
 head(df2)
+
+wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+df3 <- read.xlsx(wb, sheet = 1, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+all.equal(df1, df3)
 }
 \author{
 Alexander Walker
-}
-\seealso{
-\code{\link{readWorkbook}}
 }
 
