@@ -1721,15 +1721,19 @@ worksheetOrder <- function(wb){
 #' @param x A vector of integers
 #' @param origin date. Default value is for Windows Excel 2010
 #' @details Excel stores dates as number of days from some origin day
-#' (this origin is "1970-1-1" for Excel 2010).
+#' @seealso \code{\link{writeData}}
 #' @export
 #' @examples
 #' ##2014 April 21st to 25th
 #' x <- c(41750, 41751, 41752, 41753, 41754) 
 #' convertToDate(x)
 #' convertToDate(c(41821.8127314815, 41820.8127314815))
-convertToDate <- function(x, origin = "1970-1-1"){
-  as.Date(x - 25569, origin = origin)  
+convertToDate <- function(x, origin = "1900-01-01"){
+  if(origin == "1900-01-01"){
+    return(as.Date(x - 2, origin = "1900-01-01"))
+  }else{
+    return(as.Date(x, origin = origin))
+  }
 }
 
 
@@ -1738,7 +1742,6 @@ convertToDate <- function(x, origin = "1970-1-1"){
 #' @param x A numeric vector
 #' @param origin date. Default value is for Windows Excel 2010
 #' @details Excel stores dates as number of days from some origin day
-#' (this origin is "1970-1-1" for Excel 2010).
 #' @export
 #' @examples
 #' ## 2014-07-01 & 2014-06-30
@@ -2270,6 +2273,52 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
 
 
 
+#' @name getDateOrigin
+#' @title Return the date origin used internally by an xlsx or xlsm file
+#' @author Alexander Walker
+#' @param xlsxFile An xlsx or xlsm file.
+#' @details Excel stores dates as the number of days from either 1904-01-01 or 1900-01-01. This function
+#' checks the date origin being used in an Excel file and returns is so it can be used in \code{\link{convertToDate}}
+#' @return One of "1900-01-01" or "1904-01-01".
+#' @seealso \code{\link{convertToDate}}
+#' @examples
+#' 
+#' ## create a file with some dates
+#' write.xlsx(as.Date("2015-01-10") - (0:4), file = "getDateOriginExample.xlsx")
+#' m <- read.xlsx("getDateOriginExample.xlsx")
+#' 
+#' ## convert to dates
+#' do <- getDateOrigin(system.file("readTest.xlsx", package = "openxlsx"))
+#' convertToDate(m[[1]], do)
+#' 
+#' @export
+getDateOrigin <- function(xlsxFile){
+  
+  if(!file.exists(xlsxFile))
+    stop("Excel file does not exist.")
+  
+  if(grepl("\\.xls$|\\.xlm$", xlsxFile))
+    stop("openxlsx can not read .xls or .xlm files!")
+  
+  ## create temp dir and unzip
+  xmlDir <- paste0(tempdir(), "_excelXMLRead")
+  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  
+  on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
+  
+  workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
+  workbook <- paste(unlist(readLines(workbook, warn = FALSE)), collapse = "")
+  
+  if(grepl('date1904="1"|date1904="true"', workbook, ignore.case = TRUE)){
+    origin <- "1904-01-01"
+  }else{
+    origin <- "1900-01-01"
+  }
+  
+  return(origin)
+  
+}
+
 
 
 
@@ -2427,5 +2476,8 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
   invisible(0)
   
 }
+
+
+
 
 
