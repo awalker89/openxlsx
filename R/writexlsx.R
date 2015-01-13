@@ -187,7 +187,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   rowNames <- FALSE
   if("rowNames" %in% names(params)){
     if(is.logical(params$rowNames)){
-      colNames <- params$rowNames
+      rowNames <- params$rowNames
     }else{
       stop("Argument colNames must be TRUE or FALSE")
     }
