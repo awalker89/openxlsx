@@ -12,6 +12,7 @@
 #' will return a row of NAs.
 #' @param rowNames If TRUE, first column of data will be used as row names.
 #' @param keepNewLine If TRUE, keep new line characters embedded in strings.
+#' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
 #' @details Creates a data.frame of all the data on a worksheet.
 #' @author Alexander Walker
 #' @return data.frame
@@ -31,14 +32,14 @@
 #' all.equal(df1, df3)
 #'
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE){
   
   UseMethod("read.xlsx", xlsxFile) 
   
 }
 
 #' @export
-read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
+read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE){
   
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -103,8 +104,8 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
       sharedStrings <- .Call("openxlsx_getSharedStrings", sharedStrings, PACKAGE = 'openxlsx') ## No inline formatting
     }
     
-    emptyStrs <- attr(sharedStrings, "empty")
-    
+    emptyStrs <- c(attr(sharedStrings, "empty"), which(sharedStrings == "") - 1L)
+        
     z <- tolower(sharedStrings)
     sharedStrings[z == "true"] <- "TRUE"
     sharedStrings[z == "false"] <- "FALSE"
@@ -224,8 +225,62 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     
   }
   
+  origin <- 25569L
+  if(detectDates){
+
+    ## get date origin
+    if(grepl('date1904="1"|date1904="true"', paste(workbook, collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+
+    
+    stylesXML <- xmlFiles[grepl("styles.xml", xmlFiles)]
+    styles <- readLines(stylesXML, warn = FALSE)
+    styles <- removeHeadTag(styles)
+    
+    ## Number formats
+    numFmts <- .Call("openxlsx_getChildlessNode", styles, "<numFmt ", PACKAGE = "openxlsx")
+    
+    dateIds <- NULL
+    if(length(numFmts) > 0){
+      
+      numFmtsIds <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'numFmtId="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+      formatCodes <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'formatCode="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+      formatCodes <- gsub(".*(?<=\\])|@", "", formatCodes, perl = TRUE)
+      
+      ## this regex defines what "looks" like a date
+      dateIds <- numFmtsIds[!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)]
+      
+   }     
+      
+    dateIds <- c(dateIds, 14)
+    
+    ## which styles are using these dateIds
+    cellXfs <- .Call("openxlsx_getNodes", styles, "<cellXfs", PACKAGE = "openxlsx") 
+    xf <- .Call("openxlsx_getChildlessNode", cellXfs, "<xf ", PACKAGE = "openxlsx")
+    lookingFor <- paste(sprintf('numFmtId="%s"', dateIds), collapse = "|")
+    dateStyleIds <- which(sapply(xf, function(x) grepl(lookingFor, x), USE.NAMES = FALSE)) - 1L
+    
+    
+    s <- .Call("openxlsx_getCellStylesPossiblyMissing", ws, package = "openxlsx")
+    
+    styleInds <- s %in% dateStyleIds
+    
+    ## check numbers are also integers
+    isNotInt <- suppressWarnings(as.numeric(v[styleInds]))
+    isNotInt <- (isNotInt %% 1L != 0) | is.na(isNotInt)
+    styleInds[isNotInt] <- FALSE
+    
+    ## now replace string with something to look for
+    v[styleInds] <- "openxlsxdt"
+    
+    stringInds <- c(stringInds, which(styleInds) - 1L)
+    tR <- c(tR, r[styleInds]) 
+    
+  }
+  
+  
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
@@ -244,7 +299,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
 
 
 #' @export
-read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
+read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE){
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
@@ -428,8 +483,70 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     
   }
   
+  origin <- 25569L
+  if(detectDates){
+
+    ## get date origin
+    if(length(xlsxFile$workbook$workbookPr) > 0){
+      if(grepl('date1904="1"|date1904="true"', xlsxFile$workbook$workbookPr, ignore.case = TRUE))
+        origin <- 24107L
+    }
+     
+    sO <- xlsxFile$styleObjects
+    styles <- lapply(sO, function(x) {
+      
+      fc <- x[["style"]][["numFmt"]]$formatCode
+      if(is.null(fc))
+        fc <- x[["style"]][["numFmt"]]$numFmtId
+      fc
+      })
+    
+    
+    
+    sO <- sO[sapply(styles, length) > 0]
+    formatCodes <- unlist(lapply(sO, function(x) {
+      
+      fc <- x[["style"]][["numFmt"]]$formatCode
+      if(is.null(fc))
+        fc <- x[["style"]][["numFmt"]]$numFmtId
+      fc
+    }))
+    
+  
+    dateIds <- NULL
+    if(length(formatCodes) > 0){
+    
+      ## this regex defines what "looks" like a date
+      formatCodes <- gsub(".*(?<=\\])|@", "", formatCodes, perl = TRUE)
+      sO <- sO[(!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)) | formatCodes == 14]
+      
+    }     
+    
+    if(length(sO) > 0){
+    
+      rows <- unlist(lapply(sO, "[[", "rows"))
+      cols <- unlist(lapply(sO, "[[", "cols"))    
+      refs <- paste0(convert2ExcelRef(cols = cols, LETTERS), rows)
+  
+      styleInds <- match(refs, r)
+      
+      ## check numbers are also integers
+      isNotInt <- suppressWarnings(as.numeric(v[styleInds]))
+      isNotInt <- (isNotInt %% 1L != 0) | is.na(isNotInt)
+      styleInds[isNotInt] <- FALSE
+      
+      ## now replace string with something to look for
+      v[styleInds] <- "openxlsxdt"
+      
+      stringInds <- c(stringInds, styleInds - 1L)
+      tR <- c(tR, r[styleInds]) 
+      
+    }
+  }
+  
+  
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
@@ -464,6 +581,7 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' @param rowNames If TRUE, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
 #' @param keepNewLine If TRUE, keep new line characters embedded in strings.
+#' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
 #' @author Alexander Walker
 #' @return data.frame
 #' @export
@@ -472,6 +590,6 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE){
-  read.xlsx(xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames, keepNewLine = keepNewLine)
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE){
+  read.xlsx(xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames, keepNewLine = keepNewLine, detectDates = detectDates)
 }

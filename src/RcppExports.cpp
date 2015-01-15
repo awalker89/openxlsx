@@ -383,20 +383,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // buildMatrixMixed
-SEXP buildMatrixMixed(CharacterVector v, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols, IntegerVector charCols);
-RcppExport SEXP openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP) {
+SEXP buildMatrixMixed(CharacterVector v, NumericVector vn, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols, IntegerVector charCols, int originAdj);
+RcppExport SEXP openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP vnSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP, SEXP originAdjSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< CharacterVector >::type v(vSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type vn(vnSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type rowInd(rowIndSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type colInd(colIndSEXP );
         Rcpp::traits::input_parameter< CharacterVector >::type colNames(colNamesSEXP );
         Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
         Rcpp::traits::input_parameter< int >::type nCols(nColsSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type charCols(charColsSEXP );
-        SEXP __result = buildMatrixMixed(v, rowInd, colInd, colNames, nRows, nCols, charCols);
+        Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP );
+        SEXP __result = buildMatrixMixed(v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, originAdj);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -434,8 +436,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // readWorkbook
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP stringIndsSEXP, SEXP rSEXP, SEXP tRSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP) {
+SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows, int originAdj);
+RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP stringIndsSEXP, SEXP rSEXP, SEXP tRSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP originAdjSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -448,7 +450,8 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
         Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP );
         Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP );
-        SEXP __result = readWorkbook(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows);
+        Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP );
+        SEXP __result = readWorkbook(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows, originAdj);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -705,6 +708,21 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< List >::type style(styleSEXP );
         Rcpp::traits::input_parameter< CharacterVector >::type borders(bordersSEXP );
         std::string __result = createBorderNode(style, borders);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// getCellStylesPossiblyMissing
+SEXP getCellStylesPossiblyMissing(CharacterVector x);
+RcppExport SEXP openxlsx_getCellStylesPossiblyMissing(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
+        SEXP __result = getCellStylesPossiblyMissing(x);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

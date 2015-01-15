@@ -16,7 +16,6 @@ Convert from excel time number to R POSIXct type.
 }
 \details{
 Excel stores dates as number of days from some origin day
-(this origin is "1970-1-1" for Excel 2010).
 }
 \examples{
 ## 2014-07-01 & 2014-06-30

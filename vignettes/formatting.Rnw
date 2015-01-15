@@ -118,16 +118,16 @@ addStyle(wb, 1, style = createStyle(numFmt = "DATE"), rows = 2:11, cols = 1, gri
 sty <- createStyle(numFmt = "yyyy/mm/dd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 2, gridExpand = TRUE)
 
-sty <- createStyle(numFmt = "yy/mmm/dd")
+sty <- createStyle(numFmt = "yyyy/mmm/dd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 3, gridExpand = TRUE)
 
-sty <- createStyle(numFmt = "yyyy/m/ddd")
+sty <- createStyle(numFmt = "yy / mmmm / dd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 4, gridExpand = TRUE)
 
-sty <- createStyle(numFmt = "yy/mmm/ddddd")
+sty <- createStyle(numFmt = "ddddd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 5, gridExpand = TRUE)
 
-sty <- createStyle(numFmt = "yyyy-mmm-dddd")
+sty <- createStyle(numFmt = "yyyy-mmm-dd")
 addStyle(wb, 1, style = sty, rows = 2:11, cols = 6, gridExpand = TRUE)
 
 sty <- createStyle(numFmt = "mm/ dd yyyy")

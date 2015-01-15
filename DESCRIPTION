@@ -22,4 +22,5 @@ Imports:
 Repository: CRAN
 VignetteBuilder: knitr
 Suggests:
-    knitr
+    knitr,
+    testthat 

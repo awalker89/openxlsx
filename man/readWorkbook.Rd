@@ -5,7 +5,8 @@
 \title{Read data from a worksheet into a data.frame}
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
-  skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE)
+  skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE,
+  detectDates = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
