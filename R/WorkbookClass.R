@@ -521,9 +521,15 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ## convert any Dates to integers and create date style object
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
+    
     dInds <- which(sapply(colClasses, function(x) "date" %in% x))
+      
+    origin <- 25569L
+    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+    
     for(i in dInds)
-      df[,i] <- as.integer(df[,i]) + 25569
+      df[,i] <- as.integer(df[,i]) + origin
     
     t <- format(Sys.time(), "%z")
     offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
@@ -533,7 +539,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     for(i in pInds)
-      df[,i] <- as.numeric(as.POSIXct(df[,i])) / 86400 + 25569 + offSet
+      df[,i] <- as.numeric(as.POSIXct(df[,i])) / 86400L + origin + offSet
   }
   
   ## convert any Dates to integers and create date style object
