@@ -257,10 +257,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         }
         
         
-        if(s[["numFmtId"]] != "0" & numFmtFlag){
+        if(s[["numFmtId"]] != "0"){
           if(as.integer(s[["numFmtId"]]) < 164){
             style$numFmt <- list(numFmtId = s[["numFmtId"]])
-          }else{
+          }else if(numFmtFlag){
             style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)]]
           }
         }
