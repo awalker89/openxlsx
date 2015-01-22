@@ -1377,13 +1377,7 @@ CharacterVector buildTableXML(std::string table, std::string ref, std::vector<st
   int n = colNames.size();
   std::string tableCols;
   std::string tableStyleXML = "<tableStyleInfo name=\"" + tableStyle + "\" showFirstColumn=\"0\" showLastColumn=\"0\" showRowStripes=\"1\" showColumnStripes=\"0\"/>";
-  
-  //if colnames are null
-  if(!showColNames){
-    table += " headerRowCount=\"0\" totalsRowShown=\"0\">";
-  }else{
-    table += " totalsRowShown=\"0\">";
-  }
+  table += " totalsRowShown=\"0\">";
   
   if(withFilter)
     table += "<autoFilter ref=\"" + ref + "\"/>";

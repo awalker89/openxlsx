@@ -93,6 +93,7 @@ writeDataTable <- function(wb, sheet, x,
     tableName <- tableName
   }
   
+  
   ## increase scipen to avoid writing in scientific 
   exSciPen <- options("scipen")
   options("scipen" = 10000)
@@ -142,15 +143,16 @@ writeDataTable <- function(wb, sheet, x,
     
   }else{
     colNames <- paste0("Column", 1:ncol(x))
+    names(x) <- colNames
   }
   ## If zero rows, append an empty row (prevent XML from corrupting)
   if(nrow(x) == 0){
     x <- rbind(x, matrix("", nrow = 1, ncol = ncol(x)))
     names(x) <- colNames
   }
-  
+    
   ref1 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol, LETTERS, PACKAGE="openxlsx"), startRow)
-  ref2 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow+nrow(x)-1 + showColNames)
+  ref2 <- paste0(.Call('openxlsx_convert2ExcelRef', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow + nrow(x))
   ref <- paste(ref1, ref2, sep = ":")
   
   ## check not overwriting another table
@@ -161,7 +163,7 @@ writeDataTable <- function(wb, sheet, x,
 
       exTable <- wb$tables[tableSheets %in% sheet]
     
-      newRows <- c(startRow, startRow + nrow(x) - 1L + showColNames)
+      newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
       newCols <- c(startCol, startCol + ncol(x) - 1L)
       
       rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
@@ -182,11 +184,11 @@ writeDataTable <- function(wb, sheet, x,
   
   ## column class styling
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = showColNames, nRow = nrow(x), colClasses = colClasses)
+  classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = TRUE, nRow = nrow(x), colClasses = colClasses)
   
   ## write data to sheetData
   wb$writeData(df = x,
-               colNames = showColNames,
+               colNames = TRUE,
                sheet = sheet,
                startRow = startRow,
                startCol = startCol,
