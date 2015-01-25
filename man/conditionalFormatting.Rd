@@ -75,26 +75,26 @@ posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
 ## rule applies to all each cell in range
 writeData(wb, "cellIs", -5:5)
 writeData(wb, "cellIs", LETTERS[1:11], startCol=2)
-conditionalFormatting(wb, "cellIs", cols=1, rows=2:12, rule="!=0", style = negStyle)
-conditionalFormatting(wb, "cellIs", cols=1, rows=2:12, rule="==0", style = posStyle)
+conditionalFormatting(wb, "cellIs", cols=1, rows=1:11, rule="!=0", style = negStyle)
+conditionalFormatting(wb, "cellIs", cols=1, rows=1:11, rule="==0", style = posStyle)
 
 ## highlight row dependent on first cell in row
 writeData(wb, "Moving Row", -5:5)
 writeData(wb, "Moving Row", LETTERS[1:11], startCol=2)
-conditionalFormatting(wb, "Moving Row", cols=1:2, rows=2:12, rule="$A1<0", style = negStyle)
-conditionalFormatting(wb, "Moving Row", cols=1:2, rows=2:12, rule="$A1>0", style = posStyle)
+conditionalFormatting(wb, "Moving Row", cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
+conditionalFormatting(wb, "Moving Row", cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
 
 ## highlight column dependent on first cell in column
 writeData(wb, "Moving Col", -5:5)
 writeData(wb, "Moving Col", LETTERS[1:11], startCol=2)
-conditionalFormatting(wb, "Moving Col", cols=1:2, rows=2:12, rule="A$1<0", style = negStyle)
-conditionalFormatting(wb, "Moving Col", cols=1:2, rows=2:12, rule="A$1>0", style = posStyle)
+conditionalFormatting(wb, "Moving Col", cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
+conditionalFormatting(wb, "Moving Col", cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
 
 ## highlight entire range cols X rows dependent only on cell A1
 writeData(wb, "Dependent on 1", -5:5)
 writeData(wb, "Dependent on 1", LETTERS[1:11], startCol=2)
-conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=2:12, rule="$A$1<0", style = negStyle)
-conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=2:12, rule="$A$1>0", style = posStyle)
+conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
+conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
 
 ## highlight duplicates using default style
 writeData(wb, "Duplicates", sample(LETTERS[1:15], size = 10, replace = TRUE))

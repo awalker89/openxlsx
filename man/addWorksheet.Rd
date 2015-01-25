@@ -17,7 +17,7 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 
 \item{tabColour}{Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
 
-\item{zoom}{A numeric. Worksheet zoom level.}
+\item{zoom}{A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.}
 
 \item{header}{document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
 
