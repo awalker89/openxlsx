@@ -1779,7 +1779,9 @@ Workbook$methods(preSaveCleanUp = function(){
   ## Tables from r:id 3 to nTables+3 - 1
   ## HyperLinks from nTables+3 to nTables+3+nHyperLinks-1
   
-  nSheets <- length(worksheets)
+  sheetRIds <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=r:id="rId)[0-9]+', workbook$sheets, perl = TRUE))))
+  
+  nSheets <- length(sheetRIds)
   nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
   nPivots <- length(pivotDefinitions)
@@ -1791,6 +1793,7 @@ Workbook$methods(preSaveCleanUp = function(){
     nSheets <- 1L
   }
   
+  
   ## Assign relationship Ids  
   nChildren <- 1:length(workbook.xml.rels)
   splitRels <- strsplit(workbook.xml.rels, split = " ")
@@ -1801,23 +1804,24 @@ Workbook$methods(preSaveCleanUp = function(){
   rIds <- paste0("rId", nChildren)
   targets <- unlist(lapply(rAttrs, "[[", "Target"))
   
-  ## Reorderinf of workbook.xml.rels
-  sheetInds <- which(targets %in% sprintf("worksheets/sheet%s.xml", 1:nSheets))
-  sheetNumbers <- as.integer(gsub("[^0-9]", "", targets[sheetInds], perl = TRUE))
-  sheetInds <- sheetInds[order(sheetNumbers)]  ## make sure sheets will be in order
   
   ## get index of each child element for ordering
-  stylesInd <- which(targets == "styles.xml")
-  themeInd <- which(targets %in% sprintf("theme/theme%s.xml", 1:nThemes))
-  connectionsInd <- which(targets %in% "connections.xml")
+  sheetInds <- which(grepl("worksheets/sheet[0-9]+\\.xml", workbook.xml.rels))
+  stylesInd <- which(grepl("styles\\.xml", workbook.xml.rels))
+  themeInd <- which(grepl("theme/theme[0-9]+.xml", workbook.xml.rels))
+  connectionsInd <- which(grepl("connections.xml", workbook.xml.rels))
+  extRefInds <- which(grepl("externalLinks/externalLink[0-9]+.xml", workbook.xml.rels))
+  sharedStringsInd <- which(grepl("sharedStrings.xml", workbook.xml.rels))
+  tableInds <- which(grepl("table[0-9]+.xml", workbook.xml.rels))
   
-  extRefInds <- which(targets %in% sprintf("externalLinks/externalLink%s.xml", 1:nExtRefs))
-  sharedStringsInd <- which(targets == "sharedStrings.xml")
-  tableInds <- which(grepl("table[0-9]+.xml", targets))
+  ## Reordering of workbook.xml.rels
   pivotNode <- workbook.xml.rels[which(targets %in% sprintf("pivotCache/pivotCacheDefinition%s.xml", 1:nPivots))] ## don't want to re-assign rIds for pivot tables
   
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
+  
+  workbook$sheets
+  
   
   ## Re assign rIds to children of workbook.xml.rels
   workbook.xml.rels <<- unlist(lapply(1:length(workbook.xml.rels), function(i) {
@@ -1828,14 +1832,15 @@ Workbook$methods(preSaveCleanUp = function(){
   
   if(!is.null(vbaProject))
     workbook.xml.rels <<- c(workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2006/relationships/vbaProject" Target="vbaProject.bin"/>', 1L + length(workbook.xml.rels)))
-  
-  
+
   ## Reassign rId to workbook sheet elements, (order sheets by sheetId first)
-  sId <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE))))
-  workbook$sheets <<- sapply(order(sId), function(i) gsub('(?<=id="rId)[0-9]+', i, workbook$sheets[[i]], perl = TRUE))
-  workbook$sheets <<- sapply(1:nSheets, function(i) gsub('(?<=sheetId=")[0-9]+', i, workbook$sheets[[i]], perl = TRUE))
+  workbook$sheets <<- unlist(lapply(1:length(workbook$sheets), function(i) {
+    gsub('(?<= r:id="rId)[0-9]+', i, workbook$sheets[[i]], perl = TRUE)
+  }))
+
   if(!is.null(sheetOrder))
     workbook$sheets <<- workbook$sheets[sheetOrder]
+
   
   ## update workbook r:id to match reordered workbook.xml.rels externalLink element
   if(length(extRefInds) > 0){
