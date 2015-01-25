@@ -402,7 +402,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         '</styleSheet>',
         file.path(xlDir,"styles.xml"))
   
-
+  
   ## write workbook.xml
   workbookXML <- workbook
   workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
@@ -533,7 +533,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
     
     dInds <- which(sapply(colClasses, function(x) "date" %in% x))
-      
+    
     origin <- 25569L
     if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
       origin <- 24107L
@@ -641,7 +641,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   strFlag <- which(t == "s")
   newStrs <- v[strFlag]
   if(length(newStrs) > 0){
-
+    
     newStrs <- replaceIllegalCharacters(newStrs)
     newStrs <- paste0("<si><t>", newStrs, "</t></si>")
     
@@ -812,11 +812,11 @@ Workbook$methods(updateStyles = function(style){
   
   ## Font
   if(!is.null(style$fontName) |
-       !is.null(style$fontSize) |
-       !is.null(style$fontColour) |
-       !is.null(style$fontDecoration) | 
-       !is.null(style$fontFamily) | 
-       !is.null(style$fontScheme)){
+     !is.null(style$fontSize) |
+     !is.null(style$fontColour) |
+     !is.null(style$fontDecoration) | 
+     !is.null(style$fontFamily) | 
+     !is.null(style$fontScheme)){
     
     fontNode <- .self$createFontNode(style)
     fontId <- which(styles$font == fontNode) - 1L
@@ -1161,7 +1161,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(length(styleInds[[i]]) > 0)
         styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
     }
-
+    
     if(length(rowHeights[[i]]) == 0){
       
       .Call("openxlsx_quickBuildCellXML",
@@ -1335,7 +1335,7 @@ Workbook$methods(setColWidths = function(sheet){
         col <- col[sapply(col, length) > 0]
         
         if(length(col) > 0){
-
+          
           allCells <- lapply(1:length(col), function(i) expand.grid( min(col[[i]]):max(col[[i]]),  min(rows[[i]]):max(rows[[i]])))
           allCells <- do.call("rbind", allCells)
           allCells <- paste0(convert2ExcelRef(allCells[[1]], LETTERS), allCells[[2]])
@@ -1419,6 +1419,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Reduce calcChain i attributes & remove calcs on sheet
   # Remove sheet from sheetOrder
   # Remove styleInds element
+  # Remove queryTable references from workbook$definedNames to worksheet
   
   sheet <- validateSheet(sheet)
   sheetNames <- names(worksheets)
@@ -1440,12 +1441,12 @@ Workbook$methods(deleteWorksheet = function(sheet){
   hyperlinks[[sheet]] <<- NULL
   styleInds[[sheet]] <<- NULL
   
-  ## shetOrder
+  ## sheetOrder
   toRemove <- which(sheetOrder == sheet)
   sheetOrder[sheetOrder > sheet] <<- sheetOrder[sheetOrder > sheet] - 1L
   sheetOrder <<- sheetOrder[-toRemove]
   
-
+  
   ## remove styleObjects
   if(length(styleObjects) > 0)
     styleObjects <<- styleObjects[unlist(lapply(styleObjects, "[[", "sheet"), use.names = FALSE) != sheetName]
@@ -1462,8 +1463,12 @@ Workbook$methods(deleteWorksheet = function(sheet){
     worksheets_rels <<- list()
   }
   
+  
+  
+  
   ## remove sheet
-  workbook$sheets <<- workbook$sheets[!grepl(sprintf('name="%s"', sheetName), workbook$sheets)]
+  sn <- unlist(lapply(workbook$sheets, function(x) regmatches(x, regexpr('(?<= name=")[^"]+', x, perl = TRUE))))
+  workbook$sheets <<- workbook$sheets[!sn %in% sheetName]
   
   ## Reset rIds
   if(nSheets > 1){
@@ -1477,6 +1482,14 @@ Workbook$methods(deleteWorksheet = function(sheet){
   workbook.xml.rels <<- workbook.xml.rels[!grepl(sprintf("sheet%s.xml", nSheets), workbook.xml.rels)]
   freezePane[[sheet]] <<- NULL
   dataCount[[sheet]] <<- NULL
+  
+  ## definedNames
+  if(length(workbook$definedNames) > 0){
+    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
+    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
+    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+    workbook$definedNames <<- workbook$definedNames[!belongTo %in% sheetName]
+  }
   
   invisible(1)
   
@@ -1809,7 +1822,7 @@ Workbook$methods(preSaveCleanUp = function(){
     nSheets <- 1L
   }
   
-
+  
   ## get index of each child element for ordering
   sheetInds <- which(grepl("worksheets/sheet[0-9]+\\.xml", workbook.xml.rels))
   stylesInd <- which(grepl("styles\\.xml", workbook.xml.rels))
@@ -1838,36 +1851,41 @@ Workbook$methods(preSaveCleanUp = function(){
   
   if(!is.null(vbaProject))
     workbook.xml.rels <<- c(workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2006/relationships/vbaProject" Target="vbaProject.bin"/>', 1L + length(workbook.xml.rels)))
-
+  
   ## Reassign rId to workbook sheet elements, (order sheets by sheetId first)
   workbook$sheets <<- unlist(lapply(1:length(workbook$sheets), function(i) {
     gsub('(?<= r:id="rId)[0-9]+', i, workbook$sheets[[i]], perl = TRUE)
   }))
-
-  if(!is.null(sheetOrder)){
-
-    if(any(sheetOrder != 1:nSheets))
-      workbook$sheets <<- workbook$sheets[sheetOrder]
-
+  
+  ## re-order worksheets if need to
+  if(any(sheetOrder != 1:nSheets))
+    workbook$sheets <<- workbook$sheets[sheetOrder]
+  
+  ## re-assign tabSelected
+  worksheets[[1]]$sheetViews <<- sub('( tabSelected="0")|( tabSelected="false")', ' tabSelected="1"', worksheets[[1]]$sheetViews, ignore.case = TRUE)
+  if(nSheets > 1){
+    for(i in 2:nSheets)
+      worksheets[[i]]$sheetViews <<- sub('( tabSelected="1")|( tabSelected="true")', ' tabSelected="1"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
+  }
+  
+  
+  if(length(workbook$definedNames) > 0){
     
-    if(length(workbook$definedNames) > 1){
-      
-      sheetNames <- names(worksheets)[sheetOrder]
-      
-      belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
-      belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
-      belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
-      
-      ## sheetNames is in re-ordered order (order it will be displayed)
-      newId <- match(belongTo, sheetNames) - 1L
-      oldId <- as.numeric(regmatches(workbook$definedNames, regexpr('(?<= localSheetId=")[0-9]+', workbook$definedNames, perl = TRUE)))
-      
-      for(i in 1:length(workbook$definedNames))
-        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
-      
-    }
+    sheetNames <- names(worksheets)[sheetOrder]
+    
+    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
+    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
+    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+    
+    ## sheetNames is in re-ordered order (order it will be displayed)
+    newId <- match(belongTo, sheetNames) - 1L
+    oldId <- as.numeric(regmatches(workbook$definedNames, regexpr('(?<= localSheetId=")[0-9]+', workbook$definedNames, perl = TRUE)))
+    
+    for(i in 1:length(workbook$definedNames))
+      workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
     
   }
+  
   
   
   
@@ -1976,7 +1994,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
         ## toRemove are the elements that will be used in the merge
         ## mergeInds are the intersection of the two styles that will need to merge
         ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
-                
+        
         toRemoveInds <- which(styleObjects[[i]]$rows %in% rows & styleObjects[[i]]$cols %in% cols) 
         #which(!is.na(match(styleObjects[[i]]$rows, rows)) & !is.na(match(styleObjects[[i]]$cols, cols)))
         mergeInds <- which(rows %in% styleObjects[[i]]$rows & cols %in% styleObjects[[i]]$cols)
@@ -2010,7 +2028,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
       
       
     } ## End of loop through styles
- 
+    
     ## remove any styles that no longer have any affect
     styleObjects <<- styleObjects[keepStyle]
     

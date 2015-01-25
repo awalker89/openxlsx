@@ -50,7 +50,7 @@ genBaseWorkbook.xml.rels <- function(){
 genBaseWorkbook <- function(){
   
   list(workbookPr = '<workbookPr date1904="false"/>',
-       bookViews = '<bookViews><workbookView activeTab="0"/></bookViews>',
+       bookViews = NULL,
        sheets = NULL,
        externalReferences = NULL,
        definedNames = NULL,
