@@ -131,8 +131,14 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   
   newSheetIndex = length(worksheets) + 1L
   
+  if(newSheetIndex > 1){
+    sheetId <- max(as.integer(regmatches(workbook$sheets, regexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE)))) + 1L
+  }else{
+    sheetId <- 1
+  }
+  
   ##  Add sheet to workbook.xml
-  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, newSheetIndex, newSheetIndex))
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, sheetId, newSheetIndex))
   
   ## append to worksheets list
   worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, 
@@ -396,9 +402,13 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         '</styleSheet>',
         file.path(xlDir,"styles.xml"))
   
+
   ## write workbook.xml
   workbookXML <- workbook
   workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
+  if(length(workbookXML$definedNames) > 0)
+    workbookXML$definedNames <- paste0("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
+  
   .Call("openxlsx_writeFile", '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
         pxml(workbookXML),
         '</workbook>',   
@@ -1834,9 +1844,32 @@ Workbook$methods(preSaveCleanUp = function(){
     gsub('(?<= r:id="rId)[0-9]+', i, workbook$sheets[[i]], perl = TRUE)
   }))
 
-  if(!is.null(sheetOrder))
-    workbook$sheets <<- workbook$sheets[sheetOrder]
+  if(!is.null(sheetOrder)){
 
+    if(any(sheetOrder != 1:nSheets))
+      workbook$sheets <<- workbook$sheets[sheetOrder]
+
+    
+    if(length(workbook$definedNames) > 1){
+      
+      sheetNames <- names(worksheets)[sheetOrder]
+      
+      belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
+      belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
+      belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+      
+      ## sheetNames is in re-ordered order (order it will be displayed)
+      newId <- match(belongTo, sheetNames) - 1L
+      oldId <- as.numeric(regmatches(workbook$definedNames, regexpr('(?<= localSheetId=")[0-9]+', workbook$definedNames, perl = TRUE)))
+      
+      for(i in 1:length(workbook$definedNames))
+        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
+      
+    }
+    
+  }
+  
+  
   
   ## update workbook r:id to match reordered workbook.xml.rels externalLink element
   if(length(extRefInds) > 0){

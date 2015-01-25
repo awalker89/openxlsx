@@ -109,8 +109,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## defined Names
     dNames <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
-    if(length(dNames) > 0)
-      wb$workbook$definedNames <- dNames
+    if(length(dNames) > 0){
+      dNames <- gsub("^<definedNames>|</definedNames>$", "", dNames)
+      wb$workbook$definedNames <- paste0(.Call("openxlsx_getNodes", dNames, "<definedName", PACKAGE = "openxlsx"), ">")
+    }
     
   }
   
@@ -372,8 +374,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ## xl\theme
   if(length(themeXML) > 0)
     wb$theme <- removeHeadTag(paste(unlist(lapply(sort(themeXML)[[1]], function(x) readLines(x, warn = FALSE, encoding = "UTF-8"))), collapse = ""))
-
-
+  
+  
   ## externalLinks
   if(length(extLinksXML) > 0){
     wb$externalLinks <- lapply(sort(extLinksXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
@@ -773,26 +775,26 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   
   
-
+  
   ## table rels
   if(length(tableRelsXML) > 0){
     
     ## table_i_might have tableRels_i but I am re-ordering the tables to be in order of worksheets
     ## I make every table have a table_rels so i need to fill in the gaps if any table_rels are missing
-
+    
     tmp <- paste0(basename(tablesXML), ".rels")
     hasRels <- tmp %in% basename(tableRelsXML)
     
     ## order tableRelsXML
     tableRelsXML <- tableRelsXML[match(tmp[hasRels], basename(tableRelsXML))]
-
+    
     ##
     wb$tables.xml.rels <- character(length=length(tablesXML))
     
     ## which sheet does it belong to
     xml <- sapply(tableRelsXML, function(x) .Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"), USE.NAMES = FALSE)
     xml <- sapply(xml, removeHeadTag, USE.NAMES = FALSE)
-
+    
     wb$tables.xml.rels[hasRels] <- xml
     
   }else if(length(tablesXML) > 0){
