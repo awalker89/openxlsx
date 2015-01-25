@@ -26,11 +26,6 @@ wb ## view object
 ## Add a worksheet
 addWorksheet(wb, "A new worksheet")
 
-## update data in Sales worksheet
-df <- data.frame("Orders" = round(runif(10)*200),
-                 "TotalSales" = runif(10)*400)
-writeData(wb, "Sales", df, xy=c("A", 2))
-
 ## Save workbook
 saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
 }

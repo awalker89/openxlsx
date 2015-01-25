@@ -1076,8 +1076,8 @@ setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
 #' ## Create a new workbook
 #' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' 
-#' ## remove column widths in columns 1 to 10
-#' removeColWidths(wb, 1, cols = 1:10)
+#' ## remove column widths in columns 1 to 20
+#' removeColWidths(wb, 1, cols = 1:20)
 #' saveWorkbook(wb, "removeColWidthsExample.xlsx", overwrite = TRUE)
 removeColWidths <- function(wb, sheet, cols){
   
@@ -1624,7 +1624,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
 #' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 #' names(wb) ## list worksheets in workbook
 #' showGridLines(wb, 1, showGridLines = FALSE)
-#' showGridLines(wb, "Empty sheet", showGridLines = FALSE)
+#' showGridLines(wb, "testing", showGridLines = FALSE)
 #' saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
 showGridLines <- function(wb, sheet, showGridLines = FALSE){
   

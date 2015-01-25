@@ -20,7 +20,7 @@ Set worksheet gridlines to show or hide.
 wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
 names(wb) ## list worksheets in workbook
 showGridLines(wb, 1, showGridLines = FALSE)
-showGridLines(wb, "Empty sheet", showGridLines = FALSE)
+showGridLines(wb, "testing", showGridLines = FALSE)
 saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
 }
 \author{
