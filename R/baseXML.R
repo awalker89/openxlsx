@@ -70,6 +70,12 @@ genBaseSheet <- function(sheetName,
   if(!is.null(tabColour))
     tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
   
+  if(zoom < 10){
+    zoom <- 10
+  }else if(zoom > 400){
+    zoom <- 400
+  }
+  
   naToNULLList <- function(x){
     lapply(x, function(x) {
       if(is.na(x))
