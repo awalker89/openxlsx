@@ -153,14 +153,15 @@ writeData <- function(wb,
   ## If no rows and not writing column names return as nothing to write
   if(nRow == 0 & !colNames)
     return(invisible(0))
-  
-  ## write autoFilter, can only have a single filter per worksheet
-  if(withFilter)
-    wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
-  
+    
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  sheet <- wb$validateSheet(sheet)
+  
 
+  ## write autoFilter, can only have a single filter per worksheet
+  sheetX <- wb$validateSheet(sheet)
+  if(withFilter)
+    wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
+  
   ## write data.frame
   wb$writeData(df = x,
                colNames = colNames,
