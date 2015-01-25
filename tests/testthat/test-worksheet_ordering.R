@@ -24,10 +24,7 @@ test_that("Worksheet ordering from new Workbook", {
   
   
   tempFile <- file.path(tempdir(), "orderingTest.xlsx")
-  #   tempFile <- file.path("c:/users/alex/desktop", "orderingTest.xlsx")
-  
-  file <- xlsxFile <- tempFile
-  
+
   ## no ordering
   saveWorkbook(wb, file = tempFile, overwrite = TRUE)
   expect_equal(names(wb),  sprintf("Sheet %s", 1:3))
@@ -43,10 +40,10 @@ test_that("Worksheet ordering from new Workbook", {
   saveWorkbook(wb, file = tempFile, overwrite = TRUE)
   expect_equal(names(wb),  sprintf("Sheet %s", 1:3))
   
-  
-  
+ 
+   
   ## reloading - reordered
-  wb <- loadWorkbook(tempFile)
+  wb <- loadWorkbook(file = tempFile)
   expect_equal(names(wb),  sprintf("Sheet %s", 3:1))
   
   x <- read.xlsx(tempFile, sheet = 1)[[1]]

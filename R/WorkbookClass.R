@@ -155,8 +155,8 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   
   ## create sheet.rels to simplify id assignment
   worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex)
-  drawings_rels[[newSheetIndex]] <<- ""
-  drawings[[newSheetIndex]] <<- ""
+  drawings_rels[[newSheetIndex]] <<- list()
+  drawings[[newSheetIndex]] <<- list()
   
   sheetData[[newSheetIndex]] <<- list()
   styleInds[[newSheetIndex]] <<- list()
@@ -1055,7 +1055,8 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
   
   ## Rename in workbook
   sheetId <- regmatches(workbook$sheets[[sheet]], regexpr('(?<=sheetId=")[0-9]+', workbook$sheets[[sheet]], perl = TRUE))
-  workbook$sheets[[sheet]] <<- sprintf('<sheet name="%s" sheetId="1" r:id="rId%s"/>', newSheetName, sheetId)
+  rId <- regmatches(workbook$sheets[[sheet]], regexpr('(?<= r:id="rId)[0-9]+', workbook$sheets[[sheet]], perl = TRUE))
+  workbook$sheets[[sheet]] <<- sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', newSheetName, sheetId, rId)
   
   ## rename styleObjects sheet component
   if(length(styleObjects) > 0){
@@ -1428,8 +1429,13 @@ Workbook$methods(deleteWorksheet = function(sheet){
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL
   styleInds[[sheet]] <<- NULL
-  sheetOrder <<- c(sheetOrder[sheetOrder < sheet], sheetOrder[sheetOrder > sheet] - 1L)
   
+  ## shetOrder
+  toRemove <- which(sheetOrder == sheet)
+  sheetOrder[sheetOrder > sheet] <<- sheetOrder[sheetOrder > sheet] - 1L
+  sheetOrder <<- sheetOrder[-toRemove]
+  
+
   ## remove styleObjects
   if(length(styleObjects) > 0)
     styleObjects <<- styleObjects[unlist(lapply(styleObjects, "[[", "sheet"), use.names = FALSE) != sheetName]
@@ -1793,18 +1799,7 @@ Workbook$methods(preSaveCleanUp = function(){
     nSheets <- 1L
   }
   
-  
-  ## Assign relationship Ids  
-  nChildren <- 1:length(workbook.xml.rels)
-  splitRels <- strsplit(workbook.xml.rels, split = " ")
-  nms <- lapply(splitRels, function(x) gsub("(.*)=(.*)", "\\1", x[2:length(x)]))
-  rAttrs <- lapply(splitRels, function(x) gsub("/>$", "", gsub('(.*)="(.*)"', "\\2", x[2:length(x)])))   
-  rAttrs <- lapply(nChildren, function(i) { names(rAttrs[[i]]) <- nms[[i]]; return(rAttrs[[i]]) })
-  
-  rIds <- paste0("rId", nChildren)
-  targets <- unlist(lapply(rAttrs, "[[", "Target"))
-  
-  
+
   ## get index of each child element for ordering
   sheetInds <- which(grepl("worksheets/sheet[0-9]+\\.xml", workbook.xml.rels))
   stylesInd <- which(grepl("styles\\.xml", workbook.xml.rels))
@@ -1815,12 +1810,10 @@ Workbook$methods(preSaveCleanUp = function(){
   tableInds <- which(grepl("table[0-9]+.xml", workbook.xml.rels))
   
   ## Reordering of workbook.xml.rels
-  pivotNode <- workbook.xml.rels[which(targets %in% sprintf("pivotCache/pivotCacheDefinition%s.xml", 1:nPivots))] ## don't want to re-assign rIds for pivot tables
+  pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)] ## don't want to re-assign rIds for pivot tables
   
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
-  
-  workbook$sheets
   
   
   ## Re assign rIds to children of workbook.xml.rels
@@ -1829,6 +1822,9 @@ Workbook$methods(preSaveCleanUp = function(){
   }))
   
   workbook.xml.rels <<- c(workbook.xml.rels, pivotNode)
+  
+  
+  
   
   if(!is.null(vbaProject))
     workbook.xml.rels <<- c(workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2006/relationships/vbaProject" Target="vbaProject.bin"/>', 1L + length(workbook.xml.rels)))

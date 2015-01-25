@@ -49,7 +49,7 @@ genBaseColStyle <- function(cc){
 
 Workbook$methods(surroundingBorders = function(colClasses, sheet, startRow, startCol, nRow, nCol, borderColour, borderStyle, borderType){
   
-  sheet <- names(worksheets)[[sheet]]
+  sheet <- names(worksheets)[[validateSheet(sheet)]]
   ## steps
   # get column class
   # get corresponding base style
@@ -366,7 +366,7 @@ Workbook$methods(surroundingBorders = function(colClasses, sheet, startRow, star
 
 Workbook$methods(rowBorders = function(colClasses, sheet, startRow, startCol, nRow, nCol, borderColour, borderStyle, borderType){
   
-  sheet <- names(worksheets)[[sheet]]
+  sheet <- names(worksheets)[[validateSheet(sheet)]]
   ## steps
   # get column class
   # get corresponding base style
@@ -452,7 +452,7 @@ Workbook$methods(rowBorders = function(colClasses, sheet, startRow, startCol, nR
 
 Workbook$methods(columnBorders = function(colClasses, sheet, startRow, startCol, nRow, nCol, borderColour, borderStyle, borderType){
   
-  sheet <- names(worksheets)[[sheet]]
+  sheet <- names(worksheets)[[validateSheet(sheet)]]
   ## steps
   # get column class
   # get corresponding base style

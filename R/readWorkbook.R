@@ -69,19 +69,23 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   
   ## get workbook names
   workbook <- unlist(readLines(workbook, warn = FALSE))
-  sheetNames <- unlist(regmatches(workbook, gregexpr('(?<=<sheet name=")[^"]+', workbook, perl = TRUE)))
+  sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
+  sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+  sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
+  
+  
   
   if("character" %in% class(sheet)){
     sheetInd <- which(sheetNames == sheet)
     if(length(sheetInd) == 0)
       stop(sprintf('Cannot find sheet named "%s"', sheet))
+    sheet <- sheetrId[sheetInd]
   }else{
-    sheetInd <- sheet
-    if(nSheets < sheetInd)
+    if(nSheets < sheet)
       stop(sprintf("sheet %s does not exist.", sheet))
+    sheet <- sheetrId[sheet]
   }
-  
-  
+    
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){
     
@@ -129,7 +133,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
-  ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheetInd]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
+  ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
   
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
@@ -316,16 +320,16 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
   sheetNames <- names(xlsxFile$worksheets)
   
   if("character" %in% class(sheet)){
-    sheetInd <- which(sheetNames == sheet)
-    if(length(sheetInd) == 0)
+    if(!sheet %in% sheetNames)
       stop(sprintf('Cannot find sheet named "%s"', sheet))
+    sheet <- which(sheetNames == sheet)
   }else{
-    sheetInd <- sheet
-    if(nSheets < sheetInd)
+    sheet <- sheet
+    if(sheet > nSheets)
       stop(sprintf("sheet %s does not exist.", sheet))
   }
   
-  
+
   ## read in sharedStrings
   sharedStrings <- unlist(xlsxFile$sharedStrings)
   
