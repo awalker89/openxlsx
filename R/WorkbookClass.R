@@ -1082,7 +1082,19 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
     
   }
   
-  
+  ## rename defined names
+  if(length(workbook$definedNames) > 0){
+    
+    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
+    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
+    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+    
+    toChange <- belongTo == oldName
+    if(any(toChange))
+      workbook$definedName[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+    
+  }
+
 })
 
 
