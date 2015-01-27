@@ -530,3 +530,36 @@ genHeaderFooterNode <- function(x){
   paste0(headTag, oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter, "</headerFooter>")
   
 }
+
+
+buildFillList <- function(fills){
+  
+  
+  fillAttrs <- rep(list(list()), length(fills))
+  
+  ## patternFill
+  inds <- grepl("patternFill", fills)
+  fillAttrs[inds] <- lapply(fills[inds], nodeAttributes)
+  
+  
+  ## gradientFill
+  inds <- grepl("gradientFill", fills)
+  fillAttrs[inds] <- lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
+  
+  return(fillAttrs)
+  
+}
+
+
+getDefinedNamesSheet <- function(x){
+  
+  belongTo <- unlist(lapply(strsplit(x, split = ">|<"), "[[", 3))
+  quoted <- grepl("^'", belongTo)
+  
+  belongTo[quoted] <- regmatches(belongTo[quoted], regexpr("(?<=').*(?='!)", belongTo[quoted], perl = TRUE))
+  belongTo[!quoted] <- gsub("!\\$[A-Z0-9].*", "", belongTo[!quoted])
+  belongTo[!quoted] <- gsub("!#REF!.*", "", belongTo[!quoted])
+  
+  return(belongTo)
+  
+}

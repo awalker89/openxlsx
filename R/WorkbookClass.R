@@ -258,7 +258,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     pivotCacheRelsDir <- file.path(tmpDir, "xl", "pivotCache", "_rels")
     dir.create(path = pivotCacheRelsDir, recursive = TRUE)
-    
     for(i in 1:nPivots){
       .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
       .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
@@ -425,7 +424,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## reset styles - maintain any changes to base font
   baseFont <- styles$fonts[[1]]
-  styles <<- genBaseStyleSheet(styles$dxfs)
+  styles <<- genBaseStyleSheet(styles$dxfs, tableStyles = styles$tableStyles, extLst = styles$extLst)
   styles$fonts[[1]] <<- baseFont
   
   invisible(list("tmpDir" = tmpDir, "tmpFile" = tmpFile))
@@ -852,17 +851,18 @@ Workbook$methods(updateStyles = function(style){
   }
   
   ## Fill
-  if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg)){
-    
+  if(!is.null(style$fill)){
     fillNode <- .self$createFillNode(style)
-    fillId <- which(styles$fill == fillNode) - 1L
-    
-    if(length(fillId) == 0){      
-      fillId <- length(styles$fills)
-      styles$fills <<- c(styles$fills, fillNode)
+    if(!is.null(fillNode)){
+      fillId <- which(styles$fill == fillNode) - 1L
+      
+      if(length(fillId) == 0){      
+        fillId <- length(styles$fills)
+        styles$fills <<- c(styles$fills, fillNode)
+      }
+      xfNode$fillId <- fillId
+      xfNode <- append(xfNode, list("applyFill" = "1"))
     }
-    xfNode$fillId <- fillId
-    xfNode <- append(xfNode, list("applyFill" = "1"))
   }
   
   ## Border
@@ -1027,21 +1027,30 @@ Workbook$methods(createBorderNode = function(style){
 })
 
 
-Workbook$methods(createFillNode = function(style, patternType="solid"){
+Workbook$methods(createFillNode = function(style, patternType = "solid"){
   
   fill <- style$fill
-  fillNode <- '<fill>'
-  fillNode <- paste0(fillNode, sprintf('<patternFill patternType="%s">', patternType))
-  
-  
-  if(!is.null(fill$fillFg))
-    fillNode <- paste0(fillNode, sprintf('<fgColor %s/>', paste(paste0(names(fill$fillFg), '="', fill$fillFg, '"'), collapse = " ")))
-  
-  if(!is.null(fill$fillBg))
-    fillNode <- paste0(fillNode, sprintf('<bgColor %s/>', paste(paste0(names(fill$fillBg), '="', fill$fillBg, '"'), collapse = " ")))
-  
-  fillNode <- paste0(fillNode, "</patternFill>")
-  fillNode <- paste0(fillNode, "</fill>")
+
+  ## gradientFill
+  if(any(grepl("gradientFill", fill))){
+    
+    fillNode <- paste0("<fill>", fill, "</fill>")
+    
+  }else if(!is.null(fill$fillFg) | !is.null(fill$fillBg)){
+    
+    fillNode <- paste0('<fill>', sprintf('<patternFill patternType="%s">', patternType))
+    
+    if(!is.null(fill$fillFg))
+      fillNode <- paste0(fillNode, sprintf('<fgColor %s/>', paste(paste0(names(fill$fillFg), '="', fill$fillFg, '"'), collapse = " ")))
+    
+    if(!is.null(fill$fillBg))
+      fillNode <- paste0(fillNode, sprintf('<bgColor %s/>', paste(paste0(names(fill$fillBg), '="', fill$fillBg, '"'), collapse = " ")))
+    
+    fillNode <- paste0(fillNode, "</patternFill></fill>")
+    
+  }else{
+    return(NULL)
+  }
   
   return(fillNode)
   
@@ -1085,13 +1094,10 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
   ## rename defined names
   if(length(workbook$definedNames) > 0){
     
-    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
-    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
-    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
-    
+    belongTo <- getDefinedNamesSheet(workbook$definedNames)
     toChange <- belongTo == oldName
     if(any(toChange))
-      workbook$definedName[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+      workbook$definedNames[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
     
   }
 
@@ -1497,9 +1503,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   
   ## definedNames
   if(length(workbook$definedNames) > 0){
-    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
-    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
-    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+    belongTo <- getDefinedNamesSheet(workbook$definedNames)
     workbook$definedNames <<- workbook$definedNames[!belongTo %in% sheetName]
   }
   
@@ -1885,9 +1889,7 @@ Workbook$methods(preSaveCleanUp = function(){
     
     sheetNames <- names(worksheets)[sheetOrder]
     
-    belongTo <- unlist(lapply(strsplit(workbook$definedName, split = ">|<"), "[[", 3))
-    belongTo <- gsub("\\$[A-Z]+\\$[0-9]+.*", "", belongTo)
-    belongTo <- gsub("^'|(('!|!)$)", "", belongTo)
+    belongTo <- getDefinedNamesSheet(workbook$definedNames)
     
     ## sheetNames is in re-ordered order (order it will be displayed)
     newId <- match(belongTo, sheetNames) - 1L

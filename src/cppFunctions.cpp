@@ -173,6 +173,11 @@ SEXP getVals(CharacterVector x){
 // [[Rcpp::export]]
 SEXP getNodes(std::string xml, std::string tagIn){
   
+  // This function loops over all characters in xml, looking for tag
+  // tag should look liked <tag>
+  // tagEnd is then generated to be <tag/>
+  
+  
   if(xml.length() == 0)
   return wrap(NA_STRING);
   

@@ -141,11 +141,29 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     pivotDefRelsXML   <- pivotDefRelsXML[order(nchar(pivotDefRelsXML), pivotDefRelsXML)]
     pivotRecordsXML   <- pivotRecordsXML[order(nchar(pivotRecordsXML), pivotRecordsXML)]
     
-    wb$pivotTables <- unlist(lapply(pivotTableXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
-    wb$pivotTables.xml.rels <- unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
-    wb$pivotDefinitions <- unlist(lapply(pivotDefXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
-    wb$pivotDefinitionsRels <- unlist(lapply(pivotDefRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
-    wb$pivotRecords <- unlist(lapply(pivotRecordsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$pivotTables <- character(nPivotTables)
+    wb$pivotTables.xml.rels <- character(nPivotTables)
+    wb$pivotDefinitions <- character(nPivotTables)
+    wb$pivotDefinitionsRels <- character(nPivotTables)
+    wb$pivotRecords <- character(nPivotTables)
+    
+    wb$pivotTables[1:length(pivotTableXML)] <-
+      unlist(lapply(pivotTableXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    
+    
+    wb$pivotTables.xml.rels[1:length(pivotTableRelsXML)] <-
+      unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    
+    wb$pivotDefinitions[1:length(pivotDefXML)]  <-
+      unlist(lapply(pivotDefXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    
+    
+    wb$pivotDefinitionsRels[1:length(pivotDefRelsXML)] <-
+      unlist(lapply(pivotDefRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    
+    
+    wb$pivotRecords[1:length(pivotRecordsXML)] <-
+      unlist(lapply(pivotRecordsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
     
     ## update content_types
     wb$Content_Types <- c(wb$Content_Types, unlist(lapply(1:nPivotTables, contentTypePivotXML)))
@@ -187,6 +205,15 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     if(length(dxf) > 0)
       wb$styles$dxfs <- paste(dxf, collapse = "")
     
+    tableStyles <- .Call("openxlsx_getNodes", styles, "<tableStyles", PACKAGE = "openxlsx")
+    if(length(tableStyles) > 0)
+      wb$styles$tableStyles <- paste0(tableStyles, ">")
+
+    extLst <- .Call("openxlsx_getNodes", styles, "<extLst>", PACKAGE = "openxlsx")
+    if(length(extLst) > 0)
+      wb$styles$extLst <- extLst
+    
+    
     ## Number formats
     numFmts <- .Call("openxlsx_getChildlessNode", styles, "<numFmt ", PACKAGE = "openxlsx")
     numFmtFlag <- FALSE
@@ -205,7 +232,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     fonts <- buildFontList(fonts)       
     
     fills <- .Call("openxlsx_getNodes", styles, "<fill>", PACKAGE = "openxlsx")
-    fills <- lapply(fills, nodeAttributes)
+    fills <- buildFillList(fills)
     
     borders <- .Call("openxlsx_getNodes", styles, "<border>", PACKAGE = "openxlsx")     
     borders <- sapply(borders, buildBorder, USE.NAMES = FALSE)
@@ -264,7 +291,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           if(as.integer(s[["numFmtId"]]) < 164){
             style$numFmt <- list(numFmtId = s[["numFmtId"]])
           }else if(numFmtFlag){
-            style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)]]
+            style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
           }
         }
         
@@ -313,16 +340,22 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         }
         
         if(s[["fillId"]] != "0"){# && "applyFill" %in% names(s)){
+          
           fillId <- as.integer(s[["fillId"]]) + 1L
           
-          tmpFg <- fills[[fillId]]$fgColor
-          tmpBg <- fills[[fillId]]$bgColor
-          
-          if(!is.null(tmpFg))
-            style$fill$fillFg <- tmpFg
-          
-          if(!is.null(tmpFg))
-            style$fill$fillBg <- tmpBg
+          if("fgColor" %in% names(fills[[fillId]])){
+            
+            tmpFg <- fills[[fillId]]$fgColor
+            tmpBg <- fills[[fillId]]$bgColor
+            
+            if(!is.null(tmpFg))
+              style$fill$fillFg <- tmpFg
+            
+            if(!is.null(tmpFg))
+              style$fill$fillBg <- tmpBg
+          }else{
+            style$fill <- fills[[fillId]]
+          }
           
         }
         
@@ -490,7 +523,14 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       wb$worksheets[[i]]$sheetPr <- sheetPr
     }else{
       
-      sheetPr <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<sheetPr ", PACKAGE = "openxlsx")
+      sheetPr <- .Call("openxlsx_getNodes", wsData[[i]], "<sheetPr", PACKAGE = "openxlsx")
+      if(length(sheetPr) > 0){
+        if(!grepl(">$", sheetPr))
+          sheetPr <- paste0(sheetPr, ">")
+      }else{
+        sheetPr <- .Call("openxlsx_getChildlessNode", wsData[[i]], "<sheetPr ", PACKAGE = "openxlsx")
+      }
+      
       if(length(sheetPr) > 0)
         wb$worksheets[[i]]$sheetPr <- sheetPr
       
@@ -665,7 +705,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       hlinks <- hlinks[hlinksInds]
       for(i in 1:length(hlinksInds)){
         targets <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-        targets <- replaceXMLEntities(gsub('"$', "", targets))
+        targets <- gsub('"$', "", targets)
         
         names(wb$hyperlinks[[hlinksInds[i]]]) <- targets  
       }  
