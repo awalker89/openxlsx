@@ -97,8 +97,9 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
       ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
     }
     
+    ## pull out all string nodes
     sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")  
-    
+  
     
     ## Need to remove any inline styling
     formattingFlag <- grepl("<rPr>", ss)
@@ -110,6 +111,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     
     emptyStrs <- c(attr(sharedStrings, "empty"), which(sharedStrings == "") - 1L)
         
+    Encoding(sharedStrings) <- "UTF-8"
     z <- tolower(sharedStrings)
     sharedStrings[z == "true"] <- "TRUE"
     sharedStrings[z == "false"] <- "FALSE"
@@ -134,6 +136,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
   ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
+  Encoding(ws) <- "UTF-8"
   
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
