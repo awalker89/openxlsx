@@ -55,7 +55,8 @@ genBaseWorkbook <- function(){
        externalReferences = NULL,
        definedNames = NULL,
        calcPr = NULL,
-       pivotCaches = NULL
+       pivotCaches = NULL,
+       extLst = NULL
   )
   
 }
@@ -405,3 +406,36 @@ contentTypePivotXML <- function(i){
     
 }
 
+contentTypeSlicerCacheXML <- function(i){
+  
+  c(sprintf('<Override PartName="/xl/slicerCaches/slicerCache%s.xml" ContentType="application/vnd.ms-excel.slicerCache+xml"/>', i),
+    sprintf('<Override PartName="/xl/slicers/slicer%s.xml" ContentType="application/vnd.ms-excel.slicer+xml"/>', i)
+  )
+  
+}
+
+
+genBaseSlicerXML <- function(){
+  '<ext uri="{A8765BA9-456A-4dab-B4F3-ACF838C121DE}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
+    <x14:slicerList>
+    <x14:slicer r:id="rId0"/>
+      </x14:slicerList>
+      </ext>'
+}
+
+
+genSlicerCachesExtLst <- function(i){
+  
+  paste0(
+    '<extLst>
+    <ext uri=\"{BBE1A952-AA13-448e-AADC-164F8A28A991}\" xmlns:x14=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/main\">
+    <x14:slicerCaches>',
+    
+    paste(sprintf('<x14:slicerCache r:id="rId%s"/>', i), collapse = ""),
+    
+    '</x14:slicerCaches>
+    </ext>
+    </extLst>')
+  
+  
+}

@@ -597,6 +597,23 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// getCellsWithChildrenLimited
+CharacterVector getCellsWithChildrenLimited(std::string xmlFile, CharacterVector emptyNodes, int n);
+RcppExport SEXP openxlsx_getCellsWithChildrenLimited(SEXP xmlFileSEXP, SEXP emptyNodesSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type emptyNodes(emptyNodesSEXP );
+        Rcpp::traits::input_parameter< int >::type n(nSEXP );
+        CharacterVector __result = getCellsWithChildrenLimited(xmlFile, emptyNodes, n);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getCellsWithChildren
 CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyNodes);
 RcppExport SEXP openxlsx_getCellsWithChildren(SEXP xmlFileSEXP, SEXP emptyNodesSEXP) {

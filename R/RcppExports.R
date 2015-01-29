@@ -141,6 +141,10 @@ removeEmptyNodes <- function(x, emptyNodes) {
     .Call('openxlsx_removeEmptyNodes', PACKAGE = 'openxlsx', x, emptyNodes)
 }
 
+getCellsWithChildrenLimited <- function(xmlFile, emptyNodes, n) {
+    .Call('openxlsx_getCellsWithChildrenLimited', PACKAGE = 'openxlsx', xmlFile, emptyNodes, n)
+}
+
 getCellsWithChildren <- function(xmlFile, emptyNodes) {
     .Call('openxlsx_getCellsWithChildren', PACKAGE = 'openxlsx', xmlFile, emptyNodes)
 }

@@ -27,6 +27,10 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                
                                                "queryTables",
                                                "rowHeights",
+                                               
+                                               "slicers",
+                                               "slicerCaches",
+                                               
                                                "sharedStrings",
                                                "sheetData",
                                                "styleObjects",
@@ -91,6 +95,9 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   pivotDefinitions <<- NULL
   pivotRecords <<- NULL
   pivotDefinitionsRels <<- NULL
+  
+  slicers <<- NULL
+  slicerCaches <<- NULL
   
   vbaProject <<- NULL
   
@@ -196,6 +203,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   nSheets <- length(worksheets)
   nThemes <- length(theme)
   nPivots <- length(pivotTables)
+  nSlicers <- length(slicers)
   
   relsDir <- file.path(tmpDir, "_rels")
   dir.create(path = relsDir, recursive = TRUE)
@@ -267,6 +275,26 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     }
     
   }
+  
+  ## slicers
+  if(nSlicers > 0){
+
+    slicersDir <- file.path(tmpDir, "xl", "slicers")
+    dir.create(path = slicersDir, recursive = TRUE)
+    
+    slicerCachesDir <- file.path(tmpDir, "xl", "slicerCaches")
+    dir.create(path = slicerCachesDir, recursive = TRUE)
+    
+    for(i in 1:length(slicers))
+      if(nchar(slicers[[i]]) > 0)
+        .Call("openxlsx_writeFile", "", slicers[[i]], "", file.path(slicersDir, sprintf("slicer%s.xml", i)))
+    
+    for(i in 1:length(slicerCaches))
+      .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
+    
+    
+  }
+  
   
   ## Write content
   
@@ -1848,8 +1876,11 @@ Workbook$methods(preSaveCleanUp = function(){
   sharedStringsInd <- which(grepl("sharedStrings.xml", workbook.xml.rels))
   tableInds <- which(grepl("table[0-9]+.xml", workbook.xml.rels))
   
+  
   ## Reordering of workbook.xml.rels
-  pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)] ## don't want to re-assign rIds for pivot tables
+  ## don't want to re-assign rIds for pivot tables or slicer caches
+  pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)]
+  slicerNode <- workbook.xml.rels[which(grepl("slicerCache[0-9]+.xml", workbook.xml.rels))]
   
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
@@ -1860,7 +1891,7 @@ Workbook$methods(preSaveCleanUp = function(){
     gsub('(?<=Relationship Id="rId)[0-9]+', i, workbook.xml.rels[[i]], perl = TRUE)
   }))
   
-  workbook.xml.rels <<- c(workbook.xml.rels, pivotNode)
+  workbook.xml.rels <<- c(workbook.xml.rels, pivotNode, slicerNode)
   
   
   

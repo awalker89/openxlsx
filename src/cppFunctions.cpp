@@ -1687,6 +1687,82 @@ CharacterVector removeEmptyNodes(CharacterVector x, CharacterVector emptyNodes){
 
 
 
+
+// [[Rcpp::export]]
+CharacterVector getCellsWithChildrenLimited(std::string xmlFile, CharacterVector emptyNodes, int n){
+  
+  //read in file without spaces
+  std::string xml = cppReadFile(xmlFile);
+  
+  // std::string tag = "<c ";
+  //  std::string tagEnd1 = ">";
+  //  std::string tagEnd2 = "</c>";
+  
+  
+  // count number of rows
+  int occurrences = 0;
+  string::size_type start = 0;
+  
+  while(occurrences <= n) {
+    
+    start = xml.find("<row r", start);
+    if(start == string::npos){
+      break;
+    }else{
+      ++occurrences;
+      start = start + 5;
+    }
+    
+    
+    Rcout << occurrences << endl;
+  }
+  
+  xml = xml.substr(0, start);
+  
+  // count cells with children
+  occurrences = 0;
+  start = 0;
+  while((start = xml.find("</v>", start)) != string::npos) {
+    ++occurrences;
+    start += 4;
+  }
+  
+  CharacterVector cells(occurrences);
+  std::fill(cells.begin(), cells.end(), NA_STRING);
+  
+  int i = 0;
+  size_t nextPos = 3;
+  size_t vPos = 2;
+  std::string sub;
+  size_t pos = xml.find("<c ", 0);
+  
+  while(i < occurrences){
+    
+    if(pos != std::string::npos){
+      nextPos = xml.find("<c ", pos+9);
+      vPos = xml.find("</v>", pos+8); // have to atleast pass <c r="XX">
+      
+      if(vPos < nextPos){
+        cells[i] = xml.substr(pos, nextPos-pos);
+        i++; 
+      }
+      
+      pos = nextPos;
+      
+    }
+  }
+  
+  if(emptyNodes[0] != "<v></v>")
+    cells = removeEmptyNodes(cells, emptyNodes);
+  
+  return wrap(cells) ;  
+  
+}
+
+
+
+
+
 // [[Rcpp::export]]
 CharacterVector getCellsWithChildren(std::string xmlFile, CharacterVector emptyNodes){
   

@@ -64,6 +64,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   pivotDefRelsXML   <- xmlFiles[grepl("pivotCacheDefinition[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   pivotRecordsXML   <- xmlFiles[grepl("pivotCacheRecords[0-9]+.xml$", xmlFiles, perl = TRUE)]
   
+  ## slicers
+  slicerXML <- xmlFiles[grepl("slicer[0-9]+.xml$", xmlFiles, perl = TRUE)]
+  slicerCachesXML <- xmlFiles[grepl("slicerCache[0-9]+.xml$", xmlFiles, perl = TRUE)]
+  
   ## VBA Macro
   vbaProject        <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
@@ -83,12 +87,17 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     ## sheet rId links to the worksheets/sheet(rId).xml file
     
     sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+    sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
     
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
     sheetNames <- replaceXMLEntities(sheetNames)
     
     ## add worksheets to wb
     invisible(lapply(sheetNames, function(sheetName) wb$addWorksheet(sheetName)))
+    
+    ## replace sheetId
+    for(i in 1:nSheets)
+      wb$workbook$sheets[[i]] <- gsub(sprintf(' sheetId="%s"', i), sprintf(' sheetId="%s"', sheetId[i]), wb$workbook$sheets[[i]])
     
     
     ## additional workbook attributes
@@ -109,7 +118,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       wb$workbook$definedNames <- paste0(.Call("openxlsx_getNodes", dNames, "<definedName", PACKAGE = "openxlsx"), ">")
     }
     
+    
   }
+  
+  
   
   
   
@@ -127,10 +139,19 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     wb$sharedStrings <- vals
     
+    
+    
   }
+  
+  
+  
+  
   
   ## xl\pivotTables & xl\pivotCache
   if(length(pivotTableXML) > 0){
+    
+    # pivotTable cacheId links to workbook.xml which links to workbook.xml.rels via rId
+    # we don't modify the cacheId, only the rId
     
     nPivotTables      <- length(pivotTableXML)
     rIds <- 20000L + 1:nPivotTables
@@ -208,7 +229,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     tableStyles <- .Call("openxlsx_getNodes", styles, "<tableStyles", PACKAGE = "openxlsx")
     if(length(tableStyles) > 0)
       wb$styles$tableStyles <- paste0(tableStyles, ">")
-
+    
     extLst <- .Call("openxlsx_getNodes", styles, "<extLst>", PACKAGE = "openxlsx")
     if(length(extLst) > 0)
       wb$styles$extLst <- extLst
@@ -645,6 +666,50 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     xml <- gsub("<Relationships .*?>", "", xml)
     xml <- gsub("</Relationships>", "", xml)
     xml <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, "<Relationship ", PACKAGE="openxlsx"))
+    
+    if(length(slicerXML) > 0){
+
+      slicerXML <- slicerXML[order(nchar(slicerXML), slicerXML)]
+      slicersFiles <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=slicer)[0-9]+(?=\\.xml)", x, perl = TRUE))))
+      inds <- sapply(slicersFiles, length) > 0
+      
+      
+      ## worksheet_rels Id for slicer will be rId0
+      k <- 1L
+      wb$slicers <- rep("", nSheets)
+      for(i in 1:nSheets){
+        
+        ## read in slicer[j].XML sheets into sheet[i]
+        if(inds[i]){
+
+          wb$slicers[[i]] <- removeHeadTag(.Call("openxlsx_cppReadFile", slicerXML[k], PACKAGE = "openxlsx"))
+          k <- k + 1L
+          
+          wb$worksheets_rels[[i]] <- unlist(c(wb$worksheets_rels[[i]],
+                                              sprintf('<Relationship Id="rId0" Type="http://schemas.microsoft.com/office/2007/relationships/slicer" Target="../slicers/slicer%s.xml"/>', i)))
+          wb$Content_Types <- c(wb$Content_Types,
+                                sprintf('<Override PartName="/xl/slicers/slicer%s.xml" ContentType="application/vnd.ms-excel.slicer+xml"/>', i))
+          
+          ## Append slicer to worksheet extLst
+          wb$worksheets[[i]]$extLst <- c(wb$worksheets[[i]]$extLst, genBaseSlicerXML())
+          
+        }
+      }
+      
+    }
+    
+    
+    if(length(slicerCachesXML) > 0){
+      
+      ## ---- slicerCaches
+      inds <- 1:length(slicerCachesXML)
+      wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/slicerCaches/slicerCache%s.xml" ContentType="application/vnd.ms-excel.slicerCache+xml"/>', inds))
+      wb$slicerCaches <- sapply(slicerCachesXML[order(nchar(slicerCachesXML), slicerCachesXML)], function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+      wb$workbook.xml.rels <- c(wb$workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2007/relationships/slicerCache" Target="slicerCaches/slicerCache%s.xml"/>', 1E5 + inds, inds))
+      wb$workbook$extLst <- c(wb$workbook$extLst,  genSlicerCachesExtLst(1E5 + inds))
+      
+      
+    }    
     
     ## tables
     if(length(tablesXML) > 0){
