@@ -6,7 +6,7 @@
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE,
-  detectDates = FALSE)
+  detectDates = FALSE, rows = NULL, cols = NULL)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -26,6 +26,12 @@ will return a row of NAs}
 \item{keepNewLine}{If TRUE, keep new line characters embedded in strings.}
 
 \item{detectDates}{If TRUE, attempt to recognise dates and perform conversion.}
+
+\item{rows}{A numeric vector specifying which rows in the Excel file to read.
+If NULL, all rows are read.}
+
+\item{cols}{A numeric vector specifying which columns in the Excel file to read.
+If NULL, all columns are read.}
 }
 \value{
 data.frame
@@ -39,6 +45,9 @@ Creates a data.frame of all data in worksheet.
 \examples{
 xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
+
+xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
+df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1, rows = c(1, 3, 5), cols = 1:3)
 }
 \author{
 Alexander Walker

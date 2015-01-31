@@ -179,28 +179,28 @@ test_that("Writing then reading returns identical data.frame 3", {
   write.xlsx(df, file = fileName, overwrite = TRUE)
   
   
-  ## rowIndex, colIndex combinations
-  rowIndex <- 1:4
-  colIndex <- c(1, 3, 5)
-  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
-  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  ## rows, cols combinations
+  rows <- 1:4
+  cols <- c(1, 3, 5)
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rows = rows, cols = cols)
+  expect_equal(object = x, expected = genDf()[sort((rows-1)[(rows-1) <= nrow(df)]), sort(cols[cols <= ncol(df)])], check.attributes = FALSE)
   
   
-  rowIndex <- 1:4
-  colIndex <- 1:9
-  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
-  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  rows <- 1:4
+  cols <- 1:9
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rows = rows, cols = cols)
+  expect_equal(object = x, expected = genDf()[sort((rows-1)[(rows-1) <= nrow(df)]), sort(cols[cols <= ncol(df)])], check.attributes = FALSE)
   
   
-  rowIndex <- 1:200
-  colIndex <- c(5, 99, 2)
-  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
-  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  rows <- 1:200
+  cols <- c(5, 99, 2)
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rows = rows, cols = cols)
+  expect_equal(object = x, expected = genDf()[sort((rows-1)[(rows-1) <= nrow(df)]), sort(cols[cols <= ncol(df)])], check.attributes = FALSE)
   
   
-  rowIndex <- 1000:900
-  colIndex <- c(5, 99, 2)
-  suppressWarnings(x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex))
+  rows <- 1000:900
+  cols <- c(5, 99, 2)
+  suppressWarnings(x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rows = rows, cols = cols))
   expect_equal(object = x, expected = NULL, check.attributes = FALSE)
   
   

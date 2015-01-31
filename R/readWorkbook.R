@@ -13,9 +13,9 @@
 #' @param rowNames If TRUE, first column of data will be used as row names.
 #' @param keepNewLine If TRUE, keep new line characters embedded in strings.
 #' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
-#' @param colIndex A numeric vector specifying which columns in the Excel file to read. 
+#' @param cols A numeric vector specifying which columns in the Excel file to read. 
 #' If NULL, all columns are read.
-#' @param rowIndex A numeric vector specifying which rows in the Excel file to read. 
+#' @param rows A numeric vector specifying which rows in the Excel file to read. 
 #' If NULL, all rows are read.
 #' @details Creates a data.frame of all the data on a worksheet.
 #' @author Alexander Walker
@@ -37,18 +37,18 @@
 #' 
 #' wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
 #' df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
-#'     colIndex = c(1, 4), rowIndex = c(1, 3, 4))
+#'     cols = c(1, 4), rows = c(1, 3, 4))
 #' all.equal(df1, df3)
 #' 
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rowIndex = NULL, colIndex = NULL){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   UseMethod("read.xlsx", xlsxFile) 
   
 }
 
 #' @export
-read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rowIndex = NULL, colIndex = NULL){
+read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -145,10 +145,10 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
 
-  if(is.null(rowIndex)){
+  if(is.null(rows)){
     ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
   }else{
-    ws <- .Call("openxlsx_getCellsWithChildrenLimited", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), max(rowIndex), PACKAGE = "openxlsx")
+    ws <- .Call("openxlsx_getCellsWithChildrenLimited", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), max(rows), PACKAGE = "openxlsx")
   }
   
   Encoding(ws) <- "UTF-8"
@@ -157,16 +157,16 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   v <- r_v[[2]]
   
   ## subset if specified a row/col index
-  if(!is.null(colIndex)){
-    flag <- which(convertFromExcelRef(r) %in% colIndex)
+  if(!is.null(cols)){
+    flag <- which(convertFromExcelRef(r) %in% cols)
     r <- r[flag]
     v <- v[flag]
     ws <- ws[flag]
 
   }
   
-  if(!is.null(rowIndex)){
-    flag <- which(as.numeric(gsub("[A-Z]", "", r)) %in% rowIndex)
+  if(!is.null(rows)){
+    flag <- which(as.numeric(gsub("[A-Z]", "", r)) %in% rows)
     r <- r[flag]
     v <- v[flag]
     ws <- ws[flag]
@@ -337,7 +337,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
 
 
 #' @export
-read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rowIndex = NULL, colIndex = NULL){
+read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
@@ -403,12 +403,12 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   sheetData <- xlsxFile$sheetData[[sheet]]
-  if(!is.null(rowIndex))
-    sheetData <- sheetData[as.numeric(names(sheetData)) %in% rowIndex]
+  if(!is.null(rows))
+    sheetData <- sheetData[as.numeric(names(sheetData)) %in% rows]
   
-  if(!is.null(colIndex)){
+  if(!is.null(cols)){
     r <- unlist(lapply(sheetData, "[[", 1))
-    sheetData <- sheetData[convertFromExcelRef(r) %in% colIndex]
+    sheetData <- sheetData[convertFromExcelRef(r) %in% cols]
   }
     
 
@@ -630,6 +630,10 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' @details Creates a data.frame of all data in worksheet.
 #' @param keepNewLine If TRUE, keep new line characters embedded in strings.
 #' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
+#' @param cols A numeric vector specifying which columns in the Excel file to read. 
+#' If NULL, all columns are read.
+#' @param rows A numeric vector specifying which rows in the Excel file to read. 
+#' If NULL, all rows are read.
 #' @author Alexander Walker
 #' @return data.frame
 #' @export
@@ -638,6 +642,18 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' @examples
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE){
-  read.xlsx(xlsxFile, sheet = sheet, startRow = startRow, colNames = colNames, skipEmptyRows = skipEmptyRows, rowNames = rowNames, keepNewLine = keepNewLine, detectDates = detectDates)
+#' 
+#' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
+#' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1, rows = c(1, 3, 5), cols = 1:3)
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
+  read.xlsx(xlsxFile,
+            sheet = sheet,
+            startRow = startRow,
+            colNames = colNames,
+            skipEmptyRows = skipEmptyRows,
+            rowNames = rowNames,
+            keepNewLine = keepNewLine,
+            detectDates = detectDates,
+            rows = rows,
+            cols = cols)
 }
