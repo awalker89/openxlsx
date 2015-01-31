@@ -25,7 +25,6 @@ test_that("Reading from new workbook", {
   expect_equal(object = mtcars, expected = x, check.attributes = FALSE)
   expect_equal(object = colnames(mtcars), expected = colnames(x), check.attributes = FALSE)
   
-  
   ## colNames = FALSE, rowNames = TRUE
   writeData(wb, sheet = 3, x = mtcars, colNames = FALSE, rowNames = TRUE, startRow = 2, startCol = 2)
   x <- read.xlsx(wb, sheet = 3, colNames = FALSE, rowNames = TRUE)
@@ -41,6 +40,8 @@ test_that("Reading from new workbook", {
   rm(wb)
   
 })
+
+
 
 
 
@@ -86,6 +87,7 @@ test_that("Reading from new workbook 2 ", {
 
 
 
+
 test_that("Reading from loaded workbook", {
   
   wb <- createWorkbook()
@@ -126,5 +128,86 @@ test_that("Reading from loaded workbook", {
   unlink(tempFile, recursive = TRUE, force = TRUE)
   
 })
+
+
+
+test_that("Reading from new workbook colIndex/rowIndex", {
+  
+  wb <- createWorkbook()
+  for(i in 1:4)
+    addWorksheet(wb, sprintf('Sheet %s', i))
+  
+  tempFile <- file.path(tempdir(), "temp.xlsx")
+  
+  ## 1
+  writeData(wb, sheet = 1, x = mtcars, colNames = TRUE, rowNames = FALSE)
+  saveWorkbook(wb, tempFile, overwrite = TRUE)
+  
+  colIndex <- 1:3
+  rowIndex <- 1:10
+  x <- read.xlsx(wb, 1, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  y <- read.xlsx(tempFile, 1, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  
+  df <- mtcars[sort((rowIndex-1)[(rowIndex-1) <= nrow(mtcars)]), sort(colIndex[colIndex <= ncol(mtcars)])]
+  rownames(df) <- 1:nrow(df)
+  
+  expect_equal(object = x, expected = y)
+  expect_equal(object = x, expected = df)
+  
+  
+  
+  ## 2
+  writeData(wb, sheet = 2, x = mtcars, colNames = TRUE, rowNames = FALSE, startRow = 10, startCol = 5)
+  saveWorkbook(wb, tempFile, overwrite = TRUE)
+  
+  colIndex <- 1:300
+  rowIndex <- 1:1000
+  x <- read.xlsx(wb, sheet = 2, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  y <- read.xlsx(tempFile, sheet = 2, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  
+  
+  expect_equal(object = mtcars, expected = x, check.attributes = FALSE)
+  expect_equal(object = x, expected = y, check.attributes = TRUE)
+  expect_equal(object = colnames(mtcars), expected = colnames(x), check.attributes = FALSE)
+  
+  
+  ## 3
+  writeData(wb, sheet = 3, x = mtcars, colNames = TRUE, rowNames = FALSE)
+  saveWorkbook(wb, tempFile, overwrite = TRUE)
+  
+  colIndex <- c(2, 4, 6)
+  rowIndex <- seq(1, 31, by = 2)
+  
+  x <- read.xlsx(wb, sheet = 3, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  y <- read.xlsx(tempFile, sheet = 3, colNames = TRUE, rowNames = FALSE, rowIndex = rowIndex, colIndex = colIndex)
+  
+  df <- mtcars[sort((rowIndex-1)[(rowIndex-1) <= nrow(mtcars)]), sort(colIndex[colIndex <= ncol(mtcars)])]
+  rownames(df) <- 1:nrow(df)
+  
+  expect_equal(object = x, expected = y, check.attributes = FALSE)
+  expect_equal(object = df, expected = x, check.attributes = FALSE)
+  
+  
+  
+  ## 4
+  writeData(wb, sheet = 4, x = mtcars, colNames = TRUE, rowNames = TRUE)
+  saveWorkbook(wb, tempFile, overwrite = TRUE)
+  
+  colIndex <- c(1, 6, 12)
+  rowIndex <- seq(1, 31, by = 2)
+  x <- read.xlsx(wb, sheet = 4, colNames = TRUE, rowNames = TRUE, rowIndex = rowIndex, colIndex = colIndex)  
+  y <- read.xlsx(tempFile, sheet = 4, colNames = TRUE, rowNames = TRUE, rowIndex = rowIndex, colIndex = colIndex)  
+  
+  df <- mtcars[sort((rowIndex-1)[(rowIndex-1) <= nrow(mtcars)]),colIndex[-1]-1]
+  expect_equal(object = x, expected = y, check.attributes = FALSE)
+  expect_equal(object = df, expected = x, check.attributes = FALSE)
+  
+  rm(wb)
+  unlink(tempFile, recursive = TRUE, force = TRUE)
+  
+})
+
+
+
 
 

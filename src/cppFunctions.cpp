@@ -1713,8 +1713,6 @@ CharacterVector getCellsWithChildrenLimited(std::string xmlFile, CharacterVector
       start = start + 5;
     }
     
-    
-    Rcout << occurrences << endl;
   }
   
   xml = xml.substr(0, start);

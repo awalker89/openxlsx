@@ -6,7 +6,7 @@
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE,
-  detectDates = FALSE)
+  detectDates = FALSE, rowIndex = NULL, colIndex = NULL)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file or Workbook object}
@@ -26,6 +26,12 @@ will return a row of NAs.}
 \item{keepNewLine}{If TRUE, keep new line characters embedded in strings.}
 
 \item{detectDates}{If TRUE, attempt to recognise dates and perform conversion.}
+
+\item{rowIndex}{A numeric vector specifying which rows in the Excel file to read.
+If NULL, all rows are read.}
+
+\item{colIndex}{A numeric vector specifying which columns in the Excel file to read.
+If NULL, all columns are read.}
 }
 \value{
 data.frame
@@ -47,7 +53,12 @@ sapply(df2, class)
 head(df2)
 
 wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-df3 <- read.xlsx(wb, sheet = 1, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+all.equal(df1, df3)
+
+wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
+    colIndex = c(1, 4), rowIndex = c(1, 3, 4))
 all.equal(df1, df3)
 }
 \author{

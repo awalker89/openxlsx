@@ -148,3 +148,63 @@ test_that("Writing then reading rowNames, colNames combinations", {
 
 
 
+
+
+test_that("Writing then reading returns identical data.frame 3", {
+  
+  ## data
+  genDf <- function(){
+    data.frame("Date" = Sys.Date()-0:4,
+               "Logical" = c(TRUE, FALSE, TRUE, TRUE, FALSE),
+               "Currency" = -2:2,
+               "Accounting" = -2:2,
+               "hLink" = "http://cran.r-project.org/", 
+               "Percentage" = seq(-1, 1, length.out=5),
+               "TinyNumber" = runif(5) / 1E9, stringsAsFactors = FALSE)
+  }
+  
+  df <- genDf()
+  
+  class(df$Currency) <- "currency"
+  class(df$Accounting) <- "accounting"
+  class(df$hLink) <- "hyperlink"
+  class(df$Percentage) <- "percentage"
+  class(df$TinyNumber) <- "scientific"
+  
+  options("openxlsx.dateFormat" = "yyyy-mm-dd")
+  
+  tmpDir <- paste0(tempdir(), "readFromTests")
+  fileName <- file.path(tmpDir, "allClasses.xlsx")
+  dir.create(tmpDir, showWarnings = FALSE)
+  write.xlsx(df, file = fileName, overwrite = TRUE)
+  
+  
+  ## rowIndex, colIndex combinations
+  rowIndex <- 1:4
+  colIndex <- c(1, 3, 5)
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
+  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  
+  
+  rowIndex <- 1:4
+  colIndex <- 1:9
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
+  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  
+  
+  rowIndex <- 1:200
+  colIndex <- c(5, 99, 2)
+  x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex)
+  expect_equal(object = x, expected = genDf()[sort((rowIndex-1)[(rowIndex-1) <= nrow(df)]), sort(colIndex[colIndex <= ncol(df)])], check.attributes = FALSE)
+  
+  
+  rowIndex <- 1000:900
+  colIndex <- c(5, 99, 2)
+  suppressWarnings(x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rowIndex = rowIndex, colIndex = colIndex))
+  expect_equal(object = x, expected = NULL, check.attributes = FALSE)
+  
+  
+})
+
+
+
