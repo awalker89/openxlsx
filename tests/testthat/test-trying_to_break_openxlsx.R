@@ -8,8 +8,7 @@ test_that("Images and Tables - reordering and removing", {
 
   options('stringsAsFactors' = FALSE)
   tempFile <- file.path(tempdir(), "break.xlsx")
-  tempFile <- file.path("c:/users/alex/desktop", "break.xlsx")
-  
+
   getPlot <- function(i){
     n <- 5000
     plot(1:n, rnorm(n))
@@ -142,11 +141,7 @@ test_that("Images and Tables - reordering and removing", {
   worksheetOrder(wb) <- c(1, 3, 2)
   saveWorkbook(wb, file = tempFile, overwrite = TRUE)
 
-  tempFile <- file.path("c:/users/alex/desktop", "break.xlsx")
   wb <- loadWorkbook(file = tempFile)
-
-
-
 
 
   ## drawings added in order
