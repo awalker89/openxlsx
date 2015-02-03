@@ -95,7 +95,7 @@ writeDataTable <- function(wb, sheet, x,
   
   
   ## increase scipen to avoid writing in scientific 
-  exSciPen <- options("scipen")
+  exSciPen <- getOption("scipen")
   options("scipen" = 10000)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   

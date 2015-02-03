@@ -54,7 +54,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   on.exit(setwd(wd), add = TRUE)
   
   ## increase scipen to avoid writing in scientific 
-  exSciPen <- options("scipen")
+  exSciPen <- getOption("scipen")
   options("scipen" = 10000)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
@@ -379,7 +379,7 @@ renameWorksheet <- function(wb, sheet, newName){
 convertFromExcelRef <- function(col){
   
   ## increase scipen to avoid writing in scientific 
-  exSciPen <- options("scipen")
+  exSciPen <- getOption("scipen")
   options("scipen" = 10000)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
