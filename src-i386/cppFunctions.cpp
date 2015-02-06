@@ -6,6 +6,8 @@
 using namespace Rcpp;
 using namespace std;
 
+
+
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
@@ -170,6 +172,11 @@ SEXP getVals(CharacterVector x){
 
 // [[Rcpp::export]]
 SEXP getNodes(std::string xml, std::string tagIn){
+  
+  // This function loops over all characters in xml, looking for tag
+  // tag should look liked <tag>
+  // tagEnd is then generated to be <tag/>
+  
   
   if(xml.length() == 0)
   return wrap(NA_STRING);
@@ -907,15 +914,15 @@ CharacterVector colNames, int nRows, int nCols){
   std::fill(m.begin(), m.end(), NA_REAL);
   
   for(int i = 0; i < k; i++)
-  m(rowInd[i], colInd[i]) = v[i];
+    m(rowInd[i], colInd[i]) = v[i];
   
   List dfList(nCols);
   for(int i=0; i < nCols; ++i)
-  dfList[i] = m(_,i);
+    dfList[i] = m(_,i);
   
   std::vector<int> rowNames(nRows);
   for(int i = 0;i < nRows; ++i)
-  rowNames[i] = i+1;
+    rowNames[i] = i+1;
   
   dfList.attr("names") = colNames;
   dfList.attr("row.names") = rowNames;
@@ -928,68 +935,108 @@ CharacterVector colNames, int nRows, int nCols){
 
 
 // [[Rcpp::export]]
-SEXP buildMatrixMixed(CharacterVector v, IntegerVector rowInd, IntegerVector colInd,
-CharacterVector colNames, int nRows, int nCols, IntegerVector charCols){
+SEXP buildMatrixMixed(CharacterVector v,
+                      NumericVector vn,
+                      IntegerVector rowInd,
+                      IntegerVector colInd,
+                      CharacterVector colNames,
+                      int nRows,
+                      int nCols,
+                      IntegerVector charCols,
+                      int originAdj){
   
   int k = v.size();
-  Rcpp::CharacterMatrix m(nRows, nCols);
+  CharacterMatrix m(nRows, nCols);
   std::fill(m.begin(), m.end(), NA_STRING);
+  
+  NumericMatrix mN(nRows, nCols);
+  std::fill(mN.begin(), mN.end(), NA_REAL);
   
   // fill matrix
   for(int i = 0;i < k; i++){
     m(rowInd[i], colInd[i]) = v[i];
+    mN(rowInd[i], colInd[i]) = vn[i];
   }
   
-  List dfList(nCols);
-  LogicalVector naElements(nRows);  
+  List dfList(nCols); 
+
+  //vectors that are assigned to data.frame
   
-  for(int i=0; i < nCols; i++){
+  for(int i = 0; i < nCols; i++){
+
     
     CharacterVector tmp(nRows);
-    for(int ri=0; ri < nRows; ri++)
-    tmp[ri] = m(ri,i);
+  
+    for(int ri = 0; ri < nRows; ri++)
+      tmp[ri] = m(ri,i);
     
     LogicalVector notNAElements = !is_na(tmp);
     
     // if i in charCols
     if (std::find(charCols.begin(), charCols.end(), i) != charCols.end()){ // If column is character class
     
-    bool logCol = true;
-    for(int ri = 0; ri < nRows; ri++){
-      if(notNAElements[ri]){
-        if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
-          logCol = false;
-          break;
+      // determin if column is logical or date
+      bool logCol = true;
+      for(int ri = 0; ri < nRows; ri++){
+        if(notNAElements[ri]){
+          if((m(ri, i) != "TRUE") & (m(ri, i) != "FALSE")){
+            logCol = false;
+            break;
+          }
         }
       }
-    }
-    
-    
-    if(logCol){
       
-      LogicalVector logtmp(nRows);
-      for(int ri=0; ri < nRows; ri++){
-        if(!notNAElements[ri]){
-          logtmp[ri] = NA_LOGICAL; //IF TRUE, TRUE else FALSE
-        }else{
-          logtmp[ri] = (tmp[ri] == "TRUE");
+      
+      bool dateCol = true;
+      for(int ri = 0; ri < nRows; ri++){
+        if(notNAElements[ri]){
+          if(m(ri, i) != "openxlsxdt"){
+            dateCol = false;
+            break;
+          }
         }
       }
-      dfList[i] = logtmp;
       
-    }else{
       
-      dfList[i] = tmp;
+      if(logCol){
+        
+        LogicalVector logtmp(nRows);
+        for(int ri=0; ri < nRows; ri++){
+          if(!notNAElements[ri]){
+            logtmp[ri] = NA_LOGICAL; //IF TRUE, TRUE else FALSE
+          }else{
+            logtmp[ri] = (tmp[ri] == "TRUE");
+          }
+        }
+        
+        dfList[i] = logtmp;
+        
+      }else if(dateCol){
+              
+        DateVector datetmp(nRows);
+        for(int ri=0; ri < nRows; ri++){
+          if(!notNAElements[ri]){
+            datetmp[ri] = NA_REAL; //IF TRUE, TRUE else FALSE
+          }else{
+            datetmp[ri] = Date(mN(ri,i) - originAdj);
+          }
+        }
+        
+        dfList[i] = datetmp;
+          
       
-    }
+      }else{
+        
+        dfList[i] = tmp;
+        
+      }
     
     }else{ // else if column NOT character class
     
-    
     NumericVector ntmp(nRows);
-    for(int ri=0; ri < nRows; ri++){
+    for(int ri = 0; ri < nRows; ri++){
       if(notNAElements[ri]){
-        ntmp[ri] = atof(tmp[ri]); 
+        ntmp[ri] = mN(ri, i); 
       }else{
         ntmp[ri] = NA_REAL; 
       }
@@ -1084,7 +1131,16 @@ List buildCellMerges(List comps){
 
 
 // [[Rcpp::export]]
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows){
+SEXP readWorkbook(CharacterVector v,
+                  NumericVector vn,
+                  IntegerVector stringInds,
+                  CharacterVector r,
+                  CharacterVector tR,
+                  int nRows,
+                  bool hasColNames,
+                  bool skipEmptyRows,
+                  int originAdj
+                  ){
   
   // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
   int nCells = r.size();
@@ -1189,12 +1245,11 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     uRows = unique(rowNumbers);
   }
   
+  if(hasColNames) // remove elements that have been "used"
+   vn.erase(vn.begin(), vn.begin() + pos);
+      
   SEXP m;
   if(allNumeric){
-    
-    
-    if(hasColNames) // remove elements that have been "used"
-      vn.erase(vn.begin(), vn.begin() + pos);
     
     m = buildMatrixNumeric(vn, rowNumbers, colNumbers, colNames, nRows, nCols);
     
@@ -1214,14 +1269,13 @@ SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds,
     
     charCols = unique(charColNumbers);
 
-    m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols);
+    m = buildMatrixMixed(v, vn, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, originAdj);
     
-  }
+   }
   
   return wrap(m) ;
   
 }
-
 
 
 
@@ -1328,13 +1382,7 @@ CharacterVector buildTableXML(std::string table, std::string ref, std::vector<st
   int n = colNames.size();
   std::string tableCols;
   std::string tableStyleXML = "<tableStyleInfo name=\"" + tableStyle + "\" showFirstColumn=\"0\" showLastColumn=\"0\" showRowStripes=\"1\" showColumnStripes=\"0\"/>";
-  
-  //if colnames are null
-  if(!showColNames){
-    table += " headerRowCount=\"0\" totalsRowShown=\"0\">";
-  }else{
-    table += " totalsRowShown=\"0\">";
-  }
+  table += " totalsRowShown=\"0\">";
   
   if(withFilter)
     table += "<autoFilter ref=\"" + ref + "\"/>";
@@ -1539,6 +1587,9 @@ List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, S
 SEXP calcNRows(CharacterVector x, bool skipEmptyRows){
   
   int n = x.size();
+  if(n == 0)
+    return(wrap(0));
+  
   int nRows;
   
   if(skipEmptyRows){
@@ -1633,6 +1684,80 @@ CharacterVector removeEmptyNodes(CharacterVector x, CharacterVector emptyNodes){
   return wrap(x);
   
 }
+
+
+
+
+// [[Rcpp::export]]
+CharacterVector getCellsWithChildrenLimited(std::string xmlFile, CharacterVector emptyNodes, int n){
+  
+  //read in file without spaces
+  std::string xml = cppReadFile(xmlFile);
+  
+  // std::string tag = "<c ";
+  //  std::string tagEnd1 = ">";
+  //  std::string tagEnd2 = "</c>";
+  
+  
+  // count number of rows
+  int occurrences = 0;
+  string::size_type start = 0;
+  
+  while(occurrences <= n) {
+    
+    start = xml.find("<row r", start);
+    if(start == string::npos){
+      break;
+    }else{
+      ++occurrences;
+      start = start + 5;
+    }
+    
+  }
+  
+  xml = xml.substr(0, start);
+  
+  // count cells with children
+  occurrences = 0;
+  start = 0;
+  while((start = xml.find("</v>", start)) != string::npos) {
+    ++occurrences;
+    start += 4;
+  }
+  
+  CharacterVector cells(occurrences);
+  std::fill(cells.begin(), cells.end(), NA_STRING);
+  
+  int i = 0;
+  size_t nextPos = 3;
+  size_t vPos = 2;
+  std::string sub;
+  size_t pos = xml.find("<c ", 0);
+  
+  while(i < occurrences){
+    
+    if(pos != std::string::npos){
+      nextPos = xml.find("<c ", pos+9);
+      vPos = xml.find("</v>", pos+8); // have to atleast pass <c r="XX">
+      
+      if(vPos < nextPos){
+        cells[i] = xml.substr(pos, nextPos-pos);
+        i++; 
+      }
+      
+      pos = nextPos;
+      
+    }
+  }
+  
+  if(emptyNodes[0] != "<v></v>")
+    cells = removeEmptyNodes(cells, emptyNodes);
+  
+  return wrap(cells) ;  
+  
+}
+
+
 
 
 
@@ -2139,6 +2264,51 @@ std::string createBorderNode(List style, CharacterVector borders){
   return borderNode;
   
 }
+
+
+
+
+
+
+// [[Rcpp::export]]
+SEXP getCellStylesPossiblyMissing(CharacterVector x){
+  
+  size_t n = x.size();
+  
+  if(n == 0){
+    CharacterVector ret(1);
+    ret[0] = NA_STRING;
+    return wrap(ret);
+  }
+  
+  
+  std::string xml;
+  CharacterVector t(n);
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  std::string rtag = " s=";
+  std::string rtagEnd = "\"";
+  
+  for(size_t i = 0; i < n; i++){ 
+    
+    xml = x[i];
+    pos = xml.find(rtag, 1);
+    
+    if(pos == std::string::npos){
+      t[i] = NA_STRING;
+    }else{
+      endPos = xml.find(rtagEnd, pos+4);
+      t[i] = xml.substr(pos+4, endPos-pos-4).c_str();
+    }
+  }
+  
+  return wrap(t) ;  
+  
+}
+
+
+
 
 
 

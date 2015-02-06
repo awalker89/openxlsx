@@ -127,14 +127,15 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## xl\sharedStrings
   if(length(sharedStringsXML) > 0){
-    
-    sharedStrings <- readLines(sharedStringsXML, warn = FALSE, encoding="UTF-8")
+
+    sharedStrings <- readLines(sharedStringsXML, warn = FALSE, encoding = "UTF-8")
     sharedStrings <- removeHeadTag(sharedStrings)
     
     uniqueCount <- as.integer(regmatches(sharedStrings, regexpr('(?<=uniqueCount=")[0-9]+', sharedStrings, perl = TRUE)))
     
     ## read in and get <si> nodes
     vals <- .Call("openxlsx_getNodes", sharedStrings, "<si>", PACKAGE = "openxlsx")
+    Encoding(vals) <- "UTF-8"
     attr(vals, "uniqueCount") <- uniqueCount
     
     wb$sharedStrings <- vals
@@ -224,7 +225,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     ## dxf (don't need these, I don't think)
     dxf <- .Call("openxlsx_getNodes", styles, "<dxf>", PACKAGE = "openxlsx")
     if(length(dxf) > 0)
-      wb$styles$dxfs <- paste(dxf, collapse = "")
+      wb$styles$dxfs <- dxf
     
     tableStyles <- .Call("openxlsx_getNodes", styles, "<tableStyles", PACKAGE = "openxlsx")
     if(length(tableStyles) > 0)
@@ -561,6 +562,18 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     hyperlinks <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<hyperlink ", PACKAGE = "openxlsx")
     if(length(hyperlinks) > 0)
       wb$hyperlinks[[i]] <- .Call("openxlsx_getHyperlinkRefs", hyperlinks, 1, PACKAGE = "openxlsx")
+    
+    ## conditionalFormatting
+    conForm <- .Call("openxlsx_getNodes", sheetData[[i]], "<conditionalFormatting", PACKAGE = "openxlsx")
+    if(length(conForm) > 0){
+      sqref <- unlist(regmatches(conForm, gregexpr('(?<=sqref=")[^"]+', conForm, perl = TRUE)))
+      conForm <- unlist(lapply(conForm, function(x) paste(paste0(.Call("openxlsx_getNodes", x, "<cfRule", PACKAGE = "openxlsx"), ">"), collapse = "")))
+      if(length(conForm) > 0){
+        conForm <- unlist(conForm)
+        names(conForm) <- sqref
+        wb$worksheets[[i]]$conditionalFormatting <- conForm
+      }
+    }
     
     ## pageMargins
     pageMargins <- .Call("openxlsx_getChildlessNode", sheetData[[i]], "<pageMargins ", PACKAGE = "openxlsx")
