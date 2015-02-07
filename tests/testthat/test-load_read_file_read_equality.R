@@ -346,5 +346,105 @@ test_that("Reading example workbook", {
 
 
 
+test_that("Empty workbook", {
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, "Sheet 1")
+  
+  expect_equal(NULL, read.xlsx(wb))  
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE))  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE))
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = FALSE))
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = FALSE))
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE))
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE))
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  
+  
+  ## 1 element
+  writeData(wb, 1, "a")
+  
+  x <- read.xlsx(wb)
+  expect_equal(nrow(x), 0)  
+  expect_equal(names(x), "a")  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE)
+  expect_equal(data.frame("X1" = "a", stringsAsFactors = FALSE), x)  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = TRUE)
+  expect_equal(nrow(x), 0)  
+  expect_equal(names(x), "a") 
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = FALSE)
+  expect_equal(data.frame("X1" = "a", stringsAsFactors = FALSE), x)  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = FALSE)
+  expect_equal(nrow(x), 0)  
+  expect_equal(names(x), "a") 
+
+
+  writeData(wb, 1, Sys.Date())
+  x <- read.xlsx(wb)
+  expect_equal(nrow(x), 1)  
+
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE)
+  expect_equal(nrow(x), 2)  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = TRUE)
+  expect_equal(nrow(x), 1)  
+  expect_equal(names(x), "x") 
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)
+  expect_equal(class(x[[1]]), "character")
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = TRUE)
+  expect_equal(x[[1]], Sys.Date())
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  
+  
+  addWorksheet(wb, "Sheet 2")
+  removeWorksheet(wb, 1)
+
+
+  ## 1 date  
+  writeData(wb, 1, Sys.Date(), colNames = FALSE)
+
+  x <- read.xlsx(wb)
+  expect_equal(convertToDate(names(x)), Sys.Date())  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE)
+  x1 <- convertToDate(x[[1]])
+  expect_equal(x1, Sys.Date())  
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)
+  expect_equal(class(x[[1]]), "Date")
+  expect_equal(x[[1]], Sys.Date())
+  
+  x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = TRUE)
+  expect_equal(convertToDate(names(x)), Sys.Date())
+  
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  
+  
+  
+})
+
+
+
+
+
+
+
+
+
+
 
 

@@ -1727,7 +1727,7 @@ worksheetOrder <- function(wb){
 #' @export
 #' @examples
 #' ##2014 April 21st to 25th
-#' convertToDate(c(41750, 41751, 41752, 41753, 41754) )
+#' convertToDate(c(41750, 41751, 41752, 41753, 41754, NA) )
 #' convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 convertToDate <- function(x, origin = "1900-01-01"){
 
@@ -1749,13 +1749,13 @@ convertToDate <- function(x, origin = "1900-01-01"){
 #' @details Excel stores dates as number of days from some origin day
 #' @export
 #' @examples
-#' ## 2014-07-01 & 2014-06-30
-#' x <- c(41821.8127314815, 41820.8127314815) 
+#' ## 2014-07-01, 2014-06-30, 2014-06-29
+#' x <- c(41821.8127314815, 41820.8127314815, NA, 41819, NaN) 
 #' convertToDateTime(x)
-convertToDateTime <- function(x, origin = "1970-1-1"){
+convertToDateTime <- function(x, origin = "1900-01-01"){
   
   rem <- x %% 1
-  date <- as.Date(as.integer(x) - 25569, origin = origin)  
+  date <- convertToDate(x, origin)
   fraction <- 24*rem
   hrs <- floor(fraction)
   minFrac <- (fraction-hrs)*60
@@ -1763,7 +1763,10 @@ convertToDateTime <- function(x, origin = "1970-1-1"){
   secs <- (minFrac - mins)*60
   y <- paste(hrs, mins, secs, sep = ":")
   y <- format(strptime(y, "%H:%M:%S"), "%H:%M:%S") 
-  dateTime <- as.POSIXct(paste(date, y))
+  
+  notNA <- !is.na(x)
+  dateTime <- .POSIXct(character(length(x)))
+  dateTime[notNA] <- as.POSIXct(paste(date[notNA], y[notNA]))
   
   return(dateTime)
 }

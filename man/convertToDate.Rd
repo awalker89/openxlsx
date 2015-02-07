@@ -19,7 +19,7 @@ Excel stores dates as number of days from some origin day
 }
 \examples{
 ##2014 April 21st to 25th
-convertToDate(c(41750, 41751, 41752, 41753, 41754) )
+convertToDate(c(41750, 41751, 41752, 41753, 41754, NA) )
 convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 }
 \seealso{
