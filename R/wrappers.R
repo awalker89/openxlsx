@@ -1727,15 +1727,18 @@ worksheetOrder <- function(wb){
 #' @export
 #' @examples
 #' ##2014 April 21st to 25th
-#' x <- c(41750, 41751, 41752, 41753, 41754) 
-#' convertToDate(x)
-#' convertToDate(c(41821.8127314815, 41820.8127314815))
+#' convertToDate(c(41750, 41751, 41752, 41753, 41754) )
+#' convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 convertToDate <- function(x, origin = "1900-01-01"){
-  if(origin == "1900-01-01"){
-    return(as.Date(x - 2, origin = "1900-01-01"))
-  }else{
-    return(as.Date(x, origin = origin))
-  }
+
+  x <- as.numeric(x)
+  notNa <- !is.na(x)
+  if(origin == "1900-01-01")
+    x[notNa] <- x[notNa] - 2
+    
+  return(as.Date(x, origin = origin))
+
+  
 }
 
 

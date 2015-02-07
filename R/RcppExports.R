@@ -93,8 +93,8 @@ buildMatrixNumeric <- function(v, rowInd, colInd, colNames, nRows, nCols) {
     .Call('openxlsx_buildMatrixNumeric', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols)
 }
 
-buildMatrixMixed <- function(v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, originAdj) {
-    .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, originAdj)
+buildMatrixMixed <- function(v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols, originAdj) {
+    .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols, originAdj)
 }
 
 matrixRowInds <- function(indices) {
@@ -103,10 +103,6 @@ matrixRowInds <- function(indices) {
 
 buildCellMerges <- function(comps) {
     .Call('openxlsx_buildCellMerges', PACKAGE = 'openxlsx', comps)
-}
-
-readWorkbook <- function(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows, originAdj) {
-    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows, originAdj)
 }
 
 quickBuildCellXML <- function(prior, post, sheetData, rowNumbers, styleInds, R_fileName) {
@@ -175,5 +171,9 @@ createBorderNode <- function(style, borders) {
 
 getCellStylesPossiblyMissing <- function(x) {
     .Call('openxlsx_getCellStylesPossiblyMissing', PACKAGE = 'openxlsx', x)
+}
+
+readWorkbook <- function(v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj) {
+    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj)
 }
 

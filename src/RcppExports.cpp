@@ -383,8 +383,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // buildMatrixMixed
-SEXP buildMatrixMixed(CharacterVector v, NumericVector vn, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols, IntegerVector charCols, int originAdj);
-RcppExport SEXP openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP vnSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP, SEXP originAdjSEXP) {
+SEXP buildMatrixMixed(CharacterVector v, NumericVector vn, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols, IntegerVector charCols, IntegerVector dateCols, int originAdj);
+RcppExport SEXP openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP vnSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP, SEXP dateColsSEXP, SEXP originAdjSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -397,8 +397,9 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
         Rcpp::traits::input_parameter< int >::type nCols(nColsSEXP );
         Rcpp::traits::input_parameter< IntegerVector >::type charCols(charColsSEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type dateCols(dateColsSEXP );
         Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP );
-        SEXP __result = buildMatrixMixed(v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, originAdj);
+        SEXP __result = buildMatrixMixed(v, vn, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols, originAdj);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -429,29 +430,6 @@ BEGIN_RCPP
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< List >::type comps(compsSEXP );
         List __result = buildCellMerges(comps);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// readWorkbook
-SEXP readWorkbook(CharacterVector v, NumericVector vn, IntegerVector stringInds, CharacterVector r, CharacterVector tR, int nRows, bool hasColNames, bool skipEmptyRows, int originAdj);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP stringIndsSEXP, SEXP rSEXP, SEXP tRSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP originAdjSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< CharacterVector >::type v(vSEXP );
-        Rcpp::traits::input_parameter< NumericVector >::type vn(vnSEXP );
-        Rcpp::traits::input_parameter< IntegerVector >::type stringInds(stringIndsSEXP );
-        Rcpp::traits::input_parameter< CharacterVector >::type r(rSEXP );
-        Rcpp::traits::input_parameter< CharacterVector >::type tR(tRSEXP );
-        Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
-        Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP );
-        Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP );
-        Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP );
-        SEXP __result = readWorkbook(v, vn, stringInds, r, tR, nRows, hasColNames, skipEmptyRows, originAdj);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -740,6 +718,29 @@ BEGIN_RCPP
         Rcpp::RNGScope __rngScope;
         Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP );
         SEXP __result = getCellStylesPossiblyMissing(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// readWorkbook
+SEXP readWorkbook(CharacterVector v, NumericVector vn, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, int originAdj);
+RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP vnSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP originAdjSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< CharacterVector >::type v(vSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type vn(vnSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type r(rSEXP );
+        Rcpp::traits::input_parameter< CharacterVector >::type string_refs(string_refsSEXP );
+        Rcpp::traits::input_parameter< LogicalVector >::type is_date(is_dateSEXP );
+        Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP );
+        Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP );
+        Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP );
+        Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP );
+        SEXP __result = readWorkbook(v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

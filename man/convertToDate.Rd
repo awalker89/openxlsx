@@ -19,9 +19,8 @@ Excel stores dates as number of days from some origin day
 }
 \examples{
 ##2014 April 21st to 25th
-x <- c(41750, 41751, 41752, 41753, 41754)
-convertToDate(x)
-convertToDate(c(41821.8127314815, 41820.8127314815))
+convertToDate(c(41750, 41751, 41752, 41753, 41754) )
+convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 }
 \seealso{
 \code{\link{writeData}}

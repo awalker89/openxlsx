@@ -31,14 +31,19 @@
 #' sapply(df2, class)
 #' head(df2)
 #' 
+#' df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow = 1, skipEmptyRows = TRUE,
+#'                    detectDates = TRUE)
+#' sapply(df2, class)
+#' head(df2)
+#' 
 #' wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
 #' df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-#' all.equal(df1, df3)
+#' df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#' all.equal(df3, df4)
 #' 
 #' wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
 #' df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
 #'     cols = c(1, 4), rows = c(1, 3, 4))
-#' all.equal(df1, df3)
 #' 
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
@@ -94,7 +99,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
       stop(sprintf("sheet %s does not exist.", sheet))
     sheet <- sheetrId[sheet]
   }
-    
+  
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){
     
@@ -108,7 +113,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     
     ## pull out all string nodes
     sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")  
-  
+    
     
     ## Need to remove any inline styling
     formattingFlag <- grepl("<rPr>", ss)
@@ -119,7 +124,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     }
     
     emptyStrs <- c(attr(sharedStrings, "empty"), which(sharedStrings == "") - 1L)
-        
+    
     Encoding(sharedStrings) <- "UTF-8"
     z <- tolower(sharedStrings)
     sharedStrings[z == "true"] <- "TRUE"
@@ -144,7 +149,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   worksheets <- worksheets[order(nchar(worksheets), worksheets)]
-
+  
   if(is.null(rows)){
     ws <- .Call("openxlsx_getCellsWithChildren", worksheets[[sheet]], sprintf("<v>%s</v>", emptyStrs), PACKAGE = "openxlsx")
   }else{
@@ -155,6 +160,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   r_v <- .Call("openxlsx_getRefsVals", ws, startRow, PACKAGE = "openxlsx")
   r <- r_v[[1]]
   v <- r_v[[2]]
+  rm(r_v)
   
   ## subset if specified a row/col index
   if(!is.null(cols)){
@@ -162,7 +168,6 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     r <- r[flag]
     v <- v[flag]
     ws <- ws[flag]
-
   }
   
   if(!is.null(rows)){
@@ -171,8 +176,8 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     v <- v[flag]
     ws <- ws[flag]
   }
-    
-    
+  
+  
   nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   if(nRows == 0 | length(r) == 0){
     warning("No data found on worksheet.")
@@ -180,13 +185,13 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   }
   
   ## get references for string cells
-  tR <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"|t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
-  if(length(tR) == 0)
-    tR <- -1L
-
+  string_refs <- .Call("openxlsx_getRefs", ws[which(grepl('t="s"|t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
+  if(length(string_refs) == 0)
+    string_refs <- -1L
+  
   ## get Refs for boolean 
-  tB <- .Call("openxlsx_getRefs", ws[which(grepl('t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
-  if(length(tB) > 0 & tB[[1]] != -1L){
+  bool_refs <- .Call("openxlsx_getRefs", ws[which(grepl('t="b"', ws, perl = TRUE))], startRow, PACKAGE = "openxlsx")
+  if(length(bool_refs) > 0 & bool_refs[[1]] != -1L){
     
     fInd <- which(sharedStrings == "FALSE") - 1L
     if(length(fInd) == 0){
@@ -200,7 +205,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
       sharedStrings <- c(sharedStrings, "TRUE")
     }
     
-    boolInds <- match(tB, r)
+    boolInds <- match(bool_refs, r)
     logicalVals <- v[boolInds]
     logicalVals[logicalVals == "0"] <- fInd[[1]]
     logicalVals[logicalVals == "1"] <- tInd[[1]]
@@ -208,38 +213,43 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     
   }
   
-  if(tR[[1]] == -1L){
-    stringInds <- -1L
-  }else{
-    stringInds <- match(tR, r)
-    stringInds <- stringInds[!is.na(stringInds)]
-  }
   
   ## If any t="str" exist, add v to sharedStrings and replace with newSharedStringsInd
-  wsStrInds <- which(grepl('t="str"|t="e"', ws, perl = TRUE))
+  wsStrInds <- which(grepl('t="str"', ws, perl = TRUE))
   if(length(wsStrInds) > 0){
     
     strRV <- .Call("openxlsx_getRefsVals",  ws[wsStrInds], startRow, PACKAGE = "openxlsx")
     uStrs <- unique(strRV[[2]])
     uStrs[uStrs == "#N/A"] <- NA
     
-    ## Match references of "str" cells to r, append these to stringInds
+    ## Match references of "str" cells to r, append these
     strInds <- na.omit(match(strRV[[1]], r))
-    newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) - 1L) 
+    newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) - 1L) # -1 for 0 based index
     
     ## replace strings in v with reference to sharedStrings, (now can convert v to numeric)
     v[strInds] <- newSharedStringInds[match(strRV[[2]], uStrs)]
     
     ## append new strings to sharedStrings
     sharedStrings <- c(sharedStrings, uStrs)
-    if(tR[[1]] == -1L){
-      stringInds <- strInds
-      tR <- strRV[[1]]
+    if(string_refs[1] == -1L){
+      string_refs <- strRV[[1]]
     }else{
-      stringInds <- c(stringInds, strInds)
-      tR <- c(tR, strRV[[1]])
-      tR <- tR[order(as.numeric(gsub("[A-Z]", "", tR)), nchar(tR))]   
+      string_refs <- c(string_refs, strRV[[1]])
+      string_refs <- string_refs[order(as.numeric(gsub("[A-Z]", "", string_refs)), nchar(string_refs))]   
     }
+    
+  }
+  
+  
+  ##Set error cells to NA
+  errorStrInds <- which(grepl('t="e"', ws, perl = TRUE))
+  if(length(errorStrInds) > 0){
+    
+    ## Match references of "e" cells to r and set v values to NA
+    strRV <- .Call("openxlsx_getRefs",  ws[errorStrInds], startRow, PACKAGE = "openxlsx")
+    inds <- na.omit(match(strRV, r))
+    v[inds] <- NA
+    
     
   }
   
@@ -247,29 +257,27 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   vn <- as.numeric(v)
   
   ## Using -1 as a flag for no strings
-  if(length(sharedStrings) == 0 | stringInds[[1]] == -1L){
-    stringInds <- -1L
-    tR <- as.character(NA)
+  if(length(sharedStrings) == 0 | string_refs[1] == -1L){
+    string_refs <- as.character(NA)
   }else{
     
     ## set encoding of sharedStrings
     Encoding(sharedStrings) <- "UTF-8"
     
     ## Now replace values in v with string values
+    stringInds <- match(string_refs, r)
     v[stringInds] <- sharedStrings[vn[stringInds] + 1L]
-    
-    ## decrement stringInds as sharedString inds are zero based
-    stringInds = stringInds - 1L;  
     
   }
   
   origin <- 25569L
+  isDate <- rep.int(FALSE, times = length(r))
   if(detectDates){
-
+    
     ## get date origin
     if(grepl('date1904="1"|date1904="true"', paste(workbook, collapse = ""), ignore.case = TRUE))
       origin <- 24107L
-
+    
     
     stylesXML <- xmlFiles[grepl("styles.xml", xmlFiles)]
     styles <- readLines(stylesXML, warn = FALSE)
@@ -288,8 +296,8 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
       ## this regex defines what "looks" like a date
       dateIds <- numFmtsIds[!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)]
       
-   }     
-      
+    }     
+    
     dateIds <- c(dateIds, 14)
     
     ## which styles are using these dateIds
@@ -298,27 +306,23 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     lookingFor <- paste(sprintf('numFmtId="%s"', dateIds), collapse = "|")
     dateStyleIds <- which(sapply(xf, function(x) grepl(lookingFor, x), USE.NAMES = FALSE)) - 1L
     
-    
+    if(startRow != 1){
+      i <- which(grepl(sprintf('"%s"', r[1]), ws))
+      ws <- ws[i:length(ws)]
+    }
+
     s <- .Call("openxlsx_getCellStylesPossiblyMissing", ws, package = "openxlsx")
-    
-    styleInds <- s %in% dateStyleIds
+    isDate <- s %in% dateStyleIds
     
     ## check numbers are also integers
-    isNotInt <- suppressWarnings(as.numeric(v[styleInds]))
-    isNotInt <- (isNotInt %% 1L != 0) | is.na(isNotInt)
-    styleInds[isNotInt] <- FALSE
-    
-    ## now replace string with something to look for
-    v[styleInds] <- "openxlsxdt"
-    
-    stringInds <- c(stringInds, which(styleInds) - 1L)
-    tR <- c(tR, r[styleInds]) 
+    isNotInt <- suppressWarnings(as.numeric(v[isDate]))
+    isNotInt <- (isNotInt %% 1L != 0) & !is.na(isNotInt)
+    isDate[isNotInt] <- FALSE
     
   }
   
-  
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, vn, r, string_refs, isDate,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
@@ -334,6 +338,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   return(m)
   
 }
+
 
 
 #' @export
@@ -363,7 +368,7 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
       stop(sprintf("sheet %s does not exist.", sheet))
   }
   
-
+  
   ## read in sharedStrings
   sharedStrings <- unlist(xlsxFile$sharedStrings)
   
@@ -410,14 +415,14 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     r <- unlist(lapply(sheetData, "[[", 1))
     sheetData <- sheetData[convertFromExcelRef(r) %in% cols]
   }
-    
-
-  r <- unlist(lapply(sheetData, "[[", 1))
-  v <- unlist(lapply(sheetData, "[[", 3))
-  t <- unlist(lapply(sheetData, "[[", 2))
+  
+  
+  r <- unlist(lapply(sheetData, "[[", 1), use.names = FALSE)
+  v <- unlist(lapply(sheetData, "[[", 3), use.names = FALSE)
+  t <- unlist(lapply(sheetData, "[[", 2), use.names = FALSE)
   
   if(startRow > 1){
-        
+    
     rows <- as.numeric(gsub("[A-Z]", "", r))
     r <- r[rows >= startRow]
     v <- v[rows >= startRow]
@@ -444,18 +449,20 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
   }else{
     nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   }
-    
+  
+
   ## get references for string cells
-  tR <- r[t == "b" | t == "s"]
-  if(length(tR) == 0)
-    tR <- -1L
+  string_refs <- r[t == "b" | t == "s"]
+  if(length(string_refs) == 0)
+    string_refs <- -1L
+  
   
   ## get Refs for boolean 
-  tB <- r[t == "b"]
-  if(length(tB) == 0)
-    tB <- -1L
+  bool_refs <- r[t == "b"]
+  if(length(bool_refs) == 0)
+    bool_refs <- -1L
   
-  if(length(tB) > 0 & tB[[1]] != -1L){
+  if(bool_refs[[1]] != -1L){
     
     fInd <- which(sharedStrings == "FALSE") - 1L
     if(length(fInd) == 0){
@@ -469,7 +476,7 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
       sharedStrings <- c(sharedStrings, "TRUE")
     }
     
-    boolInds <- match(tB, r)
+    boolInds <- match(bool_refs, r)
     logicalVals <- v[boolInds]
     logicalVals[logicalVals == "0"] <- fInd[[1]]
     logicalVals[logicalVals == "1"] <- tInd[[1]]
@@ -477,21 +484,15 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     
   }
   
-  if(tR[[1]] == -1L){
-    stringInds <- -1L
-  }else{
-    stringInds <- match(tR, r)
-    stringInds <- stringInds[!is.na(stringInds)]
-  }
   
   ## If any t="str" exist, add v to sharedStrings and replace v with newSharedStringsInd
-  wsStrInds <- which(t == "str"| t == "e")
+  wsStrInds <- which(t == "str")
   if(length(wsStrInds) > 0){
-      
+    
     uStrs <- unique(v[wsStrInds])
     uStrs[uStrs == "#N/A"] <- NA
     
-    ## Match references of "str" cells to r, append these to stringInds
+    ## Match references of "str" cells to r
     strInds <- na.omit(match(r[wsStrInds], r))
     newSharedStringInds <- length(sharedStrings):(length(sharedStrings) + length(uStrs) - 1L) 
     
@@ -500,14 +501,21 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     
     ## append new strings to sharedStrings
     sharedStrings <- c(sharedStrings, uStrs)
-    if(tR[[1]] == -1L){
-      stringInds <- strInds
-      tR <- r[wsStrInds]
+    if(string_refs[[1]] == -1L){
+      string_refs <- r[wsStrInds]
     }else{
-      stringInds <- c(stringInds, strInds)
-      tR <- c(tR, r[wsStrInds])
-      tR <- tR[order(as.numeric(gsub("[A-Z]", "", tR)), nchar(tR))]   
+      string_refs <- c(string_refs, r[wsStrInds])
+      string_refs <- string_refs[order(as.numeric(gsub("[A-Z]", "", string_refs)), nchar(string_refs))]   
     }
+    
+  }
+  
+  wsStrInds <- which(t == "e")
+  if(length(wsStrInds) > 0){
+    
+    ## Match references of "e" cells to r and set v values to NA
+    inds <- na.omit(match(r[wsStrInds], r))
+    v[inds] <- NA
     
   }
   
@@ -515,39 +523,40 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
   vn <- as.numeric(v)
   
   ## Using -1 as a flag for no strings
-  if(length(sharedStrings) == 0 | stringInds[[1]] == -1L){
-    stringInds <- -1L
-    tR <- as.character(NA)
+  if(length(sharedStrings) == 0 | string_refs[1] == -1L){
+    string_refs <- as.character(NA)
   }else{
     
     ## set encoding of sharedStrings
     Encoding(sharedStrings) <- "UTF-8"
     
     ## Now replace values in v with string values
+    stringInds <- match(string_refs, r)
     v[stringInds] <- sharedStrings[vn[stringInds] + 1L]
-    
-    ## decrement stringInds as sharedString inds are zero based
-    stringInds = stringInds - 1L;  
     
   }
   
   origin <- 25569L
+  isDate <- rep.int(FALSE, times = length(r))
   if(detectDates){
-
+    
     ## get date origin
     if(length(xlsxFile$workbook$workbookPr) > 0){
       if(grepl('date1904="1"|date1904="true"', xlsxFile$workbook$workbookPr, ignore.case = TRUE))
         origin <- 24107L
     }
-     
+    
     sO <- xlsxFile$styleObjects
+    sO <- sO[unlist(lapply(sO, "[[", "sheet")) == sheetNames[sheet]]
+    
+    
     styles <- lapply(sO, function(x) {
       
       fc <- x[["style"]][["numFmt"]]$formatCode
       if(is.null(fc))
         fc <- x[["style"]][["numFmt"]]$numFmtId
       fc
-      })
+    })
     
     
     
@@ -560,10 +569,10 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
       fc
     }))
     
-  
+    
     dateIds <- NULL
     if(length(formatCodes) > 0){
-    
+      
       ## this regex defines what "looks" like a date
       formatCodes <- gsub(".*(?<=\\])|@", "", formatCodes, perl = TRUE)
       sO <- sO[(!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)) | formatCodes == 14]
@@ -571,30 +580,24 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     }     
     
     if(length(sO) > 0){
-    
+      
       rows <- unlist(lapply(sO, "[[", "rows"))
       cols <- unlist(lapply(sO, "[[", "cols"))    
       refs <- paste0(convert2ExcelRef(cols = cols, LETTERS), rows)
-  
-      styleInds <- match(refs, r)
+      
+      isDate <- r %in% refs
       
       ## check numbers are also integers
-      isNotInt <- suppressWarnings(as.numeric(v[styleInds]))
+      isNotInt <- suppressWarnings(as.numeric(v[isDate]))
       isNotInt <- (isNotInt %% 1L != 0) | is.na(isNotInt)
-      styleInds[isNotInt] <- FALSE
-      
-      ## now replace string with something to look for
-      v[styleInds] <- "openxlsxdt"
-      
-      stringInds <- c(stringInds, styleInds - 1L)
-      tR <- c(tR, r[styleInds]) 
+      isDate[isNotInt] <- FALSE
       
     }
   }
   
   
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, stringInds, r, tR,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, vn, r, string_refs, isDate,  as.integer(nRows), colNames, skipEmptyRows, origin, PACKAGE = "openxlsx")
   
   if(length(colnames(m)) > 0){
     colnames(m) <- gsub("^[[:space:]]+|[[:space:]]+$", "", colnames(m))
@@ -609,7 +612,6 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
   return(m)
   
 }
-
 
 
 
