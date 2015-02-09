@@ -162,6 +162,11 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   v <- r_v[[2]]
   rm(r_v)
   
+  if(startRow != 1L){
+    ws <- ws[!is.na(r)]
+    r <- r[!is.na(r)]
+  }
+  
   ## subset if specified a row/col index
   if(!is.null(cols)){
     flag <- which(convertFromExcelRef(r) %in% cols)

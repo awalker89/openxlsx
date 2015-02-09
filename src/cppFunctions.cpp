@@ -7,7 +7,6 @@ using namespace Rcpp;
 using namespace std;
 
 
-
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
@@ -997,7 +996,7 @@ SEXP buildMatrixMixed(CharacterVector v,
       // date columns
     }else if(std::find(charCols.begin(), charCols.end(), i) != charCols.end()){
       
-      // determin if column is logical or date
+      // determine if column is logical or date
       bool logCol = true;
       for(int ri = 0; ri < nRows; ri++){
         if(notNAElements[ri]){
@@ -1894,7 +1893,6 @@ SEXP getRefsVals(CharacterVector x, int startRow){
     } // end of loop
     
     v = na_omit(v);
-    r = na_omit(r);
     
   } // end of else
   
