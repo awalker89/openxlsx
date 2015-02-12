@@ -1912,7 +1912,7 @@ Workbook$methods(preSaveCleanUp = function(){
   worksheets[[1]]$sheetViews <<- sub('( tabSelected="0")|( tabSelected="false")', ' tabSelected="1"', worksheets[[1]]$sheetViews, ignore.case = TRUE)
   if(nSheets > 1){
     for(i in 2:nSheets)
-      worksheets[[i]]$sheetViews <<- sub('( tabSelected="1")|( tabSelected="true")', ' tabSelected="1"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
+      worksheets[[i]]$sheetViews <<- sub(' tabSelected="(1|true|false|0)"', ' tabSelected="0"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
   }
   
   
