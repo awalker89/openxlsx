@@ -39,8 +39,8 @@ Optional parameters are:
   \item{\bold{startRow}}{ A vector specifiying the starting row(s) to write df}
   \item{\bold{xy}}{ An alternative to specifying startCol and startRow individually.
  A vector of the form c(startCol, startRow)}
-  \item{\bold{colNames or col.names}}{ If TRUE, column names of x are written.}
-  \item{\bold{rowNames or row.names}}{ If TRUE, row names of x are written.}
+  \item{\bold{colNames or col.names}}{ If \code{TRUE}, column names of x are written.}
+  \item{\bold{rowNames or row.names}}{ If \code{TRUE}, row names of x are written.}
   \item{\bold{headerStyle}}{ Custom style to apply to column names.}
   \item{\bold{borders}}{ Either "surrounding", "columns" or "rows" or NULL.  If "surrounding", a border is drawn around the
 data.  If "rows", a surrounding border is drawn a border around each row. If "columns", a surrounding border is drawn with a border

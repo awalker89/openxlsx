@@ -17,9 +17,9 @@ addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = FALSE)
 
 \item{cols}{columns to apply style to.}
 
-\item{gridExpand}{If TRUE, style will be applied to all combinations of rows and cols.}
+\item{gridExpand}{If \code{TRUE}, style will be applied to all combinations of rows and cols.}
 
-\item{stack}{If TRUE, style is merged with existing cell styles,
+\item{stack}{If \code{TRUE}, style is merged with existing cell styles,
 else any existing style is complete replaced by the new style.}
 }
 \description{

@@ -23,9 +23,9 @@ writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
 \item{xy}{An alternative to specifying startCol and startRow individually.
 A vector of the form c(startCol, startRow)}
 
-\item{colNames}{If TRUE, column names of x are written.}
+\item{colNames}{If \code{TRUE}, column names of x are written.}
 
-\item{rowNames}{If TRUE, row names of x are written.}
+\item{rowNames}{If \code{TRUE}, row names of x are written.}
 
 \item{tableStyle}{Any excel table style name or "none" (see "formatting" vignette).}
 
@@ -33,9 +33,9 @@ A vector of the form c(startCol, startRow)}
 
 \item{headerStyle}{Custom style to apply to column names.}
 
-\item{withFilter}{If TRUE, columns with have withFilters in the first row.}
+\item{withFilter}{If \code{TRUE}, columns with have withFilters in the first row.}
 
-\item{keepNA}{If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.}
+\item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 }
 \description{
 Write to a worksheet and format as a table

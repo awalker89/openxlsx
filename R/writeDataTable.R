@@ -8,13 +8,13 @@
 #' @param startRow A vector specifiying the starting row to write df
 #' @param xy An alternative to specifying startCol and startRow individually.  
 #' A vector of the form c(startCol, startRow)
-#' @param colNames If TRUE, column names of x are written.
-#' @param rowNames If TRUE, row names of x are written.
+#' @param colNames If \code{TRUE}, column names of x are written.
+#' @param rowNames If \code{TRUE}, row names of x are written.
 #' @param tableStyle Any excel table style name or "none" (see "formatting" vignette).
 #' @param tableName name of table in workbook. The table name must be unique.
 #' @param headerStyle Custom style to apply to column names.
-#' @param withFilter If TRUE, columns with have withFilters in the first row.
-#' @param keepNA If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param withFilter If \code{TRUE}, columns with have withFilters in the first row.
+#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.

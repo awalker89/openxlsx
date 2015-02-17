@@ -16,9 +16,9 @@ freezePane(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL,
 
 \item{firstActiveCol}{Furthest left column of active region}
 
-\item{firstRow}{If TRUE, freezes the first row (equivalent to firstActiveRow = 2)}
+\item{firstRow}{If \code{TRUE}, freezes the first row (equivalent to firstActiveRow = 2)}
 
-\item{firstCol}{If TRUE, freezes the first column (equivalent to firstActiveCol = 2)}
+\item{firstCol}{If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
 }
 \description{
 Freeze a worksheet pane

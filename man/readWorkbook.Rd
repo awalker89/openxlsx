@@ -16,16 +16,16 @@ readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
 \item{startRow}{first row to begin looking for data.  Empty rows before any data is found are skipped.
 regardless of the value of startRow.}
 
-\item{colNames}{If TRUE, first row of data will be used as column names.}
+\item{colNames}{If \code{TRUE}, first row of data will be used as column names.}
 
-\item{skipEmptyRows}{If TRUE, empty rows are skipped else empty rows after the first row containing data
+\item{skipEmptyRows}{If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data
 will return a row of NAs}
 
-\item{rowNames}{If TRUE, first column of data will be used as row names.}
+\item{rowNames}{If \code{TRUE}, first column of data will be used as row names.}
 
-\item{keepNewLine}{If TRUE, keep new line characters embedded in strings.}
+\item{keepNewLine}{If \code{TRUE}, keep new line characters embedded in strings.}
 
-\item{detectDates}{If TRUE, attempt to recognise dates and perform conversion.}
+\item{detectDates}{If \code{TRUE}, attempt to recognise dates and perform conversion.}
 
 \item{rows}{A numeric vector specifying which rows in the Excel file to read.
 If NULL, all rows are read.}

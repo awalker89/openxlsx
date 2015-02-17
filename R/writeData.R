@@ -37,8 +37,8 @@
 #'    \item{\bold{mediumDashDotDot}}{ medium weight dash-dot-dot border}
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
-#' @param withFilter If TRUE, add filters to column name row. NOTE can only have one filter per worksheet. 
-#' @param keepNA If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param withFilter If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet. 
+#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @seealso \code{\link{writeDataTable}}
 #' @export writeData
 #' @rdname writeData

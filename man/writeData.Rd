@@ -59,9 +59,9 @@ each column. If "\code{all}" all cell borders are drawn.}
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
 
-\item{withFilter}{If TRUE, add filters to column name row. NOTE can only have one filter per worksheet.}
+\item{withFilter}{If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet.}
 
-\item{keepNA}{If TRUE, NA values are converted to #N/A in Excel else NA cells will be empty.}
+\item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 }
 \description{
 Write an object to worksheet with optional styling.

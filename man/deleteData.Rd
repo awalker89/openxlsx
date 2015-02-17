@@ -15,7 +15,7 @@ deleteData(wb, sheet, cols, rows, gridExpand = FALSE)
 
 \item{rows}{Rows to delete data from.}
 
-\item{gridExpand}{If TRUE, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
+\item{gridExpand}{If \code{TRUE}, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
 will be removed.}
 }
 \description{

@@ -11,7 +11,7 @@ saveWorkbook(wb, file, overwrite = FALSE)
 
 \item{file}{A character string naming an xlsx file}
 
-\item{overwrite}{If TRUE, overwrite any existing file.}
+\item{overwrite}{If \code{TRUE}, overwrite any existing file.}
 }
 \description{
 save Workbook to file

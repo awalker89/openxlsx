@@ -34,7 +34,7 @@ createWorkbook <- function(creator = Sys.getenv("USERNAME")){
 #' @author Alexander Walker
 #' @param wb A Workbook object to write to file
 #' @param file A character string naming an xlsx file
-#' @param overwrite If TRUE, overwrite any existing file.
+#' @param overwrite If \code{TRUE}, overwrite any existing file.
 #' @seealso \code{\link{createWorkbook}}
 #' @seealso \code{\link{addWorksheet}}
 #' @seealso \code{\link{loadWorkbook}}
@@ -492,7 +492,7 @@ convertFromExcelRef <- function(col){
 #'    \item{\bold{underline2}}{ Double underline cell contents}
 #'   } 
 #'   
-#' @param wrapText Logical. If TRUE cell contents will wrap to fit in column.  
+#' @param wrapText Logical. If \code{TRUE} cell contents will wrap to fit in column.  
 #' @param textRotation Rotation of text in degrees. Numeric in [0, 180].
 #' @return A style object
 #' @export
@@ -713,8 +713,8 @@ createStyle <- function(fontName = NULL,
 #' @param style A style object returned from createStyle()
 #' @param rows Rows to apply style to.
 #' @param cols columns to apply style to.
-#' @param gridExpand If TRUE, style will be applied to all combinations of rows and cols.
-#' @param stack If TRUE, style is merged with existing cell styles, 
+#' @param gridExpand If \code{TRUE}, style will be applied to all combinations of rows and cols.
+#' @param stack If \code{TRUE}, style is merged with existing cell styles, 
 #' else any existing style is complete replaced by the new style.
 #' @seealso \code{\link{createStyle}}
 #' @seealso expand.grid
@@ -803,8 +803,8 @@ getCellRefs <- function(cellCoords){
 #' @param sheet A name or index of a worksheet
 #' @param firstActiveRow Top row of active region
 #' @param firstActiveCol Furthest left column of active region
-#' @param firstRow If TRUE, freezes the first row (equivalent to firstActiveRow = 2)
-#' @param firstCol If TRUE, freezes the first column (equivalent to firstActiveCol = 2)
+#' @param firstRow If \code{TRUE}, freezes the first row (equivalent to firstActiveRow = 2)
+#' @param firstCol If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)
 #' @export
 #' @examples
 #' ## Create a new workbook
@@ -1316,7 +1316,7 @@ removeWorksheet <- function(wb, sheet){
 #' @param sheet A name or index of a worksheet
 #' @param rows Rows to delete data from.
 #' @param cols columns to delete data from.
-#' @param gridExpand If TRUE, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
+#' @param gridExpand If \code{TRUE}, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
 #' will be removed.
 #' @description Remove contents and styling from a cell.
 #' @export
@@ -1562,8 +1562,8 @@ setHeaderFooter <- function(wb, sheet,
 #' @param bottom bottom page margin in inches
 #' @param header header margin in inches
 #' @param footer footer margin in inches
-#' @param fitToWidth If TRUE, worksheet is scaled to fit to page width on printing.
-#' @param fitToHeight If TRUE, worksheet is scaled to fit to page height on printing.
+#' @param fitToWidth If \code{TRUE}, worksheet is scaled to fit to page width on printing.
+#' @param fitToHeight If \code{TRUE}, worksheet is scaled to fit to page height on printing.
 #' @export
 #' @examples
 #' wb <- createWorkbook()
@@ -1618,7 +1618,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
-#' @param showGridLines A logical. If TRUE, grid lines are hidden.
+#' @param showGridLines A logical. If \code{TRUE}, grid lines are hidden.
 #' @export
 #' @examples
 #' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
@@ -1833,7 +1833,7 @@ names.Workbook <- function(x){
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols columns to add filter to. 
-#' @param rows A row numbers
+#' @param rows A row number.
 #' @seealso \code{\link{writeData}}
 #' @details adds filters to worksheet columns, same as filter parameters in writeData.
 #' writeDataTable automatically adds filters to first row of a table.

@@ -103,7 +103,7 @@ Vertical alignment of cell contents
    \item{\bold{underline2}}{ Double underline cell contents}
   }}
 
-\item{wrapText}{Logical. If TRUE cell contents will wrap to fit in column.}
+\item{wrapText}{Logical. If \code{TRUE} cell contents will wrap to fit in column.}
 
 \item{textRotation}{Rotation of text in degrees. Numeric in [0, 180].}
 }

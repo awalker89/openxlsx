@@ -29,9 +29,9 @@ pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
 
 \item{footer}{footer margin in inches}
 
-\item{fitToWidth}{If TRUE, worksheet is scaled to fit to page width on printing.}
+\item{fitToWidth}{If \code{TRUE}, worksheet is scaled to fit to page width on printing.}
 
-\item{fitToHeight}{If TRUE, worksheet is scaled to fit to page height on printing.}
+\item{fitToHeight}{If \code{TRUE}, worksheet is scaled to fit to page height on printing.}
 }
 \description{
 Set page margins, orientation and print scaling

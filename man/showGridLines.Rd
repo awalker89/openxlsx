@@ -11,7 +11,7 @@ showGridLines(wb, sheet, showGridLines = FALSE)
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{showGridLines}{A logical. If TRUE, grid lines are hidden.}
+\item{showGridLines}{A logical. If \code{TRUE}, grid lines are hidden.}
 }
 \description{
 Set worksheet gridlines to show or hide.

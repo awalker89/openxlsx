@@ -11,7 +11,7 @@ addFilter(wb, sheet, rows, cols)
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{rows}{A row numbers}
+\item{rows}{A row number.}
 
 \item{cols}{columns to add filter to.}
 }

@@ -7,12 +7,12 @@
 #' @param sheet The name or index of the sheet to read data from.
 #' @param startRow first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
 #' regardless of the value of startRow.
-#' @param colNames If TRUE, the first row of data will be used as column names. 
-#' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
+#' @param colNames If \code{TRUE}, the first row of data will be used as column names. 
+#' @param skipEmptyRows If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
 #' will return a row of NAs.
-#' @param rowNames If TRUE, first column of data will be used as row names.
-#' @param keepNewLine If TRUE, keep new line characters embedded in strings.
-#' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
+#' @param rowNames If \code{TRUE}, first column of data will be used as row names.
+#' @param keepNewLine If \code{TRUE}, keep new line characters embedded in strings.
+#' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
 #' @param cols A numeric vector specifying which columns in the Excel file to read. 
 #' If NULL, all columns are read.
 #' @param rows A numeric vector specifying which rows in the Excel file to read. 
@@ -630,13 +630,13 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' @param sheet The name or index of the sheet to read data 
 #' @param startRow first row to begin looking for data.  Empty rows before any data is found are skipped.
 #' regardless of the value of startRow.
-#' @param colNames If TRUE, first row of data will be used as column names. 
-#' @param skipEmptyRows If TRUE, empty rows are skipped else empty rows after the first row containing data 
+#' @param colNames If \code{TRUE}, first row of data will be used as column names. 
+#' @param skipEmptyRows If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
 #' will return a row of NAs
-#' @param rowNames If TRUE, first column of data will be used as row names.
+#' @param rowNames If \code{TRUE}, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
-#' @param keepNewLine If TRUE, keep new line characters embedded in strings.
-#' @param detectDates If TRUE, attempt to recognise dates and perform conversion.
+#' @param keepNewLine If \code{TRUE}, keep new line characters embedded in strings.
+#' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
 #' @param cols A numeric vector specifying which columns in the Excel file to read. 
 #' If NULL, all columns are read.
 #' @param rows A numeric vector specifying which rows in the Excel file to read. 
