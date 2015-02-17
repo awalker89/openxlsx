@@ -78,6 +78,14 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   #---addWorksheet---#
   ## sheetName
   ## gridLines
+  ## tabColour = NULL
+  ## zoom = 100
+  ## header = NULL
+  ## footer = NULL
+  ## evenHeader = NULL
+  ## evenFooter = NULL
+  ## firstHeader = NULL
+  ## firstFooter = NULL
   
   #---writeData---#
   ## startCol = 1,
@@ -120,6 +128,20 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     sheetName <- as.character(params$sheetName)
   }
   
+  tabColour <- NULL
+  if("tabColour" %in% names(params))
+    tabColour <- validateColour(params$tabColour, "Invalid tabColour!")
+  
+  zoom <- 100
+  if("zoom" %in% names(params)){
+    if(is.numeric(params$zoom)){
+      zoom <- params$zoom[1]
+    }else{
+      stop("zoom must be numeric")
+    }
+  }
+
+  ## AddWorksheet
   gridLines <- TRUE
   if("gridLines" %in% names(params)){
     if(all(is.logical(params$gridLines))){
@@ -138,6 +160,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
   }
   
+
   withFilter <- TRUE
   if("withFilter" %in% names(params)){
     if(is.logical(params$withFilter)){
@@ -251,7 +274,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   ## create new Workbook object
   wb <- Workbook$new(creator)
-  
+
   ## If a list is supplied write to individual worksheets using names if available
   if("list" %in% class(x)){
     
@@ -264,6 +287,11 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
       nms[nms %in% ""] <- paste("Sheet", (1:nSheets)[nms %in% ""])
     }else{
       nms <- make.names(nms, unique  = TRUE)
+    }
+    
+    if(any(nchar(nms) > 31)){
+      warning("Truncating list names to 31 characters.")
+      nms <- substr(nms, 1, 31)
     }
     
     ## make all inputs as long as the list
@@ -302,7 +330,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
     for(i in 1:nSheets){
       
-      wb$addWorksheet(nms[[i]], showGridLines = gridLines)
+      wb$addWorksheet(nms[[i]], showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
       
       if(asTable[i]){
                 
@@ -342,7 +370,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
   }else{
     
-    wb$addWorksheet(sheetName, showGridLines = gridLines)
+    wb$addWorksheet(sheetName, showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
     
     if(asTable){
       
