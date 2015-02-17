@@ -199,7 +199,7 @@ sheets <- function(wb){
 #' @author Alexander Walker
 #' @param wb A Workbook object to attach the new worksheet
 #' @param sheetName A name for the new worksheet
-#' @param gridLines A logical. If FALSE, the worksheet grid lines will be hidden.
+#' @param gridLines A logical. If \code{FALSE}, the worksheet grid lines will be hidden.
 #' @param tabColour Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
 #' @param zoom A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.
 #' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.

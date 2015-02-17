@@ -13,7 +13,7 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 
 \item{sheetName}{A name for the new worksheet}
 
-\item{gridLines}{A logical. If FALSE, the worksheet grid lines will be hidden.}
+\item{gridLines}{A logical. If \code{FALSE}, the worksheet grid lines will be hidden.}
 
 \item{tabColour}{Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
 
