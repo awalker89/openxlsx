@@ -566,7 +566,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       origin <- 24107L
     
     for(i in dInds)
-      df[,i] <- as.integer(df[,i]) + origin
+      df[[i]] <- as.integer(df[[i]]) + origin
     
     t <- format(Sys.time(), "%z")
     offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
@@ -576,25 +576,25 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     for(i in pInds)
-      df[,i] <- as.numeric(as.POSIXct(df[,i])) / 86400L + origin + offSet
+      df[[i]] <- as.numeric(as.POSIXct(df[[i]])) / 86400L + origin + offSet
   }
   
   ## convert any Dates to integers and create date style object
   if(any(c("currency", "accounting", "percentage", "3", "comma") %in% allColClasses)){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3", "comma") %in% tolower(x))))
     for(i in cInds)
-      df[,i] <- as.numeric(gsub("[^0-9\\.-]", "", df[,i]))
+      df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]]))
   }
   
   if("hyperlink" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
-      class(df[,i]) <- "hyperlink"
+      class(df[[i]]) <- "hyperlink"
   }
   
   ## convert scientific
   if("scientific" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
-      class(df[,i]) <- "numeric"
+      class(df[[i]]) <- "numeric"
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
@@ -602,7 +602,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
-      class(df[,i]) <- "numeric"
+      class(df[[i]]) <- "numeric"
   }
   
   
@@ -610,12 +610,12 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
-      class(df[,i]) <- "character"
+      class(df[[i]]) <- "character"
   }
   
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-  
+
   ## cell values
   v <- as.character(t(as.matrix(df)))
   
