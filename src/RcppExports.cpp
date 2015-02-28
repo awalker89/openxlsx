@@ -56,6 +56,21 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// cppReadFile2
+std::string cppReadFile2(std::string xmlFile);
+RcppExport SEXP openxlsx_cppReadFile2(SEXP xmlFileSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< std::string >::type xmlFile(xmlFileSEXP );
+        std::string __result = cppReadFile2(xmlFile);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getVals
 SEXP getVals(CharacterVector x);
 RcppExport SEXP openxlsx_getVals(SEXP xSEXP) {

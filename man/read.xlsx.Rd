@@ -5,8 +5,8 @@
 \title{Read data from a worksheet or Workbook object into a data.frame}
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
-  skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE,
-  detectDates = FALSE, rows = NULL, cols = NULL)
+  skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE,
+  rows = NULL, cols = NULL)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file or Workbook object}
@@ -22,8 +22,6 @@ regardless of the value of startRow.}
 will return a row of NAs.}
 
 \item{rowNames}{If \code{TRUE}, first column of data will be used as row names.}
-
-\item{keepNewLine}{If \code{TRUE}, keep new line characters embedded in strings.}
 
 \item{detectDates}{If \code{TRUE}, attempt to recognise dates and perform conversion.}
 

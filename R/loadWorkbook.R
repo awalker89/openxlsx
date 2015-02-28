@@ -129,6 +129,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   if(length(sharedStringsXML) > 0){
 
     sharedStrings <- readLines(sharedStringsXML, warn = FALSE, encoding = "UTF-8")
+    sharedStrings <- paste(sharedStrings, collapse = "\n")
     sharedStrings <- removeHeadTag(sharedStrings)
     
     uniqueCount <- as.integer(regmatches(sharedStrings, regexpr('(?<=uniqueCount=")[0-9]+', sharedStrings, perl = TRUE)))

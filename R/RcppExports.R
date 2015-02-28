@@ -13,6 +13,10 @@ cppReadFile <- function(xmlFile) {
     .Call('openxlsx_cppReadFile', PACKAGE = 'openxlsx', xmlFile)
 }
 
+cppReadFile2 <- function(xmlFile) {
+    .Call('openxlsx_cppReadFile2', PACKAGE = 'openxlsx', xmlFile)
+}
+
 getVals <- function(x) {
     .Call('openxlsx_getVals', PACKAGE = 'openxlsx', x)
 }

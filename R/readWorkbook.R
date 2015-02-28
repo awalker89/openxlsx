@@ -11,7 +11,6 @@
 #' @param skipEmptyRows If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
 #' will return a row of NAs.
 #' @param rowNames If \code{TRUE}, first column of data will be used as row names.
-#' @param keepNewLine If \code{TRUE}, keep new line characters embedded in strings.
 #' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
 #' @param cols A numeric vector specifying which columns in the Excel file to read. 
 #' If NULL, all columns are read.
@@ -46,14 +45,14 @@
 #'     cols = c(1, 4), rows = c(1, 3, 4))
 #' 
 #' @export
-read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
+read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   UseMethod("read.xlsx", xlsxFile) 
   
 }
 
 #' @export
-read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
+read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   if(!file.exists(xlsxFile))
     stop("Excel file does not exist.")
@@ -104,13 +103,8 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
   if(length(sharedStringsFile) > 0){
     
     ## read in, get si tags, get t tag value
-    if(keepNewLine){
-      ss <- paste(readLines(sharedStringsFile, warn = FALSE), collapse = "\n")
-      ss <- gsub("\n<", "", ss)
-    }else{
-      ss <- .Call("openxlsx_cppReadFile", sharedStringsFile, PACKAGE = "openxlsx")
-    }
-    
+    ss <- .Call("openxlsx_cppReadFile2", sharedStringsFile, PACKAGE = "openxlsx")
+
     ## pull out all string nodes
     sharedStrings <- .Call("openxlsx_getNodes", ss, "<si>", PACKAGE = "openxlsx")  
     
@@ -347,7 +341,7 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
 
 
 #' @export
-read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
+read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
@@ -635,7 +629,6 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' will return a row of NAs
 #' @param rowNames If \code{TRUE}, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
-#' @param keepNewLine If \code{TRUE}, keep new line characters embedded in strings.
 #' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
 #' @param cols A numeric vector specifying which columns in the Excel file to read. 
 #' If NULL, all columns are read.
@@ -652,14 +645,13 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
 #' 
 #' xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
 #' df1 <- readWorkbook(xlsxFile = xlsxFile, sheet = 1, rows = c(1, 3, 5), cols = 1:3)
-readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, keepNewLine = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
+readWorkbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
   read.xlsx(xlsxFile,
             sheet = sheet,
             startRow = startRow,
             colNames = colNames,
             skipEmptyRows = skipEmptyRows,
             rowNames = rowNames,
-            keepNewLine = keepNewLine,
             detectDates = detectDates,
             rows = rows,
             cols = cols)

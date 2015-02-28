@@ -134,6 +134,33 @@ std::string cppReadFile(std::string xmlFile){
   return xml;
 }
 
+// [[Rcpp::export]]
+std::string cppReadFile2(std::string xmlFile){
+  
+//  std::string buf;
+//  std::string xml;
+  ifstream file;
+  file.open(xmlFile.c_str());
+  std::vector<std::string> lines;
+  
+  std::string line;
+  while ( std::getline(file, line) )
+  {
+    // skip empty lines:
+    if (line.empty())
+      continue;
+    
+    lines.push_back(line);
+  }
+  
+  line = "";
+  int n = lines.size();
+  for(int i = 0;i < n; ++i)
+    line += lines[i] + "\n";  
+  
+
+  return line;
+}
 
 
 // [[Rcpp::export]]
