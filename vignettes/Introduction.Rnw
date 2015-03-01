@@ -20,6 +20,7 @@ bottom=20mm,
 }
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{Introduction}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}
@@ -376,29 +377,34 @@ openXL("stockPrice.xlsx")
 
 \begin{verbatim}
 require(openxlsx)
-require(biOps)
+require(jpeg)
 require(ggplot2)
 
-## Create workbook and add a worksheet, hide grid lines
+plotFn <- function(x, ...){
+  colvec <- grey(x)
+  colmat <- array(match(colvec, unique(colvec)), dim = dim(x)[1:2])
+  image(x = 0:(dim(colmat)[2]), y = 0:(dim(colmat)[1]), z = t(colmat[nrow(colmat):1, ]),
+    col = unique(colvec), xlab = "", ylab = "", axes = FALSE, asp = 1,
+    bty ="n", frame.plot=F, ann=FALSE)
+}
+
+## Create workbook and add a worksheet, hide gridlines
 wb <- createWorkbook("Einstein")
 addWorksheet(wb, "Original Image", gridLines = FALSE)
 
-A <- readJpeg(file.path(path.package("openxlsx"), "einstein.jpg"))
-height = dim(A)[[1]]; width = dim(A)[[2]]
+A <- readJPEG(file.path(path.package("openxlsx"), "einstein.jpg"))
+height <- nrow(A); width <- ncol(A)
 
 ## write "Original Image" to cell B2
 writeData(wb, 1, "Original Image", xy = c(2,2))
 
 ## write Object size to cell B3
-## writeData will coerce df to a data.frame, 
-## if df is a character vector here, colNames is set to FALSE
 writeData(wb, 1, sprintf("Image object size: %s bytes",
-format(object.size(A+0)[[1]], big.mark=',')), 
-xy = c(2,3))  ## equivalent to startCol = 2, startRow = 3
+                         format(object.size(A+0)[[1]], big.mark=',')), 
+          xy = c(2,3))  ## equivalent to startCol = 2, startRow = 3
 
 ## Plot image
-par(mar=rep(0, 4), xpd = NA) 
-plot(A, bty ="n", frame.plot=F, ann=FALSE)
+par(mar=rep(0, 4), xpd = NA); plotFn(A)
 
 ## insert plot currently showing in plot window
 insertPlot(wb, 1, width, height, units="px", startRow= 5, startCol = 2)       
@@ -407,17 +413,16 @@ insertPlot(wb, 1, width, height, units="px", startRow= 5, startCol = 2)
 rMeans <- rowMeans(A)
 rowMeans <- do.call("cbind", lapply(1:ncol(A), function(X) rMeans))
 A <- A - rowMeans
-C <- A %*% t(A) / (ncol(A) - 1) # covariance matrix of A
-E <- svd(C)  ## singlur value decomposition
+E <- svd(A %*% t(A) / (ncol(A) - 1)) # SVD on covariance matrix of A
 pve <- data.frame("Eigenvalues" = E$d, 
-"PVE" = E$d/sum(E$d),
-"Cumulative PVE" = cumsum(E$d/sum(E$d)))
+                  "PVE" = E$d/sum(E$d),
+                  "Cumulative PVE" = cumsum(E$d/sum(E$d)))
 
 ## write eigenvalues to worksheet
 addWorksheet(wb, "Principal Component Analysis")
 hs <- createStyle(fontColour = "#ffffff", fgFill = "#4F80BD",
-halign = "CENTER", textDecoration = "Bold",
-border = "TopBottomLeftRight", borderColour = "#4F81BD")
+                  halign = "CENTER", textDecoration = "Bold",
+                  border = "TopBottomLeftRight", borderColour = "#4F81BD")
 
 writeData(wb, 2, x="Proportions of variance explained by Eigenvector" ,startRow = 2)
 mergeCells(wb, sheet=2, cols=1:4, rows=2)
@@ -428,17 +433,17 @@ writeData(wb, 2, x=pve, startRow = 3, startCol = 1, borders="rows", headerStyle=
 ## Plots
 pve <- cbind(pve, "Ind" = 1:nrow(pve))
 ggplot(data = pve[1:20,], aes(x = Ind, y = 100*PVE)) +
-geom_bar(stat="identity", position = "dodge") +
-xlab("Principal Component Index") + ylab("Proportion of Variance Explained") +
-geom_line(size = 1, col = "blue") + geom_point(size =3, col = "blue")
+  geom_bar(stat="identity", position = "dodge") +
+  xlab("Principal Component Index") + ylab("Proportion of Variance Explained") +
+  geom_line(size = 1, col = "blue") + geom_point(size = 3, col = "blue")
 
 ## Write plot to worksheet 2
 insertPlot(wb, 2, width = 5, height = 4, startCol = "E", startRow = 2) 
 
 ## Plot of cumulative explained variance
 ggplot(data = pve[1:50,], aes(x = Ind, y = 100*Cumulative.PVE)) +
-geom_point(size=2.5) + geom_line(size=1) + xlab("Number of PCs") +
-ylab("Cumulative Proportion of Variance Explained")
+  geom_point(size=2.5) + geom_line(size=1) + xlab("Number of PCs") +
+  ylab("Cumulative Proportion of Variance Explained")
 insertPlot(wb, 2, width = 5, height = 4, xy= c("M", 2)) 
 
 
@@ -451,30 +456,28 @@ startCol <- rep(c("B", "H", "N"), 2)
 addWorksheet(wb, "Reconstructed Images", zoom = 90)
 
 for(i in 1:length(nPCs)){
-
-V <- E$v[, 1:nPCs[i]]
-imgHat <- t(V) %*% A  ## project img data on to PCs
-imgHat.size <- object.size(imgHat)
-V.size <- object.size(V)
-
-imgHat <- V %*% imgHat + rowMeans  ## reconstruct from PCs and add back row means
-imgHat <- round((imgHat - min(imgHat)) / (max(imgHat) - min(imgHat))*255) # scale
-plot(imagedata(imgHat), bty ="n", frame.plot=F, ann=FALSE)
-imgSize <- V.size + imgHat.size + object.size(rMeans)
-
-## write strings to worksheet 3
-writeData(wb, "Reconstructed Images", 
-sprintf("Number of principal components used:  %s", 
-nPCs[[i]]), startCol[i], startRow[i])
-
-writeData(wb, "Reconstructed Images", 
-sprintf("Sum of component object sizes: %s bytes",
-format(as.numeric(imgSize), big.mark=',')), startCol[i], startRow[i]+1)
-
-## write reconstruced image
-insertPlot(wb, "Reconstructed Images", width, height, units="px",
-xy = c(startCol[i], startRow[i]+3))
-
+  
+  V <- E$v[, 1:nPCs[i]]
+  imgHat <- t(V) %*% A  ## project img data on to PCs
+  imgSize <- object.size(V) + object.size(imgHat) + object.size(rMeans)
+  
+  imgHat <- V %*% imgHat + rowMeans  ## reconstruct from PCs and add back row means
+  imgHat <- round((imgHat - min(imgHat)) / (max(imgHat) - min(imgHat))*255) # scale
+  plotFn(imgHat/255)
+  
+  ## write strings to worksheet 3
+  writeData(wb, "Reconstructed Images", 
+            sprintf("Number of principal components used:  %s", 
+                    nPCs[[i]]), startCol[i], startRow[i])
+  
+  writeData(wb, "Reconstructed Images", 
+            sprintf("Sum of component object sizes: %s bytes",
+                    format(as.numeric(imgSize), big.mark=',')), startCol[i], startRow[i]+1)
+  
+  ## write reconstruced image
+  insertPlot(wb, "Reconstructed Images", width, height, units="px",
+             xy = c(startCol[i], startRow[i]+3))
+  
 }
 
 # hide grid lines
@@ -485,11 +488,11 @@ boldStyle <- createStyle(textDecoration="BOLD")
 
 ## only want to apply style to specified cells (not all combinations of rows & cols)
 addStyle(wb, "Reconstructed Images", style=boldStyle, 
-rows = c(startRow, startRow+1), cols = rep(startCol, 2), 
-gridExpand = FALSE)  
+         rows = c(startRow, startRow+1), cols = rep(startCol, 2), 
+         gridExpand = FALSE)  
 
 ## save workbook to working directory
-saveWorkbook(wb, "Image dimensionality reduction.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "Image dimensionality reduction.xlsx", overwrite = TRUE) 
 \end{verbatim}
 
 \end{document}
