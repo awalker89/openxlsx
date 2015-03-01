@@ -1,3 +1,44 @@
+
+
+openxlsx 2.4.0
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* stackable cell styling
+
+* getDateOrigin function to return the date origin used internally by the xlsx file to pass to
+  convertToDate
+  
+* Auto-detection of date cells. Cells that "look" like dates will be converted to dates when reading from file.
+
+* read.xlsx.Workbook to read from workbook objects
+
+* colIndex, rowIndex added to read.xlsx to only read specified rows and columns
+
+* Excel slicers now maintained by loadWorkbook
+
+* fill styles extended to support gradientFill
+
+
+
+BUG FIXES
+
+* Encoding fixed and multi-byte characters now supported.
+
+* read.xlsx now maintains multiple consecutive spaces and newline characters.
+
+* convertToDate & convertToDateTime now handle NA values.
+
+* multiple selected worksheet issue whioch preventing adding of new worksheets in Excel.
+
+* zoom parameter now limited to [10, 400] and documentation updated.
+
+* write.xlsx colnames parameter being assigned to rownames
+
+
+
+
 openxlsx 2.1.3
 ----------------------------------------------------------------
 

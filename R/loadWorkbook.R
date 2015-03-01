@@ -127,7 +127,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## xl\sharedStrings
   if(length(sharedStringsXML) > 0){
-
+    
     sharedStrings <- readLines(sharedStringsXML, warn = FALSE, encoding = "UTF-8")
     sharedStrings <- paste(sharedStrings, collapse = "\n")
     sharedStrings <- removeHeadTag(sharedStrings)
@@ -682,7 +682,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     xml <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, "<Relationship ", PACKAGE="openxlsx"))
     
     if(length(slicerXML) > 0){
-
+      
       slicerXML <- slicerXML[order(nchar(slicerXML), slicerXML)]
       slicersFiles <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=slicer)[0-9]+(?=\\.xml)", x, perl = TRUE))))
       inds <- sapply(slicersFiles, length) > 0
@@ -695,7 +695,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         
         ## read in slicer[j].XML sheets into sheet[i]
         if(inds[i]){
-
+          
           wb$slicers[[i]] <- removeHeadTag(.Call("openxlsx_cppReadFile", slicerXML[k], PACKAGE = "openxlsx"))
           k <- k + 1L
           
@@ -862,9 +862,23 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           wb$worksheets_rels[[i]] <- c(wb$worksheets_rels[[i]] , pivotRels[[i]])
         }
       }  
+      
+      
+      ## remove any workbook_res references to pivot tables that are not being used in worksheet_rels
+      inds <- 1:length(wb$pivotTables.xml.rels)
+      fileNo <- as.integer(unlist(regmatches(unlist(wb$worksheets_rels), gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', unlist(wb$worksheets_rels), perl = TRUE))))
+      inds <- inds[!inds %in% fileNo]
+      
+      if(length(inds) > 0){
+        
+        toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", inds), collapse = "|")    
+        fileNo <- which(grepl(toRemove, wb$pivotTables.xml.rels))
+        toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")
+        
+        ## remove reference to file from workbook.xml.res
+        wb$workbook.xml.rels <- wb$workbook.xml.rels[!grepl(toRemove, wb$workbook.xml.rels)]
+      }
     }
-    
-    
     
   } ## end of worksheetRels
   
@@ -879,7 +893,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
                           sprintf('<Override PartName="/xl/queryTables/queryTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.queryTable+xml"/>', 1:length(queryTablesXML)))   
   }
   
-  
+
   ## connections
   if(length(connectionsXML) > 0){
     wb$connections <- removeHeadTag(.Call("openxlsx_cppReadFile", connectionsXML, PACKAGE = "openxlsx"))

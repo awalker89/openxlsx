@@ -1497,6 +1497,33 @@ Workbook$methods(deleteWorksheet = function(sheet){
   if(length(styleObjects) > 0)
     styleObjects <<- styleObjects[unlist(lapply(styleObjects, "[[", "sheet"), use.names = FALSE) != sheetName]
   
+  ## Need to remove reference from workbook.xml.rels to pivotCache
+  removeRels <- worksheets_rels[[sheet]][grepl("pivotTables", worksheets_rels[[sheet]])]
+  if(length(removeRels) > 0){
+    
+    ## sheet rels links to a pivotTable file, the corresponding pivotTable_rels file links to the cacheDefn which is listing in workbook.xml.rels
+    ## remove reference to this file from the workbook.xml.rels
+    fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))
+    toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")    
+
+    fileNo <- which(grepl(toRemove, pivotTables.xml.rels))
+    toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")
+    
+    ## remove reference to file from workbook.xml.res
+    workbook.xml.rels <<- workbook.xml.rels[!grepl(toRemove, workbook.xml.rels)]
+    
+  }
+  
+  ## As above for slicers
+  ## Need to remove reference from workbook.xml.rels to pivotCache
+  removeRels <- grepl("slicers", worksheets_rels[[sheet]])
+  if(any(removeRels))
+    workbook.xml.rels <<- workbook.xml.rels[!grepl(sprintf("(slicerCache%s\\.xml)", sheet), workbook.xml.rels)]
+  
+  
+  
+  
+  
   ## wont't remove tables and then won't need to reassign table r:id's
   worksheets[[sheet]] <<- NULL
   worksheets_rels[[sheet]] <<- NULL
@@ -1508,8 +1535,6 @@ Workbook$methods(deleteWorksheet = function(sheet){
   }else{
     worksheets_rels <<- list()
   }
-  
-  
   
   
   ## remove sheet
