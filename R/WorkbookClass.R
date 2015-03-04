@@ -421,7 +421,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   styleXML$cellStyleXfs <- c(sprintf('<cellStyleXfs count="%s">', length(styles$cellStyleXfs)), pxml(styles$cellStyleXfs), '</cellStyleXfs>')
   styleXML$cellXfs <- paste0(sprintf('<cellXfs count="%s">', length(styles$cellXfs)), pxml(styles$cellXfs), '</cellXfs>')
   styleXML$cellStyles <- paste0(sprintf('<cellStyles count="%s">', length(styles$cellStyles)), pxml(styles$cellStyles), '</cellStyles>')
-  styleXML$dxfs <- ifelse(length(styles$dxfs) == 0, '<dxfs count="0"/>', paste0(sprintf('<dxfs count="%s">', length(styles$dxfs)), pxml(styles$dxfs), '</dxfs>'))
+  styleXML$dxfs <- ifelse(length(styles$dxfs) == 0, '<dxfs count="0"/>', paste0(sprintf('<dxfs count="%s">', length(styles$dxfs)), paste(unlist(styles$dxfs), collapse = ""), '</dxfs>'))
   
   ## write styles.xml
   .Call("openxlsx_writeFile", '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">',
@@ -1267,7 +1267,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
 
 
 Workbook$methods(setColWidths = function(sheet){
-  
+
   sheet = validateSheet(sheet)
   
   widths <- unlist(lapply(colWidths[[sheet]], "[[", "width"))
@@ -1283,9 +1283,13 @@ Workbook$methods(setColWidths = function(sheet){
   
   ## If any auto
   if(length(autoCols) > 0){
-    
+
     ## only run if data on worksheet
-    if(length(sheetData[[sheet]]) == 0){
+    if(length(sheetData[[sheet]]) == 0 ){
+      
+      missingAuto <- autoCols
+      
+    }else if(all(is.na(sapply(sheetData[[sheet]], "[[", "v")))){
       
       missingAuto <- autoCols
       
