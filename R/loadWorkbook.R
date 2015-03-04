@@ -140,13 +140,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     attr(vals, "uniqueCount") <- uniqueCount
     
     wb$sharedStrings <- vals
-    
-    
-    
+
   }
-  
-  
-  
   
   
   ## xl\pivotTables & xl\pivotCache
@@ -224,9 +219,12 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       wb$styles$indexedColors <- paste0("<colors>", vals, "</colors>")
     
     ## dxf (don't need these, I don't think)
-    dxf <- .Call("openxlsx_getNodes", styles, "<dxf>", PACKAGE = "openxlsx")
-    if(length(dxf) > 0)
-      wb$styles$dxfs <- dxf
+    dxf <- .Call("openxlsx_getNodes", styles, "<dxfs", PACKAGE = "openxlsx")
+    if(length(dxf) > 0){
+      dxf <- .Call("openxlsx_getNodes", dxf[[1]], "<dxf>", PACKAGE = "openxlsx")
+      if(length(dxf) > 0)
+        wb$styles$dxfs <- dxf
+    }
     
     tableStyles <- .Call("openxlsx_getNodes", styles, "<tableStyles", PACKAGE = "openxlsx")
     if(length(tableStyles) > 0)

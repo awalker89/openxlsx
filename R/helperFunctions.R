@@ -419,6 +419,7 @@ buildBorder <- function(x){
   ## style
   weight <- gsub('style=|"', "", regmatches(x, regexpr('style="[a-z]+"', x, perl = TRUE)))
   
+  
   ## Colours
   cols <- replicate(n = length(sideBorder), list(rgb = "FF000000"))
   colNodes <- unlist(sapply(x, function(xml) .Call("openxlsx_getChildlessNode", xml, "<color", PACKAGE = "openxlsx"), USE.NAMES = FALSE))
@@ -438,9 +439,16 @@ buildBorder <- function(x){
   
   attrs <- strsplit(attrs, split = "=")
   cols <- sapply(attrs, function(attr){
-    y <- list(gsub('"', "", attr[[2]]))
-    names(y) <- gsub(" ", "", attr[[1]])
-    y
+    
+    if(length(attr) == 2){
+      y <- list(gsub('"', "", attr[2]))
+      names(y) <- gsub(" ", "", attr[[1]])
+    }else{
+      tmp <- paste(attr[-1], collapse = "=")
+      y <- gsub('^"|"$', "", tmp)  
+      names(y) <- gsub(" ", "", attr[[1]])
+    }
+    return(y)
   })
   
   ## sideBorder & cols
