@@ -1320,7 +1320,7 @@ Workbook$methods(setColWidths = function(sheet){
       #########----------------------------------------------------------------
       
       ## get char widths for each style object
-      if(length(styleObjects) > 0){
+      if(length(styleObjects) > 0 & any(!is.na(styleInds[[sheet]]))){
         
         thisSheetName <- names(worksheets)[sheet]
         
