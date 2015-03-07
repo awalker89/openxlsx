@@ -249,10 +249,11 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     inds <- na.omit(match(strRV, r))
 
     inds1 <- which(v[inds] == "#NUM!")
-    if(length(inds1) > 0)
+    if(length(inds1) > 0){
       v[inds[inds1]] <- NaN
+      inds <- inds[-inds1]
+    }
     
-    inds <- inds[-inds1]
     if(length(inds) > 0)
       v[inds] <- NA
     
@@ -523,10 +524,11 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     inds <- na.omit(match(r[wsStrInds], r))
     
     inds1 <- which(v[inds] == "#NUM!")
-    if(length(inds1) > 0)
+    if(length(inds1) > 0){
       v[inds[inds1]] <- NaN
+      inds <- inds[-inds1]
+    }
     
-    inds <- inds[-inds1]
     if(length(inds) > 0)
       v[inds] <- NA
     
