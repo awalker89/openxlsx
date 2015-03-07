@@ -55,14 +55,14 @@ df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow = 1, skipEmptyRows = T
 sapply(df2, class)
 head(df2)
 
-wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-all.equal(df3, df4)
+#wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+#df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#all.equal(df3, df4)
 
-wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
-    cols = c(1, 4), rows = c(1, 3, 4))
+#wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+#df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
+# cols = c(1, 4), rows = c(1, 3, 4))
 }
 \author{
 Alexander Walker

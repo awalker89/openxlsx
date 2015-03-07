@@ -29,8 +29,6 @@ test_that("Writing then reading returns identical data.frame 1", {
   write.xlsx(df, file = fileName, overwrite = TRUE)
   
   x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE)
-  
-  
   expect_equal(object = x, expected = genDf(), check.attributes = FALSE)
   
   unlink(fileName, recursive = TRUE, force = TRUE)

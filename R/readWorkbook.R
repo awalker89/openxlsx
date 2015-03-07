@@ -35,14 +35,14 @@
 #' sapply(df2, class)
 #' head(df2)
 #' 
-#' wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-#' df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-#' df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-#' all.equal(df3, df4)
+#' #wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+#' #df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#' #df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#' #all.equal(df3, df4)
 #' 
-#' wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-#' df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
-#'     cols = c(1, 4), rows = c(1, 3, 4))
+#' #wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
+#' #df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
+#' # cols = c(1, 4), rows = c(1, 3, 4))
 #' 
 #' @export
 read.xlsx <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE, skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE, rows = NULL, cols = NULL){
@@ -252,9 +252,9 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     if(length(inds1) > 0)
       v[inds[inds1]] <- NaN
     
-    inds1 <- which(v[inds] == "#N/A")
-    if(length(inds1) > 0)
-      v[inds[inds1]] <- NA
+    inds <- inds[!inds %in% inds1]
+    if(length(inds) > 0)
+      v[inds] <- NA
     
     
   }
@@ -527,9 +527,9 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     if(length(inds1) > 0)
       v[inds[inds1]] <- NaN
     
-    inds1 <- which(v[inds] == "#N/A")
-    if(length(inds1) > 0)
-      v[inds[inds1]] <- NA
+    inds <- inds[!inds %in% inds1]
+    if(length(inds) > 0)
+      v[inds] <- NA
     
   }
 
