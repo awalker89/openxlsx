@@ -32,7 +32,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   wb <- createWorkbook()
   
   ## create temp dir
-  xmlDir <- paste0(tempdir(),  tempfile(tmpdir = ""), "_openxlsx_loadWorkbook")
+  xmlDir <- file.path(tempdir(),  paste0(tempfile(tmpdir = ""), "_openxlsx_loadWorkbook"))
   
   ## Unzip files to temp directory
   xmlFiles <- unzip(file, exdir = xmlDir)
