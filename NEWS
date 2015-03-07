@@ -37,7 +37,8 @@ BUG FIXES
 
 * write.xlsx colnames parameter being assigned to rownames
 
-* Handling of NaN and Inf values
+* Handling of NaN and Inf values in writeData
+
 
 
 openxlsx 2.1.3
