@@ -20,7 +20,6 @@ bottom=20mm,
 }
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 \title{Introduction}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}
