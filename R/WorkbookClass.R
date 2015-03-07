@@ -631,7 +631,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ## If any NaN values
   if(length(nans) > 0){
     nans <- which(t(matrix(nans, nrow = nrow(df), ncol = ncol(df))))
-    t[nans] <- "s"
+    t[nans] <- "e"
+    v[nans] <- "#NUM!"
   }
     
   

@@ -105,7 +105,7 @@ Vertical alignment of cell contents
 
 \item{wrapText}{Logical. If \code{TRUE} cell contents will wrap to fit in column.}
 
-\item{textRotation}{Rotation of text in degrees. Numeric in [0, 180].}
+\item{textRotation}{Rotation of text in degrees. 255 for vertial text.}
 }
 \value{
 A style object

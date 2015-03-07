@@ -247,7 +247,14 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     ## Match references of "e" cells to r and set v values to NA
     strRV <- .Call("openxlsx_getRefs",  ws[errorStrInds], startRow, PACKAGE = "openxlsx")
     inds <- na.omit(match(strRV, r))
-    v[inds] <- NA
+
+    inds1 <- which(v[inds] == "#NUM!")
+    if(length(inds1) > 0)
+      v[inds[inds1]] <- NaN
+    
+    inds1 <- which(v[inds] == "#N/A")
+    if(length(inds1) > 0)
+      v[inds[inds1]] <- NA
     
     
   }
@@ -509,15 +516,24 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     
   }
   
+  ##Set error cells to NA
   wsStrInds <- which(t == "e")
   if(length(wsStrInds) > 0){
     
     ## Match references of "e" cells to r and set v values to NA
     inds <- na.omit(match(r[wsStrInds], r))
-    v[inds] <- NA
+    
+    inds1 <- which(v[inds] == "#NUM!")
+    if(length(inds1) > 0)
+      v[inds[inds1]] <- NaN
+    
+    inds1 <- which(v[inds] == "#N/A")
+    if(length(inds1) > 0)
+      v[inds[inds1]] <- NA
     
   }
-  
+
+
   ## Now safe to convert v to numeric
   vn <- as.numeric(v)
   

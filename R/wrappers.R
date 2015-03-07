@@ -493,7 +493,7 @@ convertFromExcelRef <- function(col){
 #'   } 
 #'   
 #' @param wrapText Logical. If \code{TRUE} cell contents will wrap to fit in column.  
-#' @param textRotation Rotation of text in degrees. Numeric in [0, 180].
+#' @param textRotation Rotation of text in degrees. 255 for vertial text.
 #' @return A style object
 #' @export
 #' @examples
