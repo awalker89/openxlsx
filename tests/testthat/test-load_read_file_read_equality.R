@@ -69,9 +69,7 @@ test_that("Reading from new workbook 2 ", {
   
   options("openxlsx.dateFormat" = NULL)
   
-  tmpDir <- file.path(tempdir(), "readFromTests")
-  fileName <- file.path(tmpDir, "allClasses.xlsx")
-  dir.create(tmpDir, showWarnings = FALSE)
+  fileName <- file.path(tempdir(), "allClasses.xlsx")
   wb <- write.xlsx(df, file = fileName, overwrite = TRUE)
   
   x <- read.xlsx(wb, sheet = 1, detectDates = FALSE)
@@ -82,6 +80,7 @@ test_that("Reading from new workbook 2 ", {
   x <- read.xlsx(wb, sheet = 1, detectDates = TRUE)
   expect_equal(object = x, expected = genDf(), check.attributes = FALSE)
   
+  unlink(fileName, recursive = TRUE, force = TRUE)
   
 })
 
