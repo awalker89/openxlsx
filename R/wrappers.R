@@ -1775,7 +1775,7 @@ convertToDateTime <- function(x, origin = "1900-01-01"){
 
 #' @name names
 #' @aliases names.Workbook
-#' @export names.Workbook
+#' @export
 #' @method names Workbook
 #' @title get or set worksheet names
 #' @param x A \code{Workbook} object
@@ -2309,7 +2309,7 @@ getDateOrigin <- function(xlsxFile){
     stop("openxlsx can not read .xls or .xlm files!")
   
   ## create temp dir and unzip
-  xmlDir <- paste0(tempdir(), "_excelXMLRead")
+  xmlDir <- file.path(tempdir(), "_excelXMLRead")
   xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
   
   on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)

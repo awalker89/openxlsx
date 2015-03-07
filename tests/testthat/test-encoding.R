@@ -34,7 +34,6 @@ test_that("Write read encoding equality", {
   x <- read.xlsx(tempFile)
   expect_equal(x, df)
   
-
   unlink(tempFile, recursive = TRUE, force = TRUE)
   rm(wb)
   

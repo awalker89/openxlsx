@@ -25,9 +25,7 @@ test_that("Writing then reading returns identical data.frame 1", {
   
   options("openxlsx.dateFormat" = "yyyy-mm-dd")
   
-  tmpDir <- paste0(tempdir(), "readFromTests")
-  fileName <- file.path(tmpDir, "allClasses.xlsx")
-  dir.create(tmpDir, showWarnings = FALSE)
+  fileName <- file.path(tempdir(), "allClasses.xlsx")
   write.xlsx(df, file = fileName, overwrite = TRUE)
   
   x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE)
@@ -35,7 +33,7 @@ test_that("Writing then reading returns identical data.frame 1", {
   
   expect_equal(object = x, expected = genDf(), check.attributes = FALSE)
   
-  
+  unlink(fileName, recursive = TRUE, force = TRUE)
 
   })
 
@@ -85,10 +83,7 @@ test_that("Writing then reading returns identical data.frame 2", {
   setColWidths(wb, 1, cols = 1:10, widths = 23)
     
   
-  tmpDir <- paste0(tempdir(), "readFromTests")
-  fileName <- file.path(tmpDir, "DateFormatting.xlsx")
-  dir.create(tmpDir, showWarnings = FALSE)
-  
+  fileName <- file.path(tempdir(), "DateFormatting.xlsx")
   write.xlsx(dates, file = fileName, overwrite = TRUE)
   
   x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE)  
@@ -106,6 +101,8 @@ test_that("Writing then reading returns identical data.frame 2", {
   
   expect_equal(object = xNoDateDetection, expected = dates, check.attributes = FALSE)
       
+  unlink(fileName, recursive = TRUE, force = TRUE)
+  
 })
 
 
@@ -141,6 +138,7 @@ test_that("Writing then reading rowNames, colNames combinations", {
   x <- read.xlsx(fileName, sheet = 1, rowNames = FALSE, colNames = FALSE)
   expect_equal(object = x, expected = mtcars, check.attributes = FALSE)
   
+  unlink(fileName, recursive = TRUE, force = TRUE)
   
 })
 
@@ -173,9 +171,7 @@ test_that("Writing then reading returns identical data.frame 3", {
   
   options("openxlsx.dateFormat" = "yyyy-mm-dd")
   
-  tmpDir <- paste0(tempdir(), "readFromTests")
-  fileName <- file.path(tmpDir, "allClasses.xlsx")
-  dir.create(tmpDir, showWarnings = FALSE)
+  fileName <- file.path(tempdir(), "allClasses.xlsx")
   write.xlsx(df, file = fileName, overwrite = TRUE)
   
   
@@ -203,6 +199,7 @@ test_that("Writing then reading returns identical data.frame 3", {
   suppressWarnings(x <- read.xlsx(xlsxFile = fileName, detectDates = TRUE, rows = rows, cols = cols))
   expect_equal(object = x, expected = NULL, check.attributes = FALSE)
   
+  unlink(fileName, recursive = TRUE, force = TRUE)
   
 })
 

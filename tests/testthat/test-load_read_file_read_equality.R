@@ -69,7 +69,7 @@ test_that("Reading from new workbook 2 ", {
   
   options("openxlsx.dateFormat" = NULL)
   
-  tmpDir <- paste0(tempdir(), "readFromTests")
+  tmpDir <- file.path(tempdir(), "readFromTests")
   fileName <- file.path(tmpDir, "allClasses.xlsx")
   dir.create(tmpDir, showWarnings = FALSE)
   wb <- write.xlsx(df, file = fileName, overwrite = TRUE)
@@ -474,6 +474,7 @@ test_that("NAs and NaN values", {
   expect_equal(b, read.xlsx(wb, sheet = 2))  
   expect_equal(b, read.xlsx(fileName, sheet = 2)) 
   
+  unlink(fileName, recursive = TRUE, force = TRUE)
   
 })
 
