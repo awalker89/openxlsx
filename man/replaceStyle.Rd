@@ -18,14 +18,14 @@ Replace a style object
 }
 \examples{
 ## load a workbook
-wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 
 ## create a new style and replace style 2
 
 newStyle <- createStyle(fgFill = "#00FF00")
 
 ## replace style 2
-getStyles(wb) ## prints styles
+getStyles(wb)[1:3] ## prints styles
 replaceStyle(wb, 2, newStyle = newStyle)
 
 ## Save workbook

@@ -17,6 +17,7 @@ setFooter(wb, text, position = "center")
 Set footer for all worksheets
 }
 \examples{
+\dontrun{
 wb <- createWorkbook("Edgar Anderson")
 addWorksheet(wb, "S1")
 writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
@@ -32,6 +33,7 @@ setFooter(wb, "Bottom left", position="left")
 setFooter(wb, Sys.Date(), position="right")
 
 saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+}
 }
 \author{
 Alexander Walker

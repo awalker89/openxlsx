@@ -1074,7 +1074,7 @@ setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
 #' @export
 #' @examples
 #' ## Create a new workbook
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #' 
 #' ## remove column widths in columns 1 to 20
 #' removeColWidths(wb, 1, cols = 1:20)
@@ -1105,7 +1105,7 @@ removeColWidths <- function(wb, sheet, cols){
 #' @export
 #' @examples
 #' ## Create a new workbook
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #'
 #' ## remove any custom row heights in rows 1 to 10
 #' removeRowHeights(wb, 1, rows = 1:10)
@@ -1226,14 +1226,14 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 #' @seealso \code{\link{getStyles}}
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #' 
 #' ## create a new style and replace style 2
 #' 
 #' newStyle <- createStyle(fgFill = "#00FF00")
 #'  
 #' ## replace style 2
-#' getStyles(wb) ## prints styles
+#' getStyles(wb)[1:3] ## prints styles
 #' replaceStyle(wb, 2, newStyle = newStyle)
 #' 
 #' ## Save workbook
@@ -1264,8 +1264,8 @@ replaceStyle <- function(wb, index, newStyle){
 #' @seealso \code{\link{replaceStyle}}
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
-#' getStyles(wb)
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
+#' getStyles(wb)[1:3]
 getStyles <- function(wb){
   
   nStyles <- length(wb$styleObjects)
@@ -1289,7 +1289,7 @@ getStyles <- function(wb){
 #' @export
 #' @examples
 #' ## load a workbook 
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #' 
 #' ## Remove sheet 2
 #' removeWorksheet(wb, 2)
@@ -1621,7 +1621,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
 #' @param showGridLines A logical. If \code{TRUE}, grid lines are hidden.
 #' @export
 #' @examples
-#' wb <- loadWorkbook(file = file.path(path.package("openxlsx"), "loadExample.xlsx"))
+#' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #' names(wb) ## list worksheets in workbook
 #' showGridLines(wb, 1, showGridLines = FALSE)
 #' showGridLines(wb, "testing", showGridLines = FALSE)
@@ -1928,6 +1928,7 @@ removeFilter <- function(wb, sheet){
 #' @param position Postion of text in header. One of "left", "center" or "right"
 #' @export
 #' @examples
+#' \dontrun{
 #' wb <- createWorkbook("Edgar Anderson")
 #' addWorksheet(wb, "S1")
 #' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
@@ -1942,7 +1943,8 @@ removeFilter <- function(wb, sheet){
 #' setFooter(wb, "Bottom left", position="left")
 #' setFooter(wb, Sys.Date(), position="right")
 #' 
-#' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+#' saveWorkbook(wb, "headerHeaderExample.xlsx", overwrite = TRUE)
+#' }
 setHeader <- function(wb, text, position = "center"){
   
   warning("This function is deprecated. Use function 'setHeaderFooter()'")
@@ -1971,6 +1973,7 @@ setHeader <- function(wb, text, position = "center"){
 #' @param position Postion of text in footer. One of "left", "center" or "right"
 #' @export
 #' @examples
+#' \dontrun{
 #' wb <- createWorkbook("Edgar Anderson")
 #' addWorksheet(wb, "S1")
 #' writeDataTable(wb, "S1", x = iris[1:30,], xy = c("C", 5))
@@ -1986,6 +1989,7 @@ setHeader <- function(wb, text, position = "center"){
 #' setFooter(wb, Sys.Date(), position="right")
 #' 
 #' saveWorkbook(wb, "headerFooterExample.xlsx", overwrite = TRUE)
+#' }
 setFooter <- function(wb, text, position = "center"){
   
   warning("This function is deprecated. Use function 'setHeaderFooter()'")
