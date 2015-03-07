@@ -22,6 +22,7 @@ NEW FEATURES
 
 
 
+
 BUG FIXES
 
 * Encoding fixed and multi-byte characters now supported.
@@ -36,7 +37,7 @@ BUG FIXES
 
 * write.xlsx colnames parameter being assigned to rownames
 
-
+* Handling of NaN and Inf values
 
 
 openxlsx 2.1.3

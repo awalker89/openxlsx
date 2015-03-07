@@ -555,6 +555,9 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nRows <- nrow(df)  
   
   allColClasses <- unlist(colClasses)  
+
+  ## pull out NaN values
+  nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
   
   ## convert any Dates to integers and create date style object
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
@@ -605,8 +608,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[[i]]) <- "numeric"
   }
   
-  
-  
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
@@ -627,6 +628,12 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     v[is.na(v)] <- as.character(NA)
   }
   
+  ## If any NaN values
+  if(length(nans) > 0){
+    nans <- which(t(matrix(nans, nrow = nrow(df), ncol = ncol(df))))
+    t[nans] <- "s"
+  }
+    
   
   #prepend column headers 
   if(colNames){
