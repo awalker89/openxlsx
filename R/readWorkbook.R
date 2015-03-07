@@ -252,10 +252,9 @@ read.xlsx.default <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE
     if(length(inds1) > 0)
       v[inds[inds1]] <- NaN
     
-    inds <- inds[!inds %in% inds1]
+    inds <- inds[-inds1]
     if(length(inds) > 0)
       v[inds] <- NA
-    
     
   }
   
@@ -527,7 +526,7 @@ read.xlsx.Workbook <- function(xlsxFile, sheet = 1, startRow = 1, colNames = TRU
     if(length(inds1) > 0)
       v[inds[inds1]] <- NaN
     
-    inds <- inds[!inds %in% inds1]
+    inds <- inds[-inds1]
     if(length(inds) > 0)
       v[inds] <- NA
     
