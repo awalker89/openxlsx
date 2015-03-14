@@ -33,10 +33,6 @@ getAttr <- function(x, tag) {
     .Call('openxlsx_getAttr', PACKAGE = 'openxlsx', x, tag)
 }
 
-childrenCounter <- function(x) {
-    .Call('openxlsx_childrenCounter', PACKAGE = 'openxlsx', x)
-}
-
 getCellStyles <- function(x) {
     .Call('openxlsx_getCellStyles', PACKAGE = 'openxlsx', x)
 }
@@ -57,12 +53,8 @@ getRefs <- function(x, startRow) {
     .Call('openxlsx_getRefs', PACKAGE = 'openxlsx', x, startRow)
 }
 
-getSharedStrings <- function(x) {
-    .Call('openxlsx_getSharedStrings', PACKAGE = 'openxlsx', x)
-}
-
-getSharedStrings2 <- function(x) {
-    .Call('openxlsx_getSharedStrings2', PACKAGE = 'openxlsx', x)
+getSharedStrings <- function(xmlFile, isFile) {
+    .Call('openxlsx_getSharedStrings', PACKAGE = 'openxlsx', xmlFile, isFile)
 }
 
 getNumValues <- function(inFile, n, tagIn) {
@@ -177,7 +169,11 @@ getCellStylesPossiblyMissing <- function(x) {
     .Call('openxlsx_getCellStylesPossiblyMissing', PACKAGE = 'openxlsx', x)
 }
 
-readWorkbook <- function(v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj) {
-    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj)
+readWorkbook <- function(v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names) {
+    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, vn, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names)
+}
+
+getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {
+    .Call('openxlsx_getCellInfo', PACKAGE = 'openxlsx', xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
 }
 

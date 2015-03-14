@@ -164,10 +164,21 @@ test_that("Reading from new workbook cols/rows", {
   x <- read.xlsx(wb, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
   y <- read.xlsx(tempFile, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
   
-  
+  # 
   expect_equal(object = mtcars, expected = x, check.attributes = FALSE)
   expect_equal(object = x, expected = y, check.attributes = TRUE)
   expect_equal(object = colnames(mtcars), expected = colnames(x), check.attributes = FALSE)
+  
+
+  cols <- 1:3
+  rows <- 12:13
+  x <- read.xlsx(wb, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
+  y <- read.xlsx(tempFile, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
+  
+  
+  expect_equal(object = NULL, expected = x, check.attributes = FALSE)
+  expect_equal(object = NULL, expected = y, check.attributes = TRUE)
+  
   
   
   ## 3
@@ -476,6 +487,9 @@ test_that("NAs and NaN values", {
   unlink(fileName, recursive = TRUE, force = TRUE)
   
 })
+
+
+
 
 
 

@@ -450,7 +450,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ws <- lapply(worksheetsXML, function(x) readLines(x, warn = FALSE, encoding = "UTF-8"))
   ws <- lapply(ws, removeHeadTag)
   wsTemp <- lapply(ws, function(x) strsplit(x, split = "<sheetData>")[[1]])
-  
+
   ## If there need to split at sheetData tag
   noData <- grepl("<sheetData/>", ws)
   if(any(noData))
@@ -481,8 +481,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       
       r <- .Call("openxlsx_getRefs", cells[[i]], 1, PACKAGE = "openxlsx")
       cells[[i]] <- .Call("openxlsx_getCells", cells[[i]], PACKAGE = "openxlsx")
-      
+
       v <- .Call("openxlsx_getVals", cells[[i]], PACKAGE = "openxlsx")
+      Encoding(v) <- "UTF-8"
+      
       t <- .Call("openxlsx_getCellTypes", cells[[i]], PACKAGE = "openxlsx")
       f <- .Call("openxlsx_getFunction", cells[[i]], PACKAGE = "openxlsx")
       
@@ -562,13 +564,22 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     if(length(hyperlinks) > 0)
       wb$hyperlinks[[i]] <- .Call("openxlsx_getHyperlinkRefs", hyperlinks, 1, PACKAGE = "openxlsx")
     
+    
     ## conditionalFormatting
     conForm <- .Call("openxlsx_getNodes", sheetData[[i]], "<conditionalFormatting", PACKAGE = "openxlsx")
     if(length(conForm) > 0){
+      
       sqref <- unlist(regmatches(conForm, gregexpr('(?<=sqref=")[^"]+', conForm, perl = TRUE)))
-      conForm <- unlist(lapply(conForm, function(x) paste(paste0(.Call("openxlsx_getNodes", x, "<cfRule", PACKAGE = "openxlsx"), ">"), collapse = "")))
-      if(length(conForm) > 0){
-        conForm <- unlist(conForm)
+      conForm <- gsub("</conditionalFormatting", "", conForm)
+      conForm <- unlist(regmatches(conForm, gregexpr('<cfRule.+', conForm)))
+      
+      conForm <- strsplit(conForm, split = "<cfRule")
+      conForm <- lapply(conForm, function(x) x[nchar(x) > 1])
+      
+      sqref <- rep(sqref, times = sapply(conForm, length))
+      conForm <- paste0("<cfRule", unlist(conForm))
+      
+      if(length(conForm) > 0 & (length(conForm) == length(sqref))){
         names(conForm) <- sqref
         wb$worksheets[[i]]$conditionalFormatting <- conForm
       }

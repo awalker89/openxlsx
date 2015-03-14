@@ -211,13 +211,6 @@ replaceIllegalCharacters <- function(v){
   vEnc <- Encoding(v)
   v <- as.character(v)
   
-#   if("UTF-8" %in% vEnc){
-#     fromEnc <- "UTF-8"
-#   }else{
-#     fromEnc <- ""
-#   }
-#   v <- iconv(as.character(v), from = fromEnc, to = "UTF-8")
-
   flg <- vEnc != "UTF-8"
   if(any(flg))
     v[flg] <- iconv(v[flg], from = "", to = "UTF-8")
@@ -571,3 +564,31 @@ getDefinedNamesSheet <- function(x){
   return(belongTo)
   
 }
+
+
+getSharedStringsFromFile <- function(sharedStringsFile, isFile){
+  
+  ## read in, get si tags, get t tag value and  pull out all string nodes
+  sharedStrings = .Call("openxlsx_getSharedStrings", sharedStringsFile, isFile, PACKAGE = 'openxlsx') ## read from file
+  
+  
+  Encoding(sharedStrings) <- "UTF-8"
+  z <- tolower(sharedStrings)
+  sharedStrings[z == "true"] <- "TRUE"
+  sharedStrings[z == "false"] <- "FALSE"
+  rm(z)
+  
+  ## XML replacements
+  sharedStrings <- replaceXMLEntities(sharedStrings)
+  
+  return(sharedStrings)
+  
+}
+
+
+clean_names <- function(x){
+  x <- gsub("^[[:space:]]+|[[:space:]]+$", "", x)
+  x <- gsub("[[:space:]]+", ".", x)
+  return(x)
+}
+

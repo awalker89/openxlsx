@@ -5,7 +5,7 @@
 \title{Read data from a worksheet or Workbook object into a data.frame}
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
-  skipEmptyRows = TRUE, rowNames = FALSE, detectDates = FALSE,
+  rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
   rows = NULL, cols = NULL)
 }
 \arguments{
@@ -18,12 +18,12 @@ regardless of the value of startRow.}
 
 \item{colNames}{If \code{TRUE}, the first row of data will be used as column names.}
 
-\item{skipEmptyRows}{If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data
-will return a row of NAs.}
-
 \item{rowNames}{If \code{TRUE}, first column of data will be used as row names.}
 
 \item{detectDates}{If \code{TRUE}, attempt to recognise dates and perform conversion.}
+
+\item{skipEmptyRows}{If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data
+will return a row of NAs.}
 
 \item{rows}{A numeric vector specifying which rows in the Excel file to read.
 If NULL, all rows are read.}
@@ -42,26 +42,26 @@ Creates a data.frame of all the data on a worksheet.
 }
 \examples{
 xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
-df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1, startRow = 1, skipEmptyRows = FALSE)
+df1 <- read.xlsx(xlsxFile = xlsxFile, sheet = 1, skipEmptyRows = FALSE)
 sapply(df1, class)
 
-df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow = 1, skipEmptyRows = TRUE)
+df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, skipEmptyRows = TRUE)
 df2$Date <- convertToDate(df2$Date)
 sapply(df2, class)
 head(df2)
 
-df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, startRow = 1, skipEmptyRows = TRUE,
+df2 <- read.xlsx(xlsxFile = xlsxFile, sheet = 3, skipEmptyRows = TRUE,
                    detectDates = TRUE)
 sapply(df2, class)
 head(df2)
 
 #wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-#df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
-#df4 <- read.xlsx(xlsxFile, sheet = 2, startRow = 1, skipEmptyRows = FALSE, colNames = TRUE)
+#df3 <- read.xlsx(wb, sheet = 2, skipEmptyRows = FALSE, colNames = TRUE)
+#df4 <- read.xlsx(xlsxFile, sheet = 2, skipEmptyRows = FALSE, colNames = TRUE)
 #all.equal(df3, df4)
 
 #wb <- loadWorkbook(system.file("readTest.xlsx", package = "openxlsx"))
-#df3 <- read.xlsx(wb, sheet = 2, startRow = 1, skipEmptyRows = FALSE,
+#df3 <- read.xlsx(wb, sheet = 2, skipEmptyRows = FALSE,
 # cols = c(1, 4), rows = c(1, 3, 4))
 }
 \author{
