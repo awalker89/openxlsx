@@ -135,10 +135,6 @@ read.xlsx.default <- function(xlsxFile,
   if(length(sharedStringsFile) > 0)
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
   
-  
-  # a = paste(readLines(sharedStringsFile), collapse = "")
-  # regmatches(a, gregexpr("<si>.+?</si>", a))
-  
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,

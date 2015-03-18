@@ -2512,17 +2512,7 @@ List getCellInfo(std::string xmlFile,
     res = List::create(Rcpp::Named("nRows") = 0, Rcpp::Named("r") = 0);
     return res;
   }
-  
-  /* row = r[i];
-   row.erase(std::remove_if(row.begin(), row.end(), ::isalpha), row.end());
-   rowN = atoi(row.c_str());
-   
-   if(startRow > rowN){
-   r[i] = NA_STRING;
-   continue;
-   }
-   */
-  
+
   CharacterVector r(ocs);
   CharacterVector t(ocs);
   CharacterVector v(ocs);
@@ -2688,7 +2678,6 @@ List getCellInfo(std::string xmlFile,
   }
   
   string_refs = string_refs[!is_na(string_refs)];
-  
   
   int nRows = calcNRows(r, skipEmptyRows);
   res = List::create(Rcpp::Named("r") = r,
