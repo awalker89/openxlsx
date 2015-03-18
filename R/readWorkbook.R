@@ -113,7 +113,11 @@ read.xlsx.default <- function(xlsxFile,
   ## get workbook names
   workbook <- unlist(readLines(workbook, warn = FALSE))
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
+  
+  ## make sure sheetId is 1 based
   sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+  sheetrId <- sheetrId - min(sheetrId) + 1L
+  
   sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
   
   ## get the correct sheet
