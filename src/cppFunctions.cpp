@@ -2202,6 +2202,16 @@ SEXP readWorkbook(CharacterVector v,
   
   // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
   int nCells = r.size();
+  int nDates = is_date.size();
+  
+  /* do we have any dates */
+  bool has_date;
+  if(nDates == nCells){
+    has_date = true;
+  }else{
+    has_date = false;
+  }
+  
   IntegerVector colNumbers = RcppConvertFromExcelRef(r); 
   colNumbers = match(colNumbers, sort_unique(colNumbers)) - 1;
   int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
@@ -2313,14 +2323,17 @@ SEXP readWorkbook(CharacterVector v,
   if((string_refs.size() == 0) | all(is_na(string_refs)))
     allNumeric = true;
   
-  if(is_true(any(is_date)))
-    allNumeric = false;
-  
+  if(has_date){
+    if(is_true(any(is_date)))
+      allNumeric = false;
+  }
   
   // If we build colnames we remove the ref & values for the pos number of elements used 
   if(hasColNames){
     vn.erase(vn.begin(), vn.begin() + pos);
-    is_date.erase(is_date.begin(), is_date.begin() + pos);
+    
+    if(has_date)
+      is_date.erase(is_date.begin(), is_date.begin() + pos);
   }
   
   
@@ -2352,8 +2365,13 @@ SEXP readWorkbook(CharacterVector v,
     //Rcout << "rowNumbers.size(): " << rowNumbers.size() << endl; 
     
     //date columns
-    IntegerVector dateCols = colNumbers[is_date];
-    dateCols = sort_unique(dateCols);
+    IntegerVector dateCols(1);
+    if(has_date){
+      dateCols = colNumbers[is_date];
+      dateCols = sort_unique(dateCols);
+    }else{
+      dateCols[0] = -1;
+    }
     
     m = buildMatrixMixed(v, vn, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, dateCols, originAdj);
     
@@ -2645,6 +2663,8 @@ List getCellInfo(std::string xmlFile,
   
   // replace all ints with strings now
   CharacterVector string_refs(n_strings);
+  std::fill(string_refs.begin(), string_refs.end(), NA_STRING);
+  
   std::string tmp;
   n_strings = 0;
   
@@ -2661,6 +2681,8 @@ List getCellInfo(std::string xmlFile,
       }
     }
   }
+  
+  string_refs = string_refs[!is_na(string_refs)];
   
   
   int nRows = calcNRows(r, skipEmptyRows);

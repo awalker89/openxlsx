@@ -186,7 +186,6 @@ read.xlsx.default <- function(xlsxFile,
   
   ## Determine date cells (if required)
   origin <- 25569L
-  isDate <- rep.int(FALSE, times = length(r))
   if(detectDates){
     
     ## get date origin
@@ -227,9 +226,9 @@ read.xlsx.default <- function(xlsxFile,
     isNotInt <- (isNotInt %% 1L != 0) & !is.na(isNotInt)
     isDate[isNotInt] <- FALSE
     
+  }else{
+    isDate <- as.logical(NA)
   }
-  
-  
   
   
   ## Build data.frame
