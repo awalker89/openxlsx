@@ -135,6 +135,10 @@ read.xlsx.default <- function(xlsxFile,
   if(length(sharedStringsFile) > 0)
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
   
+  
+  # a = paste(readLines(sharedStringsFile), collapse = "")
+  # regmatches(a, gregexpr("<si>.+?</si>", a))
+  
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,
@@ -144,7 +148,6 @@ read.xlsx.default <- function(xlsxFile,
                      rows = rows,
                      getDates = detectDates,
                      PACKAGE = "openxlsx")
-  
   
   nRows <- cell_info$nRows
   r <- cell_info$r
@@ -186,7 +189,6 @@ read.xlsx.default <- function(xlsxFile,
   
   ## Determine date cells (if required)
   origin <- 25569L
-  isDate <- rep.int(FALSE, times = length(r))
   if(detectDates){
     
     ## get date origin
@@ -227,9 +229,9 @@ read.xlsx.default <- function(xlsxFile,
     isNotInt <- (isNotInt %% 1L != 0) & !is.na(isNotInt)
     isDate[isNotInt] <- FALSE
     
+  }else{
+    isDate <- as.logical(NA)
   }
-  
-  
   
   
   ## Build data.frame
