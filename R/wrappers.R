@@ -541,8 +541,9 @@ createStyle <- function(fontName = NULL,
   if(numFmt == "date"){
     numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
   }else if(!numFmt %in% validNumFmt){
-    if(grepl("[^mdyhsap[[:punct:] 0\\.#\\$\\*]", numFmt))
-      stop("Invalid numFmt")
+    # if(grepl("[^mdyhsap[[:punct:] 0\\.#\\$\\*]", numFmt))
+      # stop("Invalid numFmt")
+    numFmt <- replaceIllegalCharacters(numFmt)
   }
   
   if(numFmt == "longdate"){
@@ -764,9 +765,13 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
     combs <- expand.grid(cols, rows) 
     cols <- combs[,1]
     rows <- combs[,2]
-  }
+  }else if(length(rows) == 1 & length(cols) > 1){
+    rows <- rep.int(rows, times = length(cols))
+    
+  }else if(length(cols) == 1 & length(rows) > 1){
+    cols <- rep.int(cols, times = length(rows))
   
-  if(length(rows) != length(cols)){
+  }else if(length(rows) != length(cols)){
     stop("Length of rows and cols must be equal.")
   }
   

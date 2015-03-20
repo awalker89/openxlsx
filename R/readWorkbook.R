@@ -135,9 +135,12 @@ read.xlsx.default <- function(xlsxFile,
   worksheet <- worksheets[order(nchar(worksheets), worksheets)][[sheet]]
   
   ## read in sharedStrings
-  sharedStrings <- ""
-  if(length(sharedStringsFile) > 0)
+  if(length(sharedStringsFile) > 0){
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
+  }else{
+    sharedStrings <- ""
+  }
+  
   
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
