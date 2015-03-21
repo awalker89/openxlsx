@@ -1389,7 +1389,7 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
 #' writeData(wb, "S1", iris)
 #' writeDataTable(wb, "S1", x = iris, startCol = 10) ## font colour does not affect tables
 #' saveWorkbook(wb, "modifyBaseFontExample.xlsx", overwrite = TRUE)
-modifyBaseFont <- function(wb, fontSize = 11, fontColour = "#000000", fontName = "Calibri"){
+modifyBaseFont <- function(wb, fontSize = 11, fontColour = "black", fontName = "Calibri"){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
