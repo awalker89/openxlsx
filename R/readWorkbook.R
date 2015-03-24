@@ -111,7 +111,7 @@ read.xlsx.default <- function(xlsxFile,
     stop("Workbook has no worksheets")
   
   ## get workbook names
-  workbook <- unlist(readLines(workbook, warn = FALSE))
+  workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
   
   ## make sure sheetId is 1 based
@@ -120,7 +120,7 @@ read.xlsx.default <- function(xlsxFile,
   
   sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
   
-  ## get the correct sheet
+  ## get the correct sheets
   if("character" %in% class(sheet)){
     sheetInd <- which(sheetNames == sheet)
     if(length(sheetInd) == 0)
@@ -162,8 +162,6 @@ read.xlsx.default <- function(xlsxFile,
   
   v <- cell_info$v
   Encoding(v) <- "UTF-8"
-  
-  vn <- cell_info$vn
   string_refs <- cell_info$string_refs
   
   
@@ -177,8 +175,7 @@ read.xlsx.default <- function(xlsxFile,
       return(NULL)
     }
     v <- v[flag]
-    vn <- vn[flag]
-    
+
     if(detectDates)
       cell_info$s <- cell_info$s[flag]
     
@@ -238,8 +235,8 @@ read.xlsx.default <- function(xlsxFile,
   
   
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
-
+ m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
+# m = 1
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL
@@ -514,7 +511,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   }
   
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, vn, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
   
   if(rowNames){
     rownames(m) <- m[[1]]
