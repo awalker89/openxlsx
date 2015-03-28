@@ -236,7 +236,7 @@ read.xlsx.default <- function(xlsxFile,
   
   ## Build data.frame
  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
-# m = 1
+
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL

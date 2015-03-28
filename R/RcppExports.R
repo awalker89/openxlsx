@@ -25,6 +25,10 @@ getNodes <- function(xml, tagIn) {
     .Call('openxlsx_getNodes', PACKAGE = 'openxlsx', xml, tagIn)
 }
 
+getChildlessNode_ss <- function(xml, tag) {
+    .Call('openxlsx_getChildlessNode_ss', PACKAGE = 'openxlsx', xml, tag)
+}
+
 getChildlessNode <- function(xml, tag) {
     .Call('openxlsx_getChildlessNode', PACKAGE = 'openxlsx', xml, tag)
 }
@@ -175,5 +179,9 @@ readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmp
 
 getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {
     .Call('openxlsx_getCellInfo', PACKAGE = 'openxlsx', xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
+}
+
+loadworksheets <- function(wb, styleObjects, xmlFiles) {
+    .Call('openxlsx_loadworksheets', PACKAGE = 'openxlsx', wb, styleObjects, xmlFiles)
 }
 

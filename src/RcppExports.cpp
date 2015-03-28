@@ -78,8 +78,20 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// getChildlessNode_ss
+std::vector<std::string> getChildlessNode_ss(std::string xml, std::string tag);
+RcppExport SEXP openxlsx_getChildlessNode_ss(SEXP xmlSEXP, SEXP tagSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    Rcpp::traits::input_parameter< std::string >::type tag(tagSEXP);
+    __result = Rcpp::wrap(getChildlessNode_ss(xml, tag));
+    return __result;
+END_RCPP
+}
 // getChildlessNode
-SEXP getChildlessNode(std::string xml, std::string tag);
+CharacterVector getChildlessNode(std::string xml, std::string tag);
 RcppExport SEXP openxlsx_getChildlessNode(SEXP xmlSEXP, SEXP tagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -573,6 +585,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type rows(rowsSEXP);
     Rcpp::traits::input_parameter< bool >::type getDates(getDatesSEXP);
     __result = Rcpp::wrap(getCellInfo(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates));
+    return __result;
+END_RCPP
+}
+// loadworksheets
+SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles);
+RcppExport SEXP openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< Reference >::type wb(wbSEXP);
+    Rcpp::traits::input_parameter< List >::type styleObjects(styleObjectsSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type xmlFiles(xmlFilesSEXP);
+    __result = Rcpp::wrap(loadworksheets(wb, styleObjects, xmlFiles));
     return __result;
 END_RCPP
 }

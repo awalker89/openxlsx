@@ -282,6 +282,8 @@ getAttrs <- function(xml, tag){
   
   names = lapply(a, function(xml) regmatches(xml, regexpr('[a-zA-Z]+(?=\\=".*?")', xml, perl = TRUE)))
   vals =  lapply(a, function(xml) regmatches(xml, regexpr('(?<=").*?(?=")', xml, perl = TRUE)))
+  vals <- lapply(vals, function(x) {Encoding(x) <- "UTF-8"; x})
+  
   names(vals) <- names
   return(vals)
   
@@ -292,7 +294,7 @@ buildFontList <- function(fonts){
   
   sz <- getAttrs(fonts, "<sz ")
   colour <- getAttrs(fonts, "<color ")
-  name <- getAttrs(fonts, "<name ")
+  name <- getAttrs(fonts, tag = "<name ")
   family <- getAttrs(fonts, "<family ")
   scheme <- getAttrs(fonts, "<scheme ")
   

@@ -71,12 +71,14 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   styles <<- genBaseStyleSheet()
   workbook <<- genBaseWorkbook()
   sheetData <<- list()
+  
   rowHeights <<- list()
+  colWidths <<- list()
   
   styleObjects <<- list()
   styleInds <<- list()
   
-  colWidths <<- list()
+
   dataCount <<- list()
   freezePane <<- list()
   tables <<- NULL
@@ -1278,10 +1280,9 @@ Workbook$methods(setColWidths = function(sheet){
 
   sheet = validateSheet(sheet)
   
-  widths <- unlist(lapply(colWidths[[sheet]], "[[", "width"))
-  cols <- unlist(lapply(colWidths[[sheet]], "[[", "col"))
-  names(widths) <- cols
-  
+  widths <- colWidths[[sheet]]
+  cols <- names(colWidths[[sheet]])
+
   autoColsInds <- widths %in% c("auto", "auto2")
   autoCols <- cols[autoColsInds]
   
@@ -1448,7 +1449,10 @@ Workbook$methods(setRowHeights = function(sheet, rows, heights){
   if(any(flag))
     rowHeights[[sheet]] <<- rowHeights[[sheet]][!flag]
   
-  allRowHeights <- c(rowHeights[[sheet]], heights)
+  nms <- c(names(rowHeights[[sheet]]), rows)
+  allRowHeights <- unlist(c(rowHeights[[sheet]], heights))
+  names(allRowHeights) <- nms
+  
   allRowHeights <- allRowHeights[order(as.integer(names(allRowHeights)))]
   
   rowHeights[[sheet]] <<- allRowHeights
@@ -2176,8 +2180,8 @@ Workbook$methods(show = function(){
       
       
       if(length(colWidths[[i]]) > 0){
-        cols <- lapply(colWidths[[i]], "[[", "col")
-        widths <- lapply(colWidths[[i]], "[[", "width")
+        cols <- names(colWidths[[i]])
+        widths <- unname(colWidths[[i]])
         
         widths[widths != "auto"] <- as.numeric(widths[widths != "auto"])
         tmpTxt <- append(tmpTxt, c("\n\tCustom column widths (column: width)\n\t ",
