@@ -3077,9 +3077,10 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       // get names of cells
       
-      cells.attr("names") = r_nms;
-      sheetData[i] = cells;
-      
+      if(ocs > 0){
+        cells.attr("names") = r_nms;
+        sheetData[i] = cells;
+      }
 
       // count number of rows
       int row_ocs = 0;

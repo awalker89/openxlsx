@@ -72,7 +72,7 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
   vbaProject        <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
   ## remove all except media and charts
-  on.exit(expr = unlink(xmlFiles[!grepl("charts|media", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  # on.exit(expr = unlink(xmlFiles[!grepl("charts|media", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
   
   nSheets <- length(worksheetsXML)
   
@@ -846,7 +846,7 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
       if(hasDrawing[i]){
         
         target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-        target <- paste0("drawing/", basename(gsub('"$', "", target)))
+        target <- basename(gsub('"$', "", target))
         
         ## sheet_i has which(hasDrawing)[[i]]
         relsInd <- grepl(target, drawingRelsXML)

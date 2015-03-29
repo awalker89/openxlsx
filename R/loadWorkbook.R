@@ -641,7 +641,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       if(hasDrawing[i]){
         
         target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-        target <- paste0("drawing/", basename(gsub('"$', "", target)))
+        target <- basename(gsub('"$', "", target))
         
         ## sheet_i has which(hasDrawing)[[i]]
         relsInd <- grepl(target, drawingRelsXML)
