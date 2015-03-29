@@ -57,6 +57,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   extLinksXML       <- xmlFiles[grepl("externalLink[0-9]+.xml$", xmlFiles, perl = TRUE)]
   extLinksRelsXML   <- xmlFiles[grepl("externalLink[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   
+  
   # pivot tables
   pivotTableXML     <- xmlFiles[grepl("pivotTable[0-9]+.xml$", xmlFiles, perl = TRUE)]
   pivotTableRelsXML <- xmlFiles[grepl("pivotTable[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
@@ -71,6 +72,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ## VBA Macro
   vbaProject        <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
+  ## remove all except media and charts
+  on.exit(expr = unlink(xmlFiles[!grepl("charts|media", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
   
   nSheets <- length(worksheetsXML)
   
@@ -454,6 +457,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   worksheetsXML <- file.path(dirname(worksheetsXML), sprintf("sheet%s.xml", sheetrId))
   wb <- .Call("openxlsx_loadworksheets", wb, styleObjects, worksheetsXML)
   
+
   ## Fix styleobject encoding
   if(length(wb$styleObjects) > 0){
     style_names <- sapply(wb$styleObjects, "[[", "sheet")
