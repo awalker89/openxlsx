@@ -8,7 +8,6 @@ using namespace Rcpp;
 using namespace std;
 
 
-
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
@@ -2618,16 +2617,13 @@ List getCellInfo(std::string xmlFile,
         }else{
           
           // find <v> tag and </v> end tag
-          pos = cell.find(vtag, endPos+1);
-          if(pos != std::string::npos){
-            endPos = cell.find(vtagEnd, pos + 3);
-            v[i] = cell.substr(pos + 3, endPos - pos - 3).c_str();
-          }else{
-            pos = cell.find(vtag2, endPos + 1);
-            pos = cell.find(">", pos + 1);
-            endPos = cell.find(vtagEnd, pos + 3);
-            v[i] = cell.substr(pos + 1, endPos - pos - 3).c_str();
+          endPos = cell.find(vtagEnd, 0);
+          if(endPos != std::string::npos){
+            pos = cell.find("<v", 0);
+            pos = cell.find(">", pos);
+            v[i] = cell.substr(pos + 1, endPos - pos - 1);
           }
+          
           
           // possible values for t are n, s, shared, b, str, e 
           
@@ -3037,13 +3033,14 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           
           
           // find <v> tag and </v> end tag
-          pos = cell.find("<v>", endPos+1);
-          if(pos != std::string::npos){
-            endPos = cell.find("</v>", pos + 3);
-            v[j] = cell.substr(pos + 3, endPos - pos - 3);
+          endPos = cell.find("</v>", 0);
+          if(endPos != std::string::npos){
+            pos = cell.find("<v", 0);
+            pos = cell.find(">", pos);
+            v[j] = cell.substr(pos + 1, endPos - pos - 1);
             has_v = true;
           }
-          
+
           // get<f>
           pos = cell.find("<f", 0);
           if(pos != std::string::npos){
