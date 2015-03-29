@@ -2983,12 +2983,10 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       }
        
       CharacterVector r(ocs);
-      CharacterVector t(ocs);
+      CharacterVector r_nms(ocs);
       CharacterVector v(ocs);
       CharacterVector s(ocs);
-      CharacterVector f(ocs);
       
-      std::fill(t.begin(), t.end(), "n");
       std::fill(v.begin(), v.end(), NA_STRING);
       std::fill(s.begin(), s.end(), NA_STRING);
       
@@ -2996,12 +2994,21 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       int j = 0;
       size_t nextPos = 3;
       pos = xml.find("<c ", 0);
+      bool has_v = false;
+      bool has_f = false;
+      List cells(ocs); // sheetData
+      std::string func;
+      std::string type;
       
       // PULL OUT CELL AND ATTRIBUTES
       while(j < ocs){
         
         if(pos != std::string::npos){
-          
+        
+          has_v = false;
+          has_f = false;
+          type = "n";
+            
           nextPos = xml.find("<c ", pos + 9);
           cell = xml.substr(pos, nextPos - pos);
 
@@ -3010,19 +3017,22 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           endPos = cell.find(tagEnd, pos + 3);  // find next "
           r[j] = cell.substr(pos + 3, endPos - pos - 3).c_str();
           
+          buf = cell.substr(pos + 3, endPos - pos - 3);      
+          buf.erase(std::remove_if(buf.begin(), buf.end(), ::isalpha), buf.end());
+          r_nms[j] = buf;
           
           // Pull out style
           pos = cell.find(" s=", 0);  // find s="
           if(pos != std::string::npos){
             endPos = cell.find(tagEnd, pos + 4);  // find next "
-            s[j] = cell.substr(pos + 4, endPos - pos - 4).c_str();
+            s[j] = cell.substr(pos + 4, endPos - pos - 4);
           }
           
           // Pull out type
           pos = cell.find(" t=", 0);  // find t="
           if(pos != std::string::npos){
             endPos = cell.find(tagEnd, pos + 4);  // find next "
-            t[j] = cell.substr(pos + 4, endPos - pos - 4).c_str();
+            type = cell.substr(pos + 4, endPos - pos - 4);
           }
           
           
@@ -3030,25 +3040,34 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           pos = cell.find("<v>", endPos+1);
           if(pos != std::string::npos){
             endPos = cell.find("</v>", pos + 3);
-            v[j] = cell.substr(pos + 3, endPos - pos - 3).c_str();
-          
-          }else{
-            t[j] = NA_STRING;
+            v[j] = cell.substr(pos + 3, endPos - pos - 3);
+            has_v = true;
           }
           
           // get<f>
           pos = cell.find("<f", 0);
-          if(pos == std::string::npos){
-            f[j] = NA_STRING;
-          }else{
+          if(pos != std::string::npos){
             endPos = cell.find("</f>", pos + 3);
             if(endPos == std::string::npos){
               endPos = cell.find("/>", pos + 3);
-              f[j] = cell.substr(pos, endPos - pos + 2).c_str();
+              func = cell.substr(pos, endPos - pos + 2);
             }else{
-              f[j] = cell.substr(pos, endPos - pos + 4).c_str();
+              func = cell.substr(pos, endPos - pos + 4);
             }
+            has_f = true;
           }
+          
+          if(has_f & !has_v){
+            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
+          }else if(has_f){
+            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
+          }else if(has_v){
+            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = NA_STRING); 
+          }else{ //only have s and r
+            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = NA_STRING);
+          }
+          
+          
           
           j++; // INCREMENT OVER OCCURENCES
           pos = nextPos;
@@ -3056,7 +3075,12 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         }  // end of while loop over occurences
       }  // END OF CELL AND ATTRIBUTION GATHERING
       
+      // get names of cells
       
+      cells.attr("names") = r_nms;
+      sheetData[i] = cells;
+      
+
       // count number of rows
       int row_ocs = 0;
       start = 0;
@@ -3113,8 +3137,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         heights.attr("names") = rowNumbers;
         rowHeights[i] = heights;
       }
-      
-      sheetData[i] = buildLoadCellList(r, t, v, f);
       
       // styleObjects
       std::string this_sheetname = as<std::string>(sheetNames[i]);
@@ -3186,6 +3208,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   
   
 }
+
 
 
 
