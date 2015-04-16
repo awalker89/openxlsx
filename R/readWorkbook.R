@@ -142,6 +142,13 @@ read.xlsx.default <- function(xlsxFile,
   }
   
   
+  if("character" %in% class(startRow)){
+    startRowStr <- startRow
+    startRow <- 1
+  }else{
+    startRowStr <- NULL
+  }
+  
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,
@@ -151,6 +158,9 @@ read.xlsx.default <- function(xlsxFile,
                      rows = rows,
                      getDates = detectDates,
                      PACKAGE = "openxlsx")
+  
+  
+  
   
   nRows <- cell_info$nRows
   r <- cell_info$r
@@ -175,7 +185,7 @@ read.xlsx.default <- function(xlsxFile,
       return(NULL)
     }
     v <- v[flag]
-
+    
     if(detectDates)
       cell_info$s <- cell_info$s[flag]
     
@@ -185,6 +195,21 @@ read.xlsx.default <- function(xlsxFile,
     nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
   }
   
+  
+  if(!is.null(startRowStr)){
+    ind <- which(grepl(startRowStr, v, ignore.case = TRUE))
+    if(length(ind) > 0){
+      startRow <- as.numeric(gsub("[A-Z]", "", r[ind[[1]]]))
+      toKeep <- grep(sprintf("[A-Z]%s$", startRow), r)[[1]]
+      if(toKeep > 1){
+        toRemove <- 1:(toKeep-1)
+        string_refs <- string_refs[!string_refs %in% r[toRemove]]
+        v <- v[-toRemove]
+        r <- r[-toRemove]
+        nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
+      }
+    }
+  }
   
   
   ## Determine date cells (if required)
@@ -235,8 +260,8 @@ read.xlsx.default <- function(xlsxFile,
   
   
   ## Build data.frame
- m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
-
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
+  
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL
@@ -331,7 +356,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     t <- t[rows >= startRow]
     rm(rows)
   }
-
+  
   if(length(r) == 0){
     warning("No data found on worksheet.")
     return(NULL)
@@ -385,7 +410,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     
     rm(bool_refs)
   }
- 
+  
   
   ## If any t="str" exist, add v to sharedStrings and replace v with newSharedStringsInd
   wsStrInds <- which(t == "str")
@@ -419,15 +444,15 @@ read.xlsx.Workbook <- function(xlsxFile,
     
     ## Match references of "e" cells to r and set v values to NA
     inds <- na.omit(match(r[wsStrInds], r))
-#     
-#     inds1 <- which(v[inds] == "#NUM!")
-#     if(length(inds1) > 0){
-#       v[inds[inds1]] <- NaN
-#       inds <- inds[-inds1]
-#     }
-#     
-#     if(length(inds) > 0)
-      v[inds] <- NA
+    #     
+    #     inds1 <- which(v[inds] == "#NUM!")
+    #     if(length(inds1) > 0){
+    #       v[inds[inds1]] <- NaN
+    #       inds <- inds[-inds1]
+    #     }
+    #     
+    #     if(length(inds) > 0)
+    v[inds] <- NA
     
   }
   
