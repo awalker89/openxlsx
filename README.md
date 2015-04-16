@@ -48,7 +48,7 @@ Development version can be installed via GitHub once Rtools (Windows only) has b
 ```R
 install.packages(c("Rcpp", "devtools"), dependencies=TRUE)
 require(devtools)
-install_github("openxlsx", "awalker89")
+install_github("awalker89/openxlsx")
 ```
 
 
