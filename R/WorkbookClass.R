@@ -1482,6 +1482,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove sheet from sheetOrder
   # Remove styleInds element
   # Remove queryTable references from workbook$definedNames to worksheet
+  # remove tables
   
   sheet <- validateSheet(sheet)
   sheetNames <- names(worksheets)
@@ -1536,13 +1537,20 @@ Workbook$methods(deleteWorksheet = function(sheet){
   if(any(removeRels))
     workbook.xml.rels <<- workbook.xml.rels[!grepl(sprintf("(slicerCache%s\\.xml)", sheet), workbook.xml.rels)]
   
-  
-  
-  
-  
-  ## wont't remove tables and then won't need to reassign table r:id's
+  ## wont't remove tables and then won't need to reassign table r:id's but will rename them!
   worksheets[[sheet]] <<- NULL
   worksheets_rels[[sheet]] <<- NULL
+  
+  if(length(tables) > 0){
+    tableSheets <- attr(tables, "sheet")
+    inds <- tableSheets %in% sheet
+    if(any(inds)){
+      tableNames <- attr(tables, "tableName")
+      tableNames[inds] <- paste0(tableNames[inds], "_openxlsx_deleted")
+      attr(tables, "tableName") <<- tableNames
+    }
+  }
+  
   
   ## drawing will always be the first relationship and printerSettings second
   if(nSheets > 1){
