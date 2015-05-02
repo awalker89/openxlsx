@@ -420,7 +420,7 @@ buildBorder <- function(x){
   colNodes <- unlist(sapply(x, function(xml) .Call("openxlsx_getChildlessNode", xml, "<color", PACKAGE = "openxlsx"), USE.NAMES = FALSE))
   
   if(length(colNodes) > 0){
-    attrs <- regmatches(colNodes, regexpr('(theme|indexed|rgb)=".+"', colNodes))
+    attrs <- regmatches(colNodes, regexpr('(theme|indexed|rgb|auto)=".+"', colNodes))
   }else{
     attrs <- NULL
   }
