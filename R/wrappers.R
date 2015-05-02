@@ -1789,9 +1789,10 @@ convertToDateTime <- function(x, origin = "1900-01-01"){
   y <- format(strptime(y, "%H:%M:%S"), "%H:%M:%S") 
   
   notNA <- !is.na(x)
-  dateTime <- .POSIXct(character(length(x)))
+  dateTime = rep(NA, length(x))
   dateTime[notNA] <- as.POSIXct(paste(date[notNA], y[notNA]))
-  
+  dateTime = .POSIXct(dateTime)
+
   return(dateTime)
 }
 
