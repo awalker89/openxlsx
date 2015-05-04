@@ -93,9 +93,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     sheetrId <- sheetrId - min(sheetrId) + 1L
 
     sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
-    
+
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
-    sheetNames <- replaceXMLEntities(sheetNames)
+
     
     ## add worksheets to wb
     invisible(lapply(sheetNames, function(sheetName) wb$addWorksheet(sheetName)))

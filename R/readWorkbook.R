@@ -166,7 +166,7 @@ read.xlsx.default <- function(xlsxFile,
   r <- cell_info$r
   
   if(nRows == 0 | length(r) == 0){
-    warning("No data found on worksheet.")
+    warning("No data found on worksheet.", call. = FALSE)
     return(NULL)
   }
   
@@ -181,7 +181,7 @@ read.xlsx.default <- function(xlsxFile,
     flag <- which(convertFromExcelRef(r) %in% cols)
     r <- r[flag]
     if(length(r) == 0){
-      warning("No data found on worksheet.")
+      warning("No data found on worksheet.", call. = FALSE)
       return(NULL)
     }
     v <- v[flag]
@@ -358,7 +358,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   }
   
   if(length(r) == 0){
-    warning("No data found on worksheet.")
+    warning("No data found on worksheet.", call. = FALSE)
     return(NULL)
   }
   
@@ -371,7 +371,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   }
   
   if(is.null(r)){
-    warning("No data found on worksheet.")
+    warning("No data found on worksheet.", call. = FALSE)
     return(NULL)
   }else{
     nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")

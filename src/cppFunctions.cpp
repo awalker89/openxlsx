@@ -1259,15 +1259,6 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
         }else{
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
-      }else if(attrs[3]){
-       
-       // Have a formula but no cell type (formula entered with writeData)
-       // If formula contains amp; or CONCAT it's type 'str' else it will be type 'n' (leave blank)
-       
-       
-       
-       
-        cellXML += "\">" + cVal[3] + "</c>";
       }else{
         cellXML += "\"/>";
       }

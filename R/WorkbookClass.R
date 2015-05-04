@@ -78,7 +78,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   styleObjects <<- list()
   styleInds <<- list()
   
-
+  
   dataCount <<- list()
   freezePane <<- list()
   tables <<- NULL
@@ -280,7 +280,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## slicers
   if(nSlicers > 0){
-
+    
     slicersDir <- file.path(tmpDir, "xl", "slicers")
     dir.create(path = slicersDir, recursive = TRUE)
     
@@ -557,7 +557,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nRows <- nrow(df)  
   
   allColClasses <- unlist(colClasses)  
-
+  
   ## pull out NaN values
   nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
   
@@ -618,7 +618,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-
+  
   ## cell values
   v <- as.character(t(as.matrix(df)))
   
@@ -636,7 +636,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     t[nans] <- "e"
     v[nans] <- "#NUM!"
   }
-    
+  
   
   #prepend column headers 
   if(colNames){
@@ -1068,7 +1068,7 @@ Workbook$methods(createBorderNode = function(style){
 Workbook$methods(createFillNode = function(style, patternType = "solid"){
   
   fill <- style$fill
-
+  
   ## gradientFill
   if(any(grepl("gradientFill", fill))){
     
@@ -1138,7 +1138,7 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
       workbook$definedNames[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
     
   }
-
+  
 })
 
 
@@ -1277,12 +1277,12 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
 
 
 Workbook$methods(setColWidths = function(sheet){
-
+  
   sheet = validateSheet(sheet)
   
   widths <- colWidths[[sheet]]
   cols <- names(colWidths[[sheet]])
-
+  
   autoColsInds <- widths %in% c("auto", "auto2")
   autoCols <- cols[autoColsInds]
   
@@ -1292,7 +1292,7 @@ Workbook$methods(setColWidths = function(sheet){
   
   ## If any auto
   if(length(autoCols) > 0){
-
+    
     ## only run if data on worksheet
     if(length(sheetData[[sheet]]) == 0 ){
       
@@ -1522,7 +1522,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
     ## remove reference to this file from the workbook.xml.rels
     fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))
     toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")    
-
+    
     fileNo <- which(grepl(toRemove, pivotTables.xml.rels))
     toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")
     
@@ -1975,9 +1975,10 @@ Workbook$methods(preSaveCleanUp = function(){
     newId <- match(belongTo, sheetNames) - 1L
     oldId <- as.numeric(regmatches(workbook$definedNames, regexpr('(?<= localSheetId=")[0-9]+', workbook$definedNames, perl = TRUE)))
     
-    for(i in 1:length(workbook$definedNames))
-      workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
-    
+    for(i in 1:length(workbook$definedNames)){
+      if(!is.na(newId[i]))
+        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
+    }
   }
   
   

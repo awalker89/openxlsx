@@ -89,11 +89,11 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
     ## sheet rId links to the worksheets/sheet(rId).xml file
     
     sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+    sheetrId <- sheetrId - min(sheetrId) + 1L
     sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
     
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
-    sheetNames <- replaceXMLEntities(sheetNames)
-    
+
     ## add worksheets to wb
     invisible(lapply(sheetNames, function(sheetName) wb$addWorksheet(sheetName)))
     
@@ -650,6 +650,7 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
       
       ## write style coords to styleObjects (will be in order)
       sx <- s[[i]]
+      sx[sx == "0"] <- NA
       if(any(!is.na(sx))){
         
         uStyleInds <- as.integer(unique(sx[!is.na(sx)]))
