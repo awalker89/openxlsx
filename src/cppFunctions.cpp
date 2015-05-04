@@ -1259,7 +1259,15 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
         }else{
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
-        
+      }else if(attrs[3]){
+       
+       // Have a formula but no cell type (formula entered with writeData)
+       // If formula contains amp; or CONCAT it's type 'str' else it will be type 'n' (leave blank)
+       
+       
+       
+       
+        cellXML += "\">" + cVal[3] + "</c>";
       }else{
         cellXML += "\"/>";
       }
@@ -1805,7 +1813,9 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
         }else{
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
-        
+      }else if(attrs[3]){
+        Rcout << "in here" << endl; 
+        cellXML += "\">" + cVal[3] + "</c>";
       }else{
         cellXML += "\"/>";
       }
@@ -3138,6 +3148,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       // styleObjects
       std::string this_sheetname = as<std::string>(sheetNames[i]);
+
       if(any(!is_na(s))){
         
         CharacterVector s_refs = r[!is_na(s)];
@@ -3154,28 +3165,33 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           
           List styleElement(4);
           int styleInd = atoi(as<std::string>(uStyleInds[j]).c_str());
-          uStyleInds_j[0] = uStyleInds[j];
-          LogicalVector ind = !is_na(match(s, uStyleInds_j));
-          CharacterVector s_refs_j = s_refs[ind];
           
-          int n_j = s_refs_j.size();
-          IntegerVector rows(n_j);
-          IntegerVector cols = RcppConvertFromExcelRef(s_refs_j);
+          if(styleInd != 0){
           
-          for(int k = 0; k < n_j; k++){
-            ref_j = s_refs_j[k];
-            ref_j.erase(std::remove_if(ref_j.begin(), ref_j.end(), ::isalpha), ref_j.end());
-            rows[k] = atoi(ref_j.c_str());  
+            uStyleInds_j[0] = uStyleInds[j];
+            LogicalVector ind = !is_na(match(s, uStyleInds_j));
+            CharacterVector s_refs_j = s_refs[ind];
+            
+            int n_j = s_refs_j.size();
+            IntegerVector rows(n_j);
+            IntegerVector cols = RcppConvertFromExcelRef(s_refs_j);
+            
+            for(int k = 0; k < n_j; k++){
+              ref_j = s_refs_j[k];
+              ref_j.erase(std::remove_if(ref_j.begin(), ref_j.end(), ::isalpha), ref_j.end());
+              rows[k] = atoi(ref_j.c_str());  
+            }
+            
+            styleElement[0] = styleObjects[styleInd - 1];
+            styleElement[1] = this_sheetname;
+            styleElement[2] = rows;
+            styleElement[3] = cols;
+            
+            styleElement.attr("names") = styleElementNames;
+            
+            wbstyleObjects.push_back(styleElement);
+          
           }
-          
-          styleElement[0] = styleObjects[styleInd - 1];
-          styleElement[1] = this_sheetname;
-          styleElement[2] = rows;
-          styleElement[3] = cols;
-          
-          styleElement.attr("names") = styleElementNames;
-          
-          wbstyleObjects.push_back(styleElement);
           
         }
         

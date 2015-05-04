@@ -90,6 +90,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     ## sheet rId links to the worksheets/sheet(rId).xml file
     
     sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+    sheetrId <- sheetrId - min(sheetrId) + 1L
+
     sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
     
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
@@ -457,7 +459,6 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   worksheetsXML <- file.path(dirname(worksheetsXML), sprintf("sheet%s.xml", sheetrId))
   wb <- .Call("openxlsx_loadworksheets", wb, styleObjects, worksheetsXML)
   
-
   ## Fix styleobject encoding
   if(length(wb$styleObjects) > 0){
     style_names <- sapply(wb$styleObjects, "[[", "sheet")
