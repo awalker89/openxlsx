@@ -34,7 +34,7 @@
 #' 
 openXL <- function(file = NULL){
   
-  if (is.null(file)) stop("a file have to be specified")
+  if (is.null(file)) stop("A file has to be specified.")
   
   ## workbook handling
   if ("Workbook" == class(file)) {
@@ -66,7 +66,7 @@ openXL <- function(file = NULL){
     system(command = myCommand)
     
   } else {
-    warning("Operative system not handled.")
+    warning("Operating system not handled.")
   }
   
 }
@@ -83,7 +83,7 @@ chooseExcelApp <- function() {
   nApps <- length(availProg <- prog[ "" != prog])
   
   if (0 == nApps) {
-    stop("No application (detected) availables.\n",
+    stop("No applications (detected) available.\n",
          "Set options('openxlsx.excelApp'), instead." )
   } else if (1 == nApps) {
     cat("Only", names(availProg), "found; I'll use it.\n")
@@ -99,6 +99,6 @@ chooseExcelApp <- function() {
     if (res > 0L) options(openxlsx.excelApp = unnprog)
     invisible(unname(unnprog))
   } else {
-    stop("Unexpected error")
+    stop("Unexpected error.")
   }
 }
