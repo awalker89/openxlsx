@@ -95,44 +95,53 @@ read.xlsx.default <- function(xlsxFile,
       stop("startRow must have length 1.")
   }
   
-  
   ## create temp dir and unzip
   xmlDir <- file.path(tempdir(), "_excelXMLRead")
   xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
   
   on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
   
-  worksheets        <- xmlFiles[grepl("/worksheets/sheet[0-9]", xmlFiles, perl = TRUE)]
   sharedStringsFile <- xmlFiles[grepl("sharedStrings.xml$", xmlFiles, perl = TRUE)]
   workbook          <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
-  
-  nSheets <- length(worksheets)
-  if(nSheets == 0)
-    stop("Workbook has no worksheets")
+  workbookRelsXML   <- xmlFiles[grepl("workbook.xml.rels$", xmlFiles, perl = TRUE)]
   
   ## get workbook names
+  workbookRelsXML <- paste(readLines(workbookRelsXML, warn = FALSE, encoding = "UTF-8"), collapse = "")
+  workbookRelsXML <- .Call("openxlsx_getChildlessNode", workbookRelsXML, "<Relationship ", PACKAGE="openxlsx")
+  
+  
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
   
   ## make sure sheetId is 1 based
   sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
-  sheetrId <- sheetrId - min(sheetrId) + 1L
-  
   sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
   
+  nSheets <- length(sheetrId)
+  if(nSheets == 0)
+    stop("Workbook has no worksheets")
+  
+  ## get the file_name for each sheetrId
+  file_name <- sapply(sheetrId, function(rId){
+    txt <- workbookRelsXML[grepl(sprintf('Id="rId%s"', rId), workbookRelsXML)]
+    regmatches(txt, regexpr('(?<=Target=").+xml', txt, perl = TRUE))
+  })
+  
+
   ## get the correct sheets
   if("character" %in% class(sheet)){
     sheetInd <- which(sheetNames == sheet)
     if(length(sheetInd) == 0)
       stop(sprintf('Cannot find sheet named "%s"', sheet))
-    sheet <- sheetrId[sheetInd]
+    sheet <- file_name[sheetInd]
   }else{
     if(nSheets < sheet)
       stop(sprintf("sheet %s does not exist.", sheet))
-    sheet <- sheetrId[sheet]
+    sheet <- file_name[sheet]
   }
   
-  worksheet <- worksheets[order(nchar(worksheets), worksheets)][[sheet]]
+  ## get file
+  worksheet <- xmlFiles[grepl(sheet, xmlFiles, ignore.case = TRUE)]
   
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){
