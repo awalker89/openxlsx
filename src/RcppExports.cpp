@@ -5,6 +5,17 @@
 
 using namespace Rcpp;
 
+// RcppConvertFromExcelRef2
+IntegerVector RcppConvertFromExcelRef2(std::vector<std::string>& r);
+RcppExport SEXP openxlsx_RcppConvertFromExcelRef2(SEXP rSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type r(rSEXP);
+    __result = Rcpp::wrap(RcppConvertFromExcelRef2(r));
+    return __result;
+END_RCPP
+}
 // RcppConvertFromExcelRef
 IntegerVector RcppConvertFromExcelRef(CharacterVector x);
 RcppExport SEXP openxlsx_RcppConvertFromExcelRef(SEXP xSEXP) {
@@ -263,19 +274,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// ExcelConvertExpand
-SEXP ExcelConvertExpand(IntegerVector cols, std::vector<std::string> LETTERS, std::vector<std::string> rows);
-RcppExport SEXP openxlsx_ExcelConvertExpand(SEXP colsSEXP, SEXP LETTERSSEXP, SEXP rowsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< IntegerVector >::type cols(colsSEXP);
-    Rcpp::traits::input_parameter< std::vector<std::string> >::type LETTERS(LETTERSSEXP);
-    Rcpp::traits::input_parameter< std::vector<std::string> >::type rows(rowsSEXP);
-    __result = Rcpp::wrap(ExcelConvertExpand(cols, LETTERS, rows));
-    return __result;
-END_RCPP
-}
 // buildMatrixNumeric
 SEXP buildMatrixNumeric(CharacterVector v, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols);
 RcppExport SEXP openxlsx_buildMatrixNumeric(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP) {
@@ -319,6 +317,17 @@ BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< IntegerVector >::type indices(indicesSEXP);
     __result = Rcpp::wrap(matrixRowInds(indices));
+    return __result;
+END_RCPP
+}
+// matrixRowInds2
+std::vector<int> matrixRowInds2(std::vector<int>& x);
+RcppExport SEXP openxlsx_matrixRowInds2(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::vector<int>& >::type x(xSEXP);
+    __result = Rcpp::wrap(matrixRowInds2(x));
     return __result;
 END_RCPP
 }
@@ -589,15 +598,63 @@ BEGIN_RCPP
 END_RCPP
 }
 // loadworksheets
-SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles);
-RcppExport SEXP openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP) {
+SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet);
+RcppExport SEXP openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP, SEXP is_chart_sheetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< Reference >::type wb(wbSEXP);
     Rcpp::traits::input_parameter< List >::type styleObjects(styleObjectsSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type xmlFiles(xmlFilesSEXP);
-    __result = Rcpp::wrap(loadworksheets(wb, styleObjects, xmlFiles));
+    Rcpp::traits::input_parameter< LogicalVector >::type is_chart_sheet(is_chart_sheetSEXP);
+    __result = Rcpp::wrap(loadworksheets(wb, styleObjects, xmlFiles, is_chart_sheet));
+    return __result;
+END_RCPP
+}
+// ExcelConvertExpand
+SEXP ExcelConvertExpand(const std::vector<int>& cols, const std::vector<std::string>& LETTERS, const std::vector<std::string>& rows);
+RcppExport SEXP openxlsx_ExcelConvertExpand(SEXP colsSEXP, SEXP LETTERSSEXP, SEXP rowsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type cols(colsSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::string>& >::type LETTERS(LETTERSSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::string>& >::type rows(rowsSEXP);
+    __result = Rcpp::wrap(ExcelConvertExpand(cols, LETTERS, rows));
+    return __result;
+END_RCPP
+}
+// buildMatrixNumeric2
+List buildMatrixNumeric2(std::vector<std::string> v, const std::vector<int>& rowInd, IntegerVector& colInd, int nRows, int nCols);
+RcppExport SEXP openxlsx_buildMatrixNumeric2(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP nRowsSEXP, SEXP nColsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
+    Rcpp::traits::input_parameter< int >::type nCols(nColsSEXP);
+    __result = Rcpp::wrap(buildMatrixNumeric2(v, rowInd, colInd, nRows, nCols));
+    return __result;
+END_RCPP
+}
+// readWorkbook2
+SEXP readWorkbook2(std::vector<std::string>& v, std::vector<std::string>& r, std::vector<std::string>& string_refs, std::vector<bool>& is_date, int nRows, bool hasColNames, bool skipEmptyRows, int originAdj, Function clean_names);
+RcppExport SEXP openxlsx_readWorkbook2(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP originAdjSEXP, SEXP clean_namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type r(rSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type string_refs(string_refsSEXP);
+    Rcpp::traits::input_parameter< std::vector<bool>& >::type is_date(is_dateSEXP);
+    Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
+    Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP);
+    Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
+    Rcpp::traits::input_parameter< int >::type originAdj(originAdjSEXP);
+    Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
+    __result = Rcpp::wrap(readWorkbook2(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names));
     return __result;
 END_RCPP
 }

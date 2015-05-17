@@ -9,6 +9,41 @@ using namespace std;
 
 
 // [[Rcpp::export]]
+IntegerVector RcppConvertFromExcelRef2( std::vector<std::string>& r ){
+  
+  // This function converts the Excel column letter to an integer
+  int n = r.size();
+  int k;
+  
+  std::string a;
+  IntegerVector colNums(n);
+  char A = 'A';
+  int aVal = (int)A - 1;
+  
+  for(int i = 0; i < n; i++){
+    a = r[i];
+    
+    // remove digits from string
+    a.erase(std::remove_if(a.begin()+1, a.end(), ::isdigit), a.end());
+    
+    int sum = 0;
+    k = a.length();
+    
+    for (int j = 0; j < k; j++){
+      sum *= 26;
+      sum += (a[j] - aVal);
+      
+    }
+    colNums[i] = sum;
+  }
+  
+  return colNums;
+  
+}
+
+
+
+// [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef( CharacterVector x ){
   
   // This function converts the Excel column letter to an integer
@@ -801,36 +836,36 @@ SEXP buildLoadCellList( CharacterVector r, CharacterVector t, CharacterVector v,
     
     //If we have a function    
     if(hasF[i] & !hasV[i]){
-    
-    cells[i] = CharacterVector::create(
-      Named("r") = r[i],
-      Named("t") = NA_STRING,
-      Named("v") = NA_STRING,
-      Named("f") = f[i]); 
+      
+      cells[i] = CharacterVector::create(
+        Named("r") = r[i],
+                      Named("t") = NA_STRING,
+                      Named("v") = NA_STRING,
+                      Named("f") = f[i]); 
       
     }else if(hasF[i]){
       
       cells[i] = CharacterVector::create(
         Named("r") = r[i],
-        Named("t") = t[i],
-        Named("v") = v[i],
-        Named("f") = f[i]); 
+                      Named("t") = t[i],
+                                    Named("v") = v[i],
+                                                  Named("f") = f[i]); 
       
       
     }else if(hasV[i]){
       
       cells[i] = CharacterVector::create(
         Named("r") = r[i],
-        Named("t") = t[i],
-        Named("v") = v[i],
-        Named("f") = NA_STRING); 
+                      Named("t") = t[i],
+                                    Named("v") = v[i],
+                                                  Named("f") = NA_STRING); 
       
     }else{ //only have s and r
       cells[i] = CharacterVector::create(
         Named("r") = r[i],
-        Named("t") = NA_STRING,
-        Named("v") = NA_STRING,
-        Named("f") = NA_STRING);
+                      Named("t") = NA_STRING,
+                      Named("v") = NA_STRING,
+                      Named("f") = NA_STRING);
     }
   } // end of for loop
   
@@ -919,43 +954,6 @@ SEXP convert2ExcelRef(IntegerVector cols, std::vector<std::string> LETTERS){
 }
 
 
-// [[Rcpp::export]]
-SEXP ExcelConvertExpand(IntegerVector cols, std::vector<std::string> LETTERS, std::vector<std::string> rows){
-  
-  int n = cols.size();  
-  int nRows = rows.size();
-  std::vector<std::string> res(n);
-  
-  //Convert col number to excel col letters
-  size_t x;
-  size_t modulo;
-  for(int i = 0; i < n; i++){
-    x = cols[i];
-    string columnName;
-    
-    while(x > 0){  
-      modulo = (x - 1) % 26;
-      columnName = LETTERS[modulo] + columnName;
-      x = (x - modulo) / 26;
-    }
-    res[i] = columnName;
-  }
-  
-  CharacterVector r(n*nRows);
-  CharacterVector names(n*nRows);
-  size_t c = 0;
-  for(int i=0; i < nRows; i++)
-    for(int j=0; j < n; j++){
-      r[c] = res[j] + rows[i];
-      names[c] = rows[i];
-      c++;
-    }
-    
-    r.attr("names") = names;
-  return wrap(r) ;
-  
-}
-
 
 // [[Rcpp::export]]
 SEXP buildMatrixNumeric(CharacterVector v, IntegerVector rowInd, IntegerVector colInd,
@@ -986,6 +984,8 @@ SEXP buildMatrixNumeric(CharacterVector v, IntegerVector rowInd, IntegerVector c
   
   
 }
+
+
 
 
 // [[Rcpp::export]]
@@ -1138,6 +1138,28 @@ IntegerVector matrixRowInds(IntegerVector indices) {
   return wrap(res);
   
 }
+
+
+// [[Rcpp::export]]
+std::vector<int> matrixRowInds2(std::vector<int>& x) {
+  
+  int n = x.size();
+  std::vector<int> v(n);
+  v[0] = 0;
+  
+  int c = 0;
+  for(int i = 1; i < n; ++i){
+    if(x[i] != x[i-1])
+      ++c;
+    v[i] = c;
+  }
+  
+  return v;
+  
+}
+
+
+
 
 
 // [[Rcpp::export]]
@@ -1805,7 +1827,6 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
       }else if(attrs[3]){
-        Rcout << "in here" << endl; 
         cellXML += "\">" + cVal[3] + "</c>";
       }else{
         cellXML += "\"/>";
@@ -2333,10 +2354,9 @@ SEXP readWorkbook(CharacterVector v,
   
   // getRow numbers from r 
   IntegerVector rowNumbers(nCells);  
-  IntegerVector uRows;
   if(nCells == nRows*nCols){
     
-    uRows = seq(0, nRows-1);
+    IntegerVector uRows = seq(0, nRows-1);
     rowNumbers = rep_each(uRows, nCols); 
     
   }else{
@@ -2354,7 +2374,6 @@ SEXP readWorkbook(CharacterVector v,
       rowNumbers = rowNumbers - rowNumbers[0];
     }
     
-    uRows = unique(rowNumbers);
   }
   
   
@@ -2429,7 +2448,7 @@ List getCellInfo(std::string xmlFile,
   
   //read in file
   std::string buf;
-
+  
   // ifstream file;
   // file.open(xmlFile.c_str());
   // while (file >> buf)
@@ -2694,10 +2713,10 @@ List getCellInfo(std::string xmlFile,
 
 
 // [[Rcpp::export]]
-SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles){
+SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet){
   
   List worksheets = wb.field("worksheets");
-  int n_sheets = xmlFiles.size();
+  int n_sheets = is_chart_sheet.size();
   CharacterVector sheetNames = worksheets.attr("names");
   
   // variable set up
@@ -2714,489 +2733,505 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   // loop over each worksheet file
   for(int i = 0; i < n_sheets; i++){
     
-    colWidths[i] = List(0);
-    rowHeights[i] = List(0);
-    sheetData[i] = List(0);
-    List this_worksheet = worksheets[i];
-    
-    
-    //read in file
-    std::string xmlFile = xmlFiles[i];
-
-    std::string buf;
-    std::string xml = cppReadFile2(xmlFile);
-    // ifstream file;
-    // file.open(xmlFile.c_str());
-    // while (file >> buf)
-    // xml += buf + ' ';
-    
-    std::size_t pos = xml.find("<sheetData>");  // find sheetData
-    size_t endPos = 0;
-    size_t tmp_pos = 0;
-    
-    bool has_data = true;
-    if(pos == string::npos){
-      has_data = false;
-      pos = xml.find("<sheetData/>");
-    }
-    
-    /* --- Everything before pos --- */
-    std::string xml_pre = xml.substr(0, pos);
-    
-    // sheetPR
-    CharacterVector sheetPr = getNodes(xml_pre, "<sheetPr>");
-
-    if(sheetPr.size() == 0){
-      sheetPr = getNodes(xml_pre, "<sheetPr");
+    if(is_chart_sheet[i]){
       
-      for(int j = 0; j < sheetPr.size(); j++){
-        std::string sp = as<std::string>(sheetPr[j]);
-        char ch = *sp.rbegin();  
-        if(ch != '>')
-          sp += ">";
-        sheetPr[j] = sp;
-      }
-    }
-    
-    if(sheetPr.size() == 0)
-      sheetPr = getChildlessNode(xml_pre, "<sheetPr");
-
-    if(sheetPr.size() > 0)
-      this_worksheet["sheetPr"] = sheetPr;
-    
-    
-    
-    // Freeze Panes
-    CharacterVector pane = getChildlessNode(xml_pre, "<pane ");
-    if(pane.size() > 0){
-      freezePane[i] = pane;
-    }else{
+      colWidths[i] = List(0);
+      rowHeights[i] = List(0);
+      sheetData[i] = List(0);
       freezePane[i] = List(0);
-    }
-    
-    // SheetViews
-    CharacterVector sheetViews = getNodes(xml_pre, "<sheetViews>");
-    if(sheetViews.size() > 0)
-      this_worksheet["sheetViews"] = sheetViews;
-    
-    
-    //colwidths
-    std::vector<std::string> cols = getChildlessNode_ss(xml_pre, "<col ");
-    if(cols.size() > 0){
-      
-      NumericVector widths;
-      IntegerVector columns;
+      rowHeights[i] = List(0);
+      dataCount[i] = 0;
+      hyperLinks[i] = "";
       
       
-      for(size_t ci = 0; ci < cols.size(); ci++){
+    }else{
+      
+      
+      
+      colWidths[i] = List(0);
+      rowHeights[i] = List(0);
+      sheetData[i] = List(0);
+      List this_worksheet = worksheets[i];
+      
+      
+      //read in file
+      std::string xmlFile = xmlFiles[i];
+      
+      std::string buf;
+      std::string xml = cppReadFile2(xmlFile);
+      // ifstream file;
+      // file.open(xmlFile.c_str());
+      // while (file >> buf)
+      // xml += buf + ' ';
+      
+      std::size_t pos = xml.find("<sheetData>");  // find sheetData
+      size_t endPos = 0;
+      size_t tmp_pos = 0;
+      
+      bool has_data = true;
+      if(pos == string::npos){
+        has_data = false;
+        pos = xml.find("<sheetData/>");
+      }
+      
+      /* --- Everything before pos --- */
+      std::string xml_pre = xml.substr(0, pos);
+      
+      // sheetPR
+      CharacterVector sheetPr = getNodes(xml_pre, "<sheetPr>");
+      
+      if(sheetPr.size() == 0){
+        sheetPr = getNodes(xml_pre, "<sheetPr");
         
-        double tmp = 0;
-        int min_c = 0;
-        int max_c = 0;
-        buf = cols[ci];
-        if(buf.find("customWidth", 0) != string::npos){
+        for(int j = 0; j < sheetPr.size(); j++){
+          std::string sp = as<std::string>(sheetPr[j]);
+          char ch = *sp.rbegin();  
+          if(ch != '>')
+            sp += ">";
+          sheetPr[j] = sp;
+        }
+      }
+      
+      if(sheetPr.size() == 0)
+        sheetPr = getChildlessNode(xml_pre, "<sheetPr");
+      
+      if(sheetPr.size() > 0)
+        this_worksheet["sheetPr"] = sheetPr;
+      
+      
+      
+      // Freeze Panes
+      CharacterVector pane = getChildlessNode(xml_pre, "<pane ");
+      if(pane.size() > 0){
+        freezePane[i] = pane;
+      }else{
+        freezePane[i] = List(0);
+      }
+      
+      // SheetViews
+      CharacterVector sheetViews = getNodes(xml_pre, "<sheetViews>");
+      if(sheetViews.size() > 0)
+        this_worksheet["sheetViews"] = sheetViews;
+      
+      
+      //colwidths
+      std::vector<std::string> cols = getChildlessNode_ss(xml_pre, "<col ");
+      if(cols.size() > 0){
+        
+        NumericVector widths;
+        IntegerVector columns;
+        
+        
+        for(size_t ci = 0; ci < cols.size(); ci++){
           
-          tmp_pos = buf.find("min=\"", 0);
-          endPos = buf.find(tagEnd, tmp_pos + 5);
-          min_c = atoi(buf.substr(tmp_pos + 5, endPos - tmp_pos - 5).c_str());
-          
-          tmp_pos = buf.find("max=\"", 0);
-          endPos = buf.find(tagEnd, tmp_pos + 5);
-          max_c = atoi(buf.substr(tmp_pos + 5, endPos - tmp_pos - 5).c_str());
-          
-          tmp_pos = buf.find("width=\"", 0);
-          endPos = buf.find(tagEnd, tmp_pos + 7);
-          tmp = atof(buf.substr(tmp_pos + 7, endPos - tmp_pos - 7).c_str()) - 0.71;
-          
-          if(min_c != max_c){
-            while(min_c <= max_c){
+          double tmp = 0;
+          int min_c = 0;
+          int max_c = 0;
+          buf = cols[ci];
+          if(buf.find("customWidth", 0) != string::npos){
+            
+            tmp_pos = buf.find("min=\"", 0);
+            endPos = buf.find(tagEnd, tmp_pos + 5);
+            min_c = atoi(buf.substr(tmp_pos + 5, endPos - tmp_pos - 5).c_str());
+            
+            tmp_pos = buf.find("max=\"", 0);
+            endPos = buf.find(tagEnd, tmp_pos + 5);
+            max_c = atoi(buf.substr(tmp_pos + 5, endPos - tmp_pos - 5).c_str());
+            
+            tmp_pos = buf.find("width=\"", 0);
+            endPos = buf.find(tagEnd, tmp_pos + 7);
+            tmp = atof(buf.substr(tmp_pos + 7, endPos - tmp_pos - 7).c_str()) - 0.71;
+            
+            if(min_c != max_c){
+              while(min_c <= max_c){
+                widths.push_back(tmp);
+                columns.push_back(min_c);
+                min_c++;
+              }
+            }else{
               widths.push_back(tmp);
               columns.push_back(min_c);
-              min_c++;
             }
-          }else{
-            widths.push_back(tmp);
-            columns.push_back(min_c);
           }
-        }
-        
-      }
-      
-      if(widths.size() > 0){
-        CharacterVector tmp_widths(widths);
-        tmp_widths.attr("names") = columns;
-        colWidths[i] = tmp_widths;
-      }
-      
-    }
-    
-    
-    
-    
-    /* --- Everything after sheetData --- */
-    size_t pos_post = 0;
-    if(has_data){
-      pos_post = xml.find("</sheetData>");   
-    }else{
-      pos_post = pos; 
-    }
-    
-    std::string xml_post = xml.substr(pos_post);
-    
-    
-    CharacterVector autoFilter = getChildlessNode(xml_post, "<autoFilter ");
-    if(autoFilter.size() > 0)
-      this_worksheet["autoFilter"] = autoFilter;
-    
-    CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
-    if(hyperlinks.size() > 0){
-      hyperLinks[i] = getHyperlinkRefs(hyperlinks);
-    }else{
-      hyperLinks[i] = "";
-    }
-    
-    CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
-    if(pageMargins.size() > 0)
-      this_worksheet["pageMargins"] = pageMargins;
-    
-    
-    CharacterVector pageSetup = getChildlessNode(xml_post, "<pageSetup ");
-    if(pageSetup.size() > 0){
-      for(int j = 0; j < pageSetup.size(); j++){
-        
-        std::string pageSetup_tmp = as<std::string>(pageSetup[j]);
-        size_t ps_pos = pageSetup_tmp.find("r:id=\"rId", 0);
-        if(ps_pos != std::string::npos){
           
-          std::string pageSetup_tmp2 = pageSetup_tmp.substr(0, ps_pos + 9) + "2";
-          ps_pos = pageSetup_tmp.find("\"", ps_pos + 9);
-          pageSetup_tmp  = pageSetup_tmp2 + pageSetup_tmp.substr(ps_pos);
-
         }
         
-        pageSetup[j] = pageSetup_tmp;
+        if(widths.size() > 0){
+          CharacterVector tmp_widths(widths);
+          tmp_widths.attr("names") = columns;
+          colWidths[i] = tmp_widths;
+        }
         
       }
-      this_worksheet["pageSetup"] = pageSetup;
-    }
-    
-    
-    
-    CharacterVector mergeCells = getChildlessNode(xml_post, "<mergeCell ");
-    if(mergeCells.size() > 0)
-      this_worksheet["mergeCells"] = mergeCells;
-    
-    
-    CharacterVector drawingId = getChildlessNode(xml_post, "<drawing ");
-    if(drawingId.size() == 0)
-      drawingId = getChildlessNode(xml_post, "<legacyDrawing ");
-    
-    if(drawingId.size() > 0){
-      for(int j = 0; j < drawingId.size(); j++){
-        
-        std::string drawingId_tmp = as<std::string>(drawingId[j]);
-        size_t ps_pos = drawingId_tmp.find("r:id=\"rId", 0);
-        
-        std::string drawingId_tmp2 = drawingId_tmp.substr(0, ps_pos + 9) + "1";
-        ps_pos = drawingId_tmp.find("\"", ps_pos + 9);
-        
-        drawingId_tmp  = drawingId_tmp2 + drawingId_tmp.substr(ps_pos);
-        drawingId[j] = drawingId_tmp;
-        
+      
+      
+      
+      
+      /* --- Everything after sheetData --- */
+      size_t pos_post = 0;
+      if(has_data){
+        pos_post = xml.find("</sheetData>");   
+      }else{
+        pos_post = pos; 
       }
-    }
-    
-    
-    //  conditionalFormatting
-    CharacterVector conForm = getNodes(xml_post, "<conditionalFormatting");
-    if(conForm.size() > 0){
       
-      // get sqref attribute
-      size_t tmp_pos = 0;
-      int end_pos = 0;
-      std::string sqref;
-      CharacterVector cf;
-      CharacterVector cf_names;
+      std::string xml_post = xml.substr(pos_post);
       
       
-      for(int ci = 0; ci < conForm.size(); ci++){
+      CharacterVector autoFilter = getChildlessNode(xml_post, "<autoFilter ");
+      if(autoFilter.size() > 0)
+        this_worksheet["autoFilter"] = autoFilter;
+      
+      CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
+      if(hyperlinks.size() > 0){
+        hyperLinks[i] = getHyperlinkRefs(hyperlinks);
+      }else{
+        hyperLinks[i] = "";
+      }
+      
+      CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
+      if(pageMargins.size() > 0)
+        this_worksheet["pageMargins"] = pageMargins;
+      
+      
+      CharacterVector pageSetup = getChildlessNode(xml_post, "<pageSetup ");
+      if(pageSetup.size() > 0){
+        for(int j = 0; j < pageSetup.size(); j++){
+          
+          std::string pageSetup_tmp = as<std::string>(pageSetup[j]);
+          size_t ps_pos = pageSetup_tmp.find("r:id=\"rId", 0);
+          if(ps_pos != std::string::npos){
+            
+            std::string pageSetup_tmp2 = pageSetup_tmp.substr(0, ps_pos + 9) + "2";
+            ps_pos = pageSetup_tmp.find("\"", ps_pos + 9);
+            pageSetup_tmp  = pageSetup_tmp2 + pageSetup_tmp.substr(ps_pos);
+            
+          }
+          
+          pageSetup[j] = pageSetup_tmp;
+          
+        }
+        this_worksheet["pageSetup"] = pageSetup;
+      }
+      
+      
+      
+      CharacterVector mergeCells = getChildlessNode(xml_post, "<mergeCell ");
+      if(mergeCells.size() > 0)
+        this_worksheet["mergeCells"] = mergeCells;
+      
+      
+      CharacterVector drawingId = getChildlessNode(xml_post, "<drawing ");
+      if(drawingId.size() == 0)
+        drawingId = getChildlessNode(xml_post, "<legacyDrawing ");
+      
+      if(drawingId.size() > 0){
+        for(int j = 0; j < drawingId.size(); j++){
+          
+          std::string drawingId_tmp = as<std::string>(drawingId[j]);
+          size_t ps_pos = drawingId_tmp.find("r:id=\"rId", 0);
+          
+          std::string drawingId_tmp2 = drawingId_tmp.substr(0, ps_pos + 9) + "1";
+          ps_pos = drawingId_tmp.find("\"", ps_pos + 9);
+          
+          drawingId_tmp  = drawingId_tmp2 + drawingId_tmp.substr(ps_pos);
+          drawingId[j] = drawingId_tmp;
+          
+        }
+      }
+      
+      
+      //  conditionalFormatting
+      CharacterVector conForm = getNodes(xml_post, "<conditionalFormatting");
+      if(conForm.size() > 0){
         
-        buf = conForm[ci];
+        // get sqref attribute
+        size_t tmp_pos = 0;
+        int end_pos = 0;
+        std::string sqref;
+        CharacterVector cf;
+        CharacterVector cf_names;
         
-        tmp_pos = buf.find("sqref=\"", 0);
-        end_pos = buf.find("\"", tmp_pos + 7);
         
-        sqref = buf.substr(tmp_pos + 7, end_pos - tmp_pos - 7);
-        buf = buf.substr(0, buf.find("</conditionalFormatting"));
-        buf = buf.substr(buf.find("<cfRule"));
+        for(int ci = 0; ci < conForm.size(); ci++){
+          
+          buf = conForm[ci];
+          
+          tmp_pos = buf.find("sqref=\"", 0);
+          end_pos = buf.find("\"", tmp_pos + 7);
+          
+          sqref = buf.substr(tmp_pos + 7, end_pos - tmp_pos - 7);
+          buf = buf.substr(0, buf.find("</conditionalFormatting"));
+          buf = buf.substr(buf.find("<cfRule"));
+          
+          int ocs = 0;
+          string::size_type start = 0;
+          while((start = buf.find("<cfRule", start)) != string::npos){
+            ++ocs;
+            start += 7;
+          }
+          
+          if(ocs == 1){
+            cf_names.push_back(sqref);
+            cf.push_back(buf);
+          }else if(ocs > 1){
+            
+            tmp_pos = buf.find("<cfRule", 0);
+            while(tmp_pos != std::string::npos){
+              
+              end_pos = buf.find("<cfRule", tmp_pos + 7);
+              cf.push_back(buf.substr(tmp_pos, end_pos - tmp_pos));
+              cf_names.push_back(sqref);
+              tmp_pos = end_pos;
+              
+            }
+          }
+          
+        } // end of loop through conditional formats
         
+        cf.attr("names") = cf_names;
+        this_worksheet["conditionalFormatting"] = cf;
+        
+      } // end of if(conForm.size() > 0)
+      
+      // clean pre and post xml
+      xml_post.clear();
+      xml_pre.clear();
+      
+      
+      /* --------------------------- sheet Data --------------------------- */
+      
+      if(has_data){
+        
+        xml = xml.substr(pos + 11, pos_post - pos - 11);     // get from "sheetData" to the end
+        
+        // count cells with children
         int ocs = 0;
         string::size_type start = 0;
-        while((start = buf.find("<cfRule", start)) != string::npos){
+        while((start = xml.find("<c ", start)) != string::npos){
           ++ocs;
-          start += 7;
+          start += 4;
         }
         
-        if(ocs == 1){
-          cf_names.push_back(sqref);
-          cf.push_back(buf);
-        }else if(ocs > 1){
-          
-          tmp_pos = buf.find("<cfRule", 0);
-          while(tmp_pos != std::string::npos){
-            
-            end_pos = buf.find("<cfRule", tmp_pos + 7);
-            cf.push_back(buf.substr(tmp_pos, end_pos - tmp_pos));
-            cf_names.push_back(sqref);
-            tmp_pos = end_pos;
-            
-          }
-        }
+        CharacterVector r(ocs);
+        CharacterVector r_nms(ocs);
+        CharacterVector v(ocs);
+        CharacterVector s(ocs);
         
-      } // end of loop through conditional formats
-      
-      cf.attr("names") = cf_names;
-      this_worksheet["conditionalFormatting"] = cf;
-      
-    } // end of if(conForm.size() > 0)
-    
-    // clean pre and post xml
-    xml_post.clear();
-    xml_pre.clear();
-    
-    
-    /* --------------------------- sheet Data --------------------------- */
-    
-    if(has_data){
-      
-      xml = xml.substr(pos + 11, pos_post - pos - 11);     // get from "sheetData" to the end
-      
-      // count cells with children
-      int ocs = 0;
-      string::size_type start = 0;
-      while((start = xml.find("<c ", start)) != string::npos){
-        ++ocs;
-        start += 4;
-      }
-       
-      CharacterVector r(ocs);
-      CharacterVector r_nms(ocs);
-      CharacterVector v(ocs);
-      CharacterVector s(ocs);
-      
-      std::fill(v.begin(), v.end(), NA_STRING);
-      std::fill(s.begin(), s.end(), NA_STRING);
-      
-      
-      int j = 0;
-      size_t nextPos = 3;
-      pos = xml.find("<c ", 0);
-      bool has_v = false;
-      bool has_f = false;
-      List cells(ocs); // sheetData
-      std::string func;
-      std::string type;
-      
-      // PULL OUT CELL AND ATTRIBUTES
-      while(j < ocs){
+        std::fill(v.begin(), v.end(), NA_STRING);
+        std::fill(s.begin(), s.end(), NA_STRING);
         
-        if(pos != std::string::npos){
         
-          has_v = false;
-          has_f = false;
-          type = "n";
-            
-          nextPos = xml.find("<c ", pos + 9);
-          cell = xml.substr(pos, nextPos - pos);
-
-          // Pull out ref
-          pos = cell.find("r=", 0);  // find r="
-          endPos = cell.find(tagEnd, pos + 3);  // find next "
-          r[j] = cell.substr(pos + 3, endPos - pos - 3).c_str();
+        int j = 0;
+        size_t nextPos = 3;
+        pos = xml.find("<c ", 0);
+        bool has_v = false;
+        bool has_f = false;
+        List cells(ocs); // sheetData
+        std::string func;
+        std::string type;
+        
+        // PULL OUT CELL AND ATTRIBUTES
+        while(j < ocs){
           
-          buf = cell.substr(pos + 3, endPos - pos - 3);      
-          buf.erase(std::remove_if(buf.begin(), buf.end(), ::isalpha), buf.end());
-          r_nms[j] = buf;
-          
-          // Pull out style
-          pos = cell.find(" s=", 0);  // find s="
           if(pos != std::string::npos){
-            endPos = cell.find(tagEnd, pos + 4);  // find next "
-            s[j] = cell.substr(pos + 4, endPos - pos - 4);
-          }
-          
-          // Pull out type
-          pos = cell.find(" t=", 0);  // find t="
-          if(pos != std::string::npos){
-            endPos = cell.find(tagEnd, pos + 4);  // find next "
-            type = cell.substr(pos + 4, endPos - pos - 4);
-          }
-          
-          
-          // find <v> tag and </v> end tag
-          endPos = cell.find("</v>", 0);
-          if(endPos != std::string::npos){
-            pos = cell.find("<v", 0);
-            pos = cell.find(">", pos);
-            v[j] = cell.substr(pos + 1, endPos - pos - 1);
-            has_v = true;
-          }
-
-          // get<f>
-          pos = cell.find("<f", 0);
-          if(pos != std::string::npos){
-            endPos = cell.find("</f>", pos + 3);
-            if(endPos == std::string::npos){
-              endPos = cell.find("/>", pos + 3);
-              func = cell.substr(pos, endPos - pos + 2);
-            }else{
-              func = cell.substr(pos, endPos - pos + 4);
-            }
-            has_f = true;
-          }
-          
-          if(has_f & !has_v){
-            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
-          }else if(has_f){
-            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
-          }else if(has_v){
-            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = NA_STRING); 
-          }else{ //only have s and r
-            cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = NA_STRING);
-          }
-          
-          
-          
-          j++; // INCREMENT OVER OCCURENCES
-          pos = nextPos;
-          
-        }  // end of while loop over occurences
-      }  // END OF CELL AND ATTRIBUTION GATHERING
-      
-      // get names of cells
-      
-      if(ocs > 0){
-        cells.attr("names") = r_nms;
-        sheetData[i] = cells;
-      }
-
-      // count number of rows
-      int row_ocs = 0;
-      start = 0;
-      while((start = xml.find("<row ", start)) != string::npos){
-        ++row_ocs;
-        start += 4;
-      }
-      
-      CharacterVector rowNumbers(row_ocs);
-      CharacterVector heights(row_ocs);
-      
-      
-      // PULL OUT CELL AND ATTRIBUTES
-      j = 0;
-      pos = xml.find("<row ", 0);
-      std::string htTag = " ht=\"";
-      std::string attrEnd = "\"";
-      
-      while(j < row_ocs){
-        
-        if(pos != std::string::npos){
-          
-          nextPos = xml.find("<row ", pos + 9);
-          cell = xml.substr(pos, nextPos - pos);
-          
-          
-          // Pull out ref
-          pos = cell.find("r=", 0);  // find r="
-          endPos = cell.find(tagEnd, pos + 3);  // find next "
-          rowNumbers[j] = cell.substr(pos + 3, endPos - pos - 3);
-          
-          
-          // find custom height  
-          pos = cell.find(htTag, pos);
-          if(pos == std::string::npos){
-            heights[j] = NA_STRING;
-          }else{  
-            endPos = cell.find(attrEnd, pos + 5);
-            heights[j] = cell.substr(pos + 5, endPos - pos - 5);
-          }
-          
-          
-          
-          j++; // INCREMENT OVER OCCURENCES
-          pos = nextPos;
-          
-        }  // end of while loop over occurences
-      }  // END OF CELL AND ATTRIBUTION GATHERING
-      
-      
-      rowNumbers = rowNumbers[!is_na(heights)];
-      if(rowNumbers.size() > 0){
-        heights = heights[!is_na(heights)];
-        heights.attr("names") = rowNumbers;
-        rowHeights[i] = heights;
-      }
-      
-      // styleObjects
-      std::string this_sheetname = as<std::string>(sheetNames[i]);
-
-      if(any(!is_na(s))){
-        
-        CharacterVector s_refs = r[!is_na(s)];
-        s = s[!is_na(s)];
-        
-        CharacterVector uStyleInds = sort_unique(s);
-        int nsu = uStyleInds.size();
-        CharacterVector uStyleInds_j(1);
-        
-        std::string ref_j;
-        CharacterVector styleElementNames = CharacterVector::create("style", "sheet", "rows", "cols");
-        
-        for(int j = 0; j < nsu; j ++){
-          
-          List styleElement(4);
-          int styleInd = atoi(as<std::string>(uStyleInds[j]).c_str());
-          
-          if(styleInd != 0){
-          
-            uStyleInds_j[0] = uStyleInds[j];
-            LogicalVector ind = !is_na(match(s, uStyleInds_j));
-            CharacterVector s_refs_j = s_refs[ind];
             
-            int n_j = s_refs_j.size();
-            IntegerVector rows(n_j);
-            IntegerVector cols = RcppConvertFromExcelRef(s_refs_j);
+            has_v = false;
+            has_f = false;
+            type = "n";
             
-            for(int k = 0; k < n_j; k++){
-              ref_j = s_refs_j[k];
-              ref_j.erase(std::remove_if(ref_j.begin(), ref_j.end(), ::isalpha), ref_j.end());
-              rows[k] = atoi(ref_j.c_str());  
+            nextPos = xml.find("<c ", pos + 9);
+            cell = xml.substr(pos, nextPos - pos);
+            
+            // Pull out ref
+            pos = cell.find("r=", 0);  // find r="
+            endPos = cell.find(tagEnd, pos + 3);  // find next "
+            r[j] = cell.substr(pos + 3, endPos - pos - 3).c_str();
+            
+            buf = cell.substr(pos + 3, endPos - pos - 3);      
+            buf.erase(std::remove_if(buf.begin(), buf.end(), ::isalpha), buf.end());
+            r_nms[j] = buf;
+            
+            // Pull out style
+            pos = cell.find(" s=", 0);  // find s="
+            if(pos != std::string::npos){
+              endPos = cell.find(tagEnd, pos + 4);  // find next "
+              s[j] = cell.substr(pos + 4, endPos - pos - 4);
             }
             
-            styleElement[0] = styleObjects[styleInd - 1];
-            styleElement[1] = this_sheetname;
-            styleElement[2] = rows;
-            styleElement[3] = cols;
+            // Pull out type
+            pos = cell.find(" t=", 0);  // find t="
+            if(pos != std::string::npos){
+              endPos = cell.find(tagEnd, pos + 4);  // find next "
+              type = cell.substr(pos + 4, endPos - pos - 4);
+            }
             
-            styleElement.attr("names") = styleElementNames;
             
-            wbstyleObjects.push_back(styleElement);
+            // find <v> tag and </v> end tag
+            endPos = cell.find("</v>", 0);
+            if(endPos != std::string::npos){
+              pos = cell.find("<v", 0);
+              pos = cell.find(">", pos);
+              v[j] = cell.substr(pos + 1, endPos - pos - 1);
+              has_v = true;
+            }
+            
+            // get<f>
+            pos = cell.find("<f", 0);
+            if(pos != std::string::npos){
+              endPos = cell.find("</f>", pos + 3);
+              if(endPos == std::string::npos){
+                endPos = cell.find("/>", pos + 3);
+                func = cell.substr(pos, endPos - pos + 2);
+              }else{
+                func = cell.substr(pos, endPos - pos + 4);
+              }
+              has_f = true;
+            }
+            
+            if(has_f & !has_v){
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
+            }else if(has_f){
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
+            }else if(has_v){
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = NA_STRING); 
+            }else{ //only have s and r
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = NA_STRING);
+            }
+            
+            
+            
+            j++; // INCREMENT OVER OCCURENCES
+            pos = nextPos;
+            
+          }  // end of while loop over occurences
+        }  // END OF CELL AND ATTRIBUTION GATHERING
+        
+        // get names of cells
+        
+        if(ocs > 0){
+          cells.attr("names") = r_nms;
+          sheetData[i] = cells;
+        }
+        
+        // count number of rows
+        int row_ocs = 0;
+        start = 0;
+        while((start = xml.find("<row ", start)) != string::npos){
+          ++row_ocs;
+          start += 4;
+        }
+        
+        CharacterVector rowNumbers(row_ocs);
+        CharacterVector heights(row_ocs);
+        
+        
+        // PULL OUT CELL AND ATTRIBUTES
+        j = 0;
+        pos = xml.find("<row ", 0);
+        std::string htTag = " ht=\"";
+        std::string attrEnd = "\"";
+        
+        while(j < row_ocs){
           
+          if(pos != std::string::npos){
+            
+            nextPos = xml.find("<row ", pos + 9);
+            cell = xml.substr(pos, nextPos - pos);
+            
+            
+            // Pull out ref
+            pos = cell.find("r=", 0);  // find r="
+            endPos = cell.find(tagEnd, pos + 3);  // find next "
+            rowNumbers[j] = cell.substr(pos + 3, endPos - pos - 3);
+            
+            
+            // find custom height  
+            pos = cell.find(htTag, pos);
+            if(pos == std::string::npos){
+              heights[j] = NA_STRING;
+            }else{  
+              endPos = cell.find(attrEnd, pos + 5);
+              heights[j] = cell.substr(pos + 5, endPos - pos - 5);
+            }
+            
+            
+            
+            j++; // INCREMENT OVER OCCURENCES
+            pos = nextPos;
+            
+          }  // end of while loop over occurences
+        }  // END OF CELL AND ATTRIBUTION GATHERING
+        
+        
+        rowNumbers = rowNumbers[!is_na(heights)];
+        if(rowNumbers.size() > 0){
+          heights = heights[!is_na(heights)];
+          heights.attr("names") = rowNumbers;
+          rowHeights[i] = heights;
+        }
+        
+        // styleObjects
+        std::string this_sheetname = as<std::string>(sheetNames[i]);
+        
+        if(any(!is_na(s))){
+          
+          CharacterVector s_refs = r[!is_na(s)];
+          s = s[!is_na(s)];
+          
+          CharacterVector uStyleInds = sort_unique(s);
+          int nsu = uStyleInds.size();
+          CharacterVector uStyleInds_j(1);
+          
+          std::string ref_j;
+          CharacterVector styleElementNames = CharacterVector::create("style", "sheet", "rows", "cols");
+          
+          for(int j = 0; j < nsu; j ++){
+            
+            List styleElement(4);
+            int styleInd = atoi(as<std::string>(uStyleInds[j]).c_str());
+            
+            if(styleInd != 0){
+              
+              uStyleInds_j[0] = uStyleInds[j];
+              LogicalVector ind = !is_na(match(s, uStyleInds_j));
+              CharacterVector s_refs_j = s_refs[ind];
+              
+              int n_j = s_refs_j.size();
+              IntegerVector rows(n_j);
+              IntegerVector cols = RcppConvertFromExcelRef(s_refs_j);
+              
+              for(int k = 0; k < n_j; k++){
+                ref_j = s_refs_j[k];
+                ref_j.erase(std::remove_if(ref_j.begin(), ref_j.end(), ::isalpha), ref_j.end());
+                rows[k] = atoi(ref_j.c_str());  
+              }
+              
+              styleElement[0] = styleObjects[styleInd - 1];
+              styleElement[1] = this_sheetname;
+              styleElement[2] = rows;
+              styleElement[3] = cols;
+              
+              styleElement.attr("names") = styleElementNames;
+              
+              wbstyleObjects.push_back(styleElement);
+              
+            }
+            
           }
+          
           
         }
         
-        
-      }
+        dataCount[i] = 1;
+      }else{
+        dataCount[i] = 0;
+      } // end of if(has_data)
       
-      dataCount[i] = 1;
-    }else{
-      dataCount[i] = 0;
-    } // end of if(has_data)
-    
-    
-    worksheets[i] = this_worksheet;
-    
+      
+      worksheets[i] = this_worksheet;
+      
+    } 
   }
   
   // assign back to workbook
@@ -3213,6 +3248,300 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   
   
 }
+
+
+
+// [[Rcpp::export]]
+SEXP ExcelConvertExpand(const std::vector<int>& cols, const std::vector<std::string>& LETTERS, const std::vector<std::string>& rows){
+  
+  int n = cols.size();  
+  int nRows = rows.size();
+  std::vector<std::string> res(n);
+  
+  //Convert col number to excel col letters
+  size_t x;
+  size_t modulo;
+  for(int i = 0; i < n; i++){
+    x = cols[i];
+    string columnName;
+    
+    while(x > 0){  
+      modulo = (x - 1) % 26;
+      columnName = LETTERS[modulo] + columnName;
+      x = (x - modulo) / 26;
+    }
+    res[i] = columnName;
+  }
+  
+  CharacterVector r(n*nRows);
+  CharacterVector names(n*nRows);
+  size_t c = 0;
+  for(int i=0; i < nRows; i++)
+    for(int j=0; j < n; j++){
+      r[c] = res[j] + rows[i];
+      names[c] = rows[i];
+      c++;
+    }
+    
+    r.attr("names") = names;
+  return wrap(r) ;
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// [[Rcpp::export]]
+List buildMatrixNumeric2(std::vector<std::string> v,
+                         const std::vector<int>& rowInd,
+                         IntegerVector& colInd,
+                         int nRows,
+                         int nCols){
+  
+  int k = v.size();
+  NumericMatrix m(nRows, nCols);
+  std::fill(m.begin(), m.end(), NA_REAL);
+  std::string tmp;
+  
+  for(int i = 0; i < k; i++){
+    tmp = v[i];
+    m(rowInd[i], colInd[i]) = atof(tmp.c_str());
+  }
+  
+  List dfList(nCols);
+  for(int i=0; i < nCols; ++i)
+    dfList[i] = m(_,i);
+  
+  std::vector<int> rowNames(nRows);
+  for(int i = 0;i < nRows; ++i)
+    rowNames[i] = i+1;
+  
+  dfList.attr("row.names") = rowNames;
+  dfList.attr("class") = "data.frame";
+  
+  return Rcpp::wrap(dfList);
+  
+}
+
+
+// [[Rcpp::export]]
+SEXP readWorkbook2(std::vector<std::string>& v,
+                   std::vector<std::string>& r,
+                   std::vector<std::string>& string_refs,
+                   std::vector<bool>& is_date,
+                   int nRows,
+                   bool hasColNames,
+                   bool skipEmptyRows,
+                   int originAdj,
+                   Function clean_names
+){
+  
+  
+  // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
+  int nCells = r.size();
+  int nDates = is_date.size();
+  
+  /* do we have any dates */
+  bool has_date;
+  if(nDates == nCells){
+    has_date = true;
+  }else{
+    has_date = false;
+  }
+  
+  IntegerVector colNumbers = RcppConvertFromExcelRef2(r); 
+  colNumbers = match(colNumbers, sort_unique(colNumbers)) - 1;
+  int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
+  
+  // Check if first row are all strings
+  //get first row number
+  
+  CharacterVector colNames(nCols);
+  IntegerVector removeFlag;
+  int pos = 0;
+  
+  // If we are told colNames exist take the first row and fill any gaps with X.i
+  if(hasColNames){
+    
+    char name[6];
+    std::vector<std::string> firstRowNumbers(nCols);
+    std::string ref;
+    
+    // convert first nCols r to firstRowNumbers
+    // get r for which firstRowNumbers == firstRowNumbers[0];
+    for(int i = 0; i < nCols; i++){
+      ref = r[i];
+      ref.erase(std::remove_if(ref.begin(), ref.end(), ::isalpha), ref.end());
+      firstRowNumbers[i] = ref;
+    }
+    
+    ref = firstRowNumbers[0];
+    
+    for(int i = 0; i < nCols; i++){
+      if((i == colNumbers[pos]) & (firstRowNumbers[pos] == ref)){
+        colNames[i] = v[pos];
+        pos = pos + 1;
+      }else{
+        sprintf(&(name[0]), "X%d", i+1);
+        colNames[i] = name;
+      }
+    }
+    
+    // remove elements in string_refs that appear in the first row (if there are numerics in first row this will remove less elements than pos)
+    std::vector<std::string>::iterator first = r.begin();
+    std::vector<std::string>::iterator last = r.begin() + pos;
+    std::vector<std::string> toRemove(first, last);
+    
+    for(unsigned int i = 0; i < toRemove.size(); ++i)
+      string_refs.erase(std::remove(string_refs.begin(), string_refs.end(), toRemove[i]), string_refs.end());
+    
+    if(pos > 0)
+      r.erase(r.begin(), r.begin() +  pos); 
+    
+    // tidy up column names
+    colNames = clean_names(colNames);
+    
+    //If nothing left return a data.frame with 0 rows
+    if(r.size() == 0){
+      
+      List dfList(nCols);
+      IntegerVector rowNames(0);
+      dfList.attr("names") = colNames;
+      dfList.attr("row.names") = rowNames;
+      dfList.attr("class") = "data.frame";
+      
+      return wrap(dfList);
+    }
+    
+    colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
+    nRows--; // decrement number of rows as first row is now being used as colNames
+    nCells = nCells - pos;
+    
+    
+  }else{ // else colNames is FALSE */
+    char name[6];
+    for(int i =0; i < nCols; i++){
+      sprintf(&(name[0]), "X%d", i+1);
+      colNames[i] = name;
+    }
+  }
+  
+  // getRow numbers from r 
+  std::vector<int> rowNumbers(nCells);  
+  if(nCells == nRows*nCols){
+    
+    int counter = 0;
+    for(int i = 0; i < nRows; ++i){
+      for(int j = 0; j < nCols; ++j){
+        rowNumbers[counter] = i;
+        ++counter;
+      }
+    }
+    
+  }else{
+    
+    // remove character from cell ref
+    for(int i = 0; i < nCells; i++){
+      std::string a = r[i];
+      a.erase(std::remove_if(a.begin(), a.end(), ::isalpha), a.end());
+      rowNumbers[i] = atoi(a.c_str()) - 1; 
+    }
+    
+    if(skipEmptyRows){
+      rowNumbers = matrixRowInds2(rowNumbers);
+    }else{
+      for(int i = 0; i < nCells; i++)
+        rowNumbers[i] = rowNumbers[i] - rowNumbers[0];
+    }
+    
+  }
+  
+  
+  // Possible there are no stringInds to begin with and value of stringInds is 0
+  // Possible we have stringInds but they have now all been used up by string_refs
+  bool allNumeric = false;
+  if((string_refs.size() == 0))
+    allNumeric = true;
+  
+  // check not all string_refs are NA *************************
+  
+  
+  
+  
+  // if(has_date){
+  //    if(is_true(any(is_date)))
+  //      allNumeric = false;
+  //  }
+  
+  // If we build colnames we remove the ref & values for the pos number of elements used 
+  if(hasColNames & has_date)
+    is_date.erase(is_date.begin(), is_date.begin() + pos);
+  
+  
+  
+  //Intialise return data.frame
+  List m; 
+  v.erase(v.begin(), v.begin() + pos);
+  
+  //   Rcout << "rowNumbers.size(): " << rowNumbers.size() << endl; 
+  //   Rcout << "v.size(): " << v.size() << endl; 
+  //   Rcout << "colNumbers.size(): " << colNumbers.size() << endl; 
+  //   Rcout << "is_date.size(): " << is_date.size() << endl; 
+  //   Rcout << "allNumeric: " << allNumeric << endl; 
+  
+  if(allNumeric){
+    
+    m = buildMatrixNumeric2(v, rowNumbers, colNumbers, nRows, nCols);
+    m.attr("names") = colNames;
+    
+  }else{
+    
+    // If it contains any strings it will be a character column
+    //     IntegerVector charCols;
+    //     if(all(is_na(string_refs))){
+    //       charCols = -1;
+    //     }else{
+    //       charCols = match(string_refs, r);
+    //       IntegerVector charColNumbers = colNumbers[charCols-1];
+    //       charCols = unique(charColNumbers);
+    //     }
+    //     
+    //Rcout << "colNumbers.size(): " << colNumbers.size() << endl; 
+    //Rcout << "is_date.size(): " << is_date.size() << endl; 
+    //Rcout << "v.size(): " << v.size() << endl; 
+    //Rcout << "vn.size(): " << vn.size() << endl; 
+    //Rcout << "rowNumbers.size(): " << rowNumbers.size() << endl; 
+    
+    //date columns
+    //     IntegerVector dateCols(1);
+    //     if(has_date){
+    //       dateCols = colNumbers[is_date];
+    //       dateCols = sort_unique(dateCols);
+    //     }else{
+    //       dateCols[0] = -1;
+    //     }
+    
+    //    m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, dateCols, originAdj);
+    
+  }
+  
+  return m;
+  
+}
+
+
+
 
 
 

@@ -49,7 +49,8 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
   drawingRelsXML    <- xmlFiles[grepl("drawing[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   sheetRelsXML      <- xmlFiles[grepl("sheet[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   media             <- xmlFiles[grepl("image[0-9]+.[a-z]+$", xmlFiles, perl = TRUE)]
-  charts            <- xmlFiles[grepl("chart[0-9]+.[a-z]+$", xmlFiles, perl = TRUE)]
+  charts             <- xmlFiles[grepl("xl/charts/.*xml$", xmlFiles, perl = TRUE)]
+  chartsRels         <- xmlFiles[grepl("xl/charts/_rels", xmlFiles, perl = TRUE)]
   tablesXML         <- xmlFiles[grepl("tables/table[0-9]+.xml$", xmlFiles, perl = TRUE)]
   tableRelsXML      <- xmlFiles[grepl("table[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   queryTablesXML    <- xmlFiles[grepl("queryTable[0-9]+.xml$", xmlFiles, perl = TRUE)]
@@ -415,10 +416,29 @@ loadWorkbook2 <- function(file, xlsxFile = NULL){
   
   ## xl\chart
   if(length(charts) > 0){
-    chartNames <- regmatches(charts, regexpr("chart[0-9]\\.[a-z]+$", charts))
+    
+    chartNames <- basename(charts)
+    nCharts <- sum(grepl("chart[0-9]+.xml", chartNames))
+    nChartStyles <- sum(grepl("style[0-9]+.xml", chartNames))
+    nChartCol <- sum(grepl("colors[0-9]+.xml", chartNames))
+    
+    if(nCharts > 0)
+      wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/charts/chart%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>', 1:nCharts))
+    
+    if(nChartStyles > 0)
+      wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/charts/style%s.xml" ContentType="application/vnd.ms-office.chartstyle+xml"/>', 1:nChartStyles))
+    
+    if(nChartCol > 0)
+      wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/charts/colors%s.xml" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>', 1:nChartCol))
+    
+    if(length(chartsRels)){
+      charts <- c(charts, chartsRels)
+      chartNames <- c(chartNames, file.path("_rels", basename(chartsRels)))
+    }
+    
     names(charts) <- chartNames
     wb$charts <- charts
-    wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/charts/chart%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>', 1:length(charts)))
+    
   }
   
   

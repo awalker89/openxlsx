@@ -90,7 +90,7 @@ genBaseSheet <- function(sheetName,
              evenFooter = naToNULLList(evenFooter), 
              firstHeader = naToNULLList(firstHeader),
              firstFooter = naToNULLList(firstFooter))
-    
+  
   if(all(sapply(hf, length) == 0))
     hf <- NULL
   
@@ -204,6 +204,39 @@ genBaseTable <- function(id, ref, colNames){
   
   
 }
+
+
+
+
+genBaseChartSheet <- function(sheetName, 
+                              tabSelected = FALSE, 
+                              tabColour = NULL, 
+                              zoom = 100){
+  
+  if(!is.null(tabColour))
+    tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
+  
+  if(zoom < 10){
+    zoom <- 10
+  }else if(zoom > 400){
+    zoom <- 400
+  }
+  
+  ## list of all possible children
+  tmp <- list(list(sheetPr = tabColour,
+                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" zoomScale="%s" tabSelected="%s"/></sheetViews>', as.integer(zoom), as.integer(tabSelected)),
+                   pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
+                   # pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
+                   drawing = '<drawing r:id=\"rId1\"/>' ## will always be 1
+                   ))
+  
+  names(tmp) <- sheetName
+  
+  return(tmp)
+}
+
+
+
 
 
 
@@ -403,7 +436,7 @@ contentTypePivotXML <- function(i){
   c(sprintf('<Override PartName="/xl/pivotCache/pivotCacheDefinition%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml"/>', i),
     sprintf('<Override PartName="/xl/pivotCache/pivotCacheRecords%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml"/>', i),
     sprintf('<Override PartName="/xl/pivotTables/pivotTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml"/>', i))
-    
+  
 }
 
 contentTypeSlicerCacheXML <- function(i){

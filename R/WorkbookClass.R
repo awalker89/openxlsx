@@ -1,9 +1,10 @@
 
 
-
 Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "app",
                                                "charts",
+                                               "isChartSheet",
+                                               
                                                "colWidths",
                                                "connections",
                                                "Content_Types",
@@ -61,6 +62,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   drawings_rels <<- list()
   media <<- list()
   charts <<- list()
+  isChartSheet <<- NULL
+  
   app <<- genBaseApp()
   core <<- genBaseCore(creator)
   workbook.xml.rels <<- genBaseWorkbook.xml.rels()
@@ -173,6 +176,8 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   drawings_rels[[newSheetIndex]] <<- list()
   drawings[[newSheetIndex]] <<- list()
   
+  isChartSheet[[newSheetIndex]] <<- FALSE
+  
   sheetData[[newSheetIndex]] <<- list()
   styleInds[[newSheetIndex]] <<- list()
   
@@ -187,6 +192,62 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   invisible(newSheetIndex)
   
 })
+
+
+Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 100){
+  
+  newSheetIndex <- length(worksheets) + 1L
+
+  if(newSheetIndex > 1){
+    sheetId <- max(as.integer(regmatches(workbook$sheets, regexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE)))) + 1L
+  }else{
+    sheetId <- 1
+  }
+  
+  ##  Add sheet to workbook.xml
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, sheetId, newSheetIndex))
+  
+  ## append to worksheets list
+  worksheets <<- append(worksheets, genBaseChartSheet(sheetName = sheetName,
+                                                      tabSelected = newSheetIndex == 1, 
+                                                      tabColour = tabColour, zoom = zoom))
+  
+  
+  ## update content_tyes
+  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/chartsheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml"/>', newSheetIndex))
+  
+  ## Update xl/rels
+  workbook.xml.rels <<- c(workbook.xml.rels,
+                          sprintf('<Relationship Id="rId0" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chartsheet" Target="chartsheets/sheet%s.xml"/>', newSheetIndex)
+  )
+  
+  
+  
+  ## add a drawing.xml for the worksheet
+  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/drawings/drawing%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>', newSheetIndex))
+  
+  ## create sheet.rels to simplify id assignment
+  worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex)
+  drawings_rels[[newSheetIndex]] <<- list()
+  drawings[[newSheetIndex]] <<- list()
+  
+  isChartSheet[[newSheetIndex]] <<- TRUE
+  
+  sheetData[[newSheetIndex]] <<- list()
+  styleInds[[newSheetIndex]] <<- list()
+  rowHeights[[newSheetIndex]] <<- list()
+  colWidths[[newSheetIndex]] <<- list()
+  freezePane[[newSheetIndex]] <<- list()
+  printerSettings[[newSheetIndex]] <<- genPrinterSettings()
+  hyperlinks[[newSheetIndex]] <<- ""
+  dataCount[[newSheetIndex]] <<- 0
+  sheetOrder <<- c(sheetOrder, newSheetIndex)
+  
+  invisible(newSheetIndex)
+  
+})
+
+
 
 Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
@@ -248,9 +309,13 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   xldrawingsRelsDir <- file.path(tmpDir, "xl", "drawings", "_rels")
   dir.create(path = xldrawingsRelsDir, recursive = TRUE)
   
-  ##charts dir
-  chartsDir <- file.path(tmpDir, "xl", "charts")
-  dir.create(path = chartsDir, recursive = TRUE)
+  ## charts
+  if(length(charts) > 0)
+    file.copy(from = dirname(charts[1]), to = file.path(tmpDir, "xl"), recursive = TRUE)
+  
+  # if(length(chartSheets))
+  # file.copy(from = dirname(chartSheets[1]), to = file.path(tmpDir, "xl"), recursive = TRUE)
+  
   
   printDir <- file.path(tmpDir, "xl", "printerSettings")
   dir.create(path = printDir, recursive = TRUE)
@@ -374,10 +439,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## media (copy file from origin to destination)
   for(x in media)
     file.copy(x, file.path(xlmediaDir, names(media)[which(media == x)]))
-  
-  ## charts
-  for(x in charts)
-    file.copy(x, file.path(chartsDir, names(charts)[which(charts == x)]))
   
   ## will always have a theme
   lapply(1:nThemes, function(i){
@@ -1167,106 +1228,135 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       worksheets[[i]]$drawing <<- NULL
     }
     
-    ## Write worksheets
-    ws <- worksheets[[i]]
-    if(!is.null(ws$cols))
-      ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
-    
-    if(length(freezePane[[i]]) > 0)
-      ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews)
-    
-    if(length(worksheets[[i]]$mergeCells) > 0)
-      ws$mergeCells <- paste0(sprintf('<mergeCells count="%s">', length(worksheets[[i]]$mergeCells)), pxml(worksheets[[i]]$mergeCells), '</mergeCells>')
-    
-    if(length(worksheets[[i]]$conditionalFormatting) > 0){
-      nms <- names(ws$conditionalFormatting)
-      uNames <- unique(nms)
-      ws$conditionalFormatting <- paste(sapply(uNames, function(x) paste0(sprintf('<conditionalFormatting sqref="%s">', x), pxml(ws$conditionalFormatting[nms == x]), '</conditionalFormatting>')), collapse = "")
-    }
-    
-    ## Header footer
-    if(!is.null(ws$headerFooter))
-      ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
-    
-    if(!is.null(ws$sheetPr))
-      ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
-    
-    if(length(worksheets[[i]]$tableParts) > 0)
-      ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
-    
-    if(length(worksheets[[i]]$extLst) > 0)
-      ws$extLst <- sprintf('<extLst>%s</extLst>', paste(worksheets[[i]]$extLst, collapse = ""))
-    
-    if(hyperlinks[[i]][[1]] != ""){
-      nTables <- length(tables)
-      nHLinks <- length(hyperlinks[[i]])
-      hInds <- as.integer(1:nHLinks + 3L + nTables - 1L)
-      ws$hyperlinks <- paste0('<hyperlinks>', paste(sprintf('<hyperlink ref="%s" r:id="rId%s"/>', hyperlinks[[i]], hInds), collapse = ""), '</hyperlinks>')  
-    }
-    
-    sheetDataInd <- which(names(ws) == "sheetData")
-    prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))
-    post <- paste0(pxml(ws[(sheetDataInd + 1L):length(ws)]), "</worksheet>")
-    
-    ## Sort sheetData before writing
-    if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
-      r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
-      sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
-      dataCount[[i]] <<- 1L
+    if(isChartSheet[i]){
       
-      if(length(styleInds[[i]]) > 0)
-        styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
-    }
-    
-    if(length(rowHeights[[i]]) == 0){
+      chartSheetDir <- file.path(dirname(xlworksheetsDir), "chartsheets")
+      chartSheetRelsDir <- file.path(dirname(xlworksheetsDir), "chartsheets", "_rels")
       
-      .Call("openxlsx_quickBuildCellXML",
-            prior,
-            post,
-            sheetData[[i]],
-            as.integer(names(sheetData[[i]])),
-            styleInds[[i]],
-            file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
-            PACKAGE = "openxlsx")
+      if(!file.exists(chartSheetDir)){
+        dir.create(chartSheetDir, recursive = TRUE)
+        dir.create(chartSheetRelsDir, recursive = TRUE)
+      }
+      
+      .Call("openxlsx_writeFile", 
+            '<chartsheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">>',
+            pxml(worksheets[[i]]),
+            '</chartsheet>',
+            file.path(chartSheetDir, paste0("sheet", i,".xml")))
+      
+      
+      .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
+            pxml(worksheets_rels[[i]]),
+            '</Relationships>',
+            file.path(chartSheetRelsDir, sprintf("sheet%s.xml.rels", i)))
+      
       
     }else{
       
-      ## row heights will always be in order and all row heights are given rows in preSaveCleanup  
-      .Call("openxlsx_quickBuildCellXML2",
-            prior,
-            post,
-            sheetData[[i]],
-            as.integer(names(sheetData[[i]])),
-            as.character(unname(styleInds[[i]])),
-            unlist(rowHeights[[i]]),
-            file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
-            PACKAGE="openxlsx")
       
-    }
-    
-    ## write worksheet rels
-    if(length(worksheets_rels[[i]]) > 0 ){
+      ## Write worksheets
+      ws <- worksheets[[i]]
+      if(!is.null(ws$cols))
+        ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
       
-      ws_rels <- worksheets_rels[[i]]
+      if(length(freezePane[[i]]) > 0)
+        ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews)
+      
+      if(length(worksheets[[i]]$mergeCells) > 0)
+        ws$mergeCells <- paste0(sprintf('<mergeCells count="%s">', length(worksheets[[i]]$mergeCells)), pxml(worksheets[[i]]$mergeCells), '</mergeCells>')
+      
+      if(length(worksheets[[i]]$conditionalFormatting) > 0){
+        nms <- names(ws$conditionalFormatting)
+        uNames <- unique(nms)
+        ws$conditionalFormatting <- paste(sapply(uNames, function(x) paste0(sprintf('<conditionalFormatting sqref="%s">', x), pxml(ws$conditionalFormatting[nms == x]), '</conditionalFormatting>')), collapse = "")
+      }
+      
+      ## Header footer
+      if(!is.null(ws$headerFooter))
+        ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
+      
+      if(!is.null(ws$sheetPr))
+        ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
+      
+      if(length(worksheets[[i]]$tableParts) > 0)
+        ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
+      
+      if(length(worksheets[[i]]$extLst) > 0)
+        ws$extLst <- sprintf('<extLst>%s</extLst>', paste(worksheets[[i]]$extLst, collapse = ""))
       
       if(hyperlinks[[i]][[1]] != ""){
+        nTables <- length(tables)
+        nHLinks <- length(hyperlinks[[i]])
+        hInds <- as.integer(1:nHLinks + 3L + nTables - 1L)
+        ws$hyperlinks <- paste0('<hyperlinks>', paste(sprintf('<hyperlink ref="%s" r:id="rId%s"/>', hyperlinks[[i]], hInds), collapse = ""), '</hyperlinks>')  
+      }
+      
+      sheetDataInd <- which(names(ws) == "sheetData")
+      prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))
+      post <- paste0(pxml(ws[(sheetDataInd + 1L):length(ws)]), "</worksheet>")
+      
+      ## Sort sheetData before writing
+      if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
+        r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
+        sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
+        dataCount[[i]] <<- 1L
         
-        if("UTF-8" %in% Encoding(hyperlinks[[i]])){
-          fromEnc <- "UTF-8"
-        }else{
-          fromEnc <- ""
-        }
+        if(length(styleInds[[i]]) > 0)
+          styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
+      }
+      
+      if(length(rowHeights[[i]]) == 0){
         
-        ws_rels <- c(ws_rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="%s" TargetMode="External"/>', hInds, iconv(names(hyperlinks[[i]]), from = fromEnc, to = "UTF-8")))
+        .Call("openxlsx_quickBuildCellXML",
+              prior,
+              post,
+              sheetData[[i]],
+              as.integer(names(sheetData[[i]])),
+              styleInds[[i]],
+              file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
+              PACKAGE = "openxlsx")
+        
+      }else{
+        
+        ## row heights will always be in order and all row heights are given rows in preSaveCleanup  
+        .Call("openxlsx_quickBuildCellXML2",
+              prior,
+              post,
+              sheetData[[i]],
+              as.integer(names(sheetData[[i]])),
+              as.character(unname(styleInds[[i]])),
+              unlist(rowHeights[[i]]),
+              file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
+              PACKAGE="openxlsx")
         
       }
       
-      .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
-            pxml(ws_rels),
-            '</Relationships>',
-            file.path(xlworksheetsRelsDir, sprintf("sheet%s.xml.rels", i))
-      )
-    }
+      ## write worksheet rels
+      if(length(worksheets_rels[[i]]) > 0 ){
+        
+        ws_rels <- worksheets_rels[[i]]
+        
+        if(hyperlinks[[i]][[1]] != ""){
+          
+          if("UTF-8" %in% Encoding(hyperlinks[[i]])){
+            fromEnc <- "UTF-8"
+          }else{
+            fromEnc <- ""
+          }
+          
+          ws_rels <- c(ws_rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="%s" TargetMode="External"/>', hInds, iconv(names(hyperlinks[[i]]), from = fromEnc, to = "UTF-8")))
+          
+        }
+        
+        .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
+              pxml(ws_rels),
+              '</Relationships>',
+              file.path(xlworksheetsRelsDir, sprintf("sheet%s.xml.rels", i))
+        )
+        
+      }
+      
+    }## end of isChartSheet[i]
     
   } ## end of loop through 1:nSheets
   
@@ -1904,20 +1994,21 @@ Workbook$methods(preSaveCleanUp = function(){
   sheetRIds <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=r:id="rId)[0-9]+', workbook$sheets, perl = TRUE))))
   
   nSheets <- length(sheetRIds)
+  nWorksheets <- length(worksheets)
   nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
   nPivots <- length(pivotDefinitions)
   
   ## add a worksheet if none added
-  if(nSheets == 0){
+  if(nWorksheets == 0){
     warning("Workbook does not contain any worksheets. A worksheet will be added.", call. = FALSE)
     .self$addWorksheet("Sheet 1")
-    nSheets <- 1L
+    nWorksheets <- 1L
   }
   
   
   ## get index of each child element for ordering
-  sheetInds <- which(grepl("worksheets/sheet[0-9]+\\.xml", workbook.xml.rels))
+  sheetInds <- which(grepl("(worksheets|chartsheets)/sheet[0-9]+\\.xml", workbook.xml.rels))
   stylesInd <- which(grepl("styles\\.xml", workbook.xml.rels))
   themeInd <- which(grepl("theme/theme[0-9]+.xml", workbook.xml.rels))
   connectionsInd <- which(grepl("connections.xml", workbook.xml.rels))
@@ -1930,7 +2021,7 @@ Workbook$methods(preSaveCleanUp = function(){
   ## don't want to re-assign rIds for pivot tables or slicer caches
   pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)]
   slicerNode <- workbook.xml.rels[which(grepl("slicerCache[0-9]+.xml", workbook.xml.rels))]
-  
+
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
   
@@ -1941,7 +2032,6 @@ Workbook$methods(preSaveCleanUp = function(){
   }))
   
   workbook.xml.rels <<- c(workbook.xml.rels, pivotNode, slicerNode)
-  
   
   
   
@@ -1959,8 +2049,8 @@ Workbook$methods(preSaveCleanUp = function(){
   
   ## re-assign tabSelected
   worksheets[[1]]$sheetViews <<- sub('( tabSelected="0")|( tabSelected="false")', ' tabSelected="1"', worksheets[[1]]$sheetViews, ignore.case = TRUE)
-  if(nSheets > 1){
-    for(i in 2:nSheets)
+  if(nWorksheets > 1){
+    for(i in 2:nWorksheets)
       worksheets[[i]]$sheetViews <<- sub(' tabSelected="(1|true|false|0)"', ' tabSelected="0"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
   }
   
