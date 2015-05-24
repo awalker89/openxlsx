@@ -2522,9 +2522,10 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
 #' @export
 #' @method all.equal Workbook
 #' @title Check equality of workbooks
-#' @param x A \code{Workbook} object
-#' @param y A \code{Workbook} object
-all.equal.Workbook <- function(x, y){
+#' @param target A \code{Workbook} object
+#' @param current A \code{Workbook} object
+#' @param ...
+all.equal.Workbook <- function(target, current, ...){
   
   
   print("Comparing workbooks...")

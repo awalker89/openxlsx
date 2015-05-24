@@ -5,12 +5,14 @@
 \alias{all.equal.Workbook}
 \title{Check equality of workbooks}
 \usage{
-\method{all.equal}{Workbook}(x, y)
+\method{all.equal}{Workbook}(target, current, ...)
 }
 \arguments{
-\item{x}{A \code{Workbook} object}
+\item{target}{A \code{Workbook} object}
 
-\item{y}{A \code{Workbook} object}
+\item{current}{A \code{Workbook} object}
+
+\item{...}{}
 }
 \description{
 Check equality of workbooks
