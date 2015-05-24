@@ -114,7 +114,7 @@ read.xlsx.default <- function(xlsxFile,
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
   
   ## make sure sheetId is 1 based
-  sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
+  sheetrId <- unlist(getRId(sheets))
   sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
   
   nSheets <- length(sheetrId)
@@ -123,7 +123,7 @@ read.xlsx.default <- function(xlsxFile,
   
   ## get the file_name for each sheetrId
   file_name <- sapply(sheetrId, function(rId){
-    txt <- workbookRelsXML[grepl(sprintf('Id="rId%s"', rId), workbookRelsXML)]
+    txt <- workbookRelsXML[grepl(sprintf('Id="%s"', rId), workbookRelsXML, fixed = TRUE)]
     regmatches(txt, regexpr('(?<=Target=").+xml', txt, perl = TRUE))
   })
   
