@@ -96,7 +96,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     workbookRelsXML <- workbookRelsXML[grepl("chartsheets/sheet", workbookRelsXML, fixed = TRUE)]
     
-    chartSheetRIds <- as.integer(unlist(regmatches(workbookRelsXML, gregexpr('(?<=Id="rId)[0-9]+', workbookRelsXML, perl = TRUE, ignore.case = TRUE)))) 
+    chartSheetRIds <- unlist(getId(workbookRelsXML))
     chartsheet_rId_mapping <- unlist(regmatches(workbookRelsXML, gregexpr('sheet[0-9]+\\.xml', workbookRelsXML, perl = TRUE, ignore.case = TRUE)))
     
     sheetNo <- as.integer(regmatches(chartSheetsXML, regexpr("(?<=sheet)[0-9]+(?=\\.xml)", chartSheetsXML, perl = TRUE)))
@@ -110,40 +110,6 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     
   }
-  
-  #   
-  #     chart_rId_map <- as.integer(unlist(regmatches(workbookRelsXML, gregexpr('(?<=sheet)[0-9]+(?=\\.xml)', workbookRelsXML, perl = TRUE, ignore.case = TRUE)))) 
-  #     
-  #     
-  #     ## copy chartsheets/sheeti.xml as it
-  #     ## modify corresponding rels to point to drawing_id + 50000
-  #     ## make sure drawing is saves as id+50000.xml file
-  #     ## make sure corresponding drawing_rels is saved as id+50000
-  #     
-  #     ## put chartSheets in order
-  
-  #     
-  #     
-  #     chartSheetsRels <- unlist(lapply(chartSheetsRelsXML, function(x) paste(readLines(x, warn = FALSE, encoding = "UTF-8"), collapse = "")))
-  #     
-  #     ## Add to Workbook object
-  #     drawingInd <- unlist(lapply(chartSheetsRels, function(txt){
-  #       as.integer(regmatches(txt, regexpr("(?<=drawings/drawing)[0-9]+(?=\\.xml)", txt, perl = TRUE)))
-  #     }))
-  #    
-  #     ## modify chartSheetsRels and write file
-  #     chartSheetsRels <- unlist(lapply(1:length(chartSheetsRels), function(i){
-  #       txt <- gsub(sprintf("/drawings/drawing%s.xml", drawingInd[i]),sprintf("/drawings/drawing%s.xml", drawingInd[i]+50000) , chartSheetsRels[i], fixed = TRUE)
-  #       writeLines(text = txt, con =  chartSheetsRelsXML[i])
-  #       chartSheetsRelsXML[i]
-  #     }))
-  #    
-
-  #     
-  #   }
-  
-  
-  
   
   
   ## xl\
@@ -159,8 +125,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     ## sheet rId links to the workbook.xml.resl which links worksheets/sheet(i).xml file
     ## order they appear here gives order of worksheets in xlsx file
     
-    sheetrId <- as.integer(unlist(regmatches(sheets, gregexpr('(?<=r:id="rId)[0-9]+', sheets, perl = TRUE)))) 
-
+    sheetrId <- unlist(getRId(sheets))
     sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
     
@@ -192,12 +157,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     }
     
     
-    
     ## replace sheetId
     for(i in 1:nSheets)
       wb$workbook$sheets[[i]] <- gsub(sprintf(' sheetId="%s"', i), sprintf(' sheetId="%s"', sheetId[i]), wb$workbook$sheets[[i]])
-
-    
     
     
     ## additional workbook attributes
@@ -375,72 +337,76 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       style <- createStyle()
       if(any(s != "0")){
         
-        if(s[["fontId"]] != "0"){
-          thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
-          
-          if("sz" %in% names(thisFont))
-            style$fontSize <- thisFont$sz
-          
-          if("name" %in% names(thisFont))
-            style$fontName <- thisFont$name
-          
-          if("family" %in% names(thisFont))
-            style$fontFamily <- thisFont$family
-          
-          if("color" %in% names(thisFont))
-            style$fontColour <- thisFont$color
-          
-          if("scheme" %in% names(thisFont))
-            style$fontScheme <- thisFont$scheme
-          
-          flags <- c("bold", "italic", "underline") %in% names(thisFont)
-          if(any(flags)){
-            style$fontDecoration <- NULL
-            if(flags[[1]])
-              style$fontDecoration <- append(style$fontDecoration, "BOLD")
+        if("fontId" %in% names(s)){
+          if(s[["fontId"]] != "0"){
+            thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
             
-            if(flags[[2]])
-              style$fontDecoration <- append(style$fontDecoration, "ITALIC")
+            if("sz" %in% names(thisFont))
+              style$fontSize <- thisFont$sz
             
-            if(flags[[3]])
-              style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
+            if("name" %in% names(thisFont))
+              style$fontName <- thisFont$name
+            
+            if("family" %in% names(thisFont))
+              style$fontFamily <- thisFont$family
+            
+            if("color" %in% names(thisFont))
+              style$fontColour <- thisFont$color
+            
+            if("scheme" %in% names(thisFont))
+              style$fontScheme <- thisFont$scheme
+            
+            flags <- c("bold", "italic", "underline") %in% names(thisFont)
+            if(any(flags)){
+              style$fontDecoration <- NULL
+              if(flags[[1]])
+                style$fontDecoration <- append(style$fontDecoration, "BOLD")
+              
+              if(flags[[2]])
+                style$fontDecoration <- append(style$fontDecoration, "ITALIC")
+              
+              if(flags[[3]])
+                style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
+            }
           }
         }
         
-        
-        if(s[["numFmtId"]] != "0"){
-          if(as.integer(s[["numFmtId"]]) < 164){
-            style$numFmt <- list(numFmtId = s[["numFmtId"]])
-          }else if(numFmtFlag){
-            style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
+        if("numFmtId" %in% names(s)){
+          if(s[["numFmtId"]] != "0"){
+            if(as.integer(s[["numFmtId"]]) < 164){
+              style$numFmt <- list(numFmtId = s[["numFmtId"]])
+            }else if(numFmtFlag){
+              style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
+            }
           }
         }
         
         ## Border
-        if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
-          
-          thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
-          
-          if("borderLeft" %in% names(thisBorder)){
-            style$borderLeft    <- thisBorder$borderLeft
-            style$borderLeftColour <- thisBorder$borderLeftColour
+        if("borderId" %in% names(s)){
+          if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
+            
+            thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
+            
+            if("borderLeft" %in% names(thisBorder)){
+              style$borderLeft    <- thisBorder$borderLeft
+              style$borderLeftColour <- thisBorder$borderLeftColour
+            }
+            
+            if("borderRight" %in% names(thisBorder)){
+              style$borderRight    <- thisBorder$borderRight
+              style$borderRightColour <- thisBorder$borderRightColour
+            }
+            
+            if("borderTop" %in% names(thisBorder)){
+              style$borderTop    <- thisBorder$borderTop
+              style$borderTopColour <- thisBorder$borderTopColour
+            }
+            
+            if("borderBottom" %in% names(thisBorder)){
+              style$borderBottom    <- thisBorder$borderBottom
+              style$borderBottomColour <- thisBorder$borderBottomColour
+            }
           }
-          
-          if("borderRight" %in% names(thisBorder)){
-            style$borderRight    <- thisBorder$borderRight
-            style$borderRightColour <- thisBorder$borderRightColour
-          }
-          
-          if("borderTop" %in% names(thisBorder)){
-            style$borderTop    <- thisBorder$borderTop
-            style$borderTopColour <- thisBorder$borderTopColour
-          }
-          
-          if("borderBottom" %in% names(thisBorder)){
-            style$borderBottom    <- thisBorder$borderBottom
-            style$borderBottomColour <- thisBorder$borderBottomColour
-          }
-          
         }
         
         ## alignment
@@ -460,28 +426,30 @@ loadWorkbook <- function(file, xlsxFile = NULL){
             style$wrapText <- TRUE
         }
         
-        if(s[["fillId"]] != "0"){# && "applyFill" %in% names(s)){
-          
-          fillId <- as.integer(s[["fillId"]]) + 1L
-          
-          if("fgColor" %in% names(fills[[fillId]])){
+        if("fillId" %in% names(s)){
+          if(s[["fillId"]] != "0"){
             
-            tmpFg <- fills[[fillId]]$fgColor
-            tmpBg <- fills[[fillId]]$bgColor
+            fillId <- as.integer(s[["fillId"]]) + 1L
             
-            if(!is.null(tmpFg))
-              style$fill$fillFg <- tmpFg
+            if("fgColor" %in% names(fills[[fillId]])){
+              
+              tmpFg <- fills[[fillId]]$fgColor
+              tmpBg <- fills[[fillId]]$bgColor
+              
+              if(!is.null(tmpFg))
+                style$fill$fillFg <- tmpFg
+              
+              if(!is.null(tmpFg))
+                style$fill$fillBg <- tmpBg
+            }else{
+              style$fill <- fills[[fillId]]
+            }
             
-            if(!is.null(tmpFg))
-              style$fill$fillBg <- tmpBg
-          }else{
-            style$fill <- fills[[fillId]]
           }
-          
         }
         
         
-      } ## end if !all(s == "0)
+      } ## end if !all(s == "0")
       
       ## we need to skip the first one as this is used as the base style
       if(flag)
@@ -575,7 +543,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## xl\worksheets
   file_names <- regmatches(worksheet_rId_mapping, regexpr("sheet[0-9]+\\.xml", worksheet_rId_mapping, perl = TRUE))
-  file_rIds <- as.integer(unlist(regmatches(worksheet_rId_mapping, gregexpr('(?<=Id="rId)[0-9]+', worksheet_rId_mapping, perl = TRUE)))) 
+  file_rIds <- unlist(getId(worksheet_rId_mapping))
   file_names <- file_names[match(sheetrId, file_rIds)]
   
   worksheetsXML <- file.path(dirname(worksheetsXML), file_names)
@@ -603,6 +571,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## sheetrId is order sheet appears in xlsx file
     ## create a 1-1 vector of rels to worksheet
+    ## have rels is boolean vector where i-the element is TRUE/FALSE if sheet has a rels sheet
     
     if(length(chartSheetsXML) == 0){
       allRels <- file.path(dirname(sheetRelsXML[1]), paste0(file_names, ".rels"))
@@ -639,7 +608,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         xml <- gsub("<Relationships .*?>", "", xml)
         xml <- gsub("</Relationships>", "", xml)
         xml <- .Call("openxlsx_getChildlessNode", xml, "<Relationship ", PACKAGE ="openxlsx")
-         
+        
       }else{
         xml <- "<Relationship >"
       }
@@ -765,7 +734,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
     
     if(length(drawingRelsXML) > 0){
-    
+      
       dRels <- lapply(drawingRelsXML, readLines, warn = FALSE)
       dRels <- unlist(lapply(dRels, removeHeadTag))
       dRels <- gsub("<Relationships .*?>", "", dRels)
