@@ -1,4 +1,13 @@
 
+getRId <- function(x){
+  regmatches(x, gregexpr('(?<= r:id=")[0-9A-Za-z]+', x, perl = TRUE))
+}
+
+getId <- function(x){
+  regmatches(x, gregexpr('(?<= Id=")[0-9A-Za-z]+', x, perl = TRUE))
+}
+
+
 
 ## creates style object based on column classes
 ## Used in writeData for styling when no borders and writeData table for all column-class based styling
