@@ -12,7 +12,7 @@
 
 \item{current}{A \code{Workbook} object}
 
-\item{...}{}
+\item{...}{ignored}
 }
 \description{
 Check equality of workbooks
