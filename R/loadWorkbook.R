@@ -144,12 +144,13 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         if(length(zoom) == 0)
           zoom <- 100
         
-        # tabColour <- regmatches(txt, regexpr('(?<=tabColor rgb=")[0-9]+', txt, perl = TRUE))
-        # if(length(tabColour) == 0)
-        tabColour <- NULL
+        tabColour <- .Call("openxlsx_getChildlessNode", txt, "<tabColor ", PACKAGE = "openxlsx")
+        if(length(tabColour) == 0)
+            tabColour <- NULL
+
         j <- j + 1L
         
-        wb$addChartSheet(sheetName = sheetNames[i], tabColour = tabColour, zoom = zoom)
+        wb$addChartSheet(sheetName = sheetNames[i], tabColour = tabColour, zoom = as.numeric(zoom))
       }else{
         wb$addWorksheet(sheetNames[i])
       }

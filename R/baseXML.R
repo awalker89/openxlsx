@@ -214,7 +214,7 @@ genBaseChartSheet <- function(sheetName,
                               zoom = 100){
   
   if(!is.null(tabColour))
-    tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
+    tabColour <- sprintf('<sheetPr>%s</sheetPr>', tabColour)
   
   if(zoom < 10){
     zoom <- 10
