@@ -157,8 +157,14 @@ writeData <- function(wb,
   colClasses <- lapply(x, function(x) tolower(class(x)))
   
 
-  ## write autoFilter, can only have a single filter per worksheet
+  
   sheetX <- wb$validateSheet(sheet)
+  if(wb$isChartSheet[[sheetX]]){
+    stop("Cannot write to chart sheet.")
+    return(NULL)
+  }
+    
+  ## write autoFilter, can only have a single filter per worksheet
   if(withFilter)
     wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
   
