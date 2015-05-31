@@ -2557,6 +2557,8 @@ all.equal.Workbook <- function(target, current, ...){
   #   "theme"
   
   
+  x <- target
+  y <- current
   
   
   
