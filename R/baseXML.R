@@ -17,6 +17,31 @@ genBaseContent_Type <- function(){
 }
 
 
+genBaseShapeVML <- function(clientData, id){
+  
+  paste0(sprintf('<v:shape id="_x0000_s%s" type="#_x0000_t202" style=\'position:absolute;', id),
+         'margin-left:107.25pt;margin-top:172.5pt;width:147pt;height:96pt;z-index:1;
+          visibility:visible;mso-wrap-style:tight\' fillcolor="#ffffe1" o:insetmode="auto">
+            <v:fill color2="#ffffe1"/>
+            <v:shadow color="black" obscured="t"/>
+            <v:path o:connecttype="none"/>
+            <v:textbox style=\'mso-direction-alt:auto\'>
+            <div style=\'text-align:left\'/>
+            </v:textbox>', clientData, '</v:shape>')
+}
+
+
+
+
+
+genClientData <- function(col, row){
+  
+  sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column><x:Visible/></x:ClientData>',
+          col, row-2L, col+1L, row+4L, row-1L, col-1L)
+  
+}
+
+
 genBaseRels <- function(){
   
   list(
@@ -109,6 +134,7 @@ genBaseSheet <- function(sheetName,
                    pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
                    headerFooter = hf,
                    drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
+                   legacyDrawing = NULL,
                    tableParts = NULL,
                    extLst = NULL
   ))
@@ -123,7 +149,8 @@ genBaseSheetRels <- function(sheetInd){
   
   c(
     sprintf('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing%s.xml"/>', sheetInd),
-    sprintf('<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings" Target="../printerSettings/printerSettings%s.bin"/>', sheetInd)
+    sprintf('<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings" Target="../printerSettings/printerSettings%s.bin"/>', sheetInd),
+    sprintf('<Relationship Id="rIdvml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing" Target="../drawings/vmlDrawing%s.vml"/>', sheetInd)
   )
   
 }
@@ -228,7 +255,7 @@ genBaseChartSheet <- function(sheetName,
                    pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
                    # pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
                    drawing = '<drawing r:id=\"rId1\"/>' ## will always be 1
-                   ))
+  ))
   
   names(tmp) <- sheetName
   

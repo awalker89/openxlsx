@@ -49,6 +49,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   drawingRelsXML     <- xmlFiles[grepl("drawing[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   sheetRelsXML       <- xmlFiles[grepl("sheet[0-9]+.xml.rels$", xmlFiles, perl = TRUE)]
   media              <- xmlFiles[grepl("image[0-9]+.[a-z]+$", xmlFiles, perl = TRUE)]
+  vmlDrawingXML      <- xmlFiles[grepl("drawings/vmlDrawing[0-9]+\\.vml$", xmlFiles, perl = TRUE)]
+  commentsXML        <- xmlFiles[grepl("xl/comments[0-9]+\\.xml", xmlFiles, perl = TRUE)]
+  
   
   charts             <- xmlFiles[grepl("xl/charts/.*xml$", xmlFiles, perl = TRUE)]
   chartsRels         <- xmlFiles[grepl("xl/charts/_rels", xmlFiles, perl = TRUE)]
@@ -77,7 +80,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   vbaProject         <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
   ## remove all EXCEPT media and charts
-  on.exit(expr = unlink(xmlFiles[!grepl("charts|media", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
   
   nSheets <- length(worksheetsXML) + length(chartSheetsXML)
   
@@ -146,8 +149,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         
         tabColour <- .Call("openxlsx_getChildlessNode", txt, "<tabColor ", PACKAGE = "openxlsx")
         if(length(tabColour) == 0)
-            tabColour <- NULL
-
+          tabColour <- NULL
+        
         j <- j + 1L
         
         wb$addChartSheet(sheetName = sheetNames[i], tabColour = tabColour, zoom = as.numeric(zoom))
@@ -268,6 +271,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     wb$Content_Types[grepl('<Override PartName="/xl/workbook.xml" ', wb$Content_Types)] <- '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.ms-excel.sheet.macroEnabled.main+xml"/>'
     wb$Content_Types <- c(wb$Content_Types, '<Override PartName="/xl/vbaProject.bin" ContentType="application/vnd.ms-office.vbaProject"/>')    
   }
+  
   
   ## xl\styles
   if(length(stylesXML) > 0){
@@ -595,7 +599,6 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           haveRels[i] <- TRUE
         }
       }
-      
     }
     
     ## sheet.xml have been reordered to be in the order of sheetrId
@@ -750,30 +753,100 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       
       ## split at one/two cell Anchor
       dXML <- regmatches(dXML, gregexpr("<xdr:(oneCell|twoCell|absolute)Anchor.*?</xdr:(oneCell|twoCell|absolute)Anchor>", dXML))
-    } 
+    }
     
     
     ## loop over all worksheets and assign drawing to sheet
-    for(i in 1:length(xml)){
+    if(any(hasDrawing)){
+      for(i in 1:length(xml)){
+        
+        if(hasDrawing[i]){
+          
+          target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+          target <- basename(gsub('"$', "", target))
+          
+          ## sheet_i has which(hasDrawing)[[i]]
+          relsInd <- grepl(target, drawingRelsXML)
+          if(any(relsInd))
+            wb$drawings_rels[i] <- dRels[relsInd]
+          
+          drawingInd <- grepl(target, drawingsXML)
+          if(any(drawingInd))
+            wb$drawings[i] <- dXML[drawingInd]
+          
+        }
+      }
+      rm(dXML)
+    }
+    
+    ## vmlDrawing has rIdA
+    if(length(vmlDrawingXML) > 0){
       
-      if(hasDrawing[i]){
+      wb$Content_Types <- c(wb$Content_Types, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
+      wb$vmlDrawing <- vmlDrawingXML
+      
+      drawXMLrelationship <- lapply(xml, function(x) x[grepl("drawings/vmlDrawing[0-9]+", x)])
+      hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
+      
+      for(i in 1:length(xml)){
         
-        target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-        target <- basename(gsub('"$', "", target))
-        
-        ## sheet_i has which(hasDrawing)[[i]]
-        relsInd <- grepl(target, drawingRelsXML)
-        if(any(relsInd))
-          wb$drawings_rels[i] <- dRels[relsInd]
-        
-        drawingInd <- grepl(target, drawingsXML)
-        if(any(drawingInd))
-          wb$drawings[i] <- dXML[drawingInd]
-        
-        
+        if(hasDrawing[i]){
+          
+          target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+          target <- basename(gsub('"$', "", target))
+          
+          rId <- "rIdvml"
+          wb$worksheets[[i]]$legacyDrawing <- '<legacyDrawing r:id="rIdvml"/>'
+          
+        }
       }
       
     }
+    
+    
+    ## vmlDrawing has rIdA
+    if(length(commentsXML) > 0){
+      
+      drawXMLrelationship <- lapply(xml, function(x) x[grepl("comments[0-9]+\\.xml", x)])
+      hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
+      
+      for(i in 1:length(xml)){
+        
+        if(hasDrawing[i]){
+          
+          target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+          target <- basename(gsub('"$', "", target))
+          
+          txt <- paste(readLines(commentsXML[grepl(target, commentsXML)], warn = FALSE), collapse = "\n")
+          txt <- removeHeadTag(txt)
+          
+          authors <- .Call("openxlsx_getNodes", txt, "<author>", PACKAGE = "openxlsx")
+          authors <- gsub("<author>|</author>", "", authors)
+          
+          comments <- .Call("openxlsx_getNodes", txt, "<commentList>", PACKAGE = "openxlsx")
+          comments <- gsub( "<commentList>", "", comments)
+          comments <- .Call("openxlsx_getNodes", comments, "<comment", PACKAGE = "openxlsx")
+          
+          refs <- regmatches(comments, regexpr('(?<=ref=").*?[^"]+', comments, perl = TRUE))
+          authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
+          
+          authors <- authors[authorsInds]
+          
+          comments <- regmatches(comments, gregexpr('(?<=<t( |>)).*?[^/]+', comments, perl = TRUE))
+          comments <- lapply(comments, function(x) gsub("<", "", x))
+          comments <- lapply(comments, function(x) gsub(".*?>", "", x, perl = TRUE))
+          wb$comments[[i]] <- lapply(1:length(comments), function(j){
+            
+            comment_list <- list("ref" = refs[j],
+                                 "author" = authors[j],
+                                 "comment" = comments[[j]])    
+            
+          })
+          
+        }
+      }
+    }
+    
     
     
     

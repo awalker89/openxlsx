@@ -42,6 +42,8 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "theme",
                                                
                                                "vbaProject",
+                                               "vmlDrawing",
+                                               "comments",
                                                
                                                "workbook",
                                                "workbook.xml.rels",
@@ -70,7 +72,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   theme <<- genBaseTheme()
   worksheets <<- list()
   worksheets_rels <<- list()
-  sharedStrings <<- list()
+  
   styles <<- genBaseStyleSheet()
   workbook <<- genBaseWorkbook()
   sheetData <<- list()
@@ -105,7 +107,10 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   slicerCaches <<- NULL
   
   vbaProject <<- NULL
+  vmlDrawing <<- NULL
+  comments <<- list()
   
+  sharedStrings <<- list()
   attr(sharedStrings, "uniqueCount") <<- 0
   
 })
@@ -161,15 +166,15 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
                                                  firstHeader = firstHeader, firstFooter = firstFooter))
   
   ## update content_tyes
-  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex))
+  ## add a drawing.xml for the worksheet
+  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex),
+                      sprintf('<Override PartName="/xl/drawings/drawing%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>', newSheetIndex))
   
   ## Update xl/rels
   workbook.xml.rels <<- c(workbook.xml.rels,
                           sprintf('<Relationship Id="rId0" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet%s.xml"/>', newSheetIndex)
   )
   
-  ## add a drawing.xml for the worksheet
-  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/drawings/drawing%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>', newSheetIndex))
   
   ## create sheet.rels to simplify id assignment
   worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex)
@@ -177,6 +182,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   drawings[[newSheetIndex]] <<- list()
   
   isChartSheet[[newSheetIndex]] <<- FALSE
+  comments[[newSheetIndex]] <<- list()
   
   sheetData[[newSheetIndex]] <<- list()
   styleInds[[newSheetIndex]] <<- list()
@@ -197,7 +203,7 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
 Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 100){
   
   newSheetIndex <- length(worksheets) + 1L
-
+  
   if(newSheetIndex > 1){
     sheetId <- max(as.integer(regmatches(workbook$sheets, regexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE)))) + 1L
   }else{
@@ -267,6 +273,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   nThemes <- length(theme)
   nPivots <- length(pivotTables)
   nSlicers <- length(slicers)
+  nComments <- sum(sapply(comments, length) > 0)
   
   relsDir <- file.path(tmpDir, "_rels")
   dir.create(path = relsDir, recursive = TRUE)
@@ -313,8 +320,26 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   if(length(charts) > 0)
     file.copy(from = dirname(charts[1]), to = file.path(tmpDir, "xl"), recursive = TRUE)
   
-  # if(length(chartSheets))
-  # file.copy(from = dirname(chartSheets[1]), to = file.path(tmpDir, "xl"), recursive = TRUE)
+  
+  ## xl/comments.xml
+  if(nComments > 0){
+    for(i in 1:nSheets){
+      if(length(comments[[i]]) > 0)
+        
+        fn <- sprintf("comments%s.xml", i)
+      
+      wb$Content_Types <- c(wb$Content_Types, 
+                            sprintf('<Override PartName="/xl/%s" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>', fn))
+      
+      worksheets_rels[[i]] <<- unique(c(worksheets_rels[[i]],
+                                        sprintf('<Relationship Id="rIdcomment" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../%s"/>', fn)))
+      
+      writeCommentXML(comment_list = comments[[i]], file_name = file.path(tmpDir, "xl", fn))
+    }
+    
+    .self$writeDrawingVML(xldrawingsDir)
+
+  }
   
   
   printDir <- file.path(tmpDir, "xl", "printerSettings")
@@ -467,6 +492,9 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     ## Remove relationship to sharedStrings
     ct <- ct[!grepl("sharedStrings", ct)]
   }
+  
+  if(nComments > 0)
+    ct <- c(ct, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
   
   
   
@@ -890,6 +918,43 @@ Workbook$methods(updateStyles2 = function(style){
   
   
   return(as.integer(styleId))
+  
+})
+
+
+Workbook$methods(writeDrawingVML = function(dir){
+  
+  for(i in 1:length(comments)){
+    
+    cd <- unlist(lapply(wb$comments[[i]],"[[", "clientData"))
+    nComments <- length(cd)
+    id <- 1025
+      
+    if(nComments > 0){
+      
+      write(x = paste('<xml xmlns:v="urn:schemas-microsoft-com:vml"
+                    xmlns:o="urn:schemas-microsoft-com:office:office"
+                    xmlns:x="urn:schemas-microsoft-com:office:excel">
+                    <o:shapelayout v:ext="edit">
+                    <o:idmap v:ext="edit" data="1"/>
+                    </o:shapelayout>
+                    <v:shapetype id="_x0000_t202" coordsize="21600,21600" o:spt="202"
+                    path="m,l,21600r21600,l21600,xe">
+                    <v:stroke joinstyle="miter"/>
+                    <v:path gradientshapeok="t" o:connecttype="rect"/>
+                    </v:shapetype>'), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)))
+      
+      for(j in 1:nComments){
+        id <- id + 1L
+        write(x = genBaseShapeVML(cd[j], id), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+      }
+      
+      write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+      
+      worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
+      
+    }
+  }
   
 })
 
@@ -1990,6 +2055,7 @@ Workbook$methods(preSaveCleanUp = function(){
   ## Every worksheet has a printerSettings as r:id 2
   ## Tables from r:id 3 to nTables+3 - 1
   ## HyperLinks from nTables+3 to nTables+3+nHyperLinks-1
+  ## vmlDrawing to have rId 
   
   sheetRIds <- as.integer(unlist(regmatches(workbook$sheets, gregexpr('(?<=r:id="rId)[0-9]+', workbook$sheets, perl = TRUE))))
   
@@ -2021,7 +2087,7 @@ Workbook$methods(preSaveCleanUp = function(){
   ## don't want to re-assign rIds for pivot tables or slicer caches
   pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)]
   slicerNode <- workbook.xml.rels[which(grepl("slicerCache[0-9]+.xml", workbook.xml.rels))]
-
+  
   ## Reorder children of workbook.xml.rels
   workbook.xml.rels <<- workbook.xml.rels[c(sheetInds, extRefInds, themeInd, connectionsInd, stylesInd, sharedStringsInd, tableInds)]
   

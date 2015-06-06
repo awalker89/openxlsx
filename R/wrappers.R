@@ -1947,6 +1947,11 @@ removeFilter <- function(wb, sheet){
 
 
 
+
+
+
+
+
 #' @name setHeader
 #' @title Set header for all worksheets
 #' @author Alexander Walker
