@@ -4,12 +4,14 @@
 \alias{convertToDateTime}
 \title{Convert from excel time number to R POSIXct type.}
 \usage{
-convertToDateTime(x, origin = "1900-01-01")
+convertToDateTime(x, origin = "1900-01-01", ...)
 }
 \arguments{
 \item{x}{A numeric vector}
 
 \item{origin}{date. Default value is for Windows Excel 2010}
+
+\item{...}{Additional parameters passed to as.POSIXct}
 }
 \description{
 Convert from excel time number to R POSIXct type.
@@ -21,5 +23,6 @@ Excel stores dates as number of days from some origin day
 ## 2014-07-01, 2014-06-30, 2014-06-29
 x <- c(41821.8127314815, 41820.8127314815, NA, 41819, NaN)
 convertToDateTime(x)
+convertToDateTime(x, tx = "Australia/Perth")
 }
 
