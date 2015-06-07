@@ -34,10 +34,11 @@ genBaseShapeVML <- function(clientData, id){
 
 
 
-genClientData <- function(col, row){
-  
-  sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column><x:Visible/></x:ClientData>',
-          col, row-2L, col+1L, row+4L, row-1L, col-1L)
+genClientData <- function(col, row, height, width){
+
+  sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/>
+          <x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column><x:Visible/></x:ClientData>',
+          col, row-2L, col + width - 1L, row + height - 1L, row-1L, col-1L)
   
 }
 

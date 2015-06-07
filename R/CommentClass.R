@@ -5,17 +5,21 @@ Comment <- setRefClass("Comment",
                        
                        fields = c("text",
                                   "author",
-                                  "style"),
+                                  "style",
+                                  "width",
+                                  "height"),
                        
                        methods = list()
 )
 
 
-Comment$methods(initialize = function(text, author, style){
+Comment$methods(initialize = function(text, author, style, width = 2, height = 4){
   
   text <<- text
   author <<- author
   style <<- style
+  width <<- width
+  height <<- height
   
 })
 
@@ -64,27 +68,34 @@ Comment$methods(show = function(){
 
 #' @name createComment
 #' @title write a cell comment
-#' @param wb A workbook object
-#' @param sheet A vector of names or indices of worksheets
-#' @param col Column a column number of letter 
-#' @param row A row number.
 #' @param comment Comment text. Character vector of length 1
 #' @param author Author of comment. Character vector of length 1
-#' @param xy An alternative to specifying \code{col} and
-#' \code{row} individually.  A vector of the form
-#' \code{c(col, row)}.
+#' @param style A Style object. See \code{\link{createStyle}}.
+#' @param width Textbox integer width in number of cells
+#' @param height Textbox integer height in number of cells
 #' @export
+#' @seealso \code{\link{writeComment}}
 #' @examples
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "Sheet 1")
 #' 
-#' writeComment(wb, 1, col = "A", row = 1, 
-#'    comment = "this is my comment")
-#'
-#' saveWorkbook(wb, file = "writeCommentExample.xlsx", overwrite = TRUE)
+#' c1 <- createComment(comment = "this is comment")
+#' writeComment(wb, 1, col = "B", row = 10, comment = c1)
+#' 
+#' s1 <- createStyle(fontSize = 12, fontColour = "red", textDecoration = c("BOLD"))
+#' s2 <- createStyle(fontSize = 9, fontColour = "black")
+#' 
+#' c2 <- createComment(comment = c("This Part Bold red\n\n", "This part black"), style = c(s1, s2))
+#' c2
+#' 
+#' writeComment(wb, 1, col = 6 , row = 3, comment = c2)
+#' 
+#' saveWorkbook(wb, file = "createCommentExample.xlsx", overwrite = TRUE)
 createComment <- function(comment,
                           author = Sys.getenv("USERNAME"),
-                          style = NULL){
+                          style = NULL,
+                          width = 2,
+                          height = 4){
   
   
   
@@ -93,6 +104,16 @@ createComment <- function(comment,
   
   if(!"character" %in% class(comment))
     stop("comment argument must be a character vector")
+  
+  if(!"numeric" %in% class(width))
+    stop("width argument must be a numeric vector")
+  
+  if(!"numeric" %in% class(height))
+    stop("height argument must be a numeric vector")
+  
+  
+  width <- round(width)
+  height <- round(height)
   
   n <- length(comment)
   author <- author[[1]]
@@ -104,7 +125,7 @@ createComment <- function(comment,
   comment <- replaceIllegalCharacters(comment)
   
   
-  invisible(Comment$new(text = comment, author = author, style = style))
+  invisible(Comment$new(text = comment, author = author, style = style, width = width[1], height = height[1]))
   
 }
 
@@ -118,18 +139,27 @@ createComment <- function(comment,
 #' @param sheet A vector of names or indices of worksheets
 #' @param col Column a column number of letter 
 #' @param row A row number.
-#' @param comment A Comment object
+#' @param comment A Comment object. See \code{\link{createComment}}.
 #' @param xy An alternative to specifying \code{col} and
 #' \code{row} individually.  A vector of the form
 #' \code{c(col, row)}.
 #' @export
+#' @seealso \code{\link{createComment}}
 #' @examples
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "Sheet 1")
 #' 
-#' writeComment(wb, 1, col = "A", row = 1, 
-#'    comment = "this is my comment")
-#'
+#' c1 <- createComment(comment = "this is comment")
+#' writeComment(wb, 1, col = "B", row = 10, comment = c1)
+#' 
+#' s1 <- createStyle(fontSize = 12, fontColour = "red", textDecoration = c("BOLD"))
+#' s2 <- createStyle(fontSize = 9, fontColour = "black")
+#' 
+#' c2 <- createComment(comment = c("This Part Bold red\n\n", "This part black"), style = c(s1, s2))
+#' c2
+#' 
+#' writeComment(wb, 1, col = 6 , row = 3, comment = c2)
+#' 
 #' saveWorkbook(wb, file = "writeCommentExample.xlsx", overwrite = TRUE)
 writeComment <- function(wb, sheet, col, row, comment, xy = NULL){
   
@@ -166,7 +196,7 @@ writeComment <- function(wb, sheet, col, row, comment, xy = NULL){
                        "author" = comment$author,
                        "comment" = comment$text,
                        "style" = rPr,
-                       "clientData" = genClientData(col, row))
+                       "clientData" = genClientData(col, row, height = comment$height, width = comment$width))
   
   wb$comments[[sheet]] <- append(wb$comments[[sheet]], list(comment_list))
   

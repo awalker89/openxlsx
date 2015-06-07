@@ -4,24 +4,19 @@
 \alias{createComment}
 \title{write a cell comment}
 \usage{
-createComment(comment, author = Sys.getenv("USERNAME"), style = NULL)
+createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
+  width = 2, height = 4)
 }
 \arguments{
 \item{comment}{Comment text. Character vector of length 1}
 
 \item{author}{Author of comment. Character vector of length 1}
 
-\item{wb}{A workbook object}
+\item{style}{A Style object. See \code{\link{createStyle}}.}
 
-\item{sheet}{A vector of names or indices of worksheets}
+\item{width}{Textbox integer width in number of cells}
 
-\item{col}{Column a column number of letter}
-
-\item{row}{A row number.}
-
-\item{xy}{An alternative to specifying \code{col} and
-\code{row} individually.  A vector of the form
-\code{c(col, row)}.}
+\item{height}{Textbox integer height in number of cells}
 }
 \description{
 write a cell comment
@@ -30,9 +25,20 @@ write a cell comment
 wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")
 
-writeComment(wb, 1, col = "A", row = 1,
-   comment = "this is my comment")
+c1 <- createComment(comment = "this is comment")
+writeComment(wb, 1, col = "B", row = 10, comment = c1)
 
-saveWorkbook(wb, file = "writeCommentExample.xlsx", overwrite = TRUE)
+s1 <- createStyle(fontSize = 12, fontColour = "red", textDecoration = c("BOLD"))
+s2 <- createStyle(fontSize = 9, fontColour = "black")
+
+c2 <- createComment(comment = c("This Part Bold red\\n\\n", "This part black"), style = c(s1, s2))
+c2
+
+writeComment(wb, 1, col = 6 , row = 3, comment = c2)
+
+saveWorkbook(wb, file = "createCommentExample.xlsx", overwrite = TRUE)
+}
+\seealso{
+\code{\link{writeComment}}
 }
 
