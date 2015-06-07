@@ -19,10 +19,16 @@ genBaseContent_Type <- function(){
 
 genBaseShapeVML <- function(clientData, id){
   
+  if(grepl("visible", clientData, ignore.case = TRUE)){
+    visible <- "visible"
+  }else{
+    visible <- "hidden"
+  }
+  
   paste0(sprintf('<v:shape id="_x0000_s%s" type="#_x0000_t202" style=\'position:absolute;', id),
-         'margin-left:107.25pt;margin-top:172.5pt;width:147pt;height:96pt;z-index:1;
-          visibility:visible;mso-wrap-style:tight\' fillcolor="#ffffe1" o:insetmode="auto">
-            <v:fill color2="#ffffe1"/>
+         sprintf('margin-left:107.25pt;margin-top:172.5pt;width:147pt;height:96pt;z-index:1;
+          visibility:%s;mso-wrap-style:tight\' fillcolor="#ffffe1" o:insetmode="auto">',  visible),
+            '<v:fill color2="#ffffe1"/>
             <v:shadow color="black" obscured="t"/>
             <v:path o:connecttype="none"/>
             <v:textbox style=\'mso-direction-alt:auto\'>
@@ -34,11 +40,17 @@ genBaseShapeVML <- function(clientData, id){
 
 
 
-genClientData <- function(col, row, height, width){
+genClientData <- function(col, row, visible, height, width){
 
-  sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/>
-          <x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column><x:Visible/></x:ClientData>',
+  txt <- sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column>',
           col, row-2L, col + width - 1L, row + height - 1L, row-1L, col-1L)
+  
+  if(visible)
+    txt <- paste0(txt, '<x:Visible/>')
+  
+  txt <- paste0(txt, '</x:ClientData>')
+  
+  return(txt)
   
 }
 

@@ -5,7 +5,7 @@
 \title{write a cell comment}
 \usage{
 createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
-  width = 2, height = 4)
+  visible = TRUE, width = 2, height = 4)
 }
 \arguments{
 \item{comment}{Comment text. Character vector of length 1}
@@ -13,6 +13,8 @@ createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
 \item{author}{Author of comment. Character vector of length 1}
 
 \item{style}{A Style object. See \code{\link{createStyle}}.}
+
+\item{visible}{TRUE or FALSE. Is comment visible.}
 
 \item{width}{Textbox integer width in number of cells}
 

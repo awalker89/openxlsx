@@ -6,6 +6,7 @@ Comment <- setRefClass("Comment",
                        fields = c("text",
                                   "author",
                                   "style",
+                                  "visible",
                                   "width",
                                   "height"),
                        
@@ -13,11 +14,12 @@ Comment <- setRefClass("Comment",
 )
 
 
-Comment$methods(initialize = function(text, author, style, width = 2, height = 4){
+Comment$methods(initialize = function(text, author, style, visible = TRUE, width = 2, height = 4){
   
   text <<- text
   author <<- author
   style <<- style
+  visible <<- visible
   width <<- width
   height <<- height
   
@@ -71,6 +73,7 @@ Comment$methods(show = function(){
 #' @param comment Comment text. Character vector of length 1
 #' @param author Author of comment. Character vector of length 1
 #' @param style A Style object. See \code{\link{createStyle}}.
+#' @param visible TRUE or FALSE. Is comment visible.
 #' @param width Textbox integer width in number of cells
 #' @param height Textbox integer height in number of cells
 #' @export
@@ -94,6 +97,7 @@ Comment$methods(show = function(){
 createComment <- function(comment,
                           author = Sys.getenv("USERNAME"),
                           style = NULL,
+                          visible = TRUE,
                           width = 2,
                           height = 4){
   
@@ -111,12 +115,17 @@ createComment <- function(comment,
   if(!"numeric" %in% class(height))
     stop("height argument must be a numeric vector")
   
+  if(!"logical" %in% class(visible))
+    stop("visible argument must be a logical vector")
+  
+  
   
   width <- round(width)
   height <- round(height)
   
   n <- length(comment)
-  author <- author[[1]]
+  author <- author[1]
+  visible <- visible[1]
   
   if(is.null(style))
     style <- createStyle(fontName = "Tahoma", fontSize = 9, fontColour = "black")
@@ -125,7 +134,7 @@ createComment <- function(comment,
   comment <- replaceIllegalCharacters(comment)
   
   
-  invisible(Comment$new(text = comment, author = author, style = style, width = width[1], height = height[1]))
+  invisible(Comment$new(text = comment, author = author, style = style, visible = visible, width = width[1], height = height[1]))
   
 }
 
@@ -196,12 +205,62 @@ writeComment <- function(wb, sheet, col, row, comment, xy = NULL){
                        "author" = comment$author,
                        "comment" = comment$text,
                        "style" = rPr,
-                       "clientData" = genClientData(col, row, height = comment$height, width = comment$width))
+                       "clientData" = genClientData(col, row, visible = comment$visible, height = comment$height, width = comment$width))
   
   wb$comments[[sheet]] <- append(wb$comments[[sheet]], list(comment_list))
   
   invisible(wb)
   
 }
+
+
+
+
+
+#' @name removeComment
+#' @title Remove a comment from a cell
+#' @param wb A workbook object
+#' @param sheet A vector of names or indices of worksheets
+#' @param cols Columns to delete comments from
+#' @param rows Rows to delete comments from
+#' @param gridExpand If \code{TRUE}, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
+#' will be removed.
+#' @export
+#' @seealso \code{\link{createComment}}
+#' @seealso \code{\link{writeComment}}
+removeComment <- function(wb, sheet, cols, rows, gridExpand = TRUE){
+  
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  cols <- convertFromExcelRef(cols)
+  rows <- as.integer(rows)
+  
+  ## rows and cols need to be the same length
+  if(gridExpand){
+    combs <- expand.grid(rows, cols) 
+    rows <- combs[,1]
+    cols <- combs[,2]
+  }
+  
+  if(length(rows) != length(cols)){
+    stop("Length of rows and cols must be equal.")
+  }
+  
+  comb <- paste0(.Call('openxlsx_convert2ExcelRef', cols, LETTERS, PACKAGE="openxlsx"), rows)
+  toKeep <- !sapply(wb$comments[[sheet]], "[[", "ref") %in% comb
+  
+  wb$comments[[sheet]] <- wb$comments[[sheet]][toKeep]
+  
+}
+
+
+
+
+
+
 
 
