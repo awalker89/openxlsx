@@ -779,42 +779,34 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       rm(dXML)
     }
     
-    ## vmlDrawing has rIdA
-    if(length(vmlDrawingXML) > 0){
+    
+    
+    ## vmlDrawing and comments
+    if(length(commentsXML) > 0){
       
       wb$Content_Types <- c(wb$Content_Types, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
-      wb$vmlDrawing <- vmlDrawingXML
       
-      drawXMLrelationship <- lapply(xml, function(x) x[grepl("drawings/vmlDrawing[0-9]+", x)])
+      drawXMLrelationship <- lapply(xml, function(x) x[grepl("drawings/vmlDrawing[0-9]+\\.vml", x)])
       hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
+      
+      commentXMLrelationship <- lapply(xml, function(x) x[grepl("comments[0-9]+\\.xml", x)])
+      hasComment <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
       
       for(i in 1:length(xml)){
         
-        if(hasDrawing[i]){
+        if(hasComment[i]){
           
           target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           target <- basename(gsub('"$', "", target))
           
-          rId <- "rIdvml"
-          wb$worksheets[[i]]$legacyDrawing <- '<legacyDrawing r:id="rIdvml"/>'
+          txt <- paste(readLines(vmlDrawingXML[grepl(target, vmlDrawingXML)], warn = FALSE), collapse = "\n")
+          txt <- removeHeadTag(txt)
           
-        }
-      }
-      
-    }
-    
-    
-    ## vmlDrawing has rIdA
-    if(length(commentsXML) > 0){
-      
-      drawXMLrelationship <- lapply(xml, function(x) x[grepl("comments[0-9]+\\.xml", x)])
-      hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
-      
-      for(i in 1:length(xml)){
-        
-        if(hasDrawing[i]){
+          cd <- .Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx")
+          cd <- paste0(cd, ">")
           
-          target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+          
+          target <- unlist(lapply(commentXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           target <- basename(gsub('"$', "", target))
           
           txt <- paste(readLines(commentsXML[grepl(target, commentsXML)], warn = FALSE), collapse = "\n")
@@ -828,20 +820,28 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           comments <- .Call("openxlsx_getNodes", comments, "<comment", PACKAGE = "openxlsx")
           
           refs <- regmatches(comments, regexpr('(?<=ref=").*?[^"]+', comments, perl = TRUE))
-          authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
           
+          authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
           authors <- authors[authorsInds]
+          
+          style <- lapply(comments, function(txt) .Call("openxlsx_getNodes", txt, "<rPr>", PACKAGE = "openxlsx"))
           
           comments <- regmatches(comments, gregexpr('(?<=<t( |>)).*?[^/]+', comments, perl = TRUE))
           comments <- lapply(comments, function(x) gsub("<", "", x))
           comments <- lapply(comments, function(x) gsub(".*?>", "", x, perl = TRUE))
+          
+          
           wb$comments[[i]] <- lapply(1:length(comments), function(j){
             
             comment_list <- list("ref" = refs[j],
                                  "author" = authors[j],
-                                 "comment" = comments[[j]])    
+                                 "comment" = comments[[j]],
+                                 "style"  = style[[j]],
+                                 "clientData" = cd[[j]])    
             
           })
+          
+          
           
         }
       }
