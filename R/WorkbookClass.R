@@ -36,7 +36,7 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "sheetData",
                                                
                                                "styleObjects",
-                                               "cellStyleObjects",
+                                               # "cellStyleObjects",
                                                
                                                
                                                "styles",
@@ -85,7 +85,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   colWidths <<- list()
   
   styleObjects <<- list()
-  cellStyleObjects <<- list()
+  # cellStyleObjects <<- list()
   styleInds <<- list()
   
   
@@ -1051,8 +1051,8 @@ Workbook$methods(updateStyles = function(style){
   }
   
   
-  if(!is.null(style$xfId))
-    xfNode$xfId <- style$xfId
+  # if(!is.null(style$xfId))
+    # xfNode$xfId <- style$xfId
   
   
   ## Alignment
@@ -2328,9 +2328,9 @@ Workbook$methods(preSaveCleanUp = function(){
     }
   }
   
-  
-  if(length(cellStyleObjects) > 0)
-    .self$updateCellStyles()
+  ## This doen't actually do anything to commenting all out
+  # if(length(cellStyleObjects) > 0)
+    # .self$updateCellStyles()
   
     
   
@@ -3256,139 +3256,139 @@ Workbook$methods(loadStyles = function(stylesXML){
   
 
   
-  cellStyleXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyleXfs", PACKAGE = "openxlsx") 
-  xf <- .Call("openxlsx_getChildlessNode", cellStyleXfs, "<xf ", PACKAGE = "openxlsx")
-  if(length(xf) > 0){
-    
-    xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
-    xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
-    xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
-    
-    for(i in 1:length(xf))
-      names(xfVals[[i]]) <- xfNames[[i]]
-    
-    cellStyleObjects_tmp <- list()
-    flag <- FALSE
-    for(s in xfVals){
-      
-      style <- createStyle()
-      if(any(s != "0")){
-        
-        
-        if("numFmtId" %in% names(s)){
-          if(s[["numFmtId"]] != "0"){
-            if(as.integer(s[["numFmtId"]]) < 164){
-              style$numFmt <- list(numFmtId = s[["numFmtId"]])
-            }else if(numFmtFlag){
-              style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
-            }
-          }
-        }
-        
-        if("fontId" %in% names(s)){
-          if(s[["fontId"]] != "0"){
-            thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
-            
-            if("sz" %in% names(thisFont))
-              style$fontSize <- thisFont$sz
-            
-            if("name" %in% names(thisFont))
-              style$fontName <- thisFont$name
-            
-            if("family" %in% names(thisFont))
-              style$fontFamily <- thisFont$family
-            
-            if("color" %in% names(thisFont))
-              style$fontColour <- thisFont$color
-            
-            if("scheme" %in% names(thisFont))
-              style$fontScheme <- thisFont$scheme
-            
-            flags <- c("bold", "italic", "underline") %in% names(thisFont)
-            if(any(flags)){
-              style$fontDecoration <- NULL
-              if(flags[[1]])
-                style$fontDecoration <- append(style$fontDecoration, "BOLD")
-              
-              if(flags[[2]])
-                style$fontDecoration <- append(style$fontDecoration, "ITALIC")
-              
-              if(flags[[3]])
-                style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
-            }
-          }
-        }
-        
-  
-        ## Border
-        if("borderId" %in% names(s)){
-          if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
-            
-            thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
-            
-            if("borderLeft" %in% names(thisBorder)){
-              style$borderLeft    <- thisBorder$borderLeft
-              style$borderLeftColour <- thisBorder$borderLeftColour
-            }
-            
-            if("borderRight" %in% names(thisBorder)){
-              style$borderRight    <- thisBorder$borderRight
-              style$borderRightColour <- thisBorder$borderRightColour
-            }
-            
-            if("borderTop" %in% names(thisBorder)){
-              style$borderTop    <- thisBorder$borderTop
-              style$borderTopColour <- thisBorder$borderTopColour
-            }
-            
-            if("borderBottom" %in% names(thisBorder)){
-              style$borderBottom    <- thisBorder$borderBottom
-              style$borderBottomColour <- thisBorder$borderBottomColour
-            }
-          }
-        }
-        
-      
-        if("fillId" %in% names(s)){
-          if(s[["fillId"]] != "0"){
-            
-            fillId <- as.integer(s[["fillId"]]) + 1L
-            
-            if("fgColor" %in% names(fills[[fillId]])){
-              
-              tmpFg <- fills[[fillId]]$fgColor
-              tmpBg <- fills[[fillId]]$bgColor
-              
-              if(!is.null(tmpFg))
-                style$fill$fillFg <- tmpFg
-              
-              if(!is.null(tmpFg))
-                style$fill$fillBg <- tmpBg
-            }else{
-              style$fill <- fills[[fillId]]
-            }
-            
-          }
-        }
-        
-        
-        
-  
-      } ## end if !all(s == "0")
-      
-      cellStyleObjects_tmp <- append(cellStyleObjects_tmp , list(style))
-      
-    }  ## end of for loop through styles s in ...
-   
-    cellStyleObjects <<- cellStyleObjects_tmp
-     
-  }
-    
-  
-  cellStyles <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyles", PACKAGE = "openxlsx") 
-  cellStyles <- .Call("openxlsx_getChildlessNode", cellStyles, "<cellStyle ", PACKAGE = "openxlsx") 
-  if(length(cellStyles) > 0)
-    styles$cellStyles <<- cellStyles
+#   cellStyleXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyleXfs", PACKAGE = "openxlsx") 
+#   xf <- .Call("openxlsx_getChildlessNode", cellStyleXfs, "<xf ", PACKAGE = "openxlsx")
+#   if(length(xf) > 0){
+#     
+#     xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
+#     xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
+#     xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
+#     
+#     for(i in 1:length(xf))
+#       names(xfVals[[i]]) <- xfNames[[i]]
+#     
+#     cellStyleObjects_tmp <- list()
+#     flag <- FALSE
+#     for(s in xfVals){
+#       
+#       style <- createStyle()
+#       if(any(s != "0")){
+#         
+#         
+#         if("numFmtId" %in% names(s)){
+#           if(s[["numFmtId"]] != "0"){
+#             if(as.integer(s[["numFmtId"]]) < 164){
+#               style$numFmt <- list(numFmtId = s[["numFmtId"]])
+#             }else if(numFmtFlag){
+#               style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
+#             }
+#           }
+#         }
+#         
+#         if("fontId" %in% names(s)){
+#           if(s[["fontId"]] != "0"){
+#             thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
+#             
+#             if("sz" %in% names(thisFont))
+#               style$fontSize <- thisFont$sz
+#             
+#             if("name" %in% names(thisFont))
+#               style$fontName <- thisFont$name
+#             
+#             if("family" %in% names(thisFont))
+#               style$fontFamily <- thisFont$family
+#             
+#             if("color" %in% names(thisFont))
+#               style$fontColour <- thisFont$color
+#             
+#             if("scheme" %in% names(thisFont))
+#               style$fontScheme <- thisFont$scheme
+#             
+#             flags <- c("bold", "italic", "underline") %in% names(thisFont)
+#             if(any(flags)){
+#               style$fontDecoration <- NULL
+#               if(flags[[1]])
+#                 style$fontDecoration <- append(style$fontDecoration, "BOLD")
+#               
+#               if(flags[[2]])
+#                 style$fontDecoration <- append(style$fontDecoration, "ITALIC")
+#               
+#               if(flags[[3]])
+#                 style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
+#             }
+#           }
+#         }
+#         
+#   
+#         ## Border
+#         if("borderId" %in% names(s)){
+#           if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
+#             
+#             thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
+#             
+#             if("borderLeft" %in% names(thisBorder)){
+#               style$borderLeft    <- thisBorder$borderLeft
+#               style$borderLeftColour <- thisBorder$borderLeftColour
+#             }
+#             
+#             if("borderRight" %in% names(thisBorder)){
+#               style$borderRight    <- thisBorder$borderRight
+#               style$borderRightColour <- thisBorder$borderRightColour
+#             }
+#             
+#             if("borderTop" %in% names(thisBorder)){
+#               style$borderTop    <- thisBorder$borderTop
+#               style$borderTopColour <- thisBorder$borderTopColour
+#             }
+#             
+#             if("borderBottom" %in% names(thisBorder)){
+#               style$borderBottom    <- thisBorder$borderBottom
+#               style$borderBottomColour <- thisBorder$borderBottomColour
+#             }
+#           }
+#         }
+#         
+#       
+#         if("fillId" %in% names(s)){
+#           if(s[["fillId"]] != "0"){
+#             
+#             fillId <- as.integer(s[["fillId"]]) + 1L
+#             
+#             if("fgColor" %in% names(fills[[fillId]])){
+#               
+#               tmpFg <- fills[[fillId]]$fgColor
+#               tmpBg <- fills[[fillId]]$bgColor
+#               
+#               if(!is.null(tmpFg))
+#                 style$fill$fillFg <- tmpFg
+#               
+#               if(!is.null(tmpFg))
+#                 style$fill$fillBg <- tmpBg
+#             }else{
+#               style$fill <- fills[[fillId]]
+#             }
+#             
+#           }
+#         }
+#         
+#         
+#         
+#   
+#       } ## end if !all(s == "0")
+#       
+#       cellStyleObjects_tmp <- append(cellStyleObjects_tmp , list(style))
+#       
+#     }  ## end of for loop through styles s in ...
+#    
+#     cellStyleObjects <<- cellStyleObjects_tmp
+#      
+#   }
+#     
+#   
+#   cellStyles <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyles", PACKAGE = "openxlsx") 
+#   cellStyles <- .Call("openxlsx_getChildlessNode", cellStyles, "<cellStyle ", PACKAGE = "openxlsx") 
+#   if(length(cellStyles) > 0)
+#     styles$cellStyles <<- cellStyles
   
   
 
