@@ -2369,6 +2369,49 @@ getDateOrigin <- function(xlsxFile){
 
 
 
+
+#' @name getSheetNames
+#' @title Returns the worksheet names within an xlsx file
+#' @author Alexander Walker
+#' @param file An xlsx or xlsm file.
+#' @return Character vector of worksheet names.
+#' @examples
+#' getSheetNames(system.file("readTest.xlsx", package = "openxlsx"))
+#' 
+#' @export
+getSheetNames <- function(file){
+  
+  if(!file.exists(xlsxFile))
+    stop("Excel file does not exist.")
+  
+  if(grepl("\\.xls$|\\.xlm$", xlsxFile))
+    stop("openxlsx can not read .xls or .xlm files!")
+  
+  ## create temp dir and unzip
+  xmlDir <- file.path(tempdir(), "_excelXMLRead")
+  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  
+  on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
+  
+  workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
+  workbook <- readLines(workbook, warn=FALSE, encoding="UTF-8")
+  workbook <-  removeHeadTag(workbook)
+  sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
+  sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
+  sheetNames <- replaceXMLEntities(sheetNames)
+  
+  return(sheetNames)
+  
+}
+
+
+
+
+
+
+
+
+
 #' @name conditionalFormat
 #' @title Add conditional formatting to cells
 #' @description DEPRECATED! USE \code{\link{conditionalFormatting}}
