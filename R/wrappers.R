@@ -494,6 +494,7 @@ convertFromExcelRef <- function(col){
 #'   
 #' @param wrapText Logical. If \code{TRUE} cell contents will wrap to fit in column.  
 #' @param textRotation Rotation of text in degrees. 255 for vertial text.
+#' @param indent Horizontal indentation of cell contents.
 #' @return A style object
 #' @export
 #' @examples
@@ -529,7 +530,8 @@ createStyle <- function(fontName = NULL,
                         bgFill = NULL, fgFill = NULL,
                         halign = NULL, valign = NULL, 
                         textDecoration = NULL, wrapText = FALSE,
-                        textRotation = NULL){
+                        textRotation = NULL,
+                        indent = NULL){
   
   ### Error checking
   
@@ -586,6 +588,11 @@ createStyle <- function(fontName = NULL,
   
   if(!is.logical(wrapText))
     stop("Invalid wrapText")
+  
+  if(!is.null(indent)){
+    if(!is.numeric(indent) & !is.integer(indent))
+      stop("indent must be numeric")
+  }
   
   textDecoration <- tolower(textDecoration)
   if(!is.null(textDecoration)){
@@ -682,6 +689,9 @@ createStyle <- function(fontName = NULL,
   
   if(!is.null(valign))
     style$valign <- valign
+  
+  if(!is.null(indent))
+    style$indent <- indent
   
   if(wrapText)
     style$wrapText <- TRUE
@@ -2900,6 +2910,13 @@ all.equal.Workbook <- function(target, current, ...){
         message(sprintf("styleObjects '%s' valign not equal", i))
         return(FALSE)
       }
+      
+      flag <-isTRUE(all.equal(sx$style$indent, sy$style$indent))
+      if(!flag){
+        message(sprintf("styleObjects '%s' indent not equal", i))
+        return(FALSE)
+      }
+      
       
       flag <-isTRUE(all.equal(sx$style$textRotation, sy$style$textRotation))
       if(!flag){

@@ -19,10 +19,12 @@ Style <- setRefClass("Style",
                                 "borderBottomColour",
                                 "halign",
                                 "valign",
+                                "indent",
                                 "textRotation",
                                 "numFmt",
                                 "fill",
-                                "wrapText"),
+                                "wrapText",
+                                "xfId"),
   methods = list()
 )
 
@@ -47,10 +49,13 @@ Style$methods(initialize = function(){
   
   halign <<- NULL
   valign <<- NULL
+  indent <<- NULL
   textRotation <<- NULL
   numFmt <<- NULL
   fill <<- NULL
   wrapText <<- NULL
+  xfId <<- NULL
+  
 })
 
 
@@ -118,6 +123,9 @@ mergeStyle = function(oldStyle, newStyle){
   if(!is.null(newStyle$valign))
     oldStyle$valign <- newStyle$valign
   
+  if(!is.null(newStyle$indent))
+    oldStyle$indent <- newStyle$indent
+  
   if(!is.null(newStyle$textRotation))
     oldStyle$textRotation <- newStyle$textRotation
   
@@ -130,7 +138,9 @@ mergeStyle = function(oldStyle, newStyle){
   if(!is.null(newStyle$wrapText))
     oldStyle$wrapText <- newStyle$wrapText
     
-    
+  if(!is.null(newStyle$xfId))
+    oldStyle$xfId <- newStyle$xfId
+  
     return(oldStyle)
 
 }
@@ -188,8 +198,11 @@ Style$methods(show = function(print = TRUE){
   if(!is.null(halign))
     styleShow <- append(styleShow, sprintf("Cell horz. align: %s \n", halign))  ## Cell horizontal alignment
   
-  if(!is.null(halign))
+  if(!is.null(valign))
     styleShow <- append(styleShow, sprintf("Cell vert. align: %s \n", valign))  ## Cell vertical alignment 
+  
+  if(!is.null(indent))
+    styleShow <- append(styleShow, sprintf("Cell indent: %s \n", indent))  ## Cell indent
   
   if(!is.null(textRotation))
     styleShow <- append(styleShow, sprintf("Cell text rotation: %s \n", textRotation))  ## Cell text rotation 
@@ -236,11 +249,13 @@ Style$methods(as.list = function(){
   
   "halign" = halign,
   "valign" = valign,
+  "indent" = indent,
   "textRotation" = textRotation,
   "numFmt" = numFmt,
   "fillFg" = fill$fillFg,
   "fillBg" = fill$fillBg,
-  "wrapText" = wrapText
+  "wrapText" = wrapText,
+  "xfId" = xfId
   )
   
   l[sapply(l, length) > 0]
