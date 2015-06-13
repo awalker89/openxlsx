@@ -6,7 +6,7 @@
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
-  rows = NULL, cols = NULL)
+  rows = NULL, cols = NULL, check.names = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -30,6 +30,9 @@ If NULL, all rows are read.}
 
 \item{cols}{A numeric vector specifying which columns in the Excel file to read.
 If NULL, all columns are read.}
+
+\item{check.names}{logical. If TRUE then the names of the variables in the data frame
+are checked to ensure that they are syntactically valid variable names}
 }
 \value{
 data.frame

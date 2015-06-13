@@ -16,6 +16,8 @@
 #' If NULL, all columns are read.
 #' @param rows A numeric vector specifying which rows in the Excel file to read. 
 #' If NULL, all rows are read.
+#' @param check.names logical. If TRUE then the names of the variables in the data frame 
+#' are checked to ensure that they are syntactically valid variable names
 #' @details Creates a data.frame of all the data on a worksheet.
 #' @author Alexander Walker
 #' @return data.frame
@@ -53,7 +55,8 @@ read.xlsx <- function(xlsxFile,
                       detectDates = FALSE, 
                       skipEmptyRows = TRUE, 
                       rows = NULL,
-                      cols = NULL){
+                      cols = NULL,
+                      check.names = FALSE){
   
   UseMethod("read.xlsx", xlsxFile) 
   
@@ -68,7 +71,8 @@ read.xlsx.default <- function(xlsxFile,
                               detectDates = FALSE, 
                               skipEmptyRows = TRUE, 
                               rows = NULL,
-                              cols = NULL){
+                              cols = NULL,
+                              check.names = FALSE){
   
   
   ## Validate inputs and get files
@@ -271,6 +275,10 @@ read.xlsx.default <- function(xlsxFile,
   ## Build data.frame
   m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
   
+  if(colNames && check.names)
+    colnames(m) <- make.names(colnames(m), unique = TRUE)
+  
+  
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL
@@ -295,7 +303,8 @@ read.xlsx.Workbook <- function(xlsxFile,
                                detectDates = FALSE, 
                                skipEmptyRows = TRUE, 
                                rows = NULL,
-                               cols = NULL){
+                               cols = NULL,
+                               check.names = FALSE){
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
@@ -547,6 +556,9 @@ read.xlsx.Workbook <- function(xlsxFile,
   ## Build data.frame
   m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
   
+  if(colNames && check.names)
+    colnames(m) <- make.names(colnames(m), unique = TRUE)
+  
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL
@@ -578,6 +590,8 @@ read.xlsx.Workbook <- function(xlsxFile,
 #' If NULL, all columns are read.
 #' @param rows A numeric vector specifying which rows in the Excel file to read. 
 #' If NULL, all rows are read.
+#' @param check.names logical. If TRUE then the names of the variables in the data frame 
+#' are checked to ensure that they are syntactically valid variable names
 #' @author Alexander Walker
 #' @return data.frame
 #' @export
@@ -597,7 +611,8 @@ readWorkbook <- function(xlsxFile,
                          detectDates = FALSE, 
                          skipEmptyRows = TRUE, 
                          rows = NULL,
-                         cols = NULL){
+                         cols = NULL,
+                         check.names = FALSE){
   
   read.xlsx(xlsxFile = xlsxFile,
             sheet = sheet,
@@ -607,7 +622,8 @@ readWorkbook <- function(xlsxFile,
             detectDates = detectDates, 
             skipEmptyRows = skipEmptyRows, 
             rows = rows,
-            cols = cols)
+            cols = cols,
+            check.names = check.names)
 }
 
 

@@ -803,8 +803,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           txt <- removeHeadTag(txt)
           
           cd <- .Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx")
+          cd <- cd[grepl('ObjectType="Note"', cd)]
           cd <- paste0(cd, ">")
-          
+
           
           target <- unlist(lapply(commentXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           target <- basename(gsub('"$', "", target))
