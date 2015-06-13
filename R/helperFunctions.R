@@ -314,6 +314,23 @@ validateBorderStyle <- function(borderStyle){
 
 
 
+getAttrsFont <- function(xml, tag){
+  
+  
+  x <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, tag, PACKAGE = "openxlsx"))
+  x[sapply(x, length) == 0] <- ""
+  x <- unlist(x)
+  a <- lapply(x, function(x) unlist(regmatches(x, gregexpr('[a-zA-Z]+=".*?"', x))))
+  
+  nms = lapply(a, function(xml) regmatches(xml, regexpr('[a-zA-Z]+(?=\\=".*?")', xml, perl = TRUE)))
+  vals =  lapply(a, function(xml) regmatches(xml, regexpr('(?<=").*?(?=")', xml, perl = TRUE)))
+  vals <- lapply(vals, function(x) {Encoding(x) <- "UTF-8"; x})
+  vals <- lapply(1:length(vals), function(i){ names(vals[[i]]) <- nms[[i]]; vals[[i]]})
+
+  return(vals)
+  
+}
+
 getAttrs <- function(xml, tag){
   
   x <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, tag, PACKAGE = "openxlsx"))
@@ -331,9 +348,9 @@ getAttrs <- function(xml, tag){
 
 
 buildFontList <- function(fonts){
-  
+
   sz <- getAttrs(fonts, "<sz ")
-  colour <- getAttrs(fonts, "<color ")
+  colour <- getAttrsFont(fonts, "<color ")
   name <- getAttrs(fonts, tag = "<name ")
   family <- getAttrs(fonts, "<family ")
   scheme <- getAttrs(fonts, "<scheme ")
@@ -633,4 +650,5 @@ clean_names <- function(x){
   x <- gsub("[[:space:]]+", ".", x)
   return(x)
 }
+
 

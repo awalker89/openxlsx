@@ -34,7 +34,11 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                
                                                "sharedStrings",
                                                "sheetData",
+                                               
                                                "styleObjects",
+                                               "cellStyleObjects",
+                                               
+                                               
                                                "styles",
                                                "styleInds",
                                                "tables",
@@ -81,6 +85,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   colWidths <<- list()
   
   styleObjects <<- list()
+  cellStyleObjects <<- list()
   styleInds <<- list()
   
   
@@ -328,8 +333,8 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         
         fn <- sprintf("comments%s.xml", i)
       
-      wb$Content_Types <- c(wb$Content_Types, 
-                            sprintf('<Override PartName="/xl/%s" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>', fn))
+      Content_Types <<- c(Content_Types, 
+                          sprintf('<Override PartName="/xl/%s" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>', fn))
       
       worksheets_rels[[i]] <<- unique(c(worksheets_rels[[i]],
                                         sprintf('<Relationship Id="rIdcomment" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../%s"/>', fn)))
@@ -338,7 +343,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     }
     
     .self$writeDrawingVML(xldrawingsDir)
-
+    
   }
   
   
@@ -504,6 +509,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         '</Types>', 
         file.path(tmpDir, "[Content_Types].xml"))
   
+
   styleXML <- styles
   styleXML$numFmts <- paste0(sprintf('<numFmts count="%s">', length(styles$numFmts)), pxml(styles$numFmts), '</numFmts>')
   styleXML$fonts <- paste0(sprintf('<fonts count="%s">', length(styles$fonts)), pxml(styles$fonts), '</fonts>')
@@ -926,10 +932,10 @@ Workbook$methods(writeDrawingVML = function(dir){
   
   for(i in 1:length(comments)){
     
-    cd <- unlist(lapply(wb$comments[[i]],"[[", "clientData"))
+    cd <- unlist(lapply(comments[[i]],"[[", "clientData"))
     nComments <- length(cd)
     id <- 1025
-      
+    
     if(nComments > 0){
       
       write(x = paste('<xml xmlns:v="urn:schemas-microsoft-com:vml"
@@ -1044,6 +1050,11 @@ Workbook$methods(updateStyles = function(style){
     xfNode <- append(xfNode, list("applyBorder" = "1"))
   }
   
+  
+  if(!is.null(style$xfId))
+    xfNode$xfId <- style$xfId
+  
+  
   ## Alignment
   if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation)){
     
@@ -1058,6 +1069,9 @@ Workbook$methods(updateStyles = function(style){
     
     if(!is.null(style$valign))
       alignNode <- paste(alignNode, sprintf('vertical="%s"', style$valign))
+    
+    if(!is.null(style$indent))
+      alignNode <- paste(alignNode, sprintf('indent="%s"', style$indent))
     
     if(!is.null(style$wrapText)){
       if(style$wrapText)
@@ -1087,6 +1101,116 @@ Workbook$methods(updateStyles = function(style){
   return(as.integer(styleId))
   
 })
+
+
+
+
+
+Workbook$methods(updateCellStyles = function(){
+  
+  
+  flag <- TRUE
+  for(style in cellStyleObjects){
+  
+    ## Updates styles.xml
+    xfNode <- list(numFmtId = 0,
+                   fontId = 0,
+                   fillId = 0,
+                   borderId = 0)
+    
+    
+    alignmentFlag <- FALSE
+    
+    ## Font
+    if(!is.null(style$fontName) |
+       !is.null(style$fontSize) |
+       !is.null(style$fontColour) |
+       !is.null(style$fontDecoration) | 
+       !is.null(style$fontFamily) | 
+       !is.null(style$fontScheme)){
+      
+      fontNode <- .self$createFontNode(style)
+      fontId <- which(styles$font == fontNode) - 1L
+      
+      if(length(fontId) == 0){
+        
+        fontId <- length(styles$fonts)
+        styles$fonts <<- append(styles[["fonts"]], fontNode)        
+        
+      }
+      
+      xfNode$fontId <- fontId
+      xfNode <- append(xfNode, list("applyFont" = "1"))
+    }
+    
+    
+    ## numFmt
+    if(!is.null(style$numFmt)){
+      if(as.integer(style$numFmt$numFmtId) > 0){
+        numFmtId <- style$numFmt$numFmtId
+        if(as.integer(numFmtId) > 163L){
+          
+          tmp <- style$numFmt$formatCode
+          
+          styles$numFmts <<- unique(c(styles$numFmts,
+                                      sprintf('<numFmt numFmtId="%s" formatCode="%s"/>', numFmtId, tmp)
+          ))
+        }
+        
+        xfNode$numFmtId <- numFmtId
+        xfNode <- append(xfNode, list("applyNumberFormat" = "1"))
+      }
+    }
+    
+    ## Fill
+    if(!is.null(style$fill)){
+      fillNode <- .self$createFillNode(style)
+      if(!is.null(fillNode)){
+        fillId <- which(styles$fill == fillNode) - 1L
+        
+        if(length(fillId) == 0){      
+          fillId <- length(styles$fills)
+          styles$fills <<- c(styles$fills, fillNode)
+        }
+        xfNode$fillId <- fillId
+        xfNode <- append(xfNode, list("applyFill" = "1"))
+      }
+    }
+    
+    ## Border
+    if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+      
+      borderNode <- .self$createBorderNode(style)
+      borderId <- which(styles$borders == borderNode) - 1L
+      
+      if(length(borderId) == 0){
+        borderId <- length(styles$borders)
+        styles$borders <<- c(styles$borders, borderNode)
+      }
+      
+      xfNode$borderId <- borderId
+      xfNode <- append(xfNode, list("applyBorder" = "1"))
+    }
+    
+    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
+    
+    if(flag){
+      styles$cellStyleXfs <<- xfNode
+      flag <- FALSE
+    }else{
+      styles$cellStyleXfs <<- c(styles$cellStyleXfs, xfNode)
+    }
+    
+    
+  }
+  
+})
+
+
+
+
+
+
 
 
 Workbook$methods(getBaseFont = function(){
@@ -1132,7 +1256,18 @@ Workbook$methods(createFontNode = function(style){
   if(is.null(style$fontColour[[1]])){
     fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(baseFont$colour), baseFont$colour))
   }else{
-    fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(style$fontColour), style$fontColour))
+    
+    if(length(style$fontColour) > 1){
+      
+      fontNode <- paste0(fontNode, sprintf('<color %s/>', 
+                                           paste(sapply(1:length(style$fontColour), function(i) sprintf('%s="%s"', names(style$fontColour)[i], style$fontColour[i])), collapse = " ")))
+      
+    }else{
+      fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(style$fontColour), style$fontColour))
+    }
+    
+    
+    
   }
   
   
@@ -2191,8 +2326,13 @@ Workbook$methods(preSaveCleanUp = function(){
       }
       
     }
-    
   }
+  
+  
+  if(length(cellStyleObjects) > 0)
+    .self$updateCellStyles()
+  
+    
   
   
   ## Make sure all rowHeights have rows, if not append them!
@@ -2898,3 +3038,367 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
   invisible(0)
   
 })
+
+
+
+
+
+
+Workbook$methods(loadStyles = function(stylesXML){
+  
+  
+  ## Build style objects from the styles XML
+  stylesTxt <- readLines(stylesXML, warn = FALSE, encoding = "UTF-8")
+  stylesTxt <- removeHeadTag(stylesTxt)
+  
+  ## Indexed colours
+  vals <- .Call("openxlsx_getNodes", stylesTxt, "<indexedColors>", PACKAGE = "openxlsx")
+  if(length(vals) > 0)
+    styles$indexedColors <<- paste0("<colors>", vals, "</colors>")
+  
+  ## dxf (don't need these, I don't think)
+  dxf <- .Call("openxlsx_getNodes", stylesTxt, "<dxfs", PACKAGE = "openxlsx")
+  if(length(dxf) > 0){
+    dxf <- .Call("openxlsx_getNodes", dxf[[1]], "<dxf>", PACKAGE = "openxlsx")
+    if(length(dxf) > 0)
+      styles$dxfs <<- dxf
+  }
+  
+  tableStyles <- .Call("openxlsx_getNodes", stylesTxt, "<tableStyles", PACKAGE = "openxlsx")
+  if(length(tableStyles) > 0)
+    styles$tableStyles <<- paste0(tableStyles, ">")
+  
+  extLst <- .Call("openxlsx_getNodes", stylesTxt, "<extLst>", PACKAGE = "openxlsx")
+  if(length(extLst) > 0)
+    styles$extLst <<- extLst
+  
+  
+  ## Number formats
+  numFmts <- .Call("openxlsx_getChildlessNode", stylesTxt, "<numFmt ", PACKAGE = "openxlsx")
+  numFmtFlag <- FALSE
+  if(length(numFmts) > 0){
+    
+    numFmtsIds <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'numFmtId="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+    formatCodes <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'formatCode="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+    numFmts <-lapply(1:length(numFmts), function(i) list("numFmtId"= numFmtsIds[[i]], "formatCode"=formatCodes[[i]]))
+    numFmtFlag <- TRUE
+    
+  }
+  
+  ## fonts will maintain, sz, color, name, family scheme
+  fonts <- .Call("openxlsx_getNodes", stylesTxt, "<font>", PACKAGE = "openxlsx")
+  styles$fonts[[1]] <<- fonts[[1]]
+  fonts <- buildFontList(fonts)       
+  
+  fills <- .Call("openxlsx_getNodes", stylesTxt, "<fill>", PACKAGE = "openxlsx")
+  fills <- buildFillList(fills)
+  
+  borders <- .Call("openxlsx_getNodes", stylesTxt, "<border>", PACKAGE = "openxlsx")     
+  borders <- sapply(borders, buildBorder, USE.NAMES = FALSE)
+  
+  
+  ## ------------------------------ build styleObjects ------------------------------ ##
+  
+  cellXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellXfs", PACKAGE = "openxlsx") 
+  
+  xf <- .Call("openxlsx_getChildlessNode", cellXfs, "<xf ", PACKAGE = "openxlsx")
+  xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
+  xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
+  xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
+  
+  for(i in 1:length(xf))
+    names(xfVals[[i]]) <- xfNames[[i]]
+  
+  styleObjects_tmp <- list()
+  flag <- FALSE
+  for(s in xfVals){
+    
+    style <- createStyle()
+    if(any(s != "0")){
+      
+      if("fontId" %in% names(s)){
+        if(s[["fontId"]] != "0"){
+          thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
+          
+          if("sz" %in% names(thisFont))
+            style$fontSize <- thisFont$sz
+          
+          if("name" %in% names(thisFont))
+            style$fontName <- thisFont$name
+          
+          if("family" %in% names(thisFont))
+            style$fontFamily <- thisFont$family
+          
+          if("color" %in% names(thisFont))
+            style$fontColour <- thisFont$color
+          
+          if("scheme" %in% names(thisFont))
+            style$fontScheme <- thisFont$scheme
+          
+          flags <- c("bold", "italic", "underline") %in% names(thisFont)
+          if(any(flags)){
+            style$fontDecoration <- NULL
+            if(flags[[1]])
+              style$fontDecoration <- append(style$fontDecoration, "BOLD")
+            
+            if(flags[[2]])
+              style$fontDecoration <- append(style$fontDecoration, "ITALIC")
+            
+            if(flags[[3]])
+              style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
+          }
+        }
+      }
+      
+      if("numFmtId" %in% names(s)){
+        if(s[["numFmtId"]] != "0"){
+          if(as.integer(s[["numFmtId"]]) < 164){
+            style$numFmt <- list(numFmtId = s[["numFmtId"]])
+          }else if(numFmtFlag){
+            style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
+          }
+        }
+      }
+      
+      ## Border
+      if("borderId" %in% names(s)){
+        if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
+          
+          thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
+          
+          if("borderLeft" %in% names(thisBorder)){
+            style$borderLeft    <- thisBorder$borderLeft
+            style$borderLeftColour <- thisBorder$borderLeftColour
+          }
+          
+          if("borderRight" %in% names(thisBorder)){
+            style$borderRight    <- thisBorder$borderRight
+            style$borderRightColour <- thisBorder$borderRightColour
+          }
+          
+          if("borderTop" %in% names(thisBorder)){
+            style$borderTop    <- thisBorder$borderTop
+            style$borderTopColour <- thisBorder$borderTopColour
+          }
+          
+          if("borderBottom" %in% names(thisBorder)){
+            style$borderBottom    <- thisBorder$borderBottom
+            style$borderBottomColour <- thisBorder$borderBottomColour
+          }
+        }
+      }
+      
+      ## alignment
+      # applyAlignment <- "applyAlignment" %in% names(s)
+      if("horizontal" %in% names(s))# & applyAlignment)
+        style$halign <- s[["horizontal"]]
+      
+      if("vertical" %in% names(s))
+        style$valign <- s[["vertical"]]  
+      
+      if("indent" %in% names(s))
+        style$indent <- s[["indent"]]  
+      
+      if("textRotation" %in% names(s))
+        style$textRotation <- s[["textRotation"]]
+      
+      ## wrap text
+      if("wrapText" %in% names(s)){
+        if(s[["wrapText"]] %in% c("1", "true"))
+          style$wrapText <- TRUE
+      }
+      
+      if("fillId" %in% names(s)){
+        if(s[["fillId"]] != "0"){
+          
+          fillId <- as.integer(s[["fillId"]]) + 1L
+          
+          if("fgColor" %in% names(fills[[fillId]])){
+            
+            tmpFg <- fills[[fillId]]$fgColor
+            tmpBg <- fills[[fillId]]$bgColor
+            
+            if(!is.null(tmpFg))
+              style$fill$fillFg <- tmpFg
+            
+            if(!is.null(tmpFg))
+              style$fill$fillBg <- tmpBg
+          }else{
+            style$fill <- fills[[fillId]]
+          }
+          
+        }
+      }
+      
+      
+      if("xfId" %in% names(s)){
+        if(s[["xfId"]] != "0"){
+          style$xfId <- s[["xfId"]]
+        }
+      }
+      
+      
+    } ## end if !all(s == "0")
+    
+    ## we need to skip the first one as this is used as the base style
+    if(flag)
+      styleObjects_tmp <- append(styleObjects_tmp , list(style))
+    
+    flag <- TRUE
+    
+  }  ## end of for loop through styles s in ...
+  
+  
+  ## ------------------------------ build styleObjects Complete ------------------------------ ##
+  
+  
+  ## ------------------------------ build cellStyleObjects ------------------------------ ##
+  
+
+  
+  cellStyleXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyleXfs", PACKAGE = "openxlsx") 
+  xf <- .Call("openxlsx_getChildlessNode", cellStyleXfs, "<xf ", PACKAGE = "openxlsx")
+  if(length(xf) > 0){
+    
+    xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
+    xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
+    xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
+    
+    for(i in 1:length(xf))
+      names(xfVals[[i]]) <- xfNames[[i]]
+    
+    cellStyleObjects_tmp <- list()
+    flag <- FALSE
+    for(s in xfVals){
+      
+      style <- createStyle()
+      if(any(s != "0")){
+        
+        
+        if("numFmtId" %in% names(s)){
+          if(s[["numFmtId"]] != "0"){
+            if(as.integer(s[["numFmtId"]]) < 164){
+              style$numFmt <- list(numFmtId = s[["numFmtId"]])
+            }else if(numFmtFlag){
+              style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
+            }
+          }
+        }
+        
+        if("fontId" %in% names(s)){
+          if(s[["fontId"]] != "0"){
+            thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
+            
+            if("sz" %in% names(thisFont))
+              style$fontSize <- thisFont$sz
+            
+            if("name" %in% names(thisFont))
+              style$fontName <- thisFont$name
+            
+            if("family" %in% names(thisFont))
+              style$fontFamily <- thisFont$family
+            
+            if("color" %in% names(thisFont))
+              style$fontColour <- thisFont$color
+            
+            if("scheme" %in% names(thisFont))
+              style$fontScheme <- thisFont$scheme
+            
+            flags <- c("bold", "italic", "underline") %in% names(thisFont)
+            if(any(flags)){
+              style$fontDecoration <- NULL
+              if(flags[[1]])
+                style$fontDecoration <- append(style$fontDecoration, "BOLD")
+              
+              if(flags[[2]])
+                style$fontDecoration <- append(style$fontDecoration, "ITALIC")
+              
+              if(flags[[3]])
+                style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
+            }
+          }
+        }
+        
+  
+        ## Border
+        if("borderId" %in% names(s)){
+          if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
+            
+            thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
+            
+            if("borderLeft" %in% names(thisBorder)){
+              style$borderLeft    <- thisBorder$borderLeft
+              style$borderLeftColour <- thisBorder$borderLeftColour
+            }
+            
+            if("borderRight" %in% names(thisBorder)){
+              style$borderRight    <- thisBorder$borderRight
+              style$borderRightColour <- thisBorder$borderRightColour
+            }
+            
+            if("borderTop" %in% names(thisBorder)){
+              style$borderTop    <- thisBorder$borderTop
+              style$borderTopColour <- thisBorder$borderTopColour
+            }
+            
+            if("borderBottom" %in% names(thisBorder)){
+              style$borderBottom    <- thisBorder$borderBottom
+              style$borderBottomColour <- thisBorder$borderBottomColour
+            }
+          }
+        }
+        
+      
+        if("fillId" %in% names(s)){
+          if(s[["fillId"]] != "0"){
+            
+            fillId <- as.integer(s[["fillId"]]) + 1L
+            
+            if("fgColor" %in% names(fills[[fillId]])){
+              
+              tmpFg <- fills[[fillId]]$fgColor
+              tmpBg <- fills[[fillId]]$bgColor
+              
+              if(!is.null(tmpFg))
+                style$fill$fillFg <- tmpFg
+              
+              if(!is.null(tmpFg))
+                style$fill$fillBg <- tmpBg
+            }else{
+              style$fill <- fills[[fillId]]
+            }
+            
+          }
+        }
+        
+        
+        
+  
+      } ## end if !all(s == "0")
+      
+      cellStyleObjects_tmp <- append(cellStyleObjects_tmp , list(style))
+      
+    }  ## end of for loop through styles s in ...
+   
+    cellStyleObjects <<- cellStyleObjects_tmp
+     
+  }
+    
+  
+  cellStyles <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyles", PACKAGE = "openxlsx") 
+  cellStyles <- .Call("openxlsx_getChildlessNode", cellStyles, "<cellStyle ", PACKAGE = "openxlsx") 
+  if(length(cellStyles) > 0)
+    styles$cellStyles <<- cellStyles
+  
+  
+
+  ## ------------------------------ build cellStyleObjects Complete------------------------------ ##
+  
+  
+  return(styleObjects_tmp)
+  
+  
+})
+
+
+
