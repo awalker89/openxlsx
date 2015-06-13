@@ -2391,15 +2391,15 @@ getDateOrigin <- function(xlsxFile){
 #' @export
 getSheetNames <- function(file){
   
-  if(!file.exists(xlsxFile))
-    stop("Excel file does not exist.")
+  if(!file.exists(file))
+    stop("file does not exist.")
   
-  if(grepl("\\.xls$|\\.xlm$", xlsxFile))
+  if(grepl("\\.xls$|\\.xlm$", file))
     stop("openxlsx can not read .xls or .xlm files!")
   
   ## create temp dir and unzip
   xmlDir <- file.path(tempdir(), "_excelXMLRead")
-  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  xmlFiles <- unzip(file, exdir = xmlDir)
   
   on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
   
