@@ -2,7 +2,7 @@
 
 
 #' @name read.xlsx
-#' @title Read data from a worksheet or Workbook object into a data.frame
+#' @title Read data from an Excel file or Workbook object into a data.frame
 #' @param xlsxFile An xlsx file or Workbook object
 #' @param sheet The name or index of the sheet to read data from.
 #' @param startRow first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
@@ -18,7 +18,9 @@
 #' If NULL, all rows are read.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
-#' @details Creates a data.frame of all the data on a worksheet.
+#' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
+#' This is because only the formula is written and left to be evaluated when the file is opened in Excel.
+#' Opening, saving and closing the file with Excel will resolve this.
 #' @author Alexander Walker
 #' @return data.frame
 #' @export

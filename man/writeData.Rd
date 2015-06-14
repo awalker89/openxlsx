@@ -66,6 +66,10 @@ each column. If "\code{all}" all cell borders are drawn.}
 \description{
 Write an object to worksheet with optional styling.
 }
+\details{
+Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
+This is because only the formula is written and left to Excel to evaluate the formula when the file is opened in Excel.
+}
 \examples{
 ## See formatting vignette for further examples.
 
@@ -106,6 +110,21 @@ v <- rep("http://cran.r-project.org/", 4)
 names(v) <- paste("Hyperlink", 1:4) # Names will be used as display text
 class(v) <- 'hyperlink'
 writeData(wb, "Cars", x = v, xy = c("B", 32))
+
+
+addWorksheet(wb, "Formula")
+
+## create column of class "formula"
+df <- data.frame(x=1:3, y = 1:3,
+                 z = paste(paste0("A", 1:3+1L), paste0("B", 1:3+1L), sep = " + "),
+                 stringsAsFactors = FALSE)
+
+class(df$z) <- c(class(df$z), "formula")
+
+writeData(wb, sheet = "Formula", x = df)
+
+
+
 ## Save workbook
 saveWorkbook(wb, "writeDataExample.xlsx", overwrite = TRUE)
 }

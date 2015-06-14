@@ -2,7 +2,7 @@
 % Please edit documentation in R/readWorkbook.R
 \name{read.xlsx}
 \alias{read.xlsx}
-\title{Read data from a worksheet or Workbook object into a data.frame}
+\title{Read data from an Excel file or Workbook object into a data.frame}
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
@@ -38,10 +38,12 @@ are checked to ensure that they are syntactically valid variable names}
 data.frame
 }
 \description{
-Read data from a worksheet or Workbook object into a data.frame
+Read data from an Excel file or Workbook object into a data.frame
 }
 \details{
-Creates a data.frame of all the data on a worksheet.
+Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
+This is because only the formula is written and left to be evaluated when the file is opened in Excel.
+Opening, saving and closing the file with Excel will resolve this.
 }
 \examples{
 xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")

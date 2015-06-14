@@ -652,7 +652,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nRows <- nrow(df)  
   
   allColClasses <- unlist(colClasses)  
-  
+
   ## pull out NaN values
   nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
   
@@ -695,6 +695,13 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if("scientific" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
       class(df[[i]]) <- "numeric"
+  }
+  
+  if("formula" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "formula" %in% x))){
+      df[[i]] <- replaceIllegalCharacters(as.character(df[[i]]))
+      class(df[[i]]) <- "openxlsx_formula"
+    }
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only

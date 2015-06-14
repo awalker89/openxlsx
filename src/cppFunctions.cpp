@@ -767,36 +767,58 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
   //  T	F	F	
   //  T	T	T
   //  F F	F	
-  
+  //  T F	T (must be a formula)	
+
   int n = r.size();
   List cells(n);
   LogicalVector hasV = !is_na(v);
   LogicalVector hasR = !is_na(r);
-  
+  LogicalVector hasT = !is_na(t);
+
   for(int i=0; i < n; i++){
     
     if(hasR[i]){
       
       if(hasV[i]){
         
+        if(hasT[i]){
+        
+        //  r t v	
+        //  T	T	T (2)
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
-                        Named("t") = t[i],
-                                      Named("v") = v[i],
-                                                    Named("f") = NA_STRING); 
+          Named("t") = t[i],
+          Named("v") = v[i],
+          Named("f") = NA_STRING); 
+          
+        }else{
+          
+          //  r t f	
+          //  T	T	T (4 - formula)
+          cells[i] = CharacterVector::create(
+            Named("r") = r[i],
+            Named("t") = "str",
+            Named("v") = NA_STRING,
+            Named("f") = "<f>" + v[i] + "</f>"); 
+          
+          
+        }
         
       }else{
         
-        
+        //  r t v	
+        //  T	F	F	(1)
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
-                        Named("t") = NA_STRING,
-                        Named("v") = NA_STRING,
-                        Named("f") = NA_STRING); 
+          Named("t") = NA_STRING,
+          Named("v") = NA_STRING,
+          Named("f") = NA_STRING); 
       }
       
     }else{
       
+      //  r t v	
+      //  F F	F	(3)
       cells[i] = CharacterVector::create(
         Named("r") = NA_STRING,
         Named("t") = NA_STRING,
@@ -1275,9 +1297,14 @@ SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, Inte
       //If we have a t value we must have a v value
       if(attrs[1]){
         
-        //If we have a c value we might have an f value
+        //If we have a c value we might have an f value (cval[3] is f)
         if(attrs[3]){
-          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
+          
+          if(attrs[2]){ // If v is NOT NA
+            cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
+          }else{
+            cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "</c>";
+          }
         }else{
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
@@ -1572,6 +1599,8 @@ CharacterVector buildCellTypes(CharacterVector classes, int nRows){
       colLabels[i] = "b";
     }else if(classes[i] == "hyperlink"){
       colLabels[i] = "h";
+    }else if(classes[i] == "openxlsx_formula"){
+      colLabels[i] = NA_STRING;
     }else{
       colLabels[i] = "s";
     }
@@ -1822,7 +1851,13 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       if(attrs[1]){
         //If we have a c value we might have an f value
         if(attrs[3]){
-          cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
+
+          if(attrs[2]){ // If v is NOT NA
+            cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
+          }else{
+            cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "</c>";
+          }
+          
         }else{
           cellXML += "\" t=\"" + cVal[1] + "\"><v>" + cVal[2] + "</v></c>";
         }
