@@ -131,6 +131,23 @@ mergeCells <- function(wb, sheet, cols, rows){
 }
 
 
+
+#' @name int2col
+#' @title Convert integer to Excel column
+#' @description Converts an integer to an Excel column label. 
+#' @param x A numeric vector
+#' @export
+#' @examples
+#' int2col(1:10)
+int2col <- function(x){
+  
+  if(!is.numeric(x))
+    stop("x must be numeric.")
+  
+  .Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', x, LETTERS)
+}
+
+
 #' @name removeCellMerge
 #' @title Create a new Workbook object
 #' @description Unmerges any merged cells that intersect

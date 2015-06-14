@@ -300,12 +300,13 @@ writeData <- function(wb,
 #' addWorksheet(wb, "Sheet 1")
 #' writeData(wb, "Sheet 1", x = iris)
 #' 
+#' ## SEE int2col() to convert int to Excel column label
 #' 
 #' ## 1. -  As a character vector using writeFormula
 #' 
 #' v <- c("SUM(A2:A151)", "AVERAGE(B2:B151)") ## skip header row
 #' writeFormula(wb, sheet = 1, x = v, startCol = 10, startRow = 2)
-#' 
+#' writeFormula(wb, 1, x = "A2 + B2", startCol = 10, startRow = 10)
 #' 
 #' 
 #' ## 2. - As a data.frame column with class "formula" using writeData
