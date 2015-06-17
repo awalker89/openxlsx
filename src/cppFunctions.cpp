@@ -2576,20 +2576,22 @@ List getCellInfo(std::string xmlFile,
         pos = row_xml_i.find("<row r=\"", 0);
         endPos = row_xml_i.find(tagEnd, pos + 8);
         row_i = atoi(row_xml_i.substr(pos + 8, endPos - pos - 8).c_str());
-        
-        if(row_i == rows[place]){
+
+        if (std::find(rows.begin()+place, rows.end(), row_i)!= rows.end()){
           xml += row_xml_i + ' ';
           place++;
-          
+
           if(place == nr_sub)
             break;
+          
         }
+        
         
       } // end of cut off unwanted xml
     }
     
   }
-  
+
   // count cells with children
   int ocs = 0;
   string::size_type start = 0;
