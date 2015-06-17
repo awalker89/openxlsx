@@ -84,6 +84,21 @@ read.xlsx.default <- function(xlsxFile,
   if(grepl("\\.xls$|\\.xlm$", xlsxFile))
     stop("openxlsx can not read .xls or .xlm files!")
   
+  if(!is.logical(colNames))
+    stop("colNames must be a TRUE/FALSE.")
+  
+  if(!is.logical(rowNames))
+    stop("rowNames must be a TRUE/FALSE.")
+  
+  if(!is.logical(detectDates))
+    stop("detectDates must be a TRUE/FALSE.")
+  
+  if(!is.logical(skipEmptyRows))
+    stop("skipEmptyRows must be a TRUE/FALSE.")
+  
+  if(!is.logical(check.names))
+    stop("skipEmptyRows must be a TRUE/FALSE.")
+  
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
   
