@@ -58,7 +58,8 @@ read.xlsx <- function(xlsxFile,
                       skipEmptyRows = TRUE, 
                       rows = NULL,
                       cols = NULL,
-                      check.names = FALSE){
+                      check.names = FALSE,
+                      namedRegion = NULL){
   
   UseMethod("read.xlsx", xlsxFile) 
   
@@ -74,7 +75,8 @@ read.xlsx.default <- function(xlsxFile,
                               skipEmptyRows = TRUE, 
                               rows = NULL,
                               cols = NULL,
-                              check.names = FALSE){
+                              check.names = FALSE,
+                              namedRegion = NULL){
   
   
   ## Validate inputs and get files
@@ -141,6 +143,44 @@ read.xlsx.default <- function(xlsxFile,
   nSheets <- length(sheetrId)
   if(nSheets == 0)
     stop("Workbook has no worksheets")
+  
+  
+  ## Named region logic
+  if(!is.null(namedRegion)){
+    
+    dn <- .Call("openxlsx_getChildlessNode", removeHeadTag(workbook), "<definedName ", PACKAGE = "openxlsx")
+    if(length(dn) == 0){
+      warning("Workbook has no named regions.")
+      return(NULL)
+    }
+    
+    dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
+    dn_names_clean <- replaceXMLEntities(dn_names)
+    
+    ind <- dn_names_clean == namedRegion
+    if(!any(ind))
+      stop(sprintf("Region '%s' not found!", region))
+    
+    ## pull out first node value
+    dn <- dn[ind] 
+    region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
+    sheet <- sheetNames[sapply(sheetNames, function(x) grepl(x, dn))]
+    
+    region <- gsub(sheet, "", region, fixed = TRUE)
+    region <- gsub("[^A-Z0-9:]", "", region)
+    
+    cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
+    rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
+    
+    cols <- seq(from = cols[1], to = cols[2], by = 1)
+    rows <- seq(from = rows[1], to = rows[2], by = 1)
+    
+    startRow <- 1
+  }
+  
+  
+  
+  
   
   ## get the file_name for each sheetrId
   file_name <- sapply(sheetrId, function(rId){
@@ -321,7 +361,8 @@ read.xlsx.Workbook <- function(xlsxFile,
                                skipEmptyRows = TRUE, 
                                rows = NULL,
                                cols = NULL,
-                               check.names = FALSE){
+                               check.names = FALSE,
+                               namedRegion = NULL){
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")

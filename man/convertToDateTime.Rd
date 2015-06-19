@@ -17,7 +17,7 @@ convertToDateTime(x, origin = "1900-01-01", ...)
 Convert from excel time number to R POSIXct type.
 }
 \details{
-Excel stores dates as number of days from some origin day
+Excel stores dates as number of days from some origin date
 }
 \examples{
 ## 2014-07-01, 2014-06-30, 2014-06-29

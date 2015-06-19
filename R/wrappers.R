@@ -1798,7 +1798,7 @@ convertToDate <- function(x, origin = "1900-01-01"){
 #' @param x A numeric vector
 #' @param origin date. Default value is for Windows Excel 2010
 #' @param ... Additional parameters passed to as.POSIXct
-#' @details Excel stores dates as number of days from some origin day
+#' @details Excel stores dates as number of days from some origin date
 #' @export
 #' @examples
 #' ## 2014-07-01, 2014-06-30, 2014-06-29
@@ -1879,6 +1879,31 @@ names.Workbook <- function(x){
 }
 
 
+
+#' @name getNamedRegions
+#' @title Get named regions in an xlsx file.
+#' @param xlsxFile An xlsx file or Workbook object
+#' @export
+#' @examples
+#' ##getNamedRegions
+getNamedRegions <- function(xlsxFile){
+  
+  xmlDir <- file.path(tempdir(), "named_regions_tmp")
+  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  
+  workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
+  workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
+  
+  dn <- .Call("openxlsx_getChildlessNode", removeHeadTag(workbook), "<definedName ", PACKAGE = "openxlsx")
+  if(length(dn) == 0)
+    return(NULL)
+  
+  dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
+  
+  unlink(xmlDir, recursive = TRUE, force = TRUE)
+  
+  return(dn_names)
+}
 
 
 
