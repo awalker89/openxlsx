@@ -33,6 +33,8 @@ If NULL, all columns are read.}
 
 \item{check.names}{logical. If TRUE then the names of the variables in the data frame
 are checked to ensure that they are syntactically valid variable names}
+
+\item{namedRegion}{A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.}
 }
 \value{
 data.frame
@@ -71,5 +73,8 @@ head(df2)
 }
 \author{
 Alexander Walker
+}
+\seealso{
+\code{\link{getNamedRegions}}
 }
 

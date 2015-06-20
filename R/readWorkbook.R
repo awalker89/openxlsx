@@ -18,6 +18,8 @@
 #' If NULL, all rows are read.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
+#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
+#' @seealso \code{\link{getNamedRegions}}
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to be evaluated when the file is opened in Excel.
 #' Opening, saving and closing the file with Excel will resolve this.
@@ -87,19 +89,19 @@ read.xlsx.default <- function(xlsxFile,
     stop("openxlsx can not read .xls or .xlm files!")
   
   if(!is.logical(colNames))
-    stop("colNames must be a TRUE/FALSE.")
+    stop("colNames must be TRUE/FALSE.")
   
   if(!is.logical(rowNames))
-    stop("rowNames must be a TRUE/FALSE.")
+    stop("rowNames must be TRUE/FALSE.")
   
   if(!is.logical(detectDates))
-    stop("detectDates must be a TRUE/FALSE.")
+    stop("detectDates must be TRUE/FALSE.")
   
   if(!is.logical(skipEmptyRows))
-    stop("skipEmptyRows must be a TRUE/FALSE.")
+    stop("skipEmptyRows must be TRUE/FALSE.")
   
   if(!is.logical(check.names))
-    stop("skipEmptyRows must be a TRUE/FALSE.")
+    stop("check.names must be TRUE/FALSE.")
   
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
@@ -154,10 +156,9 @@ read.xlsx.default <- function(xlsxFile,
       return(NULL)
     }
     
-    dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
-    dn_names_clean <- replaceXMLEntities(dn_names)
+    dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
     
-    ind <- dn_names_clean == namedRegion
+    ind <- dn_names == namedRegion
     if(!any(ind))
       stop(sprintf("Region '%s' not found!", region))
     
@@ -166,16 +167,15 @@ read.xlsx.default <- function(xlsxFile,
     region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
     sheet <- sheetNames[sapply(sheetNames, function(x) grepl(x, dn))]
     
-    region <- gsub(sheet, "", region, fixed = TRUE)
-    region <- gsub("[^A-Z0-9:]", "", region)
+    region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
     
     cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
     rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
     
     cols <- seq(from = cols[1], to = cols[2], by = 1)
     rows <- seq(from = rows[1], to = rows[2], by = 1)
-    
     startRow <- 1
+    
   }
   
   
@@ -364,8 +364,57 @@ read.xlsx.Workbook <- function(xlsxFile,
                                check.names = FALSE,
                                namedRegion = NULL){
   
+  
+  ## Validate inputs and get files
+  if(!is.logical(colNames))
+    stop("colNames must be TRUE/FALSE.")
+  
+  if(!is.logical(rowNames))
+    stop("rowNames must be TRUE/FALSE.")
+  
+  if(!is.logical(detectDates))
+    stop("detectDates must be TRUE/FALSE.")
+  
+  if(!is.logical(skipEmptyRows))
+    stop("skipEmptyRows must be TRUE/FALSE.")
+  
+  if(!is.logical(check.names))
+    stop("check.names must be TRUE/FALSE.")
+  
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
+  
+  ## Named region logic
+  if(!is.null(namedRegion)){
+    
+    dn <- xlsxFile$workbook$definedNames
+    if(length(dn) == 0){
+      warning("Workbook has no named regions.")
+      return(NULL)
+    }
+    
+    dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
+    
+    ind <- dn_names == namedRegion
+    if(!any(ind))
+      stop(sprintf("Region '%s' not found!", region))
+    
+    ## pull out first node value
+    dn <- dn[ind] 
+    region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
+    sheet <- names(xlsxFile)[sapply(names(xlsxFile), function(x) grepl(x, dn))]
+    
+    region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
+    
+    cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
+    rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
+    
+    cols <- seq(from = cols[1], to = cols[2], by = 1)
+    rows <- seq(from = rows[1], to = rows[2], by = 1)
+    startRow <- 1
+    
+  }
+  
   
   if(is.null(rows)){
     rows <- NA
@@ -648,10 +697,12 @@ read.xlsx.Workbook <- function(xlsxFile,
 #' If NULL, all columns are read.
 #' @param rows A numeric vector specifying which rows in the Excel file to read. 
 #' If NULL, all rows are read.
+#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
 #' @author Alexander Walker
 #' @return data.frame
+#' @seealso \code{\link{getNamedRegions}}
 #' @export
 #' @seealso \code{\link{read.xlsx}}
 #' @export
@@ -670,7 +721,8 @@ readWorkbook <- function(xlsxFile,
                          skipEmptyRows = TRUE, 
                          rows = NULL,
                          cols = NULL,
-                         check.names = FALSE){
+                         check.names = FALSE,
+                         namedRegion = NULL){
   
   read.xlsx(xlsxFile = xlsxFile,
             sheet = sheet,
@@ -681,7 +733,8 @@ readWorkbook <- function(xlsxFile,
             skipEmptyRows = skipEmptyRows, 
             rows = rows,
             cols = cols,
-            check.names = check.names)
+            check.names = check.names,
+            namedRegion = namedRegion)
 }
 
 
