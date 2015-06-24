@@ -10,7 +10,7 @@ Authors@R: c(
 URL: https://github.com/awalker89/openxlsx
 BugReports: https://github.com/awalker89/openxlsx/issues
 Maintainer: Alexander Walker <Alexander.Walker1989@gmail.com>
-Description: Simplifies the creation of .xlsx files by providing a
+Description: Simplifies the creation of Excel .xlsx files by providing a
     high level interface to writing, styling and editing worksheets. Through
     the use of Rcpp, read/write times are comparable to the xlsx and XLConnect
     packages with the added benefit of removing the dependency on Java.

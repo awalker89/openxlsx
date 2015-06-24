@@ -1780,7 +1780,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove styleInds element
   # Remove queryTable references from workbook$definedNames to worksheet
   # remove tables
-  
+
   sheet <- validateSheet(sheet)
   sheetNames <- names(worksheets)
   nSheets <- length(unlist(sheetNames, use.names = FALSE))
@@ -1847,12 +1847,12 @@ Workbook$methods(deleteWorksheet = function(sheet){
       attr(tables, "tableName") <<- tableNames
     }
   }
-  
+
   
   ## drawing will always be the first relationship and printerSettings second
   if(nSheets > 1){
     for(i in 1:(nSheets-1L))
-      worksheets_rels[[i]][1:2] <<- genBaseSheetRels(i)
+      worksheets_rels[[i]][1:3] <<- genBaseSheetRels(i)
   }else{
     worksheets_rels <<- list()
   }
