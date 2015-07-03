@@ -6,7 +6,7 @@
 \alias{openxlsx-package}
 \title{xlsx reading, writing and editing.}
 \description{
-openxlsx simplifies the the process of writing and styling xlsx files from R
+openxlsx simplifies the the process of writing and styling Excel xlsx files from R
 and removes the dependency on Java.
 }
 \details{

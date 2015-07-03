@@ -1,6 +1,6 @@
 #' xlsx reading, writing and editing.
 #'
-#' openxlsx simplifies the the process of writing and styling xlsx files from R
+#' openxlsx simplifies the the process of writing and styling Excel xlsx files from R
 #' and removes the dependency on Java.
 #' 
 #' @name openxlsx

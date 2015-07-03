@@ -1787,7 +1787,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   sheetName <- sheetNames[[sheet]]
   
   colWidths[[sheet]] <<- NULL
-  
+    
   ## remove last drawings(sheet).xml from Content_Types
   Content_Types <<- Content_Types[!grepl(sprintf("drawing%s.xml", nSheets), Content_Types)]
   
@@ -1800,6 +1800,8 @@ Workbook$methods(deleteWorksheet = function(sheet){
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL
   styleInds[[sheet]] <<- NULL
+  comments[[sheet]] <<- NULL
+  isChartSheet <<- isChartSheet[-sheet]
   
   ## sheetOrder
   toRemove <- which(sheetOrder == sheet)
@@ -1814,7 +1816,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Need to remove reference from workbook.xml.rels to pivotCache
   removeRels <- worksheets_rels[[sheet]][grepl("pivotTables", worksheets_rels[[sheet]])]
   if(length(removeRels) > 0){
-    
+    print('here')
     ## sheet rels links to a pivotTable file, the corresponding pivotTable_rels file links to the cacheDefn which is listing in workbook.xml.rels
     ## remove reference to this file from the workbook.xml.rels
     fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))

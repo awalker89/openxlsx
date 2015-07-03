@@ -150,7 +150,9 @@ read.xlsx.default <- function(xlsxFile,
   ## Named region logic
   if(!is.null(namedRegion)){
     
-    dn <- .Call("openxlsx_getChildlessNode", removeHeadTag(workbook), "<definedName ", PACKAGE = "openxlsx")
+    dn <- .Call("openxlsx_getNodes", removeHeadTag(workbook), "<definedNames>", PACKAGE = "openxlsx")
+    dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
+
     if(length(dn) == 0){
       warning("Workbook has no named regions.")
       return(NULL)
@@ -167,6 +169,7 @@ read.xlsx.default <- function(xlsxFile,
     region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
     sheet <- sheetNames[sapply(sheetNames, function(x) grepl(x, dn))]
     
+    region <- gsub(sheet, "", region, fixed = TRUE)
     region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
     
     cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
@@ -188,7 +191,7 @@ read.xlsx.default <- function(xlsxFile,
     regmatches(txt, regexpr('(?<=Target=").+xml', txt, perl = TRUE))
   })
   
-
+  
   ## get the correct sheets
   if("character" %in% class(sheet)){
     sheetInd <- which(sheetNames == sheet)

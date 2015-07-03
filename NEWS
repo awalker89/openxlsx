@@ -1,4 +1,41 @@
 
+openxlsx 3.0.1
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* rebuilt read.xlsx and loadWorkbook to be faster and more memory efficient
+
+* writeFormula funciton added to write cell formulas. Also columns
+  with class "formula" are written as cell formulas similar how column
+  classes determine cell styling
+
+* Functionality to write comments and maintain comments with loadWorkbook
+
+* check.colnames argument added read.xlsx to make syntactically valid variable names
+
+* loadWorkbook maintains cell indents
+
+* namedRegion parameter added to read.xlsx to read a named region.
+
+* getNamed regions to return names of named regions in a workbook
+
+* getSheetNames to get worksheet names within an xlsx file.
+
+
+BUG FIXES
+
+* convertToDateTime now handles NA values
+
+* read.xlsx rows bug fixed where non-consecutive cells were skipped.
+
+* convertToDate & convertToDateTime now handle NA values.
+
+* out of bounds worksheet fixed for libre office xlsx files.
+
+* loadWorkbook now maintains chartSheets 
+
+
 
 openxlsx 2.4.0
 ----------------------------------------------------------------
