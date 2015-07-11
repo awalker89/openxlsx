@@ -4,7 +4,7 @@ openxlsx 3.0.1
 
 NEW FEATURES
 
-* rebuilt read.xlsx and loadWorkbook to be faster and more memory efficient
+* improved performance of read.xlsx and loadWorkbook
 
 * writeFormula funciton added to write cell formulas. Also columns
   with class "formula" are written as cell formulas similar how column
@@ -12,7 +12,7 @@ NEW FEATURES
 
 * Functionality to write comments and maintain comments with loadWorkbook
 
-* check.colnames argument added read.xlsx to make syntactically valid variable names
+* check.names argument added read.xlsx to make syntactically valid variable names
 
 * loadWorkbook maintains cell indents
 

@@ -327,6 +327,10 @@ read.xlsx.default <- function(xlsxFile,
     isNotInt <- (isNotInt %% 1L != 0) & !is.na(isNotInt)
     isDate[isNotInt] <- FALSE
     
+    
+    ## perform int to date to character convertsion 
+    v[isDate] <- as.character(as.Date(as.integer(v[isDate]), origin = ifelse(origin == 25569L, "1900-01-01", "1904-01-01")))
+    
   }else{
     isDate <- as.logical(NA)
   }

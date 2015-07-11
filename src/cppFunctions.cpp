@@ -1073,7 +1073,8 @@ SEXP buildMatrixMixed(CharacterVector v,
         if(!notNAElements[ri]){
           datetmp[ri] = NA_REAL; //IF TRUE, TRUE else FALSE
         }else{
-          datetmp[ri] = Date(atoi(m(ri,i)) - originAdj);
+        //  datetmp[ri] = Date(atoi(m(ri,i)) - originAdj);
+          datetmp[ri] = Date(as<std::string>(m(ri,i)));
         }
       }
       

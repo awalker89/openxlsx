@@ -587,7 +587,6 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           
         }
       }
-      rm(dXML)
     }
     
     
