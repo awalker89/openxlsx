@@ -328,14 +328,19 @@ read.xlsx.default <- function(xlsxFile,
     isDate[isNotInt] <- FALSE
     
     
-    ## perform int to date to character convertsion 
-    v[isDate] <- as.character(as.Date(as.integer(v[isDate]), origin = ifelse(origin == 25569L, "1900-01-01", "1904-01-01")))
+    ## perform int to date to character convertsion (way too slow)
+#     if(origin == 25569L){
+#       origin <- "1900-01-01"
+#     }else{
+#       origin <- "1904-01-01"
+#     }
+#     
+#     v[isDate] <- as.character(as.Date(as.integer(v[isDate]), origin = origin))
     
   }else{
     isDate <- as.logical(NA)
   }
-  
-  
+
   ## Build data.frame
   m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
   

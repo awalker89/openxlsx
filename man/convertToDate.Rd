@@ -4,12 +4,14 @@
 \alias{convertToDate}
 \title{Convert from excel date number to R Date type}
 \usage{
-convertToDate(x, origin = "1900-01-01")
+convertToDate(x, origin = "1900-01-01", ...)
 }
 \arguments{
 \item{x}{A vector of integers}
 
 \item{origin}{date. Default value is for Windows Excel 2010}
+
+\item{...}{additional parameters passed to as.Date()}
 }
 \description{
 Convert from excel date number to R Date type
