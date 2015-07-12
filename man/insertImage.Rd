@@ -12,7 +12,7 @@ insertImage(wb, sheet, file, width = 6, height = 3, startRow = 1,
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{file}{An image file. Valid file types are: jpeg, png, bhp}
+\item{file}{An image file. Valid file types are: jpeg, png, bmp}
 
 \item{width}{Width of figure.}
 

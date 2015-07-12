@@ -905,7 +905,7 @@ convert2EMU <- function(d, units){
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
-#' @param file An image file. Valid file types are: jpeg, png, bhp
+#' @param file An image file. Valid file types are: jpeg, png, bmp
 #' @param width Width of figure.
 #' @param height Height of figure.
 #' @param startRow Row coordinate of upper left corner of the image

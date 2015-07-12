@@ -320,7 +320,7 @@ read.xlsx.default <- function(xlsxFile,
     lookingFor <- paste(sprintf('numFmtId="%s"', dateIds), collapse = "|")
     dateStyleIds <- which(sapply(xf, function(x) grepl(lookingFor, x), USE.NAMES = FALSE)) - 1L
     
-    isDate <- cell_info$s %in% dateStyleIds
+    isDate <- (cell_info$s %in% dateStyleIds) & !(r %in% string_refs)
     
     # check numbers are also integers
     isNotInt <- suppressWarnings(as.numeric(v[isDate]))
@@ -329,13 +329,13 @@ read.xlsx.default <- function(xlsxFile,
     
     
     ## perform int to date to character convertsion (way too slow)
-#     if(origin == 25569L){
-#       origin <- "1900-01-01"
-#     }else{
-#       origin <- "1904-01-01"
-#     }
-#     
-#     v[isDate] <- as.character(as.Date(as.integer(v[isDate]), origin = origin))
+    if(origin == 25569L){
+      origin_str <- "1900-01-01"
+    }else{
+      origin_str <- "1904-01-01"
+    }
+
+    v[isDate] <- format(as.Date(as.integer(v[isDate]), origin = origin_str), "%Y-%m-%d")
     
   }else{
     isDate <- as.logical(NA)

@@ -7,7 +7,6 @@
 using namespace Rcpp;
 using namespace std;
 
-
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef2( std::vector<std::string>& r ){
   
@@ -1037,6 +1036,7 @@ SEXP buildMatrixMixed(CharacterVector v,
    */
   
   int k = v.size();
+  std::string dt_str;
   
   // create and fill matrix
   CharacterMatrix m(nRows, nCols);
@@ -1073,7 +1073,10 @@ SEXP buildMatrixMixed(CharacterVector v,
         if(!notNAElements[ri]){
           datetmp[ri] = NA_REAL; //IF TRUE, TRUE else FALSE
         }else{
-          datetmp[ri] = Date(atoi(m(ri,i)) - originAdj);
+          // dt_str = as<std::string>(m(ri,i));
+          dt_str = m(ri,i);
+          datetmp[ri] = Rcpp::Date( atoi(dt_str.substr(0,4).c_str()), atoi(dt_str.substr(5,2).c_str()), atoi(dt_str.substr(8,2).c_str()) );
+          //datetmp[ri] = Date(atoi(m(ri,i)) - originAdj);
           //datetmp[ri] = Date(as<std::string>(m(ri,i)));
         }
       }
