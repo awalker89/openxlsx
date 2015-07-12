@@ -133,7 +133,7 @@ test_that("Empty workbook", {
   expect_equal(x[[1]], Sys.Date())
   
   x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = TRUE)
-  expect_equal(convertToDate(names(x)), Sys.Date())
+  expect_equal(as.Date(names(x)), Sys.Date())
   
   expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
   expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))

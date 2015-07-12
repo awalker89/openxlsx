@@ -93,8 +93,8 @@ buildMatrixNumeric <- function(v, rowInd, colInd, colNames, nRows, nCols) {
     .Call('openxlsx_buildMatrixNumeric', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols)
 }
 
-buildMatrixMixed <- function(v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols, originAdj) {
-    .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols, originAdj)
+buildMatrixMixed <- function(v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols) {
+    .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols)
 }
 
 matrixRowInds <- function(indices) {
@@ -177,8 +177,8 @@ getCellStylesPossiblyMissing <- function(x) {
     .Call('openxlsx_getCellStylesPossiblyMissing', PACKAGE = 'openxlsx', x)
 }
 
-readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names) {
-    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names)
+readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names) {
+    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names)
 }
 
 getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {
@@ -197,7 +197,7 @@ buildMatrixNumeric2 <- function(v, rowInd, colInd, nRows, nCols) {
     .Call('openxlsx_buildMatrixNumeric2', PACKAGE = 'openxlsx', v, rowInd, colInd, nRows, nCols)
 }
 
-readWorkbook2 <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names) {
-    .Call('openxlsx_readWorkbook2', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, originAdj, clean_names)
+readWorkbook2 <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names) {
+    .Call('openxlsx_readWorkbook2', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names)
 }
 

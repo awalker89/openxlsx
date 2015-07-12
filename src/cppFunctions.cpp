@@ -1017,8 +1017,7 @@ SEXP buildMatrixMixed(CharacterVector v,
                       int nRows,
                       int nCols,
                       IntegerVector charCols,
-                      IntegerVector dateCols,
-                      int originAdj){
+                      IntegerVector dateCols){
   
   
   /* List d(10);
@@ -1075,7 +1074,7 @@ SEXP buildMatrixMixed(CharacterVector v,
         }else{
           // dt_str = as<std::string>(m(ri,i));
           dt_str = m(ri,i);
-          datetmp[ri] = Rcpp::Date( atoi(dt_str.substr(0,4).c_str()), atoi(dt_str.substr(5,2).c_str()), atoi(dt_str.substr(8,2).c_str()) );
+          datetmp[ri] = Rcpp::Date(atoi(dt_str.substr(5,2).c_str()), atoi(dt_str.substr(8,2).c_str()), atoi(dt_str.substr(0,4).c_str()) );
           //datetmp[ri] = Date(atoi(m(ri,i)) - originAdj);
           //datetmp[ri] = Date(as<std::string>(m(ri,i)));
         }
@@ -2295,7 +2294,6 @@ SEXP readWorkbook(CharacterVector v,
                   int nRows,
                   bool hasColNames,
                   bool skipEmptyRows,
-                  int originAdj,
                   Function clean_names
 ){
   
@@ -2468,7 +2466,7 @@ SEXP readWorkbook(CharacterVector v,
       dateCols[0] = -1;
     }
     
-    m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, dateCols, originAdj);
+    m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, dateCols);
     
   }
   
@@ -3384,7 +3382,6 @@ SEXP readWorkbook2(std::vector<std::string>& v,
                    int nRows,
                    bool hasColNames,
                    bool skipEmptyRows,
-                   int originAdj,
                    Function clean_names
 ){
   

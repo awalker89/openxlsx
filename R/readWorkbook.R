@@ -329,20 +329,14 @@ read.xlsx.default <- function(xlsxFile,
     
     
     ## perform int to date to character convertsion (way too slow)
-    if(origin == 25569L){
-      origin_str <- "1900-01-01"
-    }else{
-      origin_str <- "1904-01-01"
-    }
-
-    v[isDate] <- format(as.Date(as.integer(v[isDate]), origin = origin_str), "%Y-%m-%d")
+    v[isDate] <- format(as.Date(as.integer(v[isDate]) - origin, origin = "1970-01-01"), "%Y-%m-%d")
     
   }else{
     isDate <- as.logical(NA)
   }
 
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
@@ -669,11 +663,15 @@ read.xlsx.Workbook <- function(xlsxFile,
       isNotInt <- (isNotInt %% 1L != 0) | is.na(isNotInt)
       isDate[isNotInt] <- FALSE
       
+      ## perform int to date to character convertsion (way too slow)
+      v[isDate] <- format(as.Date(as.integer(v[isDate]) - origin, origin = "1970-01-01"), "%Y-%m-%d")
+      
     }
   }
   
+
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, origin, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
