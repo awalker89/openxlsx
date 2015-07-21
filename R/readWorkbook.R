@@ -110,9 +110,8 @@ read.xlsx.default <- function(xlsxFile,
     rows <- NA
   }else if(length(rows) > 1){
     rows <- as.integer(sort(rows))
-  }else{
-    stop("rows must be a integer vector of length 1 or 2 else NULL")
   }
+  
   
   ## check startRow
   if(!is.null(startRow)){
@@ -231,8 +230,6 @@ read.xlsx.default <- function(xlsxFile,
                      rows = rows,
                      getDates = detectDates,
                      PACKAGE = "openxlsx")
-  
-  
   
   
   nRows <- cell_info$nRows

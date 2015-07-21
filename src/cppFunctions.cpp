@@ -2304,7 +2304,13 @@ SEXP readWorkbook(CharacterVector v,
   
   /* do we have any dates */
   bool has_date;
-  if(nDates == nCells){
+  if(nDates == 1){
+    if(is_true(any(is_na(is_date)))){
+      has_date = false;
+    }else{
+      has_date = true;
+    }
+  }else if(nDates == nCells){
     has_date = true;
   }else{
     has_date = false;
@@ -2413,7 +2419,6 @@ SEXP readWorkbook(CharacterVector v,
     
   }
   
-  
   // Possible there are no stringInds to begin with and value of stringInds is 0
   // Possible we have stringInds but they have now all been used up by string_refs
   bool allNumeric = false;
@@ -2430,13 +2435,13 @@ SEXP readWorkbook(CharacterVector v,
     is_date.erase(is_date.begin(), is_date.begin() + pos);
   }
   
-  
+
   //Intialise return data.frame
   SEXP m; 
   v.erase(v.begin(), v.begin() + pos);
   
   if(allNumeric){
-    
+
     m = buildMatrixNumeric(v, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
@@ -2460,8 +2465,10 @@ SEXP readWorkbook(CharacterVector v,
     //date columns
     IntegerVector dateCols(1);
     if(has_date){
+      
       dateCols = colNumbers[is_date];
       dateCols = sort_unique(dateCols);
+      
     }else{
       dateCols[0] = -1;
     }
