@@ -33,13 +33,13 @@ write directly to an xlsx file
 \details{
 Optional parameters are:
 
+\bold{createWorkbook Parameters}
 \itemize{
-  \bold{createWorkbook Parameters}
   \item{\bold{creator}}{ A string specifying the workbook author}
 }
 
+\bold{addWorksheet Parameters}
 \itemize{
-  \bold{addWorksheet Parameters}
   \item{\bold{sheetName}}{ Name of the worksheet}
   \item{\bold{gridLines}}{ A logical. If \code{FALSE}, the worksheet grid lines will be hidden.}
   \item{\bold{tabColour}}{ Colour of the worksheet tab. A valid colour (belonging to colours())
@@ -47,9 +47,8 @@ Optional parameters are:
   \item{\bold{zoom}}{ A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.}
 }
 
-
+\bold{writeData/writeDataTable Parameters}
 \itemize{
-  \bold{writeData/writeDataTable Parameters}
   \item{\bold{startCol}}{ A vector specifiying the starting column(s) to write df}
   \item{\bold{startRow}}{ A vector specifiying the starting row(s) to write df}
   \item{\bold{xy}}{ An alternative to specifying startCol and startRow individually.
@@ -65,17 +64,16 @@ between each column.  If "\code{all}" all cell borders are drawn.}
   \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE.}
 }
 
-
+\bold{freezePane Parameters}
 \itemize{
-  \bold{freezePane Parameters}
   \item{\bold{firstActiveRow}} {Top row of active region to freeze pane.}
   \item{\bold{firstActiveCol}} {Furthest left column of active region to freeze pane.}
   \item{\bold{firstRow}} {If \code{TRUE}, freezes the first row (equivalent to firstActiveRow = 2)}
   \item{\bold{firstCol}} {If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
 }
 
+\bold{saveWorkbook Parameters}
 \itemize{
-  \bold{saveWorkbook Parameters}
   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
 }
 

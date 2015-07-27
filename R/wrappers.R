@@ -2222,7 +2222,8 @@ setFooter <- function(wb, text, position = "center"){
 #' ## Logical Operators
 #' # You can use Excels logical Opertors
 #' writeData(wb, "logical operators", 1:10)
-#' conditionalFormatting(wb, "logical operators", cols = 1, rows = 1:10, rule = "OR($A1=1,$A1=3,$A1=5,$A1=7)")
+#' conditionalFormatting(wb, "logical operators", cols = 1, rows = 1:10,
+#'  rule = "OR($A1=1,$A1=3,$A1=5,$A1=7)")
 #' 
 #' saveWorkbook(wb, "conditionalFormattingExample.xlsx", TRUE)
 conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
