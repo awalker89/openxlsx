@@ -57,6 +57,12 @@ If type == "contains"
   \item{style is a Style object. See \code{\link{createStyle}}}
   \item{rule is the text to look for within cells}
 }
+
+If type == "between"
+\itemize{
+  \item{style is a Style object. See \code{\link{createStyle}}}
+  \item{rule is a numeric vector of length 2 specifying lower and upper bound (Inclusive)}
+}
 }
 \examples{
 wb <- createWorkbook()
@@ -68,6 +74,8 @@ addWorksheet(wb, "Duplicates")
 addWorksheet(wb, "containsText")
 addWorksheet(wb, "colourScale", zoom = 30)
 addWorksheet(wb, "databar")
+addWorksheet(wb, "between")
+addWorksheet(wb, "logical operators")
 
 negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -121,7 +129,17 @@ setRowHeights(wb, "colourScale", rows = 1:nrow(df), heights = 7.5)
 
 ## Databars
 writeData(wb, "databar", -5:5)
-conditionalFormatting(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
+conditionalFormatting(wb, "databar", cols = 1, rows = 1:11, type = "databar") ## Default colours
+
+## Betweem
+# Highlight cells in interval [-2, 2]
+writeData(wb, "between", -5:5)
+conditionalFormatting(wb, "between", cols = 1, rows = 1:11, type = "between", rule = c(-2,2))
+
+## Logical Operators
+# You can use Excels logical Opertors
+writeData(wb, "logical operators", 1:10)
+conditionalFormatting(wb, "logical operators", cols = 1, rows = 1:10, rule = "OR($A1=1,$A1=3,$A1=5,$A1=7)")
 
 saveWorkbook(wb, "conditionalFormattingExample.xlsx", TRUE)
 }

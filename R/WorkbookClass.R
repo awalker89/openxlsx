@@ -2018,6 +2018,11 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
                         	<formula>NOT(ISERROR(SEARCH("%s", %s)))</formula>
                        </cfRule>', dxfId, values, values, unlist(strsplit(sqref, split = ":"))[[1]])
     
+  }else if(type == "between"){
+    
+    cfRule <- sprintf('<cfRule type="cellIs" dxfId="%s" priority="1" operator="between"><formula>%s</formula><formula>%s</formula></cfRule>', dxfId, formula[1], formula[2])
+    
+    
   }
   
   worksheets[[sheet]]$conditionalFormatting <<- append(worksheets[[sheet]]$conditionalFormatting, cfRule)              

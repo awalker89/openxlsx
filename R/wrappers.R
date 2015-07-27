@@ -2139,6 +2139,12 @@ setFooter <- function(wb, text, position = "center"){
 #'   \item{rule is the text to look for within cells}
 #' }
 #' 
+#' If type == "between"
+#' \itemize{
+#'   \item{style is a Style object. See \code{\link{createStyle}}}
+#'   \item{rule is a numeric vector of length 2 specifying lower and upper bound (Inclusive)}
+#' }
+#' 
 #' @seealso \code{\link{createStyle}}
 #' @export
 #' @examples
@@ -2151,6 +2157,8 @@ setFooter <- function(wb, text, position = "center"){
 #' addWorksheet(wb, "containsText")
 #' addWorksheet(wb, "colourScale", zoom = 30)
 #' addWorksheet(wb, "databar")
+#' addWorksheet(wb, "between")
+#' addWorksheet(wb, "logical operators")
 #' 
 #' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
@@ -2204,7 +2212,17 @@ setFooter <- function(wb, text, position = "center"){
 #' 
 #' ## Databars
 #' writeData(wb, "databar", -5:5)
-#' conditionalFormatting(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
+#' conditionalFormatting(wb, "databar", cols = 1, rows = 1:11, type = "databar") ## Default colours
+#' 
+#' ## Betweem
+#' # Highlight cells in interval [-2, 2]
+#' writeData(wb, "between", -5:5)
+#' conditionalFormatting(wb, "between", cols = 1, rows = 1:11, type = "between", rule = c(-2,2))
+#' 
+#' ## Logical Operators
+#' # You can use Excels logical Opertors
+#' writeData(wb, "logical operators", 1:10)
+#' conditionalFormatting(wb, "logical operators", cols = 1, rows = 1:10, rule = "OR($A1=1,$A1=3,$A1=5,$A1=7)")
 #' 
 #' saveWorkbook(wb, "conditionalFormattingExample.xlsx", TRUE)
 conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
@@ -2222,6 +2240,9 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     
   }else if(type == "contains"){
     type <- "containsText"
+    
+  }else if(type == "between"){
+    type <- "between"
     
   }else if(type != "expression"){
     stop("Invalid type argument.  Type must be one of 'expression', 'colourScale', 'databar', 'duplicates' or 'contains'")
@@ -2292,7 +2313,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     # type == "expression"
     # - style = createStyle()
     # - rule is an expression to evaluate
-    
+
     rule <- toupper(gsub(" ", "", rule))
     rule <- replaceIllegalCharacters(rule)
     rule <- gsub("!=", "&lt;&gt;", rule)
@@ -2347,6 +2368,17 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     values <- rule
     rule <- style
     
+  }else if(type == "between"){
+    
+    rule <- range(rule)
+    
+    if(is.null(style))
+      style <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+    
+    if(!"Style" %in% class(style))
+      stop("If type == 'between', style must be a Style object.")
+    
+    invisible(dxfId <- wb$addDXFS(style))
   }
   
   
