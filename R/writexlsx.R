@@ -97,6 +97,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   ## borders = NULL,
   ## borderColour = "#4F81BD"
   ## borderStyle
+  ## keepNA = FALSE
   
   #----writeDataTable---#
   ## startCol = 1
@@ -267,6 +268,16 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     borderStyle <- validateBorderStyle(params$borderStyle)
   }
   
+  keepNA <- FALSE
+  if("keepNA" %in% names(params)){
+    if(!"logical" %in% class(keepNA)){
+      stop("keepNA must be a logical.")
+    }else{
+      keepNA <- params$keepNA
+    }
+  }
+    
+  
   tableStyle <- "TableStyleLight9"
   if("tableStyle" %in% names(params))
     tableStyle <- params$tableStyle
@@ -322,6 +333,9 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     if(length(borderStyle) != nSheets)
       borderStyle <- rep_len(borderStyle, length.out = nSheets)
     
+    if(length(keepNA) != nSheets)
+      keepNA <- rep_len(keepNA, length.out = nSheets)
+    
     if(length(asTable) != nSheets)
       asTable <- rep_len(asTable, length.out = nSheets)
     
@@ -345,7 +359,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                        tableStyle = tableStyle[[i]],
                        tableName = NULL,
                        headerStyle = headerStyle[[i]],
-                       withFilter = withFilter[[i]])
+                       withFilter = withFilter[[i]],
+                       keepNA = keepNA[[i]])
         
       }else{
         
@@ -360,7 +375,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                   headerStyle = headerStyle[[i]],
                   borders = borders[[i]],
                   borderColour = borderColour[[i]],
-                  borderStyle = borderStyle[[i]])
+                  borderStyle = borderStyle[[i]],
+                  keepNA = keepNA[[i]])
         
       }
       
@@ -387,7 +403,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                      rowNames = rowNames,
                      tableStyle = tableStyle,
                      tableName = NULL,
-                     headerStyle = headerStyle)
+                     headerStyle = headerStyle,
+                     keepNA = keepNA)
       
     }else{
             
@@ -402,7 +419,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                 headerStyle = headerStyle,
                 borders = borders,
                 borderColour = borderColour,
-                borderStyle = borderStyle)      
+                borderStyle = borderStyle,
+                keepNA = keepNA)      
     }
     
   }

@@ -13,8 +13,6 @@ test_that("read.xlsx bug fixes", {
   df <- read.xlsx(file, sheet = 1, rows = 1, cols = 1, colNames = FALSE)
   expect_equal(df, data.frame("X1" = "Var1", stringsAsFactors = FALSE))
   
-
-  
   
 })
 
