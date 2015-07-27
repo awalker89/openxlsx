@@ -1,4 +1,20 @@
 
+openxlsx 3.0.2
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* "between" type for conditional formatting values in some interval.
+
+
+
+
+BUG FIXES
+
+* keepNA paramter added to write.xlsx. Passed to writeData/writeDataTable
+
+
+
 openxlsx 3.0.1
 ----------------------------------------------------------------
 

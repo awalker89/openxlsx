@@ -11,15 +11,30 @@
 #'   \item{createWorkbook}
 #'   \item{addWorksheet}
 #'   \item{writeData}
+#'   \item{freezePane}
 #'   \item{saveWorkbook}
 #' }
 #' 
 #' see details.
 #' @details Optional parameters are:
+#'
 #' \itemize{
+#'   \bold{createWorkbook Parameters}
 #'   \item{\bold{creator}}{ A string specifying the workbook author}
+#' }
+#' 
+#' \itemize{
+#'   \bold{addWorksheet Parameters}
 #'   \item{\bold{sheetName}}{ Name of the worksheet}
 #'   \item{\bold{gridLines}}{ A logical. If \code{FALSE}, the worksheet grid lines will be hidden.}
+#'   \item{\bold{tabColour}}{ Colour of the worksheet tab. A valid colour (belonging to colours()) 
+#'   or a valid hex colour beginning with "#".}
+#'   \item{\bold{zoom}}{ A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.}
+#' }
+#' 
+#' 
+#' \itemize{
+#'   \bold{writeData/writeDataTable Parameters}
 #'   \item{\bold{startCol}}{ A vector specifiying the starting column(s) to write df}
 #'   \item{\bold{startRow}}{ A vector specifiying the starting row(s) to write df}
 #'   \item{\bold{xy}}{ An alternative to specifying startCol and startRow individually. 
@@ -32,8 +47,23 @@
 #' between each column.  If "\code{all}" all cell borders are drawn.}
 #'   \item{\bold{borderColour}}{ Colour of cell border}
 #'   \item{\bold{borderStyle}}{ Border line style.}
+#'   \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE.}
+#' }
+#' 
+#' 
+#' \itemize{
+#'   \bold{freezePane Parameters}
+#'   \item{\bold{firstActiveRow}} {Top row of active region to freeze pane.}
+#'   \item{\bold{firstActiveCol}} {Furthest left column of active region to freeze pane.}
+#'   \item{\bold{firstRow}} {If \code{TRUE}, freezes the first row (equivalent to firstActiveRow = 2)}
+#'   \item{\bold{firstCol}} {If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
+#' }
+#' 
+#' \itemize{
+#'   \bold{saveWorkbook Parameters}
 #'   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
 #' }
+#' 
 #' 
 #' columns of x with class Date or POSIXt are automatically
 #' styled as dates and datetimes respectively.
@@ -110,6 +140,13 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   ## headerStyle = NULL
   ## withFilter = TRUE
   
+  #---freezePane---#
+  ## firstActiveRow = NULL
+  ## firstActiveCol = NULL
+  ## firstRow = FALSE
+  ## firstCol = FALSE
+  
+  
   #---saveWorkbook---#
   #   overwrite = TRUE
   
@@ -141,7 +178,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
       stop("zoom must be numeric")
     }
   }
-
+  
   ## AddWorksheet
   gridLines <- TRUE
   if("gridLines" %in% names(params)){
@@ -161,7 +198,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
   }
   
-
+  
   withFilter <- TRUE
   if("withFilter" %in% names(params)){
     if(is.logical(params$withFilter)){
@@ -276,7 +313,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
       keepNA <- params$keepNA
     }
   }
-    
+  
   
   tableStyle <- "TableStyleLight9"
   if("tableStyle" %in% names(params))
@@ -285,8 +322,9 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   ## create new Workbook object
   wb <- Workbook$new(creator)
-
+  
   ## If a list is supplied write to individual worksheets using names if available
+  nSheets <- 1
   if("list" %in% class(x)){
     
     nms <- names(x)
@@ -320,10 +358,10 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
     if(length(startCol) != nSheets)
       startCol <- rep_len(startCol, length.out = nSheets)
-        
+    
     if(length(headerStyle) != nSheets & !is.null(headerStyle))
       headerStyle <- lapply(1:nSheets, function(x) headerStyle)
-        
+    
     if(length(borders) != nSheets & !is.null(borders))
       borders <- rep_len(borders, length.out = nSheets)
     
@@ -347,7 +385,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
       wb$addWorksheet(nms[[i]], showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
       
       if(asTable[i]){
-                
+        
         writeDataTable(wb = wb,
                        sheet = i,
                        x = x[[i]],
@@ -407,7 +445,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                      keepNA = keepNA)
       
     }else{
-            
+      
       writeData(wb = wb, 
                 sheet = 1,
                 x = x,
@@ -424,6 +462,56 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
     
   }
+  
+  ###--Freeze Panes---###
+  ## firstActiveRow = NULL
+  ## firstActiveCol = NULL
+  ## firstRow = FALSE
+  ## firstCol = FALSE
+  
+  freezePanes <- FALSE
+  firstActiveRow <- rep_len(1L, length.out = nSheets)
+  if("firstActiveRow" %in% names(params)){
+    firstActiveRow <- params$firstActiveRow
+    freezePanes <- TRUE    
+    if(length(firstActiveRow) != nSheets)
+      firstActiveRow <- rep_len(firstActiveRow, length.out = nSheets)
+  }
+  
+  firstActiveCol <- rep_len(1L, length.out = nSheets)
+  if("firstActiveCol" %in% names(params)){
+    firstActiveCol <- params$firstActiveCol
+    freezePanes <- TRUE    
+    if(length(firstActiveCol) != nSheets)
+      firstActiveCol <- rep_len(firstActiveCol, length.out = nSheets)
+  }
+  
+  firstRow <- rep_len(FALSE, length.out = nSheets)
+  if("firstRow" %in% names(params)){
+    firstRow <- params$firstRow
+    freezePanes <- TRUE    
+    if("list" %in% class(x) & length(firstRow) != nSheets)
+      firstRow <- rep_len(firstRow, length.out = nSheets)
+  }
+  
+  firstCol <- rep_len(FALSE, length.out = nSheets)
+  if("firstCol" %in% names(params)){
+    firstCol <- params$firstCol
+    freezePanes <- TRUE    
+    if("list" %in% class(x) & length(firstCol) != nSheets)
+      firstCol <- rep_len(firstCol, length.out = nSheets)
+  }
+  
+  if(freezePanes){
+    for(i in 1:nSheets)
+      freezePane(wb = wb,
+                  sheet = i,
+                  firstActiveRow = firstActiveRow[i],
+                  firstActiveCol = firstActiveCol[i],
+                  firstRow = firstRow[i],
+                  firstCol = firstCol[i])
+  }
+  
   
   
   

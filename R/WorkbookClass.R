@@ -718,6 +718,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[[i]]) <- "character"
   }
   
+  
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
   
