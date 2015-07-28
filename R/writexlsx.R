@@ -57,6 +57,12 @@
 #'   \item{\bold{firstCol}} {If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
 #' }
 #' 
+#' \bold{colWidths Parameters}
+#' \itemize{
+#'   \item{\bold{colWidths}} {Must be value "auto". Sets all columns containing data to auto width.}
+#' }
+#' 
+#' 
 #' \bold{saveWorkbook Parameters}
 #' \itemize{
 #'   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
@@ -84,7 +90,7 @@
 #' 
 #' ## Lists elements are written to individual worksheets, using list names as sheet names if available
 #' l <- list("IRIS" = iris, "MTCATS" = mtcars, matrix(runif(1000), ncol = 5))
-#' write.xlsx(l, "writeList1.xlsx")
+#' write.xlsx(l, "writeList1.xlsx", colWidths = c(NA, "auto", "auto"))
 #' 
 #' ## different sheets can be given different parameters
 #' write.xlsx(l, "writeList2.xlsx", startCol = c(1,2,3), startRow = 2,
@@ -318,6 +324,12 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     tableStyle <- params$tableStyle
   
   
+  ## auto column widths
+  colWidths <- ""
+  if("colWidths" %in% names(params))
+    colWidths <- params$colWidths
+  
+    
   ## create new Workbook object
   wb <- Workbook$new(creator)
   
@@ -378,6 +390,9 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     if(length(tableStyle) != nSheets)
       tableStyle <- rep_len(tableStyle, length.out = nSheets)
     
+    if(length(colWidths) != nSheets)
+      colWidths <- rep_len(colWidths, length.out = nSheets)
+    
     for(i in 1:nSheets){
       
       wb$addWorksheet(nms[[i]], showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
@@ -415,6 +430,10 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                   keepNA = keepNA[[i]])
         
       }
+      
+      if(colWidths[i] %in% "auto")
+        setColWidths(wb, sheet = i, cols =  1:ncol(x[[i]]) +  startCol[[i]] - 1L, widths = "auto")
+      
       
       
     }
@@ -458,6 +477,9 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
                 borderStyle = borderStyle,
                 keepNA = keepNA)      
     }
+    
+    if(colWidths[1] %in% "auto")
+      setColWidths(wb, sheet = 1, cols =  1:ncol(x) +  startCol - 1L, widths = "auto")
     
   }
   
@@ -503,11 +525,11 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   if(freezePanes){
     for(i in 1:nSheets)
       freezePane(wb = wb,
-                  sheet = i,
-                  firstActiveRow = firstActiveRow[i],
-                  firstActiveCol = firstActiveCol[i],
-                  firstRow = firstRow[i],
-                  firstCol = firstCol[i])
+                 sheet = i,
+                 firstActiveRow = firstActiveRow[i],
+                 firstActiveCol = firstActiveCol[i],
+                 firstRow = firstRow[i],
+                 firstCol = firstCol[i])
   }
   
   

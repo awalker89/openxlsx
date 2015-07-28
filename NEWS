@@ -6,7 +6,9 @@ NEW FEATURES
 
 * "between" type for conditional formatting values in some interval.
 
+* colWidths parameter added to write.xlsx for auto column widths.
 
+* freezePane parameter handling added to write.xlsx.
 
 
 BUG FIXES

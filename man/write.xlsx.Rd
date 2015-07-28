@@ -72,6 +72,12 @@ between each column.  If "\code{all}" all cell borders are drawn.}
   \item{\bold{firstCol}} {If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
 }
 
+\bold{colWidths Parameters}
+\itemize{
+  \item{\bold{colWidths}} {Must be value "auto". Sets all columns containing data to auto width.}
+}
+
+
 \bold{saveWorkbook Parameters}
 \itemize{
   \item{\bold{overwrite}}{ Overwrite existing file (Defaults to TRUE as with write.table)}
@@ -95,7 +101,7 @@ write.xlsx(iris, file = "writeXLSX3.xlsx", colNames = TRUE, borders = "rows", he
 
 ## Lists elements are written to individual worksheets, using list names as sheet names if available
 l <- list("IRIS" = iris, "MTCATS" = mtcars, matrix(runif(1000), ncol = 5))
-write.xlsx(l, "writeList1.xlsx")
+write.xlsx(l, "writeList1.xlsx", colWidths = c(NA, "auto", "auto"))
 
 ## different sheets can be given different parameters
 write.xlsx(l, "writeList2.xlsx", startCol = c(1,2,3), startRow = 2,
