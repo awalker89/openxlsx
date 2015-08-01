@@ -10,6 +10,10 @@ NEW FEATURES
 
 * freezePane parameter handling added to write.xlsx.
 
+* visible parameter to addWorksheet to hide worksheets.
+
+* sheetVisible function to get and assign worksheet visibility state "hidden"/"visible"
+
 
 BUG FIXES
 

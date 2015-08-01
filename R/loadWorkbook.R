@@ -133,6 +133,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
     
     is_chart_sheet <- sheetrId %in% chartSheetRIds
+    is_visible <- !grepl("hidden",  unlist(strsplit(sheets, split = "<sheet "))[-1])
+    if(length(is_visible) != length(sheetrId))
+      is_visible <- rep(TRUE, length(sheetrId))
     
     ## add worksheets to wb
     j <- 1
@@ -155,7 +158,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         
         wb$addChartSheet(sheetName = sheetNames[i], tabColour = tabColour, zoom = as.numeric(zoom))
       }else{
-        wb$addWorksheet(sheetNames[i])
+        wb$addWorksheet(sheetNames[i], visible = is_visible[i])
       }
       
     }

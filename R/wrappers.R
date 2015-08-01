@@ -225,6 +225,7 @@ sheets <- function(wb){
 #' @param evenFooter document footer for even pages.
 #' @param firstHeader document header for first page only.
 #' @param firstFooter document footer for first page only.
+#' @param visible If FALSE, sheet is hidden else visible.
 #' @details Headers and footers can contain special tags
 #' \itemize{
 #'   \item{\bold{&[Page]}}{ Page number}
@@ -287,13 +288,14 @@ addWorksheet <- function(wb, sheetName,
                          evenHeader = NULL,
                          evenFooter = NULL,
                          firstHeader = NULL,
-                         firstFooter = NULL){
+                         firstFooter = NULL,
+                         visible = TRUE){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  if(sheetName %in% names(wb$worksheets))
-    stop("A worksheet by that name already exists!")
+  if(tolower(sheetName) %in% tolower(names(wb$worksheets)))
+    stop("A worksheet by that name already exists! Sheet names must be unique case-insensitive.")
   
   if(!is.logical(gridLines) | length(gridLines) > 1)
     stop("gridLines must be a logical of length 1.")
@@ -328,6 +330,10 @@ addWorksheet <- function(wb, sheetName,
   if(!is.null(firstFooter) & length(firstFooter) != 3)
     stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
   
+  
+  if(!is.logical(visible))
+    stop("visible must be TRUE or FALSE")
+  
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
   
@@ -340,7 +346,8 @@ addWorksheet <- function(wb, sheetName,
                             evenHeader = headerFooterSub(evenHeader),
                             evenFooter = headerFooterSub(evenFooter),
                             firstHeader = headerFooterSub(firstHeader),
-                            firstFooter = headerFooterSub(firstFooter)))
+                            firstFooter = headerFooterSub(firstFooter),
+                            visible = visible[1]))
 } 
 
 
@@ -1121,7 +1128,7 @@ removeColWidths <- function(wb, sheet, cols){
   
   if(!is.numeric(cols))
     cols <- convertFromExcelRef(cols)
-
+  
   customCols <- as.integer(names(wb$colWidths[[sheet]]))
   removeInds <- which(customCols %in% cols)
   if(length(removeInds) > 0){
@@ -1140,8 +1147,8 @@ removeColWidths <- function(wb, sheet, cols){
     
     
   }
-
-    
+  
+  
 }
 
 
@@ -1822,7 +1829,7 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
   dateTime = rep(NA, length(x))
   dateTime[notNA] <- as.POSIXct(paste(date[notNA], y[notNA]), ...)
   dateTime = .POSIXct(dateTime)
-
+  
   return(dateTime)
 }
 
@@ -1855,7 +1862,7 @@ names.Workbook <- function(x){
 #' @export
 `names<-.Workbook` <- function(x, value) {
   
-  if(any(duplicated(value)))
+  if(any(duplicated(tolower(value))))
     stop("Worksheet names must be unique.")
   
   exSheets <- names(x$worksheets)
@@ -2314,7 +2321,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     # type == "expression"
     # - style = createStyle()
     # - rule is an expression to evaluate
-
+    
     rule <- toupper(gsub(" ", "", rule))
     rule <- replaceIllegalCharacters(rule)
     rule <- gsub("!=", "&lt;&gt;", rule)
@@ -2489,6 +2496,83 @@ getSheetNames <- function(file){
   return(sheetNames)
   
 }
+
+
+
+#' @name sheetVisible
+#' @title Get worksheet visible state.
+#' @author Alexander Walker
+#' @param wb A workbook object 
+#' @return Character vector of worksheet names.
+#' @return  TRUE if sheet is visible, FALSE if sheet is hidden
+#' @examples
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, sheetName = "S1", visible = FALSE)
+#' addWorksheet(wb, sheetName = "S2", visible = TRUE)
+#' addWorksheet(wb, sheetName = "S3", visible = FALSE)
+#' 
+#' sheetVisible(wb)
+#' sheetVisible(wb)[1] <- TRUE ## show sheet 1
+#' sheetVisible(wb)[2] <- FALSE ## hide sheet 2
+#' 
+#' @export
+sheetVisible <- function(wb){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  state <- rep(TRUE, length(wb$workbook$sheets))
+  state[grepl("hidden", wb$workbook$sheets)] <- FALSE
+  
+  return(state)
+  
+}
+
+#' @rdname sheetVisible
+#' @param value a logical vector the same length as sheetVisible(wb)
+#' @export
+`sheetVisible<-` <- function(wb, value) {
+
+  if(!is.logical(value))
+    stop("value must be a logical vector.")
+  
+  if(!any(value))
+    stop("A workbook must have atleast 1 visible worksheet.")
+  
+  value <- as.character(value)
+  value[value %in% "TRUE"] <- "visible"
+  value[value %in% "FALSE"] <- "hidden"
+  
+  exState <- rep("visible", length(wb$workbook$sheets))
+  exState[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  
+  if(length(value) != length(wb$workbook$sheets))
+    stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
+  
+  inds <- which(value != exState)
+  if(length(inds) == 0)
+    return(invisible(wb))
+  
+  for(i in inds)
+    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
+
+  invisible(wb)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3104,7 +3188,7 @@ all.equal.Workbook <- function(target, current, ...){
     message("tables.xml.rels not equal")
     return(FALSE)
   } 
-    
+  
   flag <- x$theme == y$theme
   if(!flag){
     message("theme not equal")

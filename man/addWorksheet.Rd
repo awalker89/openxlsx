@@ -6,7 +6,8 @@
 \usage{
 addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
   zoom = 100, header = NULL, footer = NULL, evenHeader = NULL,
-  evenFooter = NULL, firstHeader = NULL, firstFooter = NULL)
+  evenFooter = NULL, firstHeader = NULL, firstFooter = NULL,
+  visible = TRUE)
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}
@@ -30,6 +31,8 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 \item{firstHeader}{document header for first page only.}
 
 \item{firstFooter}{document footer for first page only.}
+
+\item{visible}{If FALSE, sheet is hidden else visible.}
 }
 \value{
 XML tree

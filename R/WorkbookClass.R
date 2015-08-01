@@ -149,7 +149,8 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
 Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL, zoom = 100,
                                          oddHeader = NULL, oddFooter = NULL,
                                          evenHeader = NULL, evenFooter = NULL,
-                                         firstHeader = NULL, firstFooter = NULL){
+                                         firstHeader = NULL, firstFooter = NULL,
+                                         visible = TRUE){
   
   newSheetIndex = length(worksheets) + 1L
   
@@ -159,8 +160,14 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
     sheetId <- 1
   }
   
+  if(visible){
+    visible <- "visible"
+  }else{
+    visible <- "hidden"
+  }
+  
   ##  Add sheet to workbook.xml
-  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, sheetId, newSheetIndex))
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state = "%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
   
   ## append to worksheets list
   worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, 
@@ -2264,9 +2271,14 @@ Workbook$methods(preSaveCleanUp = function(){
     workbook$sheets <<- workbook$sheets[sheetOrder]
   
   ## re-assign tabSelected
-  worksheets[[1]]$sheetViews <<- sub('( tabSelected="0")|( tabSelected="false")', ' tabSelected="1"', worksheets[[1]]$sheetViews, ignore.case = TRUE)
+  state <- rep("visible", length(workbook$sheets))
+  state[grepl("hidden", workbook$sheets)] <- "hidden"
+  i <- which(state %in% "visible")[[1]]
+  
+  workbook$bookViews <<- sprintf('<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="13125" windowHeight="6105" firstSheet="%s" activeTab="%s"/></bookViews>', i-1L, i-1L)
+  worksheets[[i]]$sheetViews <<- sub('( tabSelected="0")|( tabSelected="false")', ' tabSelected="1"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
   if(nWorksheets > 1){
-    for(i in 2:nWorksheets)
+    for(i in (1:nWorksheets)[!(1:nWorksheets) %in% i])
       worksheets[[i]]$sheetViews <<- sub(' tabSelected="(1|true|false|0)"', ' tabSelected="0"', worksheets[[i]]$sheetViews, ignore.case = TRUE)
   }
   
