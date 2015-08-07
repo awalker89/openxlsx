@@ -397,6 +397,17 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// isInternalHyperlink
+LogicalVector isInternalHyperlink(CharacterVector x);
+RcppExport SEXP openxlsx_isInternalHyperlink(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    __result = Rcpp::wrap(isInternalHyperlink(x));
+    return __result;
+END_RCPP
+}
 // writeCellStyles
 List writeCellStyles(List sheetData, CharacterVector rows, IntegerVector cols, String styleId, std::vector<std::string> LETTERS);
 RcppExport SEXP openxlsx_writeCellStyles(SEXP sheetDataSEXP, SEXP rowsSEXP, SEXP colsSEXP, SEXP styleIdSEXP, SEXP LETTERSSEXP) {

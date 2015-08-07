@@ -17,6 +17,7 @@ Workbook <- setRefClass("Workbook", fields = c(".rels",
                                                "freezePane",
                                                "headFoot",
                                                "hyperlinks",
+                                               "hyperlinks_int",
                                                "media",
                                                "printerSettings",
                                                
@@ -257,7 +258,6 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
   printerSettings[[newSheetIndex]] <<- genPrinterSettings()
-  hyperlinks[[newSheetIndex]] <<- ""
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
@@ -760,7 +760,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ##Append hyperlinks, convert h to s in cell type
   if("hyperlink" %in% colClasses){
-    
+
     hInds <- which(t == "h")
     
     if(length(hInds) > 0){
@@ -771,8 +771,9 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       names(newHlinks) <- replaceIllegalCharacters(v[hInds])
       
       if(!is.null(hlinkNames) & length(hlinkNames) == length(hInds))
-        v[hInds] <- hlinkNames 
+        v[hInds] <- hlinkNames ## this is text to display instead of hyperlink
       
+      ## Name of the hyperlink is used to populate the "Target" field in worksheet_rels
       if(exHlinks[[1]] == ""){
         hyperlinks[[sheet]] <<- newHlinks
       }else{
@@ -1499,12 +1500,23 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(length(worksheets[[i]]$extLst) > 0)
         ws$extLst <- sprintf('<extLst>%s</extLst>', paste(worksheets[[i]]$extLst, collapse = ""))
       
+      haveHL <- FALSE
       if(hyperlinks[[i]][[1]] != ""){
         nTables <- length(tables)
         nHLinks <- length(hyperlinks[[i]])
-        hInds <- as.integer(1:nHLinks + 3L + nTables - 1L)
+        hInds <- paste0(1:nHLinks, "h")
         ws$hyperlinks <- paste0('<hyperlinks>', paste(sprintf('<hyperlink ref="%s" r:id="rId%s"/>', hyperlinks[[i]], hInds), collapse = ""), '</hyperlinks>')  
+        haveHL <- TRUE
       }
+      
+      if(hyperlinks_int[[i]][[1]] != ""){
+        if(haveHL){
+          ws$hyperlinks <- c(ws$hyperlinks, hyperlinks_int[[i]])  
+        }else{
+          ws$hyperlinks <- hyperlinks_int[[i]]
+        }
+      }
+        
       
       sheetDataInd <- which(names(ws) == "sheetData")
       prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))

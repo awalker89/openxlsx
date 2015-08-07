@@ -1435,6 +1435,9 @@ SEXP getHyperlinkRefs(CharacterVector x){
   
   int n = x.size();
   
+  if(n == 0)
+    return wrap("");
+  
   std::string xml;
   CharacterVector r(n);
   size_t pos = 0;
@@ -1457,6 +1460,33 @@ SEXP getHyperlinkRefs(CharacterVector x){
   
 }
 
+
+// [[Rcpp::export]]
+LogicalVector isInternalHyperlink(CharacterVector x){
+  
+  int n = x.size();
+  std::string xml;
+  std::string tag = "location=";
+  size_t found;
+  LogicalVector isInternal(n);
+  
+  for(int i = 0; i < n; i++){ 
+  
+      // find location tag  
+    xml = x[i];
+    found = xml.find("location=", 0);
+      
+    if (found!=std::string::npos){
+      isInternal[i] = true;
+    }else{
+      isInternal[i] = false;
+    }
+    
+  }
+  
+  return wrap(isInternal) ;  
+  
+}
 
 
 
@@ -2774,6 +2804,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   List rowHeights(n_sheets);
   List dataCount(n_sheets);
   List hyperLinks(n_sheets);
+  List hyperLinks_internal(n_sheets);
   List wbstyleObjects;
   
   // loop over each worksheet file
@@ -2788,7 +2819,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       rowHeights[i] = List(0);
       dataCount[i] = 0;
       hyperLinks[i] = "";
-      
+      hyperLinks_internal[i] = "";
       
     }else{
       
@@ -2930,9 +2961,19 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
       if(hyperlinks.size() > 0){
-        hyperLinks[i] = getHyperlinkRefs(hyperlinks);
+        
+        LogicalVector isIntH = isInternalHyperlink(hyperlinks);
+        hyperLinks[i] = getHyperlinkRefs(hyperlinks[!isIntH]);
+        
+        if(is_true(any(isIntH))){
+          hyperLinks_internal[i] = hyperlinks[isIntH];
+        }else{
+          hyperLinks_internal[i] = "";
+        }
+        
       }else{
         hyperLinks[i] = "";
+        hyperLinks_internal[i] = "";
       }
       
       CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
@@ -3289,6 +3330,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   wb.field("styleObjects") = wbstyleObjects;
   wb.field("dataCount") = dataCount;
   wb.field("hyperlinks") = hyperLinks;
+  wb.field("hyperlinks_int") = hyperLinks_internal;
   
   return wrap(wb);
   
