@@ -1466,7 +1466,7 @@ LogicalVector isInternalHyperlink(CharacterVector x){
   
   int n = x.size();
   std::string xml;
-  std::string tag = "location=";
+  std::string tag = "r:id=";
   size_t found;
   LogicalVector isInternal(n);
   
@@ -1474,12 +1474,12 @@ LogicalVector isInternalHyperlink(CharacterVector x){
   
       // find location tag  
     xml = x[i];
-    found = xml.find("location=", 0);
+    found = xml.find(tag, 0);
       
-    if (found!=std::string::npos){
-      isInternal[i] = true;
-    }else{
+    if (found != std::string::npos){
       isInternal[i] = false;
+    }else{
+      isInternal[i] = true;
     }
     
   }
@@ -2684,8 +2684,7 @@ List getCellInfo(std::string xmlFile,
         pos = cell.find(rtag, 0);  // find r="
         endPos = cell.find(tagEnd, pos + 3);  // find next "
         r[i] = cell.substr(pos + 3, endPos - pos - 3).c_str();
-        
-        
+       
         // Pull out type
         pos = cell.find(ttag, 0);  // find t="
         if(pos != std::string::npos){
@@ -2757,7 +2756,6 @@ List getCellInfo(std::string xmlFile,
   } // end of while loop over occurences
   // END OF CELL AND ATTRIBUTION GATHERING
   
-  
   string_refs = string_refs[!is_na(string_refs)];
   
   int nRows = calcNRows(r, skipEmptyRows);
@@ -2804,7 +2802,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   List rowHeights(n_sheets);
   List dataCount(n_sheets);
   List hyperLinks(n_sheets);
-  List hyperLinks_internal(n_sheets);
   List wbstyleObjects;
   
   // loop over each worksheet file
@@ -2818,8 +2815,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       freezePane[i] = List(0);
       rowHeights[i] = List(0);
       dataCount[i] = 0;
-      hyperLinks[i] = "";
-      hyperLinks_internal[i] = "";
+      hyperLinks[i] = List(0);
       
     }else{
       
@@ -2961,19 +2957,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
       if(hyperlinks.size() > 0){
-        
-        LogicalVector isIntH = isInternalHyperlink(hyperlinks);
-        hyperLinks[i] = getHyperlinkRefs(hyperlinks[!isIntH]);
-        
-        if(is_true(any(isIntH))){
-          hyperLinks_internal[i] = hyperlinks[isIntH];
-        }else{
-          hyperLinks_internal[i] = "";
-        }
-        
+        hyperLinks[i] = hyperlinks;
       }else{
-        hyperLinks[i] = "";
-        hyperLinks_internal[i] = "";
+        hyperLinks[i] = List(0);
       }
       
       CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
@@ -3330,7 +3316,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   wb.field("styleObjects") = wbstyleObjects;
   wb.field("dataCount") = dataCount;
   wb.field("hyperlinks") = hyperLinks;
-  wb.field("hyperlinks_int") = hyperLinks_internal;
   
   return wrap(wb);
   

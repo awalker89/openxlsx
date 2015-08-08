@@ -528,20 +528,36 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       }
     } ## if(length(tablesXML) > 0)
     
-    ## hyperlinks
-    hlinks <- lapply(xml, function(x) x[grepl("hyperlink", x) & grepl("External", x)])
-    hlinksInds <- which(sapply(hlinks, length) > 0)
-    
-    if(length(hlinksInds) > 0){
+
+    ## might we have some external hyperlinks
+    if(any(sapply(wb$hyperlinks, length) > 0)){
       
-      hlinks <- hlinks[hlinksInds]
-      for(i in 1:length(hlinksInds)){
-        targets <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-        targets <- gsub('"$', "", targets)
-        
-        names(wb$hyperlinks[[hlinksInds[i]]]) <- targets  
-      }  
+      ## Do we have external hyperlinks
+      hlinks <- lapply(xml, function(x) x[grepl("hyperlink", x) & grepl("External", x)])
+      hlinksInds <- which(sapply(hlinks, length) > 0)
+      
+      ## If it's an external hyperlink it will have a target in the sheet_rels
+      if(length(hlinksInds) > 0){
+        for(i in hlinksInds){
+
+          ids <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Id=").*?"', x, perl = TRUE))[[1]]))
+          ids <- gsub('"$', "", ids)
+          
+          targets <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+          targets <- gsub('"$', "", targets)
+          
+          ids2 <- lapply(wb$hyperlinks[[i]], function(x) regmatches(x, gregexpr('(?<=r:id=").*?"', x, perl = TRUE))[[1]])
+          ids2[sapply(ids2, length) == 0] <- NA
+          ids2 <- gsub('"$', "", unlist(ids2))
+          
+          targets <- targets[match(ids2, ids)]
+          names(wb$hyperlinks[[i]]) <- targets
+          
+        }
+      }
     }
+    
+    
     
     ## xml is in the order of the sheets, drawIngs is toes to sheet position of hasDrawing
     ## Not every sheet has a drawing.xml
@@ -618,7 +634,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           cd <- .Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx")
           cd <- cd[grepl('ObjectType="Note"', cd)]
           cd <- paste0(cd, ">")
-
+          
           
           target <- unlist(lapply(commentXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           target <- basename(gsub('"$', "", target))
@@ -702,6 +718,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
   } ## end of worksheetRels
   
+  ## convert hyperliks to hyperlink objects
+  if(any(sapply(wb$hyperlinks, length) > 0)) 
+    wb$hyperlinks <- lapply(1:nSheets, function(i) xml_to_hyperlink(wb$hyperlinks[[i]]))
   
   
   ## queryTables
