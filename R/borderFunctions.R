@@ -565,7 +565,7 @@ Workbook$methods(columnBorders = function(colClasses, sheet, startRow, startCol,
 
 Workbook$methods(allBorders = function(colClasses, sheet, startRow, startCol, nRow, nCol, borderColour, borderStyle, borderType){
   
-  sheet <- names(worksheets)[[sheet]]
+  sheet <- names(worksheets)[[validateSheet(sheet)]]
   ## steps
   # get column class
   # get corresponding base style
