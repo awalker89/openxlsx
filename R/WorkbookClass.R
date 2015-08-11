@@ -335,17 +335,18 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## xl/comments.xml
   if(nComments > 0){
     for(i in 1:nSheets){
-      if(length(comments[[i]]) > 0)
+      if(length(comments[[i]]) > 0){
         
         fn <- sprintf("comments%s.xml", i)
-      
-      Content_Types <<- c(Content_Types, 
-                          sprintf('<Override PartName="/xl/%s" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>', fn))
-      
-      worksheets_rels[[i]] <<- unique(c(worksheets_rels[[i]],
-                                        sprintf('<Relationship Id="rIdcomment" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../%s"/>', fn)))
-      
-      writeCommentXML(comment_list = comments[[i]], file_name = file.path(tmpDir, "xl", fn))
+        
+        Content_Types <<- c(Content_Types, 
+                            sprintf('<Override PartName="/xl/%s" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>', fn))
+        
+        worksheets_rels[[i]] <<- unique(c(worksheets_rels[[i]],
+                                          sprintf('<Relationship Id="rIdcomment" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../%s"/>', fn)))
+        
+        writeCommentXML(comment_list = comments[[i]], file_name = file.path(tmpDir, "xl", fn))
+      }
     }
     
     .self$writeDrawingVML(xldrawingsDir)
@@ -776,7 +777,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       newhl <- lapply(1:length(hInds), function(i){
         Hyperlink$new(ref = newHlinks[i], target = targets[i], location = NULL, display = NULL, is_external = TRUE)
       })
-        
+      
       hyperlinks[[sheet]] <<- append(hyperlinks[[sheet]], newhl)
       
     }
