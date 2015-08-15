@@ -2574,19 +2574,14 @@ sheetVisible <- function(wb){
 #' @examples
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "Sheet 1")
-#' addWorksheet(wb, "Sheet 2")
-#' addWorksheet(wb, "Sheet 3")
+#' writeData(wb, sheet = 1, x = iris)
 #' 
-#' writeData(wb, 1, iris)
-#' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
+#' pageBreak(wb, sheet = 1, i = 10, type = "row")
+#' pageBreak(wb, sheet = 1, i = 20, type = "row")
+#' pageBreak(wb, sheet = 1, i = 2, type = "column")
 #' 
-#' ## Equivalently
-#' writeData(wb, 2, x = iris, withFilter = TRUE)
-#' 
-#' ## Similarly
-#' writeDataTable(wb, 3, iris)
-#' 
-#' saveWorkbook(wb, file = "addFilterExample.xlsx", overwrite = TRUE)
+#' saveWorkbook(wb, "pageBreakExample.xlsx", TRUE)
+#' ## In Excel: View tab -> Page Break Preview
 pageBreak <- function(wb, sheet, i, type = "row"){
   
   if(!"Workbook" %in% class(wb))
