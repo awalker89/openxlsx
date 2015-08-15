@@ -1489,6 +1489,20 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(!is.null(ws$headerFooter))
         ws$headerFooter <- genHeaderFooterNode(ws$headerFooter)
       
+      ## rowBreaks and colBreaks
+      if(!is.null(ws$rowBreaks)){
+        ws$rowBreaks <- paste0(sprintf('<rowBreaks count="%s" manualBreakCount="%s">', length(ws$rowBreaks), length(ws$rowBreaks)),
+                               paste(ws$rowBreaks, collapse = ""),
+                               '</rowBreaks>')
+      }
+      
+      if(!is.null(ws$colBreaks)){
+        ws$colBreaks <- paste0(sprintf('<colBreaks count="%s" manualBreakCount="%s">', length(ws$colBreaks), length(ws$colBreaks)),
+                               paste(ws$colBreaks, collapse = ""),
+                               '</colBreaks>')
+      }
+       
+      
       if(!is.null(ws$sheetPr))
         ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
       

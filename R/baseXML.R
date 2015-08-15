@@ -146,6 +146,8 @@ genBaseSheet <- function(sheetName,
                    pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
                    pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
                    headerFooter = hf,
+                   rowBreaks = NULL,
+                   colBreaks = NULL,
                    drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
                    legacyDrawing = NULL,
                    tableParts = NULL,

@@ -2563,7 +2563,64 @@ sheetVisible <- function(wb){
 
 
 
-
+#' @name pageBreak
+#' @title add a page break to a worksheet
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param i row or column number to insert page break.
+#' @param type One of "row" or "column" for a row break or column break. 
+#' @export
+#' @seealso \code{\link{addWorksheet}}
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' addWorksheet(wb, "Sheet 3")
+#' 
+#' writeData(wb, 1, iris)
+#' addFilter(wb, 1, row = 1, cols = 1:ncol(iris))
+#' 
+#' ## Equivalently
+#' writeData(wb, 2, x = iris, withFilter = TRUE)
+#' 
+#' ## Similarly
+#' writeDataTable(wb, 3, iris)
+#' 
+#' saveWorkbook(wb, file = "addFilterExample.xlsx", overwrite = TRUE)
+pageBreak <- function(wb, sheet, i, type = "row"){
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  type <- tolower(type)[1]
+  if(!type %in% c("row", "column"))
+    stop("'type' argument must be 'row' or 'column'.")
+  
+  if(!is.numeric(i))
+    stop("'i' must be numeric.")
+  i <- round(i)
+  
+  if(type == "row"){
+    wb$worksheets[[sheet]]$rowBreaks <- c(
+      wb$worksheets[[sheet]]$rowBreaks
+      ,sprintf('<brk id="%s" max="16383" man="1"/>', i)
+    )
+    
+  }else if(type == "column"){
+    wb$worksheets[[sheet]]$colBreaks <- c(
+      wb$worksheets[[sheet]]$colBreaks
+      ,sprintf('<brk id="%s" max="1048575" man="1"/>', i)
+    )
+  }
+  
+  
+  # wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(rows, rows), "y" = c(min(cols), max(cols)))), collapse = ":"))
+  
+  invisible(wb)
+  
+}
 
 
 

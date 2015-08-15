@@ -14,6 +14,7 @@ NEW FEATURES
 
 * sheetVisible function to get and assign worksheet visibility state "hidden"/"visible"
 
+* pageBreak function to add page breaks to worksheets.
 
 BUG FIXES
 
