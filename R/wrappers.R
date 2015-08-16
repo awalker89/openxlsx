@@ -1911,7 +1911,7 @@ names.Workbook <- function(x){
 #'                   sheet = 1,
 #'                   name = "iris",
 #'                   rows = 1:(nrow(iris)+1),
-#'                   cols = 1:(ncol(iris)+1))
+#'                   cols = 1:ncol(iris))
 #' 
 #' 
 #' ## using writeData 'name' argument
@@ -1994,7 +1994,7 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
 #'                   sheet = 1,
 #'                   name = "iris",
 #'                   rows = 1:(nrow(iris)+1),
-#'                   cols = 1:(ncol(iris)+1))
+#'                   cols = 1:ncol(iris))
 #' 
 #' 
 #' ## using writeData 'name' argument

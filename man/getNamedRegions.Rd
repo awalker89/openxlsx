@@ -23,7 +23,7 @@ createNamedRegion(wb = wb,
                   sheet = 1,
                   name = "iris",
                   rows = 1:(nrow(iris)+1),
-                  cols = 1:(ncol(iris)+1))
+                  cols = 1:ncol(iris))
 
 
 ## using writeData 'name' argument
