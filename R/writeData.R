@@ -39,6 +39,7 @@
 #'   }
 #' @param withFilter If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet. 
 #' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param name If not NULL, a named region is defined.
 #' @seealso \code{\link{writeDataTable}}
 #' @export writeData
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
@@ -115,7 +116,8 @@ writeData <- function(wb,
                       borderColour = getOption("openxlsx.borderColour", "black"),
                       borderStyle = getOption("openxlsx.borderStyle", "thin"),
                       withFilter = FALSE,
-                      keepNA = FALSE){
+                      keepNA = FALSE,
+                      name = NULL){
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- getOption("scipen")
@@ -164,6 +166,20 @@ writeData <- function(wb,
     colNames = FALSE
   }
 
+  ## named region
+  if(!is.null(name)){ ## validate name
+    ex_names <- regmatches(wb$workbook$definedNames, regexpr('(?<=name=")[^"]+', wb$workbook$definedNames, perl = TRUE))
+    ex_names <- replaceXMLEntities(ex_names)
+    
+    if(name %in% ex_names){
+      stop(sprintf("Named region with name '%s' already exists!", name))
+    }else if(grepl("[^A-Z0-9_]", name[1], ignore.case = TRUE)){
+      stop("Invalid characters in name")
+    }else if(grepl('^[A-Z]{1,3}[0-9]+$', name)){
+      stop("name cannot look like a cell reference.")
+    }
+  }
+  
   if(is.vector(x) | is.factor(x))
     colNames <- FALSE ## this will go to coerce.default and rowNames will be ignored 
   
@@ -211,6 +227,15 @@ writeData <- function(wb,
   ## If we don't have any rows to write return
   if(nRow == 0)
     return(invisible(0))
+  
+  ## named region
+  if(!is.null(name)){
+    
+    ref1 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol, LETTERS), "$", startRow)
+    ref2 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol + nCol - 1L, LETTERS), "$", startRow + nRow - 1L + colNames)
+    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = names(wb$worksheets)[sheet])
+    
+  }
   
   
   ## hyperlink style, if no borders

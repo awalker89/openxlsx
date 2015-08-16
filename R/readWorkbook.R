@@ -397,10 +397,9 @@ read.xlsx.Workbook <- function(xlsxFile,
     }
     
     dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
-    
     ind <- dn_names == namedRegion
     if(!any(ind))
-      stop(sprintf("Region '%s' not found!", region))
+      stop(sprintf("Region '%s' not found!", namedRegion))
     
     ## pull out first node value
     dn <- dn[ind] 
@@ -415,7 +414,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     cols <- seq(from = cols[1], to = cols[2], by = 1)
     rows <- seq(from = rows[1], to = rows[2], by = 1)
     startRow <- 1
-    
+
   }
   
   
@@ -423,8 +422,6 @@ read.xlsx.Workbook <- function(xlsxFile,
     rows <- NA
   }else if(length(rows) > 1){
     rows <- as.integer(sort(rows))
-  }else{
-    stop("rows must be an integer vector else NULL or NA")
   }
   
   ## check startRow

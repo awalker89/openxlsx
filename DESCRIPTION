@@ -1,7 +1,7 @@
 Package: openxlsx
 Type: Package
 Title: Read, Write and Edit XLSX Files
-Version: 3.0.9
+Version: 3.0.10
 Date: 2015-08-15
 Authors@R: c(
     person("Alexander", "Walker",

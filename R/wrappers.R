@@ -1888,16 +1888,145 @@ names.Workbook <- function(x){
 
 
 
-#' @name getNamedRegions
-#' @title Get named regions in an xlsx file.
-#' @param xlsxFile An xlsx file or Workbook object
+#' @name createNamedRegion
+#' @title Create a named region.
+#' @title Insert an image into a worksheet 
+#' @author Alexander Walker
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param rows Numeric vector specifying rows to include in region
+#' @param cols Numeric vector specifying columns to include in region
+#' @param name Name for region. A character vector of length 1.
+#' @details Region is given by: min(cols):max(cols) X min(rows):max(rows)
 #' @export
+#' @seealso \code{\link{getNamedRegions}}
 #' @examples
-#' ##getNamedRegions
-getNamedRegions <- function(xlsxFile){
+#' ## create named regions
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' 
+#' ## specify region
+#' writeData(wb, sheet = 1, x = iris, startCol = 1, startRow = 1)
+#' createNamedRegion(wb = wb,
+#'                   sheet = 1,
+#'                   name = "iris",
+#'                   rows = 1:(nrow(iris)+1),
+#'                   cols = 1:(ncol(iris)+1))
+#' 
+#' 
+#' ## using writeData 'name' argument
+#' writeData(wb, sheet = 1, x = iris, name = "iris2", startCol = 10)
+#' 
+#' out_file <- tempfile(fileext = ".xlsx")
+#' saveWorkbook(wb, out_file, overwrite = TRUE)
+#' 
+#' ## see named regions
+#' getNamedRegions(wb) ## From Workbook object
+#' getNamedRegions(out_file) ## From xlsx file
+#' 
+#' ## read named regions
+#' df <- read.xlsx(wb, namedRegion = "iris")
+#' head(df)
+#' 
+#' df <- read.xlsx(out_file, namedRegion = "iris2")
+#' head(df)
+createNamedRegion <- function(wb, sheet, cols, rows, name){
+  
+  sheet <- wb$validateSheet(sheet)
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!is.numeric(rows))
+    stop("rows argument must be a numeric/integer vector")
+  
+  if(!is.numeric(cols))
+    stop("cols argument must be a numeric/integer vector")
+  
+  ## check name doesn't already exist
+  ## named region
+  
+  ex_names <- regmatches(wb$workbook$definedNames, regexpr('(?<=name=")[^"]+', wb$workbook$definedNames, perl = TRUE))
+  ex_names <- replaceXMLEntities(ex_names)
+  
+  if(name %in% ex_names){
+    stop(sprintf("Named region with name '%s' already exists!", name))
+  }else if(grepl("[^A-Z0-9_]", name[1], ignore.case = TRUE)){
+    stop("Invalid characters in name")
+  }else if(grepl('^[A-Z]{1,3}[0-9]+$', name)){
+    stop("name cannot look like a cell reference.")
+  }
+  
+  
+  cols <- round(cols)
+  rows <- round(rows)
+  
+  startCol <- min(cols)
+  endCol <- max(cols)
+  
+  startRow <- min(rows)
+  endRow <- max(rows)
+  
+  ref1 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol, LETTERS), "$", startRow)
+  ref2 <- paste0("$", .Call("openxlsx_convert2ExcelRef", endCol, LETTERS), "$", endRow)
+  
+  invisible(
+    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = names(wb$worksheets)[sheet])
+  )
+  
+}
+
+
+
+#' @name getNamedRegions
+#' @title Get named regions.
+#' @param x An xlsx file or Workbook object
+#' @export
+#' @seealso \code{\link{createNamedRegion}}
+#' @examples
+#' ## create named regions
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' 
+#' ## specify region
+#' writeData(wb, sheet = 1, x = iris, startCol = 1, startRow = 1)
+#' createNamedRegion(wb = wb,
+#'                   sheet = 1,
+#'                   name = "iris",
+#'                   rows = 1:(nrow(iris)+1),
+#'                   cols = 1:(ncol(iris)+1))
+#' 
+#' 
+#' ## using writeData 'name' argument
+#' writeData(wb, sheet = 1, x = iris, name = "iris2", startCol = 10)
+#' 
+#' out_file <- tempfile(fileext = ".xlsx")
+#' saveWorkbook(wb, out_file, overwrite = TRUE)
+#' 
+#' ## see named regions
+#' getNamedRegions(wb) ## From Workbook object
+#' getNamedRegions(out_file) ## From xlsx file
+#' 
+#' ## read named regions
+#' df <- read.xlsx(wb, namedRegion = "iris")
+#' head(df)
+#' 
+#' df <- read.xlsx(out_file, namedRegion = "iris2")
+#' head(df)
+getNamedRegions <- function(x){
+  
+  UseMethod("getNamedRegions", x) 
+  
+}
+
+#' @export
+getNamedRegions.default <- function(x){
+  
+  if(!file.exists(x))
+    stop(sprintf("File '%s' does not exist.", x))
   
   xmlDir <- file.path(tempdir(), "named_regions_tmp")
-  xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
+  xmlFiles <- unzip(x, exdir = xmlDir)
   
   workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
@@ -1912,6 +2041,21 @@ getNamedRegions <- function(xlsxFile){
   
   return(dn_names)
 }
+
+#' @export
+getNamedRegions.Workbook <- function(x){
+
+  dn <- x$workbook$definedNames
+  if(length(dn) == 0)
+    return(NULL)
+  
+  dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
+
+  return(dn_names)
+}
+
+
+
 
 
 

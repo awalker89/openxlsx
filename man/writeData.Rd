@@ -9,7 +9,7 @@ writeData(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   borders = c("none", "surrounding", "rows", "columns", "all"),
   borderColour = getOption("openxlsx.borderColour", "black"),
   borderStyle = getOption("openxlsx.borderStyle", "thin"),
-  withFilter = FALSE, keepNA = FALSE)
+  withFilter = FALSE, keepNA = FALSE, name = NULL)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
@@ -62,6 +62,8 @@ each column. If "\code{all}" all cell borders are drawn.}
 \item{withFilter}{If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet.}
 
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
+
+\item{name}{If not NULL, a named region is defined.}
 }
 \description{
 Write an object to worksheet with optional styling.
