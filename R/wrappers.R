@@ -1622,7 +1622,78 @@ setHeaderFooter <- function(wb, sheet,
 #' @param footer footer margin in inches
 #' @param fitToWidth If \code{TRUE}, worksheet is scaled to fit to page width on printing.
 #' @param fitToHeight If \code{TRUE}, worksheet is scaled to fit to page height on printing.
+#' @param paperSize See details. Default value is 9 (A4 paper).
 #' @export
+#' @details
+#' paperSize is an integer corresponding to: 
+#' \itemize{
+#' \item{\bold{1}}{ Letter paper (8.5 in. by 11 in.)} 
+#' \item{\bold{2}}{ Letter small paper (8.5 in. by 11 in.)} 
+#' \item{\bold{3}}{ Tabloid paper (11 in. by 17 in.)} 
+#' \item{\bold{4}}{ Ledger paper (17 in. by 11 in.)} 
+#' \item{\bold{5}}{ Legal paper (8.5 in. by 14 in.)} 
+#' \item{\bold{6}}{ Statement paper (5.5 in. by 8.5 in.)} 
+#' \item{\bold{7}}{ Executive paper (7.25 in. by 10.5 in.)} 
+#' \item{\bold{8}}{ A3 paper (297 mm by 420 mm)} 
+#' \item{\bold{9}}{ A4 paper (210 mm by 297 mm)} 
+#' \item{\bold{10}}{ A4 small paper (210 mm by 297 mm)} 
+#' \item{\bold{11}}{ A5 paper (148 mm by 210 mm)} 
+#' \item{\bold{12}}{ B4 paper (250 mm by 353 mm)} 
+#' \item{\bold{13}}{ B5 paper (176 mm by 250 mm)} 
+#' \item{\bold{14}}{ Folio paper (8.5 in. by 13 in.)} 
+#' \item{\bold{15}}{ Quarto paper (215 mm by 275 mm)} 
+#' \item{\bold{16}}{ Standard paper (10 in. by 14 in.)} 
+#' \item{\bold{17}}{ Standard paper (11 in. by 17 in.)} 
+#' \item{\bold{18}}{ Note paper (8.5 in. by 11 in.)} 
+#' \item{\bold{19}}{ #9 envelope (3.875 in. by 8.875 in.)} 
+#' \item{\bold{20}}{ #10 envelope (4.125 in. by 9.5 in.)} 
+#' \item{\bold{21}}{ #11 envelope (4.5 in. by 10.375 in.)} 
+#' \item{\bold{22}}{ #12 envelope (4.75 in. by 11 in.)} 
+#' \item{\bold{23}}{ #14 envelope (5 in. by 11.5 in.)} 
+#' \item{\bold{24}}{ C paper (17 in. by 22 in.)} 
+#' \item{\bold{25}}{ D paper (22 in. by 34 in.)} 
+#' \item{\bold{26}}{ E paper (34 in. by 44 in.)} 
+#' \item{\bold{27}}{ DL envelope (110 mm by 220 mm)} 
+#' \item{\bold{28}}{ C5 envelope (162 mm by 229 mm)} 
+#' \item{\bold{29}}{ C3 envelope (324 mm by 458 mm)} 
+#' \item{\bold{30}}{ C4 envelope (229 mm by 324 mm)} 
+#' \item{\bold{31}}{ C6 envelope (114 mm by 162 mm)} 
+#' \item{\bold{32}}{ C65 envelope (114 mm by 229 mm)} 
+#' \item{\bold{33}}{ B4 envelope (250 mm by 353 mm)} 
+#' \item{\bold{34}}{ B5 envelope (176 mm by 250 mm)} 
+#' \item{\bold{35}}{ B6 envelope (176 mm by 125 mm)} 
+#' \item{\bold{36}}{ Italy envelope (110 mm by 230 mm)} 
+#' \item{\bold{37}}{ Monarch envelope (3.875 in. by 7.5 in.).} 
+#' \item{\bold{38}}{ 6 3/4 envelope (3.625 in. by 6.5 in.)} 
+#' \item{\bold{39}}{ US standard fanfold (14.875 in. by 11 in.)} 
+#' \item{\bold{40}}{ German standard fanfold (8.5 in. by 12 in.)} 
+#' \item{\bold{41}}{ German legal fanfold (8.5 in. by 13 in.)} 
+#' \item{\bold{42}}{ ISO B4 (250 mm by 353 mm)} 
+#' \item{\bold{43}}{ Japanese double postcard (200 mm by 148 mm)} 
+#' \item{\bold{44}}{ Standard paper (9 in. by 11 in.)} 
+#' \item{\bold{45}}{ Standard paper (10 in. by 11 in.)} 
+#' \item{\bold{46}}{ Standard paper (15 in. by 11 in.)} 
+#' \item{\bold{47}}{ Invite envelope (220 mm by 220 mm)} 
+#' \item{\bold{50}}{ Letter extra paper (9.275 in. by 12 in.)} 
+#' \item{\bold{51}}{ Legal extra paper (9.275 in. by 15 in.)} 
+#' \item{\bold{52}}{ Tabloid extra paper (11.69 in. by 18 in.)} 
+#' \item{\bold{53}}{ A4 extra paper (236 mm by 322 mm)} 
+#' \item{\bold{54}}{ Letter transverse paper (8.275 in. by 11 in.)} 
+#' \item{\bold{55}}{ A4 transverse paper (210 mm by 297 mm)} 
+#' \item{\bold{56}}{ Letter extra transverse paper (9.275 in. by 12 in.)} 
+#' \item{\bold{57}}{ SuperA/SuperA/A4 paper (227 mm by 356 mm)} 
+#' \item{\bold{58}}{ SuperB/SuperB/A3 paper (305 mm by 487 mm)} 
+#' \item{\bold{59}}{ Letter plus paper (8.5 in. by 12.69 in.)} 
+#' \item{\bold{60}}{ A4 plus paper (210 mm by 330 mm)} 
+#' \item{\bold{61}}{ A5 transverse paper (148 mm by 210 mm)} 
+#' \item{\bold{62}}{ JIS B5 transverse paper (182 mm by 257 mm)} 
+#' \item{\bold{63}}{ A3 extra paper (322 mm by 445 mm)} 
+#' \item{\bold{64}}{ A5 extra paper (174 mm by 235 mm)} 
+#' \item{\bold{65}}{ ISO B5 extra paper (201 mm by 276 mm)} 
+#' \item{\bold{66}}{ A2 paper (420 mm by 594 mm)} 
+#' \item{\bold{67}}{ A3 transverse paper (297 mm by 420 mm)} 
+#' \item{\bold{68}}{ A3 extra transverse paper (322 mm by 445 mm)}
+#' }
 #' @examples
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "S1")
@@ -1640,7 +1711,7 @@ setHeaderFooter <- function(wb, sheet,
 pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
                       header = 0.3, footer = 0.3,
-                      fitToWidth = FALSE, fitToHeight = FALSE){
+                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -1651,12 +1722,19 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
   
+  paperSizes <- 1:68
+  paperSizes <- paperSizes[!paperSizes %in% 48:49]
+  if(!paperSize %in% paperSizes)
+    stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
+  paperSize <- as.integer(paperSize)
+  
+  
   for(sheet in sheet){
     
     sheet <- wb$validateSheet(sheet)
     
-    wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                                orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+    wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
+                                                paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
     
     if(fitToHeight | fitToWidth)
       wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
@@ -2044,13 +2122,13 @@ getNamedRegions.default <- function(x){
 
 #' @export
 getNamedRegions.Workbook <- function(x){
-
+  
   dn <- x$workbook$definedNames
   if(length(dn) == 0)
     return(NULL)
   
   dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
-
+  
   return(dn_names)
 }
 
@@ -2677,7 +2755,7 @@ sheetVisible <- function(wb){
 #' @param value a logical vector the same length as sheetVisible(wb)
 #' @export
 `sheetVisible<-` <- function(wb, value) {
-
+  
   if(!is.logical(value))
     stop("value must be a logical vector.")
   
@@ -2700,7 +2778,7 @@ sheetVisible <- function(wb){
   
   for(i in inds)
     wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
-
+  
   invisible(wb)
   
 }
