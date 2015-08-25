@@ -1409,8 +1409,15 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
     
     belongTo <- getDefinedNamesSheet(workbook$definedNames)
     toChange <- belongTo == oldName
-    if(any(toChange))
-      workbook$definedNames[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+    if(any(toChange)){
+    
+      newSheetName <- sprintf("'%s'", newSheetName)
+      tmp <- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+      tmp <- gsub("'+", "'", tmp)
+      workbook$definedNames[toChange] <<- tmp
+      
+    }
+      
     
   }
   
