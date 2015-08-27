@@ -6,7 +6,8 @@
 \usage{
 pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
   right = 0.7, top = 0.75, bottom = 0.75, header = 0.3, footer = 0.3,
-  fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9)
+  fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9,
+  printTileRows = NULL, printTileCols = NULL)
 }
 \arguments{
 \item{wb}{A workbook object}
@@ -34,6 +35,10 @@ pageSetup(wb, sheet, orientation = "portrait", scale = 100, left = 0.7,
 \item{fitToHeight}{If \code{TRUE}, worksheet is scaled to fit to page height on printing.}
 
 \item{paperSize}{See details. Default value is 9 (A4 paper).}
+
+\item{printTileRows}{Rows to repeat at top of page when printing. Integer vector.}
+
+\item{printTileCols}{Columns to repeat at left when printing. Integer vector.}
 }
 \description{
 Set page margins, orientation and print scaling

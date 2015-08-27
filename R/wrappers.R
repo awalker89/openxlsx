@@ -1623,6 +1623,8 @@ setHeaderFooter <- function(wb, sheet,
 #' @param fitToWidth If \code{TRUE}, worksheet is scaled to fit to page width on printing.
 #' @param fitToHeight If \code{TRUE}, worksheet is scaled to fit to page height on printing.
 #' @param paperSize See details. Default value is 9 (A4 paper).
+#' @param printTileRows Rows to repeat at top of page when printing. Integer vector.
+#' @param printTileCols Columns to repeat at left when printing. Integer vector.
 #' @export
 #' @details
 #' paperSize is an integer corresponding to: 
@@ -1711,7 +1713,8 @@ setHeaderFooter <- function(wb, sheet,
 pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
                       header = 0.3, footer = 0.3,
-                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9){
+                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9,
+                      printTileRows = NULL, printTileCols = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -1728,21 +1731,39 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
     stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
   paperSize <- as.integer(paperSize)
   
+  ## print Tiles
+  sheet <- wb$validateSheet(sheet)
   
-  for(sheet in sheet){
-    
-    sheet <- wb$validateSheet(sheet)
-    
-    wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                                paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
-    
-    if(fitToHeight | fitToWidth)
-      wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
-    
-    wb$worksheets[[sheet]]$pageMargins <- 
-      sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
+                                              paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+  
+  if(fitToHeight | fitToWidth)
+    wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
+  
+  wb$worksheets[[sheet]]$pageMargins <- 
+    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+  
+  ## print tiles
+
+  if(!is.null(printTileRows)){
+    # $4:$7
+    warnings("printTileRows is not implemented.")
     
   }
+  
+  
+  
+  if(!is.null(printTileCols)){
+    warnings("printTileCols is not implemented.")
+    
+    
+    
+  }
+  
+  
+    
+  
+  
   
 }
 
@@ -2029,7 +2050,7 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   
   if(name %in% ex_names){
     stop(sprintf("Named region with name '%s' already exists!", name))
-  }else if(grepl("[^A-Z0-9_]", name[1], ignore.case = TRUE)){
+  }else if(grepl("[^A-Z0-9_\\.]", name[1], ignore.case = TRUE)){
     stop("Invalid characters in name")
   }else if(grepl('^[A-Z]{1,3}[0-9]+$', name)){
     stop("name cannot look like a cell reference.")

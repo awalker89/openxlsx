@@ -193,9 +193,10 @@ genBaseStyleSheet <- function(dxfs = NULL, tableStyles = NULL, extLst = NULL){
     
     tableStyles = tableStyles,
     
-    extLst = extLst,
+    indexedColors = NULL,
     
-    indexedColors = NULL
+    extLst = extLst
+    
   )
   
 }
