@@ -2498,13 +2498,20 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
 
 
 
-Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet){
+Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet, localSheetId = NULL){
   
-  names <- replaceIllegalCharacters(name)
-  workbook$definedNames <<- c(workbook$definedNames, 
-                             sprintf('<definedName name="%s">\'%s\'!%s:%s</definedName>', name, sheet, ref1, ref2 )
-  )
+  name <- replaceIllegalCharacters(name)
   
+  if(is.null(localSheetId)){
+    workbook$definedNames <<- c(workbook$definedNames, 
+                                sprintf('<definedName name="%s">\'%s\'!%s:%s</definedName>', name, sheet, ref1, ref2 )
+    )
+  }else{
+    workbook$definedNames <<- c(workbook$definedNames, 
+                                sprintf('<definedName name="%s" localSheetId="%s">\'%s\'!%s:%s</definedName>', name, localSheetId, sheet, ref1, ref2)
+    )
+  }
+
 })
 
 

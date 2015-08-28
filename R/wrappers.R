@@ -1746,24 +1746,34 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
   ## print tiles
 
   if(!is.null(printTileRows)){
-    # $4:$7
-    warnings("printTileRows is not implemented.")
     
+    if(!is.numeric(printTileRows))
+      stop("printTileRows must be numeric.")
+    
+    wb$createNamedRegion(ref1 = paste0("$", min(printTileRows)),
+                         ref2 = paste0("$", max(printTileRows)),
+                         name = "_xlnm.Print_Titles",
+                         sheet = names(wb)[[sheet]],
+                         localSheetId = sheet)
   }
   
   
   
   if(!is.null(printTileCols)){
-    warnings("printTileCols is not implemented.")
     
+    warning("printTileCols is not yet implemented.")
     
-    
+#     if(!is.numeric(printTileCols))
+#       stop("printTileCols must be numeric.")
+#     
+#     cols <- convert2ExcelRef(cols = range(printTileCols), LETTERS)
+#     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
+#                          ref2 = paste0("$", cols[2]),
+#                          name = "_xlnm.Print_Titles",
+#                          sheet = names(wb)[[sheet]],
+#                          localSheetId = sheet)
   }
-  
-  
-    
-  
-  
+
   
 }
 
