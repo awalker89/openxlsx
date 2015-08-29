@@ -1709,6 +1709,18 @@ setHeaderFooter <- function(wb, sheet,
 #' ## portrait page scales to 300% with 0.5in left and right margins
 #' pageSetup(wb, sheet = 2, orientation = "portrait", scale = 300, left= 0.5, right = 0.5)
 #' 
+#' 
+#' ## print titles
+#' addWorksheet(wb, "print_title_rows")
+#' addWorksheet(wb, "print_title_cols")
+#'
+#' writeData(wb, "print_title_rows", rbind(iris, iris, iris, iris))
+#' writeData(wb, "print_title_cols", x = rbind(mtcars, mtcars, mtcars), rowNames = TRUE)
+#' 
+#' pageSetup(wb, sheet = "print_title_rows", printTitleRows = 1) ## first row
+#' pageSetup(wb, sheet = "print_title_cols", printTitleCols = 1, printTitleRows = 1)
+#' 
+#' 
 #' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
 pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
@@ -1744,7 +1756,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
     sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
   
   ## print tiles
-  if(!is.null(printTitleRows)){
+  if(!is.null(printTitleRows) & is.null(printTitleCols)){
     
     if(!is.numeric(printTitleRows))
       stop("printTitleRows must be numeric.")
@@ -1753,12 +1765,10 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                          ref2 = paste0("$", max(printTitleRows)),
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
-                         localSheetId = sheet)
+                         localSheetId = sheet - 1L)
     
   
-  }
-  
-  if(!is.null(printTitleCols)){
+  }else if(!is.null(printTitleCols) & is.null(printTitleRows)){
 
     if(!is.numeric(printTitleCols))
       stop("printTitleCols must be numeric.")
@@ -1768,11 +1778,32 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                          ref2 = paste0("$", cols[2]),
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
-                         localSheetId = sheet)
+                         localSheetId = sheet - 1L)
     
 
-  }
+  }else if(!is.null(printTitleCols) & !is.null(printTitleRows)){
   
+    if(!is.numeric(printTitleRows))
+      stop("printTitleRows must be numeric.")
+    
+    if(!is.numeric(printTitleCols))
+      stop("printTitleCols must be numeric.")
+    
+    
+    
+    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
+    rows <- range(printTitleRows)
+    
+    cols <- paste(paste0("$", cols[1]), paste0("$", cols[2]), sep = ":")
+    rows <- paste(paste0("$", rows[1]), paste0("$", rows[2]), sep = ":")
+    localSheetId <- sheet - 1L
+    sheet <- names(wb)[[sheet]]
+    
+    wb$workbook$definedNames <<- c(wb$workbook$definedNames, 
+       sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
+    )
+    
+  }
   
   
 }
