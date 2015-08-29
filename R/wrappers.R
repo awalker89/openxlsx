@@ -1744,7 +1744,6 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
     sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
   
   ## print tiles
-
   if(!is.null(printTileRows)){
     
     if(!is.numeric(printTileRows))
@@ -1755,25 +1754,26 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet)
+    
+  
   }
-  
-  
   
   if(!is.null(printTileCols)){
-    
-    warning("printTileCols is not yet implemented.")
-    
-#     if(!is.numeric(printTileCols))
-#       stop("printTileCols must be numeric.")
-#     
-#     cols <- convert2ExcelRef(cols = range(printTileCols), LETTERS)
-#     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
-#                          ref2 = paste0("$", cols[2]),
-#                          name = "_xlnm.Print_Titles",
-#                          sheet = names(wb)[[sheet]],
-#                          localSheetId = sheet)
-  }
 
+    if(!is.numeric(printTileCols))
+      stop("printTileCols must be numeric.")
+    
+    cols <- convert2ExcelRef(cols = range(printTileCols), LETTERS)
+    wb$createNamedRegion(ref1 = paste0("$", cols[1]),
+                         ref2 = paste0("$", cols[2]),
+                         name = "_xlnm.Print_Titles",
+                         sheet = names(wb)[[sheet]],
+                         localSheetId = sheet)
+    
+
+  }
+  
+  
   
 }
 
