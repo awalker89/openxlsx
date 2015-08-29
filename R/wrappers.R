@@ -1623,8 +1623,8 @@ setHeaderFooter <- function(wb, sheet,
 #' @param fitToWidth If \code{TRUE}, worksheet is scaled to fit to page width on printing.
 #' @param fitToHeight If \code{TRUE}, worksheet is scaled to fit to page height on printing.
 #' @param paperSize See details. Default value is 9 (A4 paper).
-#' @param printTileRows Rows to repeat at top of page when printing. Integer vector.
-#' @param printTileCols Columns to repeat at left when printing. Integer vector.
+#' @param printTitleRows Rows to repeat at top of page when printing. Integer vector.
+#' @param printTitleCols Columns to repeat at left when printing. Integer vector.
 #' @export
 #' @details
 #' paperSize is an integer corresponding to: 
@@ -1714,7 +1714,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
                       header = 0.3, footer = 0.3,
                       fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9,
-                      printTileRows = NULL, printTileCols = NULL){
+                      printTitleRows = NULL, printTitleCols = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -1744,13 +1744,13 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
     sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
   
   ## print tiles
-  if(!is.null(printTileRows)){
+  if(!is.null(printTitleRows)){
     
-    if(!is.numeric(printTileRows))
-      stop("printTileRows must be numeric.")
+    if(!is.numeric(printTitleRows))
+      stop("printTitleRows must be numeric.")
     
-    wb$createNamedRegion(ref1 = paste0("$", min(printTileRows)),
-                         ref2 = paste0("$", max(printTileRows)),
+    wb$createNamedRegion(ref1 = paste0("$", min(printTitleRows)),
+                         ref2 = paste0("$", max(printTitleRows)),
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet)
@@ -1758,12 +1758,12 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
   
   }
   
-  if(!is.null(printTileCols)){
+  if(!is.null(printTitleCols)){
 
-    if(!is.numeric(printTileCols))
-      stop("printTileCols must be numeric.")
+    if(!is.numeric(printTitleCols))
+      stop("printTitleCols must be numeric.")
     
-    cols <- convert2ExcelRef(cols = range(printTileCols), LETTERS)
+    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
                          ref2 = paste0("$", cols[2]),
                          name = "_xlnm.Print_Titles",
