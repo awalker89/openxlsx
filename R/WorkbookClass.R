@@ -652,7 +652,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 
 
-Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames, keepNA){
+Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames, keepNA, list_sep){
   
   sheet <- validateSheet(sheet)
   nCols <- ncol(df)
@@ -661,7 +661,11 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   allColClasses <- unlist(colClasses)  
 
   ## pull out NaN values
-  nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
+  nans <- unlist(lapply(1:ncol(df), function(i) {
+    if(!"character" %in% class(df[[i]]) & !"list" %in% class(df[[i]]))
+      return(is.nan(df[[i]]) | is.infinite(df[[i]]))
+    return(rep(FALSE, nRows))
+  }))
   
   ## convert any Dates to integers and create date style object
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
@@ -697,6 +701,12 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if("scientific" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
       class(df[[i]]) <- "numeric"
+  }
+  
+  ##
+  if("list" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "list" %in% x)))
+      df[[i]] <- sapply(df[[i]], paste, collapse = list_sep)
   }
   
   if("formula" %in% allColClasses){
@@ -741,7 +751,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## If any NaN values
-  if(length(nans) > 0){
+  if(any(nans) > 0){
     nans <- which(t(matrix(nans, nrow = nrow(df), ncol = ncol(df))))
     t[nans] <- "e"
     v[nans] <- "#NUM!"

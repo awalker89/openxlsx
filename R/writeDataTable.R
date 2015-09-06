@@ -15,6 +15,7 @@
 #' @param headerStyle Custom style to apply to column names.
 #' @param withFilter If \code{TRUE}, columns with have withFilters in the first row.
 #' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param sep Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
@@ -22,35 +23,51 @@
 #' @seealso \code{\link{writeData}}
 #' @export
 #' @examples
-#' ## see package vignette for further examples.
+#' ## see package vignettes for further examples.
+#' 
+#' #####################################################################################
+#' ## Create Workbook object and add worksheets
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "S1")
 #' addWorksheet(wb, "S2")
 #' addWorksheet(wb, "S3")
 #' 
-#' ## write data formatted as excel table with table withFilters
-#' # default table style is "TableStyleMedium2"
+#' 
+#' #####################################################################################
+#' ## -- write data.frame as an Excel table with column filters
+#' ## -- default table style is "TableStyleMedium2"
+#' 
 #' writeDataTable(wb, "S1", x = iris)
 #' 
-#' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames=TRUE, tableStyle="TableStyleLight9")
+#' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames = TRUE, tableStyle = "TableStyleLight9")
 #' 
-#' df <- data.frame("Date" = Sys.Date()-0:19, "T" = TRUE, "F" = FALSE, "Time" = Sys.time()-0:19*60*60,
+#' df <- data.frame("Date" = Sys.Date()-0:19,
+#'                  "T" = TRUE, "F" = FALSE,
+#'                  "Time" = Sys.time()-0:19*60*60,
 #'                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
 #'                  "hLink" = "http://cran.r-project.org/", 
 #'                  "Percentage" = seq(0, 1, length.out=20),
 #'                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
 #' 
+#' ## openxlsx will apply default Excel styling for these classes
 #' class(df$Cash) <- "currency"
 #' class(df$Cash2) <- "accounting"
 #' class(df$hLink) <- "hyperlink"
 #' class(df$Percentage) <- "percentage"
 #' class(df$TinyNumbers) <- "scientific"
 #' 
-#' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames=TRUE, tableStyle="TableStyleMedium9")
+#' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames = TRUE, tableStyle = "TableStyleMedium9")
 #' 
-#' ## Additional headerStyling and remove withFilters
+#' #####################################################################################
+#' ## Additional Header Styling and remove column filters
+#' 
 #' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
-#' withFilter = FALSE)
+#'                  withFilter = FALSE)
+#' 
+#' 
+#' ##################################################################################### 
+#' ## Save workbook
+#' ## Open in excel without saving file: openXL(wb)
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 writeDataTable <- function(wb, sheet, x,
@@ -63,7 +80,8 @@ writeDataTable <- function(wb, sheet, x,
                            tableName = NULL,
                            headerStyle= NULL,
                            withFilter = TRUE,
-                           keepNA = FALSE){
+                           keepNA = FALSE,
+                           sep = ", "){
   
     
   if(!is.null(xy)){
@@ -80,6 +98,7 @@ writeDataTable <- function(wb, sheet, x,
   if(!is.logical(rowNames)) stop("rowNames must be a logical.")
   if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
   if(!is.logical(withFilter)) stop("withFilter must be a logical.")
+  if((!is.character(sep)) | (length(sep) != 1)) stop("sep must be a character vector of length 1")
   
   if(is.null(tableName)){
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
@@ -194,7 +213,8 @@ writeDataTable <- function(wb, sheet, x,
                startCol = startCol,
                colClasses = colClasses,
                hlinkNames = NULL,
-               keepNA = keepNA)
+               keepNA = keepNA,
+               list_sep = sep)
   
   ## replace invalid XML characters
   colNames <- replaceIllegalCharacters(colNames)
