@@ -173,7 +173,7 @@ writeData <- function(wb,
     
     if(name %in% ex_names){
       stop(sprintf("Named region with name '%s' already exists!", name))
-    }else if(grepl("[^A-Z0-9_]", name[1], ignore.case = TRUE)){
+    }else if(grepl("[^A-Z0-9_\\.]", name[1], ignore.case = TRUE)){
       stop("Invalid characters in name")
     }else if(grepl('^[A-Z]{1,3}[0-9]+$', name)){
       stop("name cannot look like a cell reference.")
@@ -194,8 +194,9 @@ writeData <- function(wb,
     return(invisible(0))
     
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  
-
+  colClasss2 <- colClasses
+  colClasss2[sapply(colClasses, function(x) "formula" %in% x) & sapply(colClasses, function(x) "hyperlink" %in% x)] <- "formula"
+    
   
   sheetX <- wb$validateSheet(sheet)
   if(wb$isChartSheet[[sheetX]]){
@@ -213,7 +214,7 @@ writeData <- function(wb,
                sheet = sheet,
                startCol = startCol,
                startRow = startRow,
-               colClasses = colClasses,
+               colClasses = colClasss2,
                hlinkNames = hlinkNames,
                keepNA = keepNA)
   
@@ -370,6 +371,11 @@ writeFormula <- function(wb,
   
   dfx <- data.frame("X" = x, stringsAsFactors = FALSE)
   class(dfx$X) <- c("character", "formula")
+  
+  if(grepl("^(=|)HYPERLINK\\(", x, ignore.case = TRUE))
+    class(dfx$X) <- c("character", "formula", "hyperlink")
+    
+    
   
   writeData(wb = wb,
             sheet = sheet,

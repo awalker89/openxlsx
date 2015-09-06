@@ -1743,7 +1743,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
     stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
   paperSize <- as.integer(paperSize)
   
-  ## print Tiles
+ ## validate sheet - get sheet index
   sheet <- wb$validateSheet(sheet)
   
   wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
@@ -1755,7 +1755,7 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
   wb$worksheets[[sheet]]$pageMargins <- 
     sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
   
-  ## print tiles
+  ## print Titles
   if(!is.null(printTitleRows) & is.null(printTitleCols)){
     
     if(!is.numeric(printTitleRows))

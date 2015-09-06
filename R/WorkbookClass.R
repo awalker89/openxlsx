@@ -659,7 +659,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nRows <- nrow(df)  
   
   allColClasses <- unlist(colClasses)  
-  
+
   ## pull out NaN values
   nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
   
@@ -693,11 +693,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]]))
   }
   
-  if("hyperlink" %in% allColClasses){
-    for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
-      class(df[[i]]) <- "hyperlink"
-  }
-  
   ## convert scientific
   if("scientific" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
@@ -709,6 +704,11 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       df[[i]] <- replaceIllegalCharacters(as.character(df[[i]]))
       class(df[[i]]) <- "openxlsx_formula"
     }
+  }
+  
+  if("hyperlink" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
+      class(df[[i]]) <- "hyperlink"
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
@@ -789,7 +789,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if(length(newStrs) > 0){
     
     newStrs <- replaceIllegalCharacters(newStrs)
-    newStrs <- paste0("<si><t>", newStrs, "</t></si>")
+    newStrs <- paste0("<si><t xml:space=\"preserve\">", newStrs, "</t></si>")
     
     uNewStr <- unique(newStrs)
     
