@@ -64,7 +64,8 @@ addWorksheet(wb, "S3")
 
 writeDataTable(wb, "S1", x = iris)
 
-writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames = TRUE, tableStyle = "TableStyleLight9")
+writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames = TRUE,
+  tableStyle = "TableStyleLight9")
 
 df <- data.frame("Date" = Sys.Date()-0:19,
                  "T" = TRUE, "F" = FALSE,

@@ -122,6 +122,10 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 
 Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
+  ## set time on files to a point in time so files can
+  sapply(list.files(no.. = FALSE, recursive = TRUE, full.names = FALSE, include.dirs = TRUE), Sys.setFileTime, time = "2015-01-01")
+  Sys.setFileTime(path = "_rels/.rels", time = "2015-01-01")
+  
   ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
   
@@ -706,7 +710,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ##
   if("list" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "list" %in% x)))
-      df[[i]] <- sapply(df[[i]], paste, collapse = list_sep)
+      df[[i]] <- sapply(lapply(df[[i]], unlist), paste, collapse = list_sep)
   }
   
   if("formula" %in% allColClasses){
