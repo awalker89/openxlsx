@@ -2518,8 +2518,7 @@ List getCellInfo(std::string xmlFile,
                  bool skipEmptyRows,
                  int startRow,
                  IntegerVector rows,
-                 bool getDates,
-                 CharacterVector USER_NA_STRING){
+                 bool getDates){
   
   //read in file
   std::string buf;
@@ -2729,7 +2728,7 @@ List getCellInfo(std::string xmlFile,
             ss_ind = atoi(v[i]);
             v[i] = sharedStrings[ss_ind];
             
-            if(v[i] == USER_NA_STRING[0]){
+            if(v[i] == "openxlsx_na_vlu"){
               v[i] = NA_STRING;
             }
             

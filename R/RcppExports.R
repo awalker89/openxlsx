@@ -185,8 +185,8 @@ readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmp
     .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names)
 }
 
-getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates, USER_NA_STRING) {
-    .Call('openxlsx_getCellInfo', PACKAGE = 'openxlsx', xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates, USER_NA_STRING)
+getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {
+    .Call('openxlsx_getCellInfo', PACKAGE = 'openxlsx', xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
 }
 
 loadworksheets <- function(wb, styleObjects, xmlFiles, is_chart_sheet) {

@@ -7,7 +7,7 @@
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
   rows = NULL, cols = NULL, check.names = FALSE, namedRegion = NULL,
-  na.string = "NA")
+  na.strings = "NA")
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -37,7 +37,7 @@ are checked to ensure that they are syntactically valid variable names}
 
 \item{namedRegion}{A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.}
 
-\item{na.string}{A string which is to be interpreted as NA. Blank cells will be returned as NA.}
+\item{na.strings}{A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.}
 }
 \value{
 data.frame
