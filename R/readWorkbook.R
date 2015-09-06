@@ -19,6 +19,7 @@
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
 #' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
+#' @param na.string A string which is to be interpreted as NA. Blank cells will be returned as NA.
 #' @seealso \code{\link{getNamedRegions}}
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to be evaluated when the file is opened in Excel.
@@ -61,7 +62,8 @@ read.xlsx <- function(xlsxFile,
                       rows = NULL,
                       cols = NULL,
                       check.names = FALSE,
-                      namedRegion = NULL){
+                      namedRegion = NULL,
+                      na.string = "NA"){
   
   UseMethod("read.xlsx", xlsxFile) 
   
@@ -78,7 +80,8 @@ read.xlsx.default <- function(xlsxFile,
                               rows = NULL,
                               cols = NULL,
                               check.names = FALSE,
-                              namedRegion = NULL){
+                              namedRegion = NULL,
+                              na.string = "NA"){
   
   
   ## Validate inputs and get files
@@ -105,6 +108,9 @@ read.xlsx.default <- function(xlsxFile,
   
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
+  
+  if((!"character" %in% class(na.string)) | length(na.string) != 1)
+    stop("na.string must be a character vector of length 1")
   
   if(is.null(rows)){
     rows <- NA
@@ -220,7 +226,7 @@ read.xlsx.default <- function(xlsxFile,
   }else{
     startRowStr <- NULL
   }
-  
+
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,
@@ -229,6 +235,7 @@ read.xlsx.default <- function(xlsxFile,
                      startRow = startRow,
                      rows = rows,
                      getDates = detectDates,
+                     USER_NA_STRING = na.string,
                      PACKAGE = "openxlsx")
   
   
@@ -365,7 +372,8 @@ read.xlsx.Workbook <- function(xlsxFile,
                                rows = NULL,
                                cols = NULL,
                                check.names = FALSE,
-                               namedRegion = NULL){
+                               namedRegion = NULL,
+                               na.string = "NA"){
   
   
   ## Validate inputs and get files
@@ -704,6 +712,7 @@ read.xlsx.Workbook <- function(xlsxFile,
 #' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
+#' @param na.string A string which is to be interpreted as NA. Blank cells will be returned as NA.
 #' @author Alexander Walker
 #' @return data.frame
 #' @seealso \code{\link{getNamedRegions}}
@@ -726,7 +735,8 @@ readWorkbook <- function(xlsxFile,
                          rows = NULL,
                          cols = NULL,
                          check.names = FALSE,
-                         namedRegion = NULL){
+                         namedRegion = NULL,
+                         na.string = "NA"){
   
   read.xlsx(xlsxFile = xlsxFile,
             sheet = sheet,
@@ -738,7 +748,8 @@ readWorkbook <- function(xlsxFile,
             rows = rows,
             cols = cols,
             check.names = check.names,
-            namedRegion = namedRegion)
+            namedRegion = namedRegion,
+            na.string = "NA")
 }
 
 

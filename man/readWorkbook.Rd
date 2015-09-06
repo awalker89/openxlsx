@@ -6,7 +6,8 @@
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
-  rows = NULL, cols = NULL, check.names = FALSE, namedRegion = NULL)
+  rows = NULL, cols = NULL, check.names = FALSE, namedRegion = NULL,
+  na.string = "NA")
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}
@@ -35,6 +36,8 @@ If NULL, all columns are read.}
 are checked to ensure that they are syntactically valid variable names}
 
 \item{namedRegion}{A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.}
+
+\item{na.string}{A string which is to be interpreted as NA. Blank cells will be returned as NA.}
 }
 \value{
 data.frame

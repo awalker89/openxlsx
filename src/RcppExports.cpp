@@ -591,8 +591,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // getCellInfo
-List getCellInfo(std::string xmlFile, CharacterVector sharedStrings, bool skipEmptyRows, int startRow, IntegerVector rows, bool getDates);
-RcppExport SEXP openxlsx_getCellInfo(SEXP xmlFileSEXP, SEXP sharedStringsSEXP, SEXP skipEmptyRowsSEXP, SEXP startRowSEXP, SEXP rowsSEXP, SEXP getDatesSEXP) {
+List getCellInfo(std::string xmlFile, CharacterVector sharedStrings, bool skipEmptyRows, int startRow, IntegerVector rows, bool getDates, CharacterVector USER_NA_STRING);
+RcppExport SEXP openxlsx_getCellInfo(SEXP xmlFileSEXP, SEXP sharedStringsSEXP, SEXP skipEmptyRowsSEXP, SEXP startRowSEXP, SEXP rowsSEXP, SEXP getDatesSEXP, SEXP USER_NA_STRINGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -602,7 +602,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type startRow(startRowSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type rows(rowsSEXP);
     Rcpp::traits::input_parameter< bool >::type getDates(getDatesSEXP);
-    __result = Rcpp::wrap(getCellInfo(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates));
+    Rcpp::traits::input_parameter< CharacterVector >::type USER_NA_STRING(USER_NA_STRINGSEXP);
+    __result = Rcpp::wrap(getCellInfo(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates, USER_NA_STRING));
     return __result;
 END_RCPP
 }
