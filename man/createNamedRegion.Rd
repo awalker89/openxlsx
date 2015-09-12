@@ -15,7 +15,7 @@ createNamedRegion(wb, sheet, cols, rows, name)
 
 \item{rows}{Numeric vector specifying rows to include in region}
 
-\item{name}{Name for region. A character vector of length 1.}
+\item{name}{Name for region. A character vector of length 1. Note region names musts be case-insensitive unique.}
 }
 \description{
 Create a named region.

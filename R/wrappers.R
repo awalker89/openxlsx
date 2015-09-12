@@ -2036,7 +2036,7 @@ names.Workbook <- function(x){
 #' @param sheet A name or index of a worksheet
 #' @param rows Numeric vector specifying rows to include in region
 #' @param cols Numeric vector specifying columns to include in region
-#' @param name Name for region. A character vector of length 1.
+#' @param name Name for region. A character vector of length 1. Note region names musts be case-insensitive unique.
 #' @details Region is given by: min(cols):max(cols) X min(rows):max(rows)
 #' @export
 #' @seealso \code{\link{getNamedRegions}}
@@ -2087,9 +2087,9 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   ## named region
   
   ex_names <- regmatches(wb$workbook$definedNames, regexpr('(?<=name=")[^"]+', wb$workbook$definedNames, perl = TRUE))
-  ex_names <- replaceXMLEntities(ex_names)
+  ex_names <- tolower(replaceXMLEntities(ex_names))
   
-  if(name %in% ex_names){
+  if(tolower(name) %in% ex_names){
     stop(sprintf("Named region with name '%s' already exists!", name))
   }else if(grepl("[^A-Z0-9_\\.]", name[1], ignore.case = TRUE)){
     stop("Invalid characters in name")
