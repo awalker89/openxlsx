@@ -153,7 +153,7 @@ writeData <- function(wb,
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- getOption("scipen")
-  options("scipen" = 10000)
+  options("scipen" = 200)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
   if(is.null(x))
