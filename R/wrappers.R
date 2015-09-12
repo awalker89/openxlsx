@@ -2182,6 +2182,7 @@ getNamedRegions.default <- function(x){
   return(dn_names)
 }
 
+
 #' @export
 getNamedRegions.Workbook <- function(x){
   

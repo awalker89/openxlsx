@@ -162,9 +162,9 @@ read.xlsx.default <- function(xlsxFile,
     
     dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
     
-    ind <- dn_names == namedRegion
+    ind <- tolower(dn_names) == tolower(namedRegion)
     if(!any(ind))
-      stop(sprintf("Region '%s' not found!", region))
+      stop(sprintf("Region '%s' not found!", namedRegion))
     
     ## pull out first node value
     dn <- dn[ind] 
@@ -404,7 +404,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     }
     
     dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
-    ind <- dn_names == namedRegion
+    ind <- tolower(dn_names) == tolower(namedRegion)
     if(!any(ind))
       stop(sprintf("Region '%s' not found!", namedRegion))
     
