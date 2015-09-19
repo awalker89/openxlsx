@@ -213,7 +213,7 @@ writeData <- function(wb,
     }
   }
   
-  if(is.vector(x) | is.factor(x))
+  if(is.vector(x) | is.factor(x) | inherits(x, "Date"))
     colNames <- FALSE ## this will go to coerce.default and rowNames will be ignored 
   
   ## Coerce to data.frame
