@@ -601,10 +601,9 @@ buildFillList <- function(fills){
   inds <- grepl("patternFill", fills)
   fillAttrs[inds] <- lapply(fills[inds], nodeAttributes)
   
-  
   ## gradientFill
   inds <- grepl("gradientFill", fills)
-  fillAttrs[inds] <- lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
+  fillAttrs[inds] <- fills[inds] #lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
   
   return(fillAttrs)
   

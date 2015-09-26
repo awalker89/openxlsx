@@ -33,6 +33,10 @@ getChildlessNode_ss <- function(xml, tag) {
     .Call('openxlsx_getChildlessNode_ss', PACKAGE = 'openxlsx', xml, tag)
 }
 
+get_extLst_Major <- function(xml) {
+    .Call('openxlsx_get_extLst_Major', PACKAGE = 'openxlsx', xml)
+}
+
 getChildlessNode <- function(xml, tag) {
     .Call('openxlsx_getChildlessNode', PACKAGE = 'openxlsx', xml, tag)
 }

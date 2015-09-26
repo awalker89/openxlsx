@@ -101,6 +101,17 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// get_extLst_Major
+CharacterVector get_extLst_Major(std::string xml);
+RcppExport SEXP openxlsx_get_extLst_Major(SEXP xmlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    __result = Rcpp::wrap(get_extLst_Major(xml));
+    return __result;
+END_RCPP
+}
 // getChildlessNode
 CharacterVector getChildlessNode(std::string xml, std::string tag);
 RcppExport SEXP openxlsx_getChildlessNode(SEXP xmlSEXP, SEXP tagSEXP) {

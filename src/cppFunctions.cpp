@@ -295,6 +295,53 @@ std::vector<std::string> getChildlessNode_ss(std::string xml, std::string tag){
 
 
 // [[Rcpp::export]]
+CharacterVector get_extLst_Major(std::string xml){
+  
+  // find page margin or pagesetup then take the extLst after that
+  
+  if(xml.length() == 0)
+    return wrap(NA_STRING);
+  
+  std::vector<std::string> r;
+  std::string tagEnd = "</extLst>";
+  size_t endPos = 0;
+  std::string node;
+  
+  
+  size_t pos = xml.find("<pageSetup ", 0);   
+  if(pos == std::string::npos)
+    pos = xml.find("<pageMargins ", 0);   
+ 
+  if(pos == std::string::npos)
+    pos = xml.find("</conditionalFormatting>", 0);   
+  
+  if(pos == std::string::npos)
+    return wrap(NA_STRING);
+  
+  while(1){
+    
+    pos = xml.find("<extLst>", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    endPos = xml.find(tagEnd, pos + 8);
+    
+    node = xml.substr(pos + 8, endPos - pos - 8);
+    pos = xml.find("conditionalFormattings", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    r.push_back(node.c_str());
+    
+  }
+  
+  return wrap(r) ;  
+  
+}
+
+
+
+// [[Rcpp::export]]
 CharacterVector getChildlessNode(std::string xml, std::string tag){
   
   size_t k = tag.length();
@@ -2874,17 +2921,17 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       
       // Freeze Panes
-      CharacterVector pane = getChildlessNode(xml_pre, "<pane ");
-      if(pane.size() > 0){
-        freezePane[i] = pane;
+      CharacterVector node_xml = getChildlessNode(xml_pre, "<pane ");
+      if(node_xml.size() > 0){
+        freezePane[i] = node_xml;
       }else{
         freezePane[i] = List(0);
       }
       
       // SheetViews
-      CharacterVector sheetViews = getNodes(xml_pre, "<sheetViews>");
-      if(sheetViews.size() > 0)
-        this_worksheet["sheetViews"] = sheetViews;
+      node_xml = getNodes(xml_pre, "<sheetViews>");
+      if(node_xml.size() > 0)
+        this_worksheet["sheetViews"] = node_xml;
       
       
       //colwidths
@@ -2951,27 +2998,27 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       std::string xml_post = xml.substr(pos_post);
       
       
-      CharacterVector autoFilter = getChildlessNode(xml_post, "<autoFilter ");
-      if(autoFilter.size() > 0)
-        this_worksheet["autoFilter"] = autoFilter;
+      node_xml = getChildlessNode(xml_post, "<autoFilter ");
+      if(node_xml.size() > 0)
+        this_worksheet["autoFilter"] = node_xml;
       
-      CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
-      if(hyperlinks.size() > 0){
-        hyperLinks[i] = hyperlinks;
+      node_xml = getChildlessNode(xml_post, "<hyperlink ");
+      if(node_xml.size() > 0){
+        hyperLinks[i] = node_xml;
       }else{
         hyperLinks[i] = List(0);
       }
       
-      CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
-      if(pageMargins.size() > 0)
-        this_worksheet["pageMargins"] = pageMargins;
+      node_xml = getChildlessNode(xml_post, "<pageMargins ");
+      if(node_xml.size() > 0)
+        this_worksheet["pageMargins"] = node_xml;
       
       
-      CharacterVector pageSetup = getChildlessNode(xml_post, "<pageSetup ");
-      if(pageSetup.size() > 0){
-        for(int j = 0; j < pageSetup.size(); j++){
+      node_xml = getChildlessNode(xml_post, "<pageSetup ");
+      if(node_xml.size() > 0){
+        for(int j = 0; j < node_xml.size(); j++){
           
-          std::string pageSetup_tmp = as<std::string>(pageSetup[j]);
+          std::string pageSetup_tmp = as<std::string>(node_xml[j]);
           size_t ps_pos = pageSetup_tmp.find("r:id=\"rId", 0);
           if(ps_pos != std::string::npos){
             
@@ -2981,34 +3028,34 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
             
           }
           
-          pageSetup[j] = pageSetup_tmp;
+          node_xml[j] = pageSetup_tmp;
           
         }
-        this_worksheet["pageSetup"] = pageSetup;
+        this_worksheet["pageSetup"] = node_xml;
       }
       
       
       
-      CharacterVector mergeCells = getChildlessNode(xml_post, "<mergeCell ");
-      if(mergeCells.size() > 0)
-        this_worksheet["mergeCells"] = mergeCells;
+      node_xml = getChildlessNode(xml_post, "<mergeCell ");
+      if(node_xml.size() > 0)
+        this_worksheet["mergeCells"] = node_xml;
       
       
-      CharacterVector drawingId = getChildlessNode(xml_post, "<drawing ");
-      if(drawingId.size() == 0)
-        drawingId = getChildlessNode(xml_post, "<legacyDrawing ");
+      node_xml = getChildlessNode(xml_post, "<drawing ");
+      if(node_xml.size() == 0)
+        node_xml = getChildlessNode(xml_post, "<legacyDrawing ");
       
-      if(drawingId.size() > 0){
-        for(int j = 0; j < drawingId.size(); j++){
+      if(node_xml.size() > 0){
+        for(int j = 0; j < node_xml.size(); j++){
           
-          std::string drawingId_tmp = as<std::string>(drawingId[j]);
+          std::string drawingId_tmp = as<std::string>(node_xml[j]);
           size_t ps_pos = drawingId_tmp.find("r:id=\"rId", 0);
           
           std::string drawingId_tmp2 = drawingId_tmp.substr(0, ps_pos + 9) + "1";
           ps_pos = drawingId_tmp.find("\"", ps_pos + 9);
           
           drawingId_tmp  = drawingId_tmp2 + drawingId_tmp.substr(ps_pos);
-          drawingId[j] = drawingId_tmp;
+          node_xml[j] = drawingId_tmp;
           
         }
       }
@@ -3066,6 +3113,16 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         this_worksheet["conditionalFormatting"] = cf;
         
       } // end of if(conForm.size() > 0)
+      
+      // extLst
+      node_xml = get_extLst_Major(xml_post);
+      if(node_xml.size() > 0)
+        this_worksheet["extLst"] = node_xml;
+      
+      
+      
+      
+      
       
       // clean pre and post xml
       xml_post.clear();

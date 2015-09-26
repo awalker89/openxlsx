@@ -1357,11 +1357,11 @@ Workbook$methods(createBorderNode = function(style){
 Workbook$methods(createFillNode = function(style, patternType = "solid"){
   
   fill <- style$fill
-  
+
   ## gradientFill
   if(any(grepl("gradientFill", fill))){
     
-    fillNode <- paste0("<fill>", fill, "</fill>")
+    fillNode <- fill #paste0("<fill>", fill, "</fill>")
     
   }else if(!is.null(fill$fillFg) | !is.null(fill$fillBg)){
     
@@ -3123,8 +3123,7 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
 
 
 Workbook$methods(loadStyles = function(stylesXML){
-  
-  
+
   ## Build style objects from the styles XML
   stylesTxt <- readLines(stylesXML, warn = FALSE, encoding = "UTF-8")
   stylesTxt <- removeHeadTag(stylesTxt)
