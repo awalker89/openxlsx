@@ -37,10 +37,13 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ## Unzip files to temp directory
   xmlFiles <- unzip(file, exdir = xmlDir)
   
-  .relsXML           <- xmlFiles[grepl("_rels/.rels$", xmlFiles, perl = TRUE)]
+  ## Not used
+  # .relsXML           <- xmlFiles[grepl("_rels/.rels$", xmlFiles, perl = TRUE)]
+  # appXML             <- xmlFiles[grepl("app.xml$", xmlFiles, perl = TRUE)]
+  
   drawingsXML        <- xmlFiles[grepl("drawings/drawing[0-9]+.xml$", xmlFiles, perl = TRUE)]
   worksheetsXML      <- xmlFiles[grepl("/worksheets/sheet[0-9]", xmlFiles, perl = TRUE)]
-  appXML             <- xmlFiles[grepl("app.xml$", xmlFiles, perl = TRUE)]
+  
   coreXML            <- xmlFiles[grepl("core.xml$", xmlFiles, perl = TRUE)]
   workbookXML        <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
   stylesXML          <- xmlFiles[grepl("styles.xml$", xmlFiles, perl = TRUE)]

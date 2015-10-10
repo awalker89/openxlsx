@@ -3106,7 +3106,6 @@ all.equal.Workbook <- function(target, current, ...){
   #   "worksheets",
   #   "worksheets_rels",
   #   "sheetOrder"
-  #   "printerSettings",
   #   "sharedStrings",
   #   "sheetData",
   #   "tables",

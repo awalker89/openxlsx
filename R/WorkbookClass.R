@@ -1,59 +1,58 @@
 
 
-Workbook <- setRefClass("Workbook", fields = c(".rels",
-                                               "app",
-                                               "charts",
-                                               "isChartSheet",
-                                               
-                                               "colWidths",
-                                               "connections",
-                                               "Content_Types",
-                                               "core",
-                                               "dataCount",
-                                               "drawings",
-                                               "drawings_rels",
-                                               "externalLinks",
-                                               "externalLinksRels",
-                                               "freezePane",
-                                               "headFoot",
-                                               "hyperlinks",
-                                               "media",
-                                               "printerSettings",
-                                               
-                                               "pivotTables",
-                                               "pivotTables.xml.rels",
-                                               "pivotDefinitions",
-                                               "pivotRecords",
-                                               "pivotDefinitionsRels",
-                                               
-                                               "queryTables",
-                                               "rowHeights",
-                                               
-                                               "slicers",
-                                               "slicerCaches",
-                                               
-                                               "sharedStrings",
-                                               "sheetData",
-                                               
-                                               "styleObjects",
-                                               # "cellStyleObjects",
-                                               
-                                               
-                                               "styles",
-                                               "styleInds",
-                                               "tables",
-                                               "tables.xml.rels",
-                                               "theme",
-                                               
-                                               "vbaProject",
-                                               "vmlDrawing",
-                                               "comments",
-                                               
-                                               "workbook",
-                                               "workbook.xml.rels",
-                                               "worksheets",
-                                               "worksheets_rels",
-                                               "sheetOrder")
+Workbook <- setRefClass("Workbook", fields = c(#".rels",
+  #"app",
+  "charts",
+  "isChartSheet",
+  
+  "colWidths",
+  "connections",
+  "Content_Types",
+  "core",
+  "dataCount",
+  "drawings",
+  "drawings_rels",
+  "externalLinks",
+  "externalLinksRels",
+  "freezePane",
+  "headFoot",
+  "hyperlinks",
+  "media",
+  
+  "pivotTables",
+  "pivotTables.xml.rels",
+  "pivotDefinitions",
+  "pivotRecords",
+  "pivotDefinitionsRels",
+  
+  "queryTables",
+  "rowHeights",
+  
+  "slicers",
+  "slicerCaches",
+  
+  "sharedStrings",
+  "sheetData",
+  
+  "styleObjects",
+  # "cellStyleObjects",
+  
+  
+  "styles",
+  "styleInds",
+  "tables",
+  "tables.xml.rels",
+  "theme",
+  
+  "vbaProject",
+  "vmlDrawing",
+  "comments",
+  
+  "workbook",
+  "workbook.xml.rels",
+  "worksheets",
+  "worksheets_rels",
+  "sheetOrder")
 )
 
 
@@ -62,18 +61,21 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   if(length(creator) == 0)
     creator <- ""
   
+  # .rels <<- genBaseRels()
+  # app <<- genBaseApp()
+  # printerSettings <<- list()
+  
   Content_Types <<- genBaseContent_Type()
-  .rels <<- genBaseRels()
+  
   drawings <<- list()
   drawings_rels <<- list()
   media <<- list()
   charts <<- list()
   isChartSheet <<- NULL
   
-  app <<- genBaseApp()
   core <<- genBaseCore(creator)
   workbook.xml.rels <<- genBaseWorkbook.xml.rels()
-  theme <<- genBaseTheme()
+  theme <<- NULL #genBaseTheme()
   worksheets <<- list()
   worksheets_rels <<- list()
   
@@ -98,7 +100,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   externalLinks <<- NULL
   externalLinksRels <<- NULL
   headFoot <<- NULL
-  printerSettings <<- list()
+  
   hyperlinks <<- list()
   sheetOrder <<- NULL
   
@@ -206,7 +208,6 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
-  printerSettings[[newSheetIndex]] <<- genPrinterSettings()
   hyperlinks[[newSheetIndex]] <<- list()
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
@@ -260,7 +261,6 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
-  printerSettings[[newSheetIndex]] <<- genPrinterSettings()
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
@@ -313,10 +313,25 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = xlmediaDir, recursive = TRUE)
   }
   
-  if(nThemes > 0){
-    xlthemeDir <- file.path(tmpDir, "xl", "theme")
-    dir.create(path = xlthemeDir, recursive = TRUE)
+  
+  ## will always have a theme
+  xlthemeDir <- file.path(tmpDir, "xl", "theme")
+  dir.create(path = xlthemeDir, recursive = TRUE)
+  
+  if(is.null(theme)){
+    con <- file(file.path(xlthemeDir, "theme1.xml"), open = "wb")
+    writeBin(charToRaw(genBaseTheme()), con)
+    close(con)  
+  }else{
+    lapply(1:nThemes, function(i){
+      con <- file(file.path(xlthemeDir, paste0("theme", i, ".xml")), open = "wb")
+      writeBin(charToRaw(pxml(theme[[i]])), con)
+      close(con)        
+    })
   }
+  
+
+  
   
   ## will always have drawings
   xlworksheetsDir <- file.path(tmpDir, "xl", "worksheets")
@@ -357,9 +372,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
   }
   
-  
-  printDir <- file.path(tmpDir, "xl", "printerSettings")
-  dir.create(path = printDir, recursive = TRUE)
   
   if(nPivots > 0){
     
@@ -408,14 +420,16 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## write .rels
   .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-        pxml(.rels),
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+         <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+         <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>',
         '</Relationships>',
         file.path(relsDir, ".rels"))
   
   
   ## write app.xml
   .Call("openxlsx_writeFile", '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">',
-        pxml(app),
+        '<Application>Microsoft Excel</Application>',
         '</Properties>',
         file.path(docPropsDir, "app.xml"))
   
@@ -474,19 +488,14 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   } 
   
   # printerSettings
+  printDir <- file.path(tmpDir, "xl", "printerSettings")
+  dir.create(path = printDir, recursive = TRUE)
   for(i in 1:nSheets)
-    writeLines(printerSettings[[i]], file.path(printDir, sprintf("printerSettings%s.bin", i)))
+    writeLines(genPrinterSettings(), file.path(printDir, sprintf("printerSettings%s.bin", i)))
   
   ## media (copy file from origin to destination)
   for(x in media)
     file.copy(x, file.path(xlmediaDir, names(media)[which(media == x)]))
-  
-  ## will always have a theme
-  lapply(1:nThemes, function(i){
-    con <- file(file.path(xlthemeDir, paste0("theme", i, ".xml")), open = "wb")
-    writeBin(charToRaw(pxml(theme[[i]])), con)
-    close(con)        
-  })
   
   ## VBA Macro
   if(!is.null(vbaProject))
@@ -663,7 +672,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   nRows <- nrow(df)  
   
   allColClasses <- unlist(colClasses)  
-
+  
   ## pull out NaN values
   nans <- unlist(lapply(1:ncol(df), function(i) {
     if(!"character" %in% class(df[[i]]) & !"list" %in% class(df[[i]]))
@@ -1357,7 +1366,7 @@ Workbook$methods(createBorderNode = function(style){
 Workbook$methods(createFillNode = function(style, patternType = "solid"){
   
   fill <- style$fill
-
+  
   ## gradientFill
   if(any(grepl("gradientFill", fill))){
     
@@ -1424,14 +1433,14 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
     belongTo <- getDefinedNamesSheet(workbook$definedNames)
     toChange <- belongTo == oldName
     if(any(toChange)){
-    
+      
       newSheetName <- sprintf("'%s'", newSheetName)
       tmp <- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
       tmp <- gsub("'+", "'", tmp)
       workbook$definedNames[toChange] <<- tmp
       
     }
-      
+    
     
   }
   
@@ -1522,7 +1531,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
                                paste(ws$colBreaks, collapse = ""),
                                '</colBreaks>')
       }
-       
+      
       
       if(!is.null(ws$sheetPr))
         ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
@@ -2252,7 +2261,6 @@ Workbook$methods(preSaveCleanUp = function(){
   
   nSheets <- length(sheetRIds)
   nWorksheets <- length(worksheets)
-  nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
   nPivots <- length(pivotDefinitions)
   
@@ -2525,7 +2533,7 @@ Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet, localShee
                                 sprintf('<definedName name="%s" localSheetId="%s">\'%s\'!%s:%s</definedName>', name, localSheetId, sheet, ref1, ref2)
     )
   }
-
+  
 })
 
 
@@ -3123,7 +3131,7 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
 
 
 Workbook$methods(loadStyles = function(stylesXML){
-
+  
   ## Build style objects from the styles XML
   stylesTxt <- readLines(stylesXML, warn = FALSE, encoding = "UTF-8")
   stylesTxt <- removeHeadTag(stylesTxt)
