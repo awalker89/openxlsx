@@ -707,7 +707,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if(any(c("currency", "accounting", "percentage", "3", "comma") %in% allColClasses)){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3", "comma") %in% tolower(x))))
     for(i in cInds)
-      df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]]))
+      df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]], perl = TRUE))
   }
   
   ## convert scientific
@@ -1504,7 +1504,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
       
       if(length(freezePane[[i]]) > 0)
-        ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews)
+        ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews, fixed = TRUE)
       
       if(length(worksheets[[i]]$mergeCells) > 0)
         ws$mergeCells <- paste0(sprintf('<mergeCells count="%s">', length(worksheets[[i]]$mergeCells)), pxml(worksheets[[i]]$mergeCells), '</mergeCells>')
@@ -1658,7 +1658,7 @@ Workbook$methods(setColWidths = function(sheet){
       if(is.null(baseFontName)){
         baseFontName <- "calibri"
       }else{
-        baseFontName <- gsub(" ", ".", tolower(baseFontName))
+        baseFontName <- gsub(" ", ".", tolower(baseFontName), fixed = TRUE)
         if(!baseFontName %in% names(openxlsxFontSizeLookupTable)){
           baseFontName <- "calibri"
         }
@@ -1693,7 +1693,7 @@ Workbook$methods(setColWidths = function(sheet){
           if(is.null(fN)){
             fN <- "calibri"
           }else{
-            fN <- gsub(" ", ".", tolower(fN))
+            fN <- gsub(" ", ".", tolower(fN), fixed = TRUE)
             if(!fN %in% names(openxlsxFontSizeLookupTable)){
               fN <- "calibri"
             }
@@ -1737,7 +1737,7 @@ Workbook$methods(setColWidths = function(sheet){
         col <- lapply(comps, convertFromExcelRef)
         col <- lapply(col, function(x) x[x %in% cols[auto2Inds]]) ## subset to auto2Inds
         
-        rows <- lapply(comps, function(x) as.numeric(gsub("[A-Z]", "", x)))
+        rows <- lapply(comps, function(x) as.numeric(gsub("[A-Z]", "", x, perl = TRUE)))
         rows <- rows[sapply(col, length) > 0]
         col <- col[sapply(col, length) > 0]
         
@@ -1918,7 +1918,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Reset rIds
   if(nSheets > 1){
     for(i in (sheet+1L):nSheets)
-      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets)
+      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets, fixed = TRUE)
   }else{
     workbook$sheets <<- NULL
   }
@@ -2337,7 +2337,7 @@ Workbook$methods(preSaveCleanUp = function(){
     
     for(i in 1:length(workbook$definedNames)){
       if(!is.na(newId[i]))
-        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
+        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]], fixed = TRUE)
     }
   }
   
