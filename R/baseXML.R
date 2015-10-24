@@ -103,7 +103,8 @@ genBaseSheet <- function(sheetName,
                          tabSelected = FALSE, 
                          tabColour = NULL, 
                          zoom = 100, 
-                         oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter){
+                         oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter,
+                         paperSize, orientation){
   
   if(!is.null(tabColour))
     tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
@@ -143,7 +144,7 @@ genBaseSheet <- function(sheetName,
                    conditionalFormatting = NULL,
                    hyperlinks = NULL,
                    pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
-                   pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
+                   pageSetup = sprintf('<pageSetup paperSize="%s" orientation="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', paperSize, orientation),  ## will always be 2
                    headerFooter = hf,
                    rowBreaks = NULL,
                    colBreaks = NULL,

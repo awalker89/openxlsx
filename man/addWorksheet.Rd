@@ -7,7 +7,8 @@
 addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
   zoom = 100, header = NULL, footer = NULL, evenHeader = NULL,
   evenFooter = NULL, firstHeader = NULL, firstFooter = NULL,
-  visible = TRUE)
+  visible = TRUE, paperSize = getOption("openxlsx.paperSize", default = 9),
+  orientation = getOption("openxlsx.orientation", default = "portrait"))
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}
@@ -33,6 +34,10 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 \item{firstFooter}{document footer for first page only.}
 
 \item{visible}{If FALSE, sheet is hidden else visible.}
+
+\item{pageSize.}{An integer corresponding to a page size. See ?pageSetup for details.}
+
+\item{Page}{orientation. One of "portrait" or "landscape"}
 }
 \value{
 XML tree

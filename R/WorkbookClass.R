@@ -152,11 +152,19 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
 })
 
 
-Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL, zoom = 100,
-                                         oddHeader = NULL, oddFooter = NULL,
-                                         evenHeader = NULL, evenFooter = NULL,
-                                         firstHeader = NULL, firstFooter = NULL,
-                                         visible = TRUE){
+Workbook$methods(addWorksheet = function(sheetName
+                                         , showGridLines = TRUE
+                                         , tabColour = NULL
+                                         , zoom = 100
+                                         , oddHeader = NULL
+                                         , oddFooter = NULL
+                                         , evenHeader = NULL
+                                         , evenFooter = NULL
+                                         , firstHeader = NULL
+                                         , firstFooter = NULL
+                                         , visible = TRUE
+                                         , paperSize = 9
+                                         , orientation = 'portrait'){
   
   newSheetIndex = length(worksheets) + 1L
   
@@ -176,12 +184,19 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state = "%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, 
-                                                 tabSelected = newSheetIndex == 1, 
-                                                 tabColour = tabColour, zoom = zoom,
-                                                 oddHeader = oddHeader, oddFooter = oddFooter,
-                                                 evenHeader = evenHeader, evenFooter = evenFooter,
-                                                 firstHeader = firstHeader, firstFooter = firstFooter))
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName
+                                                 , showGridLines = showGridLines
+                                                 , tabSelected = newSheetIndex == 1
+                                                 , tabColour = tabColour
+                                                 , zoom = zoom
+                                                 , oddHeader = oddHeader
+                                                 , oddFooter = oddFooter
+                                                 , evenHeader = evenHeader
+                                                 , evenFooter = evenFooter
+                                                 , firstHeader = firstHeader
+                                                 , firstFooter = firstFooter
+                                                 , paperSize = paperSize
+                                                 , orientation = orientation))
   
   ## update content_tyes
   ## add a drawing.xml for the worksheet
@@ -1867,7 +1882,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Need to remove reference from workbook.xml.rels to pivotCache
   removeRels <- worksheets_rels[[sheet]][grepl("pivotTables", worksheets_rels[[sheet]])]
   if(length(removeRels) > 0){
-    print('here')
+    
     ## sheet rels links to a pivotTable file, the corresponding pivotTable_rels file links to the cacheDefn which is listing in workbook.xml.rels
     ## remove reference to this file from the workbook.xml.rels
     fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))

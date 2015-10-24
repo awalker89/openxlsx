@@ -226,6 +226,8 @@ sheets <- function(wb){
 #' @param firstHeader document header for first page only.
 #' @param firstFooter document footer for first page only.
 #' @param visible If FALSE, sheet is hidden else visible.
+#' @param pageSize. An integer corresponding to a page size. See ?pageSetup for details.
+#' @param Page orientation. One of "portrait" or "landscape"
 #' @details Headers and footers can contain special tags
 #' \itemize{
 #'   \item{\bold{&[Page]}}{ Page number}
@@ -289,7 +291,9 @@ addWorksheet <- function(wb, sheetName,
                          evenFooter = NULL,
                          firstHeader = NULL,
                          firstFooter = NULL,
-                         visible = TRUE){
+                         visible = TRUE,
+                         paperSize = getOption("openxlsx.paperSize", default = 9),
+                         orientation = getOption("openxlsx.orientation", default = "portrait")){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -330,9 +334,12 @@ addWorksheet <- function(wb, sheetName,
   if(!is.null(firstFooter) & length(firstFooter) != 3)
     stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
   
-  
   if(!is.logical(visible))
     stop("visible must be TRUE or FALSE")
+  
+  orientation <- tolower(orientation)
+  if(!orientation %in% c("portrait", "landscape"))
+    stop("orientation must be 'portrait' or 'landscape'.")
   
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
@@ -347,7 +354,9 @@ addWorksheet <- function(wb, sheetName,
                             evenFooter = headerFooterSub(evenFooter),
                             firstHeader = headerFooterSub(firstHeader),
                             firstFooter = headerFooterSub(firstFooter),
-                            visible = visible[1]))
+                            visible = visible[1],
+                            paperSize = paperSize,
+                            orientation = orientation))
 } 
 
 
