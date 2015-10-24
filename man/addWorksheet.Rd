@@ -40,11 +40,11 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 
 \item{paperSize}{An integer corresponding to a paper size. See ?pageSetup for details.}
 
-\item{orientation.}{One of "portrait" or "landscape"}
+\item{orientation}{One of "portrait" or "landscape"}
 
-\item{hdpi.}{Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)}
+\item{vdpi}{Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)}
 
-\item{vdpi.}{Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)}
+\item{hdpi}{Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)}
 }
 \value{
 XML tree
