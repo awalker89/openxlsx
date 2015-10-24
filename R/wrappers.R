@@ -227,9 +227,9 @@ sheets <- function(wb){
 #' @param firstFooter document footer for first page only.
 #' @param visible If FALSE, sheet is hidden else visible.
 #' @param paperSize An integer corresponding to a paper size. See ?pageSetup for details.
-#' @param orientation. One of "portrait" or "landscape"
-#' @param hdpi. Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)
-#' @param vdpi. Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)
+#' @param orientation One of "portrait" or "landscape"
+#' @param hdpi Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)
+#' @param vdpi Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)
 #' @details Headers and footers can contain special tags
 #' \itemize{
 #'   \item{\bold{&[Page]}}{ Page number}
@@ -1758,19 +1758,27 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
+  xml <- wb$worksheets[[sheet]]$pageSetup
+  
   if(!is.null(orientation)){
     orientation <- tolower(orientation)
     if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+  }else{
+    orientation <- ifelse(grepl("landscape", xml), "landscape", "portrait") ## get existing
   }
   
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
   
-  paperSizes <- 1:68
-  paperSizes <- paperSizes[!paperSizes %in% 48:49]
-  if(!paperSize %in% paperSizes)
-    stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
-  paperSize <- as.integer(paperSize)
+  if(!is.null(paperSize)){
+    paperSizes <- 1:68
+    paperSizes <- paperSizes[!paperSizes %in% 48:49]
+    if(!paperSize %in% paperSizes)
+      stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
+    paperSize <- as.integer(paperSize)
+  }else{
+    paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
+  }
   
  ## validate sheet - get sheet index
   sheet <- wb$validateSheet(sheet)
@@ -1778,15 +1786,6 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   
   ##############################
   ## Keep defaults on orientation, hdpi, vdpi, paperSize
-  xml <- wb$worksheets[[sheet]]$pageSetup
-  if(is.null(orientation)){
-    orientation <- ifelse(grepl("landscape", xml), "landscape", "portrait")
-  }
-  
-  if(is.null(paperSize)){
-    paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE))
-  }
-  
   hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
   vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
   
