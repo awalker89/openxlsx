@@ -28,6 +28,8 @@
 #'    \item{\code{options("openxlsx.dateFormat" = "mm/dd/yyyy")}}
 #'    \item{\code{options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")}}
 #'    \item{\code{options("openxlsx.numFmt" = NULL)}}
+#'    \item{\code{options("openxlsx.paperSize" = 9)}} ## A4
+#'    \item{\code{options("openxlsx.orientation" = "portrait")}} ## page orientation
 #' } 
 #'  See the Formatting vignette for examples. 
 #' 
