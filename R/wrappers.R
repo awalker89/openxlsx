@@ -293,7 +293,11 @@ addWorksheet <- function(wb, sheetName,
                          firstFooter = NULL,
                          visible = TRUE,
                          paperSize = getOption("openxlsx.paperSize", default = 9),
-                         orientation = getOption("openxlsx.orientation", default = "portrait")){
+                         orientation = getOption("openxlsx.orientation", default = "portrait"),
+                         vdpi = getOption("openxlsx.vdpi", default = getOption("openxlsx.dpi", default = 300)),
+                         hdpi = getOption("openxlsx.hdpi", default = getOption("openxlsx.dpi", default = 300))){
+  
+  
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -356,7 +360,9 @@ addWorksheet <- function(wb, sheetName,
                             firstFooter = headerFooterSub(firstFooter),
                             visible = visible[1],
                             paperSize = paperSize,
-                            orientation = orientation))
+                            orientation = orientation,
+                            vdpi = vdpi,
+                            hdpi = hdpi))
 } 
 
 

@@ -164,7 +164,9 @@ Workbook$methods(addWorksheet = function(sheetName
                                          , firstFooter = NULL
                                          , visible = TRUE
                                          , paperSize = 9
-                                         , orientation = 'portrait'){
+                                         , orientation = 'portrait'
+                                         , hdpi = 300
+                                         , vdpi = 300){
   
   newSheetIndex = length(worksheets) + 1L
   
@@ -196,7 +198,9 @@ Workbook$methods(addWorksheet = function(sheetName
                                                  , firstHeader = firstHeader
                                                  , firstFooter = firstFooter
                                                  , paperSize = paperSize
-                                                 , orientation = orientation))
+                                                 , orientation = orientation
+                                                 , hdpi = hdpi
+                                                 , vdpi = vdpi))
   
   ## update content_tyes
   ## add a drawing.xml for the worksheet
