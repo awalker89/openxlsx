@@ -8,7 +8,10 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
   zoom = 100, header = NULL, footer = NULL, evenHeader = NULL,
   evenFooter = NULL, firstHeader = NULL, firstFooter = NULL,
   visible = TRUE, paperSize = getOption("openxlsx.paperSize", default = 9),
-  orientation = getOption("openxlsx.orientation", default = "portrait"))
+  orientation = getOption("openxlsx.orientation", default = "portrait"),
+  vdpi = getOption("openxlsx.vdpi", default = getOption("openxlsx.dpi",
+  default = 300)), hdpi = getOption("openxlsx.hdpi", default =
+  getOption("openxlsx.dpi", default = 300)))
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}
@@ -38,6 +41,10 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 \item{paperSize}{An integer corresponding to a paper size. See ?pageSetup for details.}
 
 \item{orientation.}{One of "portrait" or "landscape"}
+
+\item{hdpi.}{Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)}
+
+\item{vdpi.}{Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)}
 }
 \value{
 XML tree

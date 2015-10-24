@@ -228,6 +228,8 @@ sheets <- function(wb){
 #' @param visible If FALSE, sheet is hidden else visible.
 #' @param paperSize An integer corresponding to a paper size. See ?pageSetup for details.
 #' @param orientation. One of "portrait" or "landscape"
+#' @param hdpi. Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)
+#' @param vdpi. Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)
 #' @details Headers and footers can contain special tags
 #' \itemize{
 #'   \item{\bold{&[Page]}}{ Page number}
@@ -344,6 +346,16 @@ addWorksheet <- function(wb, sheetName,
   orientation <- tolower(orientation)
   if(!orientation %in% c("portrait", "landscape"))
     stop("orientation must be 'portrait' or 'landscape'.")
+  
+  vdpi <- as.integer(vdpi)
+  if(is.na(vdpi))
+    stop("vdpi must be numeric")
+  
+  hdpi <- as.integer(hdpi)
+  if(is.na(hdpi))
+    stop("hdpi must be numeric")
+  
+  
   
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
@@ -1737,17 +1749,19 @@ setHeaderFooter <- function(wb, sheet,
 #' 
 #' 
 #' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
-pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
+pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
                       header = 0.3, footer = 0.3,
-                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = 9,
+                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = NULL,
                       printTitleRows = NULL, printTitleCols = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  orientation <- tolower(orientation)
-  if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+  if(!is.null(orientation)){
+    orientation <- tolower(orientation)
+    if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+  }
   
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
@@ -1761,8 +1775,27 @@ pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
  ## validate sheet - get sheet index
   sheet <- wb$validateSheet(sheet)
   
-  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                              paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+  
+  ##############################
+  ## Keep defaults on orientation, hdpi, vdpi, paperSize
+  xml <- wb$worksheets[[sheet]]$pageSetup
+  if(is.null(orientation)){
+    orientation <- ifelse(grepl("landscape", xml), "landscape", "portrait")
+  }
+  
+  if(is.null(paperSize)){
+    paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE))
+  }
+  
+  hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
+  vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
+  
+
+  
+  ##############################
+  ## Update
+  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="%s" verticalDpi="%s" r:id="rId2"/>', 
+                                              paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight), hdpi, vdpi)
   
   if(fitToHeight | fitToWidth)
     wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
