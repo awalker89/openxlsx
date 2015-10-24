@@ -35,9 +35,9 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 
 \item{visible}{If FALSE, sheet is hidden else visible.}
 
-\item{pageSize.}{An integer corresponding to a page size. See ?pageSetup for details.}
+\item{paperSize}{An integer corresponding to a paper size. See ?pageSetup for details.}
 
-\item{Page}{orientation. One of "portrait" or "landscape"}
+\item{orientation.}{One of "portrait" or "landscape"}
 }
 \value{
 XML tree
