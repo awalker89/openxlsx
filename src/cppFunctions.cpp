@@ -104,7 +104,7 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
     
     tmp = as<std::vector<std::string> >(sheetData[i]);
     if(tmp[1] == "s"){
-      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 16; //-16 for shared string tags around text
+      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 37; //-37 for shared string tags around text
     }else{
       nLen = tmp[2].length();
       v[i] = min(nLen, 11); // For numerics - max width is 11
