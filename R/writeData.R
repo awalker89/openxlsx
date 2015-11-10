@@ -156,6 +156,13 @@ writeData <- function(wb,
   options("scipen" = 200)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
+  
+  exDigits <- getOption("digits")
+  options("digits" = 22)
+  on.exit(options("digits" = exDigits), add = TRUE)
+
+  
+    
   if(is.null(x))
     return(invisible(0))
   
