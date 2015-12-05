@@ -185,8 +185,8 @@ getCellStylesPossiblyMissing <- function(x) {
     .Call('openxlsx_getCellStylesPossiblyMissing', PACKAGE = 'openxlsx', x)
 }
 
-readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names) {
-    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names)
+readWorkbook <- function(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, skipEmptyCols, clean_names) {
+    .Call('openxlsx_readWorkbook', PACKAGE = 'openxlsx', v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, skipEmptyCols, clean_names)
 }
 
 getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {

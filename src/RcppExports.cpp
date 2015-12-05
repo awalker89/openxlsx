@@ -584,8 +584,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // readWorkbook
-SEXP readWorkbook(CharacterVector v, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, Function clean_names);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP clean_namesSEXP) {
+SEXP readWorkbook(CharacterVector v, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, Function clean_names);
+RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP clean_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -596,8 +596,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
     Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
+    Rcpp::traits::input_parameter< bool >::type skipEmptyCols(skipEmptyColsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
-    __result = Rcpp::wrap(readWorkbook(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names));
+    __result = Rcpp::wrap(readWorkbook(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, skipEmptyCols, clean_names));
     return __result;
 END_RCPP
 }

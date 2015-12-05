@@ -59,6 +59,7 @@ read.xlsx <- function(xlsxFile,
                       rowNames = FALSE,
                       detectDates = FALSE, 
                       skipEmptyRows = TRUE, 
+                      skipEmptyCols = TRUE, 
                       rows = NULL,
                       cols = NULL,
                       check.names = FALSE,
@@ -77,6 +78,7 @@ read.xlsx.default <- function(xlsxFile,
                               rowNames = FALSE,
                               detectDates = FALSE, 
                               skipEmptyRows = TRUE, 
+                              skipEmptyCols = TRUE, 
                               rows = NULL,
                               cols = NULL,
                               check.names = FALSE,
@@ -339,7 +341,7 @@ read.xlsx.default <- function(xlsxFile,
   }
 
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
@@ -368,6 +370,7 @@ read.xlsx.Workbook <- function(xlsxFile,
                                rowNames = FALSE,
                                detectDates = FALSE, 
                                skipEmptyRows = TRUE, 
+                               skipEmptyCols = TRUE, 
                                rows = NULL,
                                cols = NULL,
                                check.names = FALSE,
@@ -672,7 +675,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   
 
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
@@ -731,6 +734,7 @@ readWorkbook <- function(xlsxFile,
                          rowNames = FALSE,
                          detectDates = FALSE, 
                          skipEmptyRows = TRUE, 
+                         skipEmptyCols = TRUE, 
                          rows = NULL,
                          cols = NULL,
                          check.names = FALSE,
@@ -744,6 +748,7 @@ readWorkbook <- function(xlsxFile,
             rowNames = rowNames,
             detectDates = detectDates, 
             skipEmptyRows = skipEmptyRows, 
+            skipEmptyCols = skipEmptyCols, 
             rows = rows,
             cols = cols,
             check.names = check.names,

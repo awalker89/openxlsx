@@ -6,8 +6,8 @@
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
-  rows = NULL, cols = NULL, check.names = FALSE, namedRegion = NULL,
-  na.strings = "NA")
+  skipEmptyCols = TRUE, rows = NULL, cols = NULL, check.names = FALSE,
+  namedRegion = NULL, na.strings = "NA")
 }
 \arguments{
 \item{xlsxFile}{An xlsx file or Workbook object}

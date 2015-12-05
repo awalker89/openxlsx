@@ -2371,6 +2371,7 @@ SEXP readWorkbook(CharacterVector v,
                   int nRows,
                   bool hasColNames,
                   bool skipEmptyRows,
+                  bool skipEmptyCols,
                   Function clean_names
 ){
   
@@ -2394,7 +2395,13 @@ SEXP readWorkbook(CharacterVector v,
   }
   
   IntegerVector colNumbers = RcppConvertFromExcelRef(r); 
-  colNumbers = match(colNumbers, sort_unique(colNumbers)) - 1;
+  IntegerVector uCols = sort_unique(colNumbers);
+  
+  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
+    uCols = seq(1, max(uCols));
+  }
+  
+  colNumbers = match(colNumbers, uCols) - 1;
   int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
   
   // Check if first row are all strings
