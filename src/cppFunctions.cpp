@@ -7,6 +7,45 @@
 using namespace Rcpp;
 using namespace std;
 
+
+
+// [[Rcpp::export]]
+std::vector<std::string> makeLetters(){
+  
+  std::vector<std::string> LETTERS(26);
+  
+  LETTERS[0] = "A";
+  LETTERS[1] = "B";
+  LETTERS[2] = "C";
+  LETTERS[3] = "D";
+  LETTERS[4] = "E";
+  LETTERS[5] = "F";
+  LETTERS[6] = "G";
+  LETTERS[7] = "H";
+  LETTERS[8] = "I";
+  LETTERS[9] = "J";
+  LETTERS[10] = "K";
+  LETTERS[11] = "L";
+  LETTERS[12] = "M";
+  LETTERS[13] = "N";
+  LETTERS[14] = "O";
+  LETTERS[15] = "P";
+  LETTERS[16] = "Q";
+  LETTERS[17] = "R";
+  LETTERS[18] = "S";
+  LETTERS[19] = "T";
+  LETTERS[20] = "U";
+  LETTERS[21] = "V";
+  LETTERS[22] = "W";
+  LETTERS[23] = "X";
+  LETTERS[24] = "Y";
+  LETTERS[25] = "Z";
+  
+  return(LETTERS);
+  
+}
+
+
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef2( std::vector<std::string>& r ){
   
@@ -311,7 +350,7 @@ CharacterVector get_extLst_Major(std::string xml){
   size_t pos = xml.find("<pageSetup ", 0);   
   if(pos == std::string::npos)
     pos = xml.find("<pageMargins ", 0);   
- 
+  
   if(pos == std::string::npos)
     pos = xml.find("</conditionalFormatting>", 0);   
   
@@ -814,13 +853,13 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
   //  T	T	T
   //  F F	F	
   //  T F	T (must be a formula)	
-
+  
   int n = r.size();
   List cells(n);
   LogicalVector hasV = !is_na(v);
   LogicalVector hasR = !is_na(r);
   LogicalVector hasT = !is_na(t);
-
+  
   for(int i=0; i < n; i++){
     
     if(hasR[i]){
@@ -828,14 +867,14 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
       if(hasV[i]){
         
         if(hasT[i]){
-        
-        //  r t v	
-        //  T	T	T (2)
-        cells[i] = CharacterVector::create(
-          Named("r") = r[i],
-          Named("t") = t[i],
-          Named("v") = v[i],
-          Named("f") = NA_STRING); 
+          
+          //  r t v	
+          //  T	T	T (2)
+          cells[i] = CharacterVector::create(
+            Named("r") = r[i],
+                          Named("t") = t[i],
+                                        Named("v") = v[i],
+                                                      Named("f") = NA_STRING); 
           
         }else{
           
@@ -843,9 +882,9 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
           //  T	T	T (4 - formula)
           cells[i] = CharacterVector::create(
             Named("r") = r[i],
-            Named("t") = "str",
-            Named("v") = NA_STRING,
-            Named("f") = "<f>" + v[i] + "</f>"); 
+                          Named("t") = "str",
+                          Named("v") = NA_STRING,
+                          Named("f") = "<f>" + v[i] + "</f>"); 
           
           
         }
@@ -856,9 +895,9 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
         //  T	F	F	(1)
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
-          Named("t") = NA_STRING,
-          Named("v") = NA_STRING,
-          Named("f") = NA_STRING); 
+                        Named("t") = NA_STRING,
+                        Named("v") = NA_STRING,
+                        Named("f") = NA_STRING); 
       }
       
     }else{
@@ -1129,7 +1168,7 @@ SEXP buildMatrixMixed(CharacterVector v,
       
       dfList[i] = datetmp;
       
-  
+      
       // character columns
     }else if(std::find(charCols.begin(), charCols.end(), i) != charCols.end()){
       
@@ -1518,11 +1557,11 @@ LogicalVector isInternalHyperlink(CharacterVector x){
   LogicalVector isInternal(n);
   
   for(int i = 0; i < n; i++){ 
-  
-      // find location tag  
+    
+    // find location tag  
     xml = x[i];
     found = xml.find(tag, 0);
-      
+    
     if (found != std::string::npos){
       isInternal[i] = false;
     }else{
@@ -1931,7 +1970,7 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       if(attrs[1]){
         //If we have a c value we might have an f value
         if(attrs[3]){
-
+          
           if(attrs[2]){ // If v is NOT NA
             cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
           }else{
@@ -2519,13 +2558,13 @@ SEXP readWorkbook(CharacterVector v,
     is_date.erase(is_date.begin(), is_date.begin() + pos);
   }
   
-
+  
   //Intialise return data.frame
   SEXP m; 
   v.erase(v.begin(), v.begin() + pos);
   
   if(allNumeric){
-
+    
     m = buildMatrixNumeric(v, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
@@ -2669,11 +2708,11 @@ List getCellInfo(std::string xmlFile,
         pos = row_xml_i.find("<row r=\"", 0);
         endPos = row_xml_i.find(tagEnd, pos + 8);
         row_i = atoi(row_xml_i.substr(pos + 8, endPos - pos - 8).c_str());
-
+        
         if (std::find(rows.begin()+place, rows.end(), row_i)!= rows.end()){
           xml += row_xml_i + ' ';
           place++;
-
+          
           if(place == nr_sub)
             break;
           
@@ -2684,7 +2723,7 @@ List getCellInfo(std::string xmlFile,
     }
     
   }
-
+  
   // count cells with children
   int ocs = 0;
   string::size_type start = 0;
@@ -2697,6 +2736,10 @@ List getCellInfo(std::string xmlFile,
     res = List::create(Rcpp::Named("nRows") = 0, Rcpp::Named("r") = 0);
     return res;
   }
+  
+  // pull out cell merges
+  CharacterVector merge_cell_xml = getChildlessNode(xml, "<mergeCell ");
+  
   
   CharacterVector r(ocs);
   CharacterVector t(ocs);
@@ -2738,7 +2781,7 @@ List getCellInfo(std::string xmlFile,
         pos = cell.find(rtag, 0);  // find r="
         endPos = cell.find(tagEnd, pos + 3);  // find next "
         r[i] = cell.substr(pos + 3, endPos - pos - 3).c_str();
-       
+        
         // Pull out type
         pos = cell.find(ttag, 0);  // find t="
         if(pos != std::string::npos){
@@ -2817,10 +2860,11 @@ List getCellInfo(std::string xmlFile,
                      Rcpp::Named("string_refs") = string_refs,
                      Rcpp::Named("v") = v,
                      Rcpp::Named("s") = s,
-                     Rcpp::Named("nRows") = nRows
+                     Rcpp::Named("nRows") = nRows,
+                     Rcpp::Named("cellMerge") = merge_cell_xml
   );
   
-  
+
   return wrap(res);  
   
 }
@@ -3676,9 +3720,90 @@ SEXP readWorkbook2(std::vector<std::string>& v,
   
 }
 
+// [[Rcpp::export]]
+SEXP mergeCell2mappingDF(CharacterVector x){
+  
+  int n = x.size();
+  int ref_pos;
+  int colon_pos;
+  int end_pos;
+  
+  std::string tag_end = "\"";
+  std::string cell;
+  std::string left_val;
+  std::string right_val;
+  
+  std::vector<std::string> lv(n);
+  std::vector<std::string> rv(n);
+  
+  IntegerVector start_col(n);
+  IntegerVector end_col(n);
+  
+  IntegerVector start_row(n);
+  IntegerVector end_row(n);
+
+  std::vector<std::string> LETTERS = makeLetters();
+  
+  for(int i = 0; i < n; i++){
+    
+    cell = as<std::string>(x[i]);
+    
+    ref_pos = cell.find("ref=", 0);  // find ref=
+    colon_pos = cell.find(":", ref_pos + 6);  // find :
+    end_pos = cell.find(tag_end, colon_pos + 1);  // find next 
+    
+    lv[i] = cell.substr(ref_pos + 5, colon_pos - ref_pos - 5).c_str();
+    rv[i] = cell.substr(colon_pos + 1, end_pos - colon_pos - 1).c_str();
+    
+    left_val = lv[i];
+    right_val = rv[i];
+   
+    left_val.erase(std::remove_if(left_val.begin(), left_val.end(), ::isalpha), left_val.end());
+    start_row[i] = atoi(left_val.c_str()); 
+    
+    right_val.erase(std::remove_if(right_val.begin(), right_val.end(), ::isalpha), right_val.end());
+    end_row[i] = atoi(right_val.c_str()); 
+    
+   
+  }
+
+  
+  start_col = RcppConvertFromExcelRef2(lv);
+  end_col = RcppConvertFromExcelRef2(rv);
+  
+  int n_rows = sum((end_row - start_row + 1) * (end_col - start_col + 1));
+  CharacterVector anchor_cell(n_rows);
+  CharacterVector ref(n_rows);
+  IntegerVector tmpi(1);
 
 
+  int k = 0;
+  for(int i = 0; i < n; ++i){
+    
+    int n_cols =  (end_col[i] - start_col[i] + 1);
+    int n_rows =  (end_row[i] - start_row[i] + 1);
+    
+    //Rcout << "n_cols: " << n_cols << endl;
+    //Rcout << "n_rows: " << n_rows << endl;
 
+    for(int r = 0; r < n_rows; r++){
+      for(int c = 0; c < n_cols; c++){
+      
+        tmpi[0] = start_col[i] + c;
+        CharacterVector tmp = convert2ExcelRef(tmpi, LETTERS = LETTERS);
+        ref[k] = as<std::string>(tmp[0]) + itos(start_row[i] + r);
+        anchor_cell[k] = lv[i];
+        k++;
+      }
+    }
+  }
+  
+  DataFrame mapping = DataFrame::create(Rcpp::Named("anchor_cell") = anchor_cell,
+                                    Rcpp::Named("ref") = ref);
+  
+  return(wrap(mapping));
+  
+}
 
 
 

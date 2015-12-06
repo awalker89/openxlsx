@@ -7,7 +7,7 @@
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
   skipEmptyCols = TRUE, rows = NULL, cols = NULL, check.names = FALSE,
-  namedRegion = NULL, na.strings = "NA")
+  namedRegion = NULL, na.strings = "NA", fillMergedCells = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file}

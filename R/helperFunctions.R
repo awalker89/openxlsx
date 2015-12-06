@@ -651,3 +651,33 @@ clean_names <- function(x){
 }
 
 
+
+mergeCell2mapping <- function(x){
+  
+  refs <- regmatches(x, regexpr("(?<=ref=\")[A-Z0-9:]+", x, perl = TRUE))
+  refs <- strsplit(refs, split = ":")
+  rows <- lapply(refs, function(r) {
+    r <- as.integer(gsub("[A-Z]", "", r))
+    seq(from = r[1], to = r[2], by = 1)
+  })
+  
+  cols <- lapply(refs, function(r) {
+    r <- convertFromExcelRef(r)
+    seq(from = r[1], to = r[2], by = 1)
+  })
+  
+  ## for each we grid.expand
+  refs <- do.call("rbind", lapply(1:length(rows), function(i){
+    tmp <- expand.grid("cols" = cols[[i]], "rows" = rows[[i]])
+    tmp$ref <- paste0(.Call("openxlsx_convert2ExcelRef", tmp$cols, LETTERS), tmp$rows)
+    tmp$anchor_cell <- tmp$ref[1]
+    return(tmp[, c("anchor_cell", "ref", "rows")])
+  }))
+
+  
+  refs <- refs[refs$anchor_cell != refs$ref,  ]
+  
+  return(refs)
+}
+
+

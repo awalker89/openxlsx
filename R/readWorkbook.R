@@ -64,7 +64,8 @@ read.xlsx <- function(xlsxFile,
                       cols = NULL,
                       check.names = FALSE,
                       namedRegion = NULL,
-                      na.strings = "NA"){
+                      na.strings = "NA",
+                      fillMergedCells = FALSE){
   
   UseMethod("read.xlsx", xlsxFile) 
   
@@ -83,7 +84,8 @@ read.xlsx.default <- function(xlsxFile,
                               cols = NULL,
                               check.names = FALSE,
                               namedRegion = NULL,
-                              na.strings = "NA"){
+                              na.strings = "NA",
+                              fillMergedCells = FALSE){
   
   
   ## Validate inputs and get files
@@ -240,6 +242,52 @@ read.xlsx.default <- function(xlsxFile,
                      PACKAGE = "openxlsx")
   
   
+  if(fillMergedCells & length(cell_info$cellMerge) > 0){
+    
+
+    merge_mapping <- mergeCell2mapping(cell_info$cellMerge) # .Call("openxlsx_mergeCell2mappingDF", cell_info$cellMerge, package = "openxlsx")
+
+    ## remove any elements from  r, string_refs, b, s that existing in merge_mapping
+    ## insert all missing refs into r
+    
+    to_remove_inds <- cell_info$r %in% merge_mapping$ref
+    to_remove_elems <- cell_info$r[to_remove_inds]
+    
+    if(any(to_remove_inds)){
+
+      cell_info$r <- cell_info$r[!to_remove_inds]
+      cell_info$s <- cell_info$s[!to_remove_inds]
+      cell_info$v <- cell_info$v[!to_remove_inds]
+      cell_info$string_refs <- cell_info$string_refs[!cell_info$string_refs %in% to_remove_elems]
+ 
+    }
+    
+    ## Now insert
+    inds <- match(merge_mapping$anchor_cell, cell_info$r)
+    
+    ## String refs (must sort)
+    new_string_refs <- merge_mapping$ref[merge_mapping$anchor_cell %in% cell_info$string_refs]
+    cell_info$string_refs <- c(cell_info$string_refs, new_string_refs)
+    cell_info$string_refs <- cell_info$string_refs[order(as.integer(gsub("[A-Z]", "", cell_info$string_refs)), nchar(cell_info$string_refs), cell_info$string_refs)]
+    
+    ## r
+    cell_info$r <- c(cell_info$r, merge_mapping$ref)
+    cell_info$v <- c(cell_info$v, cell_info$v[inds])
+    
+    ord <- order(as.integer(gsub("[A-Z]", "", cell_info$r)), nchar(cell_info$r), cell_info$r)
+    
+    cell_info$r <- cell_info$r[ord]
+    cell_info$v <- cell_info$v[ord]
+    
+    if(length(cell_info$s) > 0){
+      cell_info$s <- c(cell_info$s, cell_info$s[inds])
+      cell_info$s <- cell_info$s[ord]
+    }
+
+    cell_info$nRows <- .Call("openxlsx_calcNRows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
+    
+  }
+  
   nRows <- cell_info$nRows
   r <- cell_info$r
   
@@ -375,7 +423,8 @@ read.xlsx.Workbook <- function(xlsxFile,
                                cols = NULL,
                                check.names = FALSE,
                                namedRegion = NULL,
-                               na.strings = "NA"){
+                               na.strings = "NA",
+                               fillMergedCells = FALSE){
   
   
   ## Validate inputs and get files
@@ -739,7 +788,8 @@ readWorkbook <- function(xlsxFile,
                          cols = NULL,
                          check.names = FALSE,
                          namedRegion = NULL,
-                         na.strings = "NA"){
+                         na.strings = "NA",
+                         fillMergedCells = FALSE){
   
   read.xlsx(xlsxFile = xlsxFile,
             sheet = sheet,
@@ -753,7 +803,8 @@ readWorkbook <- function(xlsxFile,
             cols = cols,
             check.names = check.names,
             namedRegion = namedRegion,
-            na.strings = "NA")
+            na.strings = na.strings,
+            fillMergedCells = fillMergedCells)
 }
 
 

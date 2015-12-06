@@ -5,6 +5,16 @@
 
 using namespace Rcpp;
 
+// makeLetters
+std::vector<std::string> makeLetters();
+RcppExport SEXP openxlsx_makeLetters() {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    __result = Rcpp::wrap(makeLetters());
+    return __result;
+END_RCPP
+}
 // RcppConvertFromExcelRef2
 IntegerVector RcppConvertFromExcelRef2(std::vector<std::string>& r);
 RcppExport SEXP openxlsx_RcppConvertFromExcelRef2(SEXP rSEXP) {
@@ -675,6 +685,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
     __result = Rcpp::wrap(readWorkbook2(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names));
+    return __result;
+END_RCPP
+}
+// mergeCell2mappingDF
+SEXP mergeCell2mappingDF(CharacterVector x);
+RcppExport SEXP openxlsx_mergeCell2mappingDF(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    __result = Rcpp::wrap(mergeCell2mappingDF(x));
     return __result;
 END_RCPP
 }
