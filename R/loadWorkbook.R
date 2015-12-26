@@ -420,7 +420,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## sheet.xml have been reordered to be in the order of sheetrId
     ## not every sheet has a worksheet rels
-    
+
     xml <- lapply(1:length(allRels), function(i) {
       if(haveRels[i]){
         
@@ -436,6 +436,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       return(xml)
     })
     
+    
+    ############################################################################################
+    ############################################################################################
+    ## Slicers
     
     if(length(slicerXML) > 0){
       
@@ -481,7 +485,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       
     }    
     
+    ############################################################################################
+    ############################################################################################
     ## tables
+    
     if(length(tablesXML) > 0){
       
       tables <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=table)[0-9]+(?=\\.xml)", x, perl = TRUE))))
@@ -559,6 +566,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         }
       }
     }
+    
     
     
     

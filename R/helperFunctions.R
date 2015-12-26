@@ -634,7 +634,7 @@ getSharedStringsFromFile <- function(sharedStringsFile, isFile){
   z <- tolower(sharedStrings)
   sharedStrings[z == "true"] <- "TRUE"
   sharedStrings[z == "false"] <- "FALSE"
-  rm(z)
+  z <- NULL ## effectivel remove z
   
   ## XML replacements
   sharedStrings <- replaceXMLEntities(sharedStrings)

@@ -1,7 +1,10 @@
 
 
-Workbook <- setRefClass("Workbook", fields = c(#".rels",
+Workbook <- setRefClass("Workbook", fields = c(
+  
+  #".rels",
   #"app",
+  
   "charts",
   "isChartSheet",
   
