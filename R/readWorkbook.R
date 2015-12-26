@@ -20,6 +20,7 @@
 #' are checked to ensure that they are syntactically valid variable names
 #' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
 #' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
+#' @param fillMergedCells If TRUE, the value in a merged cell is given to all cells within the merge.
 #' @seealso \code{\link{getNamedRegions}}
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to be evaluated when the file is opened in Excel.
