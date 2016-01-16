@@ -151,6 +151,7 @@ genBaseSheet <- function(sheetName,
                    colBreaks = NULL,
                    drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
                    legacyDrawing = NULL,
+                   oleObjects = NULL,
                    tableParts = NULL,
                    extLst = NULL
   ))

@@ -15,6 +15,7 @@ Workbook <- setRefClass("Workbook", fields = c(
   "dataCount",
   "drawings",
   "drawings_rels",
+  "embeddings",
   "externalLinks",
   "externalLinksRels",
   "freezePane",
@@ -48,7 +49,8 @@ Workbook <- setRefClass("Workbook", fields = c(
   "theme",
   
   "vbaProject",
-  "vmlDrawing",
+  "vml",
+  "vml_rels",
   "comments",
   
   "workbook",
@@ -100,6 +102,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   tables.xml.rels <<- NULL
   queryTables <<- NULL
   connections <<- NULL
+  embeddings <<- NULL
   externalLinks <<- NULL
   externalLinksRels <<- NULL
   headFoot <<- NULL
@@ -117,7 +120,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   slicerCaches <<- NULL
   
   vbaProject <<- NULL
-  vmlDrawing <<- NULL
+  vml <<- list()
+  vml_rels <<- list()
   comments <<- list()
   
   sharedStrings <<- list()
@@ -221,6 +225,9 @@ Workbook$methods(addWorksheet = function(sheetName
   drawings_rels[[newSheetIndex]] <<- list()
   drawings[[newSheetIndex]] <<- list()
   
+  vml_rels[[newSheetIndex]] <<- list()
+  vml[[newSheetIndex]] <<- list()
+  
   isChartSheet[[newSheetIndex]] <<- FALSE
   comments[[newSheetIndex]] <<- list()
   
@@ -283,6 +290,10 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
+  
+  vml_rels[[newSheetIndex]] <<- list()
+  vml[[newSheetIndex]] <<- list()
+  
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
@@ -311,6 +322,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   nPivots <- length(pivotTables)
   nSlicers <- length(slicers)
   nComments <- sum(sapply(comments, length) > 0)
+  nVML <- sum(sapply(vml, length) > 0)
   
   relsDir <- file.path(tmpDir, "_rels")
   dir.create(path = relsDir, recursive = TRUE)
@@ -374,7 +386,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   
   ## xl/comments.xml
-  if(nComments > 0){
+  if(nComments > 0 | nVML > 0){
     for(i in 1:nSheets){
       if(length(comments[[i]]) > 0){
         
@@ -392,6 +404,14 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     .self$writeDrawingVML(xldrawingsDir)
     
+  }
+  
+  if(length(embeddings) > 0){
+    
+    embeddingsDir <- file.path(tmpDir, "xl", "embeddings")
+    dir.create(path = embeddingsDir, recursive = TRUE)
+    for(fl in embeddings)
+      file.copy(from = fl, to = embeddingsDir, overwrite = TRUE)
   }
   
   
@@ -542,9 +562,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   if(nComments > 0)
     ct <- c(ct, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
-  
-  
-  
+
   ## write [Content_type]       
   .Call("openxlsx_writeFile", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
         pxml(ct),
@@ -1002,11 +1020,13 @@ Workbook$methods(writeDrawingVML = function(dir){
   
   for(i in 1:length(comments)){
     
+    id <- 1025
+
     cd <- unlist(lapply(comments[[i]],"[[", "clientData"))
     nComments <- length(cd)
-    id <- 1025
     
-    if(nComments > 0){
+    ## write head
+    if(nComments > 0 | length(vml[[i]]) > 0){
       
       write(x = paste('<xml xmlns:v="urn:schemas-microsoft-com:vml"
                     xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -1020,18 +1040,24 @@ Workbook$methods(writeDrawingVML = function(dir){
                     <v:path gradientshapeok="t" o:connecttype="rect"/>
                     </v:shapetype>'), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)))
       
+    }
+    
+    if(nComments > 0){
       for(j in 1:nComments){
         id <- id + 1L
         write(x = genBaseShapeVML(cd[j], id), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
       }
-      
-      write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
-      
-      worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
-      
     }
+    
+    if(length(vml[[i]]) > 0)
+      write(x = vml[[i]], file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+
+    if(nComments > 0 | length(vml[[i]]) > 0){
+      write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+      worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
+    }
+     
   }
-  
 })
 
 
@@ -1484,7 +1510,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
   
   ## write worksheets  
   nSheets <- length(worksheets)
-  header <- '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' 
+  header <- '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' 
   
   for(i in 1:nSheets){
     
@@ -1504,6 +1530,12 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     }else{
       worksheets[[i]]$drawing <<- NULL
     }
+    
+    ## vml drawing
+    if(length(vml_rels[[i]]) > 0)
+      file.copy(from = vml_rels[[i]], to = file.path(xldrawingsRelsDir, paste0("vmlDrawing", i,".vml.rels")))
+      
+    
     
     if(isChartSheet[i]){
       
@@ -1849,6 +1881,10 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove highest sheet from Content_Types
   # Remove drawings element
   # Remove drawings_rels element
+  
+  # Remove vml element
+  # Remove vml_rels element
+  
   # Remove rowHeights element
   # Remove sheetData
   # Remove styleObjects on sheet
@@ -1880,6 +1916,10 @@ Workbook$methods(deleteWorksheet = function(sheet){
   
   drawings[[sheet]] <<- NULL
   drawings_rels[[sheet]] <<- NULL
+  
+  vml[[sheet]] <<- NULL
+  vml_rels[[sheet]] <<- NULL
+  
   rowHeights[[sheet]] <<- NULL
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL

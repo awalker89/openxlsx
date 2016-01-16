@@ -43,7 +43,7 @@ test_that("Can rename worksheets under all conditions", {
   worksheetOrder(wb) <- c(4,3,2,5,1)
   saveWorkbook(wb, tempFile, overwrite = TRUE)
   
-  wb <- loadWorkbook(tempFile)
+  wb <- loadWorkbook(file = tempFile)
   renameWorksheet(wb, sheet = 2, "THIS is SHEET 3")
 
   wb <- loadWorkbook(tempFile)

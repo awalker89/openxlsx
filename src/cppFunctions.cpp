@@ -3085,11 +3085,14 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         this_worksheet["pageSetup"] = node_xml;
       }
       
-      
-      
       node_xml = getChildlessNode(xml_post, "<mergeCell ");
       if(node_xml.size() > 0)
         this_worksheet["mergeCells"] = node_xml;
+      
+      
+      node_xml = getNodes(xml_post, "<oleObjects>");
+      if(node_xml.size() > 0)
+        this_worksheet["oleObjects"] = node_xml;
       
       
       node_xml = getChildlessNode(xml_post, "<drawing ");
