@@ -2465,7 +2465,7 @@ setFooter <- function(wb, text, position = "center"){
 #' writeDataTable(wb, 1, x = iris[1:30,])
 #' 
 #' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "whole", operator = "between", value = c(1, 9))
-#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "textLength", operator = "between", value = c(4, 6))
+#' dataValidation(wb, 1, col = 5, rows = 2:31, type = "textLength", operator = "between", value = c(4, 6))
 #' 
 #' 
 #' ## Date and Time cell validation

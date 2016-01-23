@@ -191,7 +191,37 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
 
 
 
+// [[Rcpp::export]]
+SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag){
+  
+  if(xml.length() == 0)
+    return wrap(NA_STRING);
+  
+  xml = " " + xml;
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  size_t k = open_tag.length();
+  size_t l = close_tag.length();
+  
+  std::vector<std::string> r;
 
+  while(1){
+    
+    pos = xml.find(open_tag, pos+1);
+    endPos = xml.find(close_tag, pos+k);
+    
+    if((pos == std::string::npos) | (endPos == std::string::npos))
+      break;
+    
+    r.push_back(xml.substr(pos, endPos-pos+l).c_str());
+    
+  }  
+  
+  return wrap(r) ;  
+  
+  
+}
 
 
 // [[Rcpp::export]]
@@ -3122,18 +3152,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       }
       
 
-      
-      
-      
-    //  <oddHeader>&amp;LODD HEAD LEFT&amp;CODD HEAD CENTER&amp;RODD HEAD RIGHT</oddHeader>
-    //  <oddFooter>&amp;LODD FOOT RIGHT&amp;CODD FOOT CENTER&amp;RODD FOOT RIGHT</oddFooter>
-    //  <evenHeader>&amp;LEVEN HEAD LEFT&amp;CEVEN HEAD CENTER&amp;REVEN HEAD RIGHT</evenHeader>
-    //  <evenFooter>&amp;LEVEN FOOT RIGHT&amp;CEVEN FOOT CENTER&amp;REVEN FOOT RIGHT</evenFooter>
-    //  <firstHeader>&amp;LTOP&amp;COF FIRST&amp;RPAGE</firstHeader>
-    //  <firstFooter>&amp;LBOTTOM&amp;COF FIRST&amp;RPAGE</firstFooter>
-        
-      
-      
       node_xml = getChildlessNode(xml_post, "<drawing ");
       if(node_xml.size() == 0)
         node_xml = getChildlessNode(xml_post, "<legacyDrawing ");
@@ -3207,16 +3225,18 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
       } // end of if(conForm.size() > 0)
       
+      
+      //data validation
+      node_xml = getOpenClosedNode(xml_post, "<dataValidation ", "</dataValidation>");
+      if(node_xml.size() > 0)
+        this_worksheet["dataValidations"] = node_xml;
+      
       // extLst
       node_xml = get_extLst_Major(xml_post);
       if(node_xml.size() > 0)
         this_worksheet["extLst"] = node_xml;
       
-      
-      
-      
-      
-      
+
       // clean pre and post xml
       xml_post.clear();
       xml_pre.clear();

@@ -17,6 +17,10 @@ calcColumnWidths <- function(sheetData, sharedStrings, autoColumns, widths, base
     .Call('openxlsx_calcColumnWidths', PACKAGE = 'openxlsx', sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW)
 }
 
+getOpenClosedNode <- function(xml, open_tag, close_tag) {
+    .Call('openxlsx_getOpenClosedNode', PACKAGE = 'openxlsx', xml, open_tag, close_tag)
+}
+
 cppReadFile <- function(xmlFile) {
     .Call('openxlsx_cppReadFile', PACKAGE = 'openxlsx', xmlFile)
 }

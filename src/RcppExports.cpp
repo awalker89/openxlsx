@@ -54,6 +54,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// getOpenClosedNode
+SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag);
+RcppExport SEXP openxlsx_getOpenClosedNode(SEXP xmlSEXP, SEXP open_tagSEXP, SEXP close_tagSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    Rcpp::traits::input_parameter< std::string >::type open_tag(open_tagSEXP);
+    Rcpp::traits::input_parameter< std::string >::type close_tag(close_tagSEXP);
+    __result = Rcpp::wrap(getOpenClosedNode(xml, open_tag, close_tag));
+    return __result;
+END_RCPP
+}
 // cppReadFile
 std::string cppReadFile(std::string xmlFile);
 RcppExport SEXP openxlsx_cppReadFile(SEXP xmlFileSEXP) {
