@@ -2436,6 +2436,131 @@ setFooter <- function(wb, text, position = "center"){
 
 
 
+
+
+
+
+
+
+
+#' @name dataValidation
+#' @title Add data validation to cells
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to apply conditional formatting to
+#' @param rows Rows to apply conditional formatting to
+#' @param type One of 'whole', 'decimal', 'date', 'time', 'textLength'
+#' @param operator One of 'between', 'notBetween', 'equal',
+#'  'notEqual', 'greaterThan', 'lessThan', 'greaterThanOrEqual', 'lessThanOrEqual'
+#' @param value a vector of length 1 or 2 depending on operator
+#' @param allowBlank logial
+#' @param showInputMsg logical
+#' @param showErrorMsg logical
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' 
+#' writeDataTable(wb, 1, x = iris[1:30,])
+#' 
+#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "whole", operator = "between", value = c(1, 9))
+#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "textLength", operator = "between", value = c(4, 6))
+#' 
+#' 
+#' ## Date and Time cell validation
+#' df <- data.frame("d" = as.Date("2016-01-01") + -5:5,
+#'                  "t" = as.POSIXct("2016-01-01")+ -5:5*10000)
+#'                  
+#' writeData(wb, 2, x = df)
+#' dataValidation(wb, 2, col = 1, rows = 2:12, type = "date", operator = "greaterThanOrEqual", value = as.Date("2016-01-01"))
+#' dataValidation(wb, 2, col = 2, rows = 2:12, type = "time", operator = "between", value = df$t[c(4, 8)]) 
+#' 
+#' saveWorkbook(wb, "dataValidationExample.xlsx", overwrite = TRUE)
+#' 
+dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBlank = TRUE, showInputMsg = TRUE, showErrorMsg = TRUE){
+  
+  ## rows and cols
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)  
+  rows <- as.integer(rows)
+  
+  ## check length of value
+  if(length(value) > 2)
+    stop("value argument must be length < 2")
+  
+  valid_types <- c("whole", 
+                   "decimal",
+                   "date",
+                   "time", ## need to conv
+                   "textLength"
+  )
+  
+  if(!tolower(type) %in% tolower(valid_types))
+    stop("Invalid 'type' argument!")
+  
+  
+  ## operator == 'between' we leave out
+  valid_operators <- c("between",
+                       "notBetween",
+                       "equal",
+                       "notEqual",
+                       "greaterThan",
+                       "lessThan",
+                       "greaterThanOrEqual",
+                       "lessThanOrEqual")
+  
+  if(!tolower(operator) %in% tolower(valid_operators))
+    stop("Invalid 'operator' argument!")
+  
+  if(!is.logical(allowBlank))
+    stop("Argument 'allowBlank' musts be logical!")
+  
+  if(!is.logical(showInputMsg))
+    stop("Argument 'showInputMsg' musts be logical!")
+  
+  if(!is.logical(showErrorMsg))
+    stop("Argument 'showErrorMsg' musts be logical!")
+  
+  ## All inputs validated
+  operator <- valid_operators[tolower(valid_operators) %in% tolower(operator)][1]
+  type <- valid_types[tolower(valid_types) %in% tolower(type)][1]
+  
+  ## check input combinations
+  if(type == "date" & !"Date" %in% class(value))
+    stop("If type == 'date' value argument must be a Date vector.")
+  
+  if(type == "time" & !any(tolower(class(value)) %in% c("posixct", "posixt")))
+    stop("If type == 'date' value argument must be a POSIXct or POSIXlt vector.")
+  
+  
+  value <- head(value, 2)
+  allowBlank <- as.integer(allowBlank[1])
+  showInputMsg <- as.integer(showInputMsg[1])
+  showErrorMsg <- as.integer(showErrorMsg[1])
+  
+  
+  invisible(wb$dataValidation(sheet = sheet, 
+                              startRow = min(rows),
+                              endRow = max(rows),
+                              startCol = min(cols),
+                              endCol = max(cols),
+                              type = type, 
+                              operator = operator, 
+                              value = value, 
+                              allowBlank = allowBlank, 
+                              showInputMsg = showInputMsg,
+                              showErrorMsg = showErrorMsg))
+  
+  invisible(0)
+  
+}
+
+
+
+
+
+
 #' @name conditionalFormatting
 #' @title Add conditional formatting to cells
 #' @author Alexander Walker
