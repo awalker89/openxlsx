@@ -429,11 +429,18 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     pivotCacheRelsDir <- file.path(tmpDir, "xl", "pivotCache", "_rels")
     dir.create(path = pivotCacheRelsDir, recursive = TRUE)
     for(i in 1:nPivots){
-      .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
+      
       .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
-      .Call("openxlsx_writeFile", "", pivotDefinitions[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)))
-      .Call("openxlsx_writeFile", "", pivotRecords[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)))
-      .Call("openxlsx_writeFile", "", pivotDefinitionsRels[[i]], "", file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)))   
+     
+      file.copy(from = pivotTables[i], to =  file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+      file.copy(from = pivotDefinitions[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+      file.copy(from = pivotRecords[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+      file.copy(from = pivotDefinitionsRels[i], to =  file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)), overwrite = TRUE, copy.date = TRUE)
+      
+      # .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
+      # .Call("openxlsx_writeFile", "", pivotDefinitions[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)))
+      # .Call("openxlsx_writeFile", "", pivotRecords[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)))
+      # .Call("openxlsx_writeFile", "", pivotDefinitionsRels[[i]], "", file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)))   
     }
     
   }
@@ -447,9 +454,12 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     slicerCachesDir <- file.path(tmpDir, "xl", "slicerCaches")
     dir.create(path = slicerCachesDir, recursive = TRUE)
     
-    for(i in 1:length(slicers))
-      if(nchar(slicers[[i]]) > 0)
-        .Call("openxlsx_writeFile", "", slicers[[i]], "", file.path(slicersDir, sprintf("slicer%s.xml", i)))
+    for(i in 1:length(slicers)){
+      if(nchar(slicers[i]) > 0)
+        file.copy(from = slicers[i], to = file.path(slicersDir, sprintf("slicer%s.xml", i)))
+    }
+    
+
     
     for(i in 1:length(slicerCaches))
       .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
