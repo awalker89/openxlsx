@@ -222,7 +222,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     # pivotTable cacheId links to workbook.xml which links to workbook.xml.rels via rId
     # we don't modify the cacheId, only the rId
     
-    nPivotTables      <- length(pivotTableXML)
+    nPivotTables      <- length(pivotRecordsXML)
     rIds <- 20000L + 1:nPivotTables
     
     pivotTableXML     <- pivotTableXML[order(nchar(pivotTableXML), pivotTableXML)]
@@ -236,26 +236,25 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     if(length(pivotTableXML) > 0)
       wb$pivotTables[1:length(pivotTableXML)] <- pivotTableXML
-
+    
     if(length(pivotDefXML) > 0)
       wb$pivotDefinitions[1:length(pivotDefXML)]  <- pivotDefXML
     
     if(length(pivotRecordsXML) > 0)
       wb$pivotRecords[1:length(pivotRecordsXML)] <- pivotRecordsXML
     
+    if(length(pivotDefRelsXML) > 0)
+      wb$pivotDefinitionsRels[1:length(pivotDefRelsXML)] <- pivotDefRelsXML
+    
     
     if(length(pivotTableRelsXML) > 0)
       wb$pivotTables.xml.rels[1:length(pivotTableRelsXML)] <-
-        unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+      unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
     
-
-    if(length(pivotDefRelsXML) > 0)
-      wb$pivotDefinitionsRels[1:length(pivotDefRelsXML)] <- pivotDefRelsXML
-        # unlist(lapply(pivotDefRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
-
-
+  
     ## update content_types
     wb$Content_Types <- c(wb$Content_Types, unlist(lapply(1:nPivotTables, contentTypePivotXML)))
+
     
     ## workbook rels
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
@@ -377,7 +376,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     wb$styleObjects <- lapply(1:length(style_names), function(i) {wb$styleObjects[[i]]$sheet = style_names[[i]]; wb$styleObjects[[i]]})
   }
   
-
+  
   ## Fix headers/footers
   for(i in 1:length(worksheetsXML)){
     if(!is.null(wb$worksheets[[i]]$headerFooter))
@@ -388,8 +387,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ##*----------------------------------------------------------------------------------------------*##
   ### READING IN WORKSHEET DATA COMPLETE
   ##*----------------------------------------------------------------------------------------------*##
-
-
+  
+  
   ## Next sheetRels to see which drawings_rels belongs to which sheet
   if(length(sheetRelsXML) > 0){
     
@@ -468,8 +467,18 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           wb$Content_Types <- c(wb$Content_Types,
                                 sprintf('<Override PartName="/xl/slicers/slicer%s.xml" ContentType="application/vnd.ms-excel.slicer+xml"/>', i))
           
+          slicer_xml_exists <- FALSE
           ## Append slicer to worksheet extLst
-          wb$worksheets[[i]]$extLst <- c(wb$worksheets[[i]]$extLst, genBaseSlicerXML())
+          if(!is.null(wb$worksheets[[i]]$extLst)){
+            if(grepl('x14:slicer r:id="rId[0-9]+"', wb$worksheets[[i]]$extLst)){
+              wb$worksheets[[i]]$extLst <- sub('x14:slicer r:id="rId[0-9]+"', 'x14:slicer r:id="rId0"', wb$worksheets[[i]]$extLst)
+              slicer_xml_exists <- TRUE
+            }
+          }
+          
+          if(!slicer_xml_exists)
+            wb$worksheets[[i]]$extLst <- c(wb$worksheets[[i]]$extLst, genBaseSlicerXML())
+          
           
         }
       }

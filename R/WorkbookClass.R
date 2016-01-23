@@ -319,7 +319,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   nSheets <- length(worksheets)
   nThemes <- length(theme)
-  nPivots <- length(pivotTables)
+  nPivots <- length(pivotDefinitions)
   nSlicers <- length(slicers)
   nComments <- sum(sapply(comments, length) > 0)
   nVML <- sum(sapply(vml, length) > 0)
