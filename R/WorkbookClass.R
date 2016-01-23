@@ -152,7 +152,8 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
   
   if(res != 0){
     stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
-         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH.', call. = FALSE)
+         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
+         or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
   }
   
   invisible(res)
