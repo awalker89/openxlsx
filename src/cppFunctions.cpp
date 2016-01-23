@@ -2876,14 +2876,6 @@ List getCellInfo(std::string xmlFile,
 
 
 
-
-
-
-
-
-
-
-
 // [[Rcpp::export]]
 SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet){
   
@@ -2900,6 +2892,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   List rowHeights(n_sheets);
   List dataCount(n_sheets);
   List hyperLinks(n_sheets);
+  List headerFooter(n_sheets);
   List wbstyleObjects;
   
   // loop over each worksheet file
@@ -2917,11 +2910,10 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
     }else{
       
-      
-      
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
       sheetData[i] = List(0);
+      headerFooter[i] = List(0);
       List this_worksheet = worksheets[i];
       
       
@@ -3093,6 +3085,53 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       node_xml = getNodes(xml_post, "<oleObjects>");
       if(node_xml.size() > 0)
         this_worksheet["oleObjects"] = node_xml;
+      
+      
+      // headerfooter
+      CharacterVector xml_hf = getNodes(xml_post, "<headerFooter");
+      if(xml_hf.size() > 0){
+        
+        List hf = List(0);
+        
+        node_xml = getNodes(xml_post, "<oddHeader>");
+        if(node_xml.size() > 0)
+          hf["oddHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<oddFooter>");
+        if(node_xml.size() > 0)
+          hf["oddFooter"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<evenHeader>");
+        if(node_xml.size() > 0)
+          hf["evenHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<evenFooter>");
+        if(node_xml.size() > 0)
+          hf["evenFooter"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<firstHeader>");
+        if(node_xml.size() > 0)
+          hf["firstHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<firstFooter>");
+        if(node_xml.size() > 0)
+          hf["firstFooter"] = node_xml;
+        
+        this_worksheet["headerFooter"] = hf;
+        
+      }
+      
+
+      
+      
+      
+    //  <oddHeader>&amp;LODD HEAD LEFT&amp;CODD HEAD CENTER&amp;RODD HEAD RIGHT</oddHeader>
+    //  <oddFooter>&amp;LODD FOOT RIGHT&amp;CODD FOOT CENTER&amp;RODD FOOT RIGHT</oddFooter>
+    //  <evenHeader>&amp;LEVEN HEAD LEFT&amp;CEVEN HEAD CENTER&amp;REVEN HEAD RIGHT</evenHeader>
+    //  <evenFooter>&amp;LEVEN FOOT RIGHT&amp;CEVEN FOOT CENTER&amp;REVEN FOOT RIGHT</evenFooter>
+    //  <firstHeader>&amp;LTOP&amp;COF FIRST&amp;RPAGE</firstHeader>
+    //  <firstFooter>&amp;LBOTTOM&amp;COF FIRST&amp;RPAGE</firstFooter>
+        
       
       
       node_xml = getChildlessNode(xml_post, "<drawing ");
