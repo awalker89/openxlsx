@@ -1578,6 +1578,9 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(!is.null(ws$cols))
         ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
       
+      if(length(ws$dataValidations) > 0)
+        ws$dataValidations <- paste0(sprintf('<dataValidations count="%s">', length(ws$dataValidations)), pxml(ws$dataValidations), '</dataValidations>')
+      
       if(length(freezePane[[i]]) > 0)
         ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews, fixed = TRUE)
       
@@ -2045,6 +2048,46 @@ Workbook$methods(addDXFS = function(style){
 })
 
 
+
+Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, endCol, type, operator, value, allowBlank, showInputMsg, showErrorMsg){
+  
+  sheet = validateSheet(sheet)
+  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  
+  header <- sprintf('<dataValidation type="%s" operator="%s" allowBlank="%s" showInputMessage="%s" showErrorMessage="%s" sqref="%s">',
+                    type, operator, allowBlank, showInputMsg, showErrorMsg, sqref)
+  
+  
+  if(type == "date"){
+    
+    origin <- 25569L
+    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+    
+    value <- as.integer(value) + origin
+        
+  }
+  
+  if(type == "time"){
+
+    origin <- 25569L
+    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+    
+    t <- format(value[1], "%z")
+    offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
+    if(is.na(offSet)) offSet[i] <- 0
+   
+    value <- as.numeric(as.POSIXct(value)) / 86400 + origin + offSet
+      
+  }    
+    
+  form <- sapply(1:length(value), function(i) sprintf("<formula%s>%s</formula%s>", i, value[i], i))
+  worksheets[[sheet]]$dataValidations <<- c(worksheets[[sheet]]$dataValidation, paste0(header, paste(form, collapse = ""), "</dataValidation>"))
+  
+  invisible(0)
+  
+})
 
 
 
