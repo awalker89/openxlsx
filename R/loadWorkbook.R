@@ -234,15 +234,28 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     wb$pivotTables.xml.rels <- character(nPivotTables)
     wb$pivotDefinitionsRels <- character(nPivotTables)
     
-    if(length(pivotTableXML) > 0)
+    pivot_content_type <- NULL
+    
+    if(length(pivotTableXML) > 0){
       wb$pivotTables[1:length(pivotTableXML)] <- pivotTableXML
+      pivot_content_type <- c(pivot_content_type, 
+                              sprintf('<Override PartName="/xl/pivotTables/pivotTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml"/>', 1:length(pivotTableXML))) 
+    }
     
-    if(length(pivotDefXML) > 0)
+    if(length(pivotDefXML) > 0){
       wb$pivotDefinitions[1:length(pivotDefXML)]  <- pivotDefXML
+      pivot_content_type <- c(pivot_content_type, 
+                              sprintf('<Override PartName="/xl/pivotCache/pivotCacheDefinition%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml"/>', 1:length(pivotDefXML))) 
+      
+    }
     
-    if(length(pivotRecordsXML) > 0)
+    if(length(pivotRecordsXML) > 0){
       wb$pivotRecords[1:length(pivotRecordsXML)] <- pivotRecordsXML
-    
+      pivot_content_type <- c(pivot_content_type, 
+                              sprintf('<Override PartName="/xl/pivotCache/pivotCacheRecords%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml"/>', 1:length(pivotRecordsXML))) 
+      
+    }
+      
     if(length(pivotDefRelsXML) > 0)
       wb$pivotDefinitionsRels[1:length(pivotDefRelsXML)] <- pivotDefRelsXML
     
@@ -251,14 +264,13 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       wb$pivotTables.xml.rels[1:length(pivotTableRelsXML)] <-
       unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
     
-  
     ## update content_types
-    wb$Content_Types <- c(wb$Content_Types, unlist(lapply(1:nPivotTables, contentTypePivotXML)))
+    wb$Content_Types <- c(wb$Content_Types, pivot_content_type)
 
     
     ## workbook rels
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
-                              sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:nPivotTables)
+                              sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:length(pivotDefXML))
     )
     
     caches <- .Call("openxlsx_getChildlessNode", workbook, "<pivotCache ", PACKAGE = "openxlsx")

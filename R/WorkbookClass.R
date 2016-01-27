@@ -365,7 +365,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     })
   }
   
-
+  
   
   
   ## will always have drawings
@@ -429,20 +429,23 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     pivotCacheRelsDir <- file.path(tmpDir, "xl", "pivotCache", "_rels")
     dir.create(path = pivotCacheRelsDir, recursive = TRUE)
-    for(i in 1:nPivots){
-      
-      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
-     
+    
+    for(i in 1:length(pivotTables))
       file.copy(from = pivotTables[i], to =  file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
-      file.copy(from = pivotDefinitions[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+    
+    for(i in 1:length(pivotDefinitions))
+      file.copy(from = pivotDefinitions[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)), overwrite = TRUE, copy.date = TRUE)    
+    
+    for(i in 1:length(pivotRecords))
       file.copy(from = pivotRecords[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+    
+    for(i in 1:length(pivotDefinitionsRels))
       file.copy(from = pivotDefinitionsRels[i], to =  file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)), overwrite = TRUE, copy.date = TRUE)
-      
-      # .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
-      # .Call("openxlsx_writeFile", "", pivotDefinitions[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)))
-      # .Call("openxlsx_writeFile", "", pivotRecords[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)))
-      # .Call("openxlsx_writeFile", "", pivotDefinitionsRels[[i]], "", file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)))   
-    }
+    
+    for(i in 1:length(pivotTables.xml.rels))
+      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
+    
+    
     
   }
   
@@ -460,7 +463,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
         file.copy(from = slicers[i], to = file.path(slicersDir, sprintf("slicer%s.xml", i)))
     }
     
-
+    
     
     for(i in 1:length(slicerCaches))
       .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
@@ -573,7 +576,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   if(nComments > 0)
     ct <- c(ct, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
-
+  
   ## write [Content_type]       
   .Call("openxlsx_writeFile", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
         pxml(ct),
@@ -743,8 +746,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     for(i in dInds)
       df[[i]] <- as.integer(df[[i]]) + origin
     
-
-
+    
+    
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     if(length(pInds) > 0){
       t <- sapply(pInds,  function(i) format(df[[i]][[1]], "%z"))
@@ -759,7 +762,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
         df[[pInds[i]]] <- as.numeric(as.POSIXct(df[[pInds[i]]])) / 86400 + origin + offSet[i]
         
       }
-
+      
       
     }
     
@@ -1032,7 +1035,7 @@ Workbook$methods(writeDrawingVML = function(dir){
   for(i in 1:length(comments)){
     
     id <- 1025
-
+    
     cd <- unlist(lapply(comments[[i]],"[[", "clientData"))
     nComments <- length(cd)
     
@@ -1062,12 +1065,12 @@ Workbook$methods(writeDrawingVML = function(dir){
     
     if(length(vml[[i]]) > 0)
       write(x = vml[[i]], file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
-
+    
     if(nComments > 0 | length(vml[[i]]) > 0){
       write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
       worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
     }
-     
+    
   }
 })
 
@@ -1545,7 +1548,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     ## vml drawing
     if(length(vml_rels[[i]]) > 0)
       file.copy(from = vml_rels[[i]], to = file.path(xldrawingsRelsDir, paste0("vmlDrawing", i,".vml.rels")))
-      
+    
     
     
     if(isChartSheet[i]){
@@ -2066,11 +2069,11 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
       origin <- 24107L
     
     value <- as.integer(value) + origin
-        
+    
   }
   
   if(type == "time"){
-
+    
     origin <- 25569L
     if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
       origin <- 24107L
@@ -2078,11 +2081,11 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
     t <- format(value[1], "%z")
     offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
     if(is.na(offSet)) offSet[i] <- 0
-   
-    value <- as.numeric(as.POSIXct(value)) / 86400 + origin + offSet
-      
-  }    
     
+    value <- as.numeric(as.POSIXct(value)) / 86400 + origin + offSet
+    
+  }    
+  
   form <- sapply(1:length(value), function(i) sprintf("<formula%s>%s</formula%s>", i, value[i], i))
   worksheets[[sheet]]$dataValidations <<- c(worksheets[[sheet]]$dataValidation, paste0(header, paste(form, collapse = ""), "</dataValidation>"))
   
