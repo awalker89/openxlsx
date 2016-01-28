@@ -12,6 +12,9 @@ createWorkbook(creator = Sys.getenv("USERNAME"))
 \value{
 Workbook object
 }
+\description{
+Create a new Workbook object
+}
 \examples{
 ## Create a new workbook
 wb <- createWorkbook()

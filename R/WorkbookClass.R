@@ -184,14 +184,17 @@ Workbook$methods(addWorksheet = function(sheetName
     sheetId <- 1
   }
   
-  if(visible){
+  
+  ## fix visible value
+  if(visible == "true")
     visible <- "visible"
-  }else{
+  
+  if(visible == "false")
     visible <- "hidden"
-  }
+  
   
   ##  Add sheet to workbook.xml
-  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state = "%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state="%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
   
   ## append to worksheets list
   worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName

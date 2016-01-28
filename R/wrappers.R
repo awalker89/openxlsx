@@ -1,6 +1,7 @@
 
 #' @name createWorkbook
 #' @title Create a new Workbook object
+#' @description Create a new Workbook object
 #' @param creator Creator of the workbook (your name). Defaults to login username
 #' @author Alexander Walker
 #' @return Workbook object
@@ -340,8 +341,9 @@ addWorksheet <- function(wb, sheetName,
   if(!is.null(firstFooter) & length(firstFooter) != 3)
     stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
   
-  if(!is.logical(visible))
-    stop("visible must be TRUE or FALSE")
+  visible <- tolower(visible[1])
+  if(!visible %in% c("true",  "false", "hidden", "visible", "veryhidden"))
+    stop("visible must be one of: TRUE, FALSE, 'hidden', 'visible', 'veryHidden'")
   
   orientation <- tolower(orientation)
   if(!orientation %in% c("portrait", "landscape"))
@@ -370,7 +372,7 @@ addWorksheet <- function(wb, sheetName,
                             evenFooter = headerFooterSub(evenFooter),
                             firstHeader = headerFooterSub(firstHeader),
                             firstFooter = headerFooterSub(firstFooter),
-                            visible = visible[1],
+                            visible = visible,
                             paperSize = paperSize,
                             orientation = orientation,
                             vdpi = vdpi,
@@ -2956,12 +2958,12 @@ getSheetNames <- function(file){
 
 
 
-#' @name sheetVisible
+
+#' @name sheetVisibility
 #' @title Get worksheet visible state.
-#' @author Alexander Walker
 #' @param wb A workbook object 
 #' @return Character vector of worksheet names.
-#' @return  TRUE if sheet is visible, FALSE if sheet is hidden
+#' @return  Vector of "hidden", "visible", "veryHidden"
 #' @examples
 #' 
 #' wb <- createWorkbook()
@@ -2969,40 +2971,43 @@ getSheetNames <- function(file){
 #' addWorksheet(wb, sheetName = "S2", visible = TRUE)
 #' addWorksheet(wb, sheetName = "S3", visible = FALSE)
 #' 
-#' sheetVisible(wb)
-#' sheetVisible(wb)[1] <- TRUE ## show sheet 1
-#' sheetVisible(wb)[2] <- FALSE ## hide sheet 2
+#' sheetVisibility(wb)
+#' sheetVisibility(wb)[1] <- TRUE ## show sheet 1
+#' sheetVisibility(wb)[2] <- FALSE ## hide sheet 2
+#' sheetVisibility(wb)[3] <- "hidden" ## hide sheet 3
+#' sheetVisibility(wb)[3] <- "veryHidden" ## hide sheet 3 from UI
 #' 
 #' @export
-sheetVisible <- function(wb){
+sheetVisibility <- function(wb){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  state <- rep(TRUE, length(wb$workbook$sheets))
-  state[grepl("hidden", wb$workbook$sheets)] <- FALSE
+  state <- rep("visible", length(wb$workbook$sheets))
+  state[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  state[grepl("veryHidden", wb$workbook$sheets, ignore.case = TRUE)] <- "veryHidden"
+  
   
   return(state)
   
 }
 
-#' @rdname sheetVisible
-#' @param value a logical vector the same length as sheetVisible(wb)
+#' @rdname sheetVisibility
+#' @param value a logical/character vector the same length as sheetVisibility(wb)
 #' @export
-`sheetVisible<-` <- function(wb, value) {
+`sheetVisibility<-` <- function(wb, value) {
   
-  if(!is.logical(value))
-    stop("value must be a logical vector.")
-  
-  if(!any(value))
+  value <- tolower(as.character(value))
+  if(!any(value %in% c("true", "visible")))
     stop("A workbook must have atleast 1 visible worksheet.")
   
-  value <- as.character(value)
-  value[value %in% "TRUE"] <- "visible"
-  value[value %in% "FALSE"] <- "hidden"
+  value[value %in% "true"] <- "visible"
+  value[value %in% "false"] <- "hidden"
+  value[value %in% "veryhidden"] <- "veryHidden"
   
   exState <- rep("visible", length(wb$workbook$sheets))
-  exState[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  exState[grepl("hidden", wb$workbook$sheets, fixed = TRUE)] <- "hidden"
+  exState[grepl("veryHidden", wb$workbook$sheets, ignore.case = TRUE)]<- "veryHidden"
   
   if(length(value) != length(wb$workbook$sheets))
     stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
@@ -3012,11 +3017,13 @@ sheetVisible <- function(wb){
     return(invisible(wb))
   
   for(i in inds)
-    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
+    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i], fixed = TRUE)
   
   invisible(wb)
   
 }
+
+
 
 
 
@@ -3720,6 +3727,75 @@ all.equal.Workbook <- function(target, current, ...){
   
   
   return(TRUE)
+}
+
+
+
+#' @name sheetVisible
+#' @title Get worksheet visible state.
+#' @description DEPRECATED - Use function 'sheetVisibility()
+#' @author Alexander Walker
+#' @param wb A workbook object 
+#' @return Character vector of worksheet names.
+#' @return  TRUE if sheet is visible, FALSE if sheet is hidden
+#' @examples
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, sheetName = "S1", visible = FALSE)
+#' addWorksheet(wb, sheetName = "S2", visible = TRUE)
+#' addWorksheet(wb, sheetName = "S3", visible = FALSE)
+#' 
+#' sheetVisible(wb)
+#' sheetVisible(wb)[1] <- TRUE ## show sheet 1
+#' sheetVisible(wb)[2] <- FALSE ## hide sheet 2
+#' 
+#' @export
+sheetVisible <- function(wb){
+  
+  warning("This function is deprecated. Use function 'sheetVisibility()'")
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  state <- rep(TRUE, length(wb$workbook$sheets))
+  state[grepl("hidden", wb$workbook$sheets)] <- FALSE
+  
+  return(state)
+  
+}
+
+#' @rdname sheetVisible
+#' @param value a logical vector the same length as sheetVisible(wb)
+#' @export
+`sheetVisible<-` <- function(wb, value) {
+  
+  warning("This function is deprecated. Use function 'sheetVisibility()'")
+  
+  if(!is.logical(value))
+    stop("value must be a logical vector.")
+  
+  if(!any(value))
+    stop("A workbook must have atleast 1 visible worksheet.")
+  
+  value <- as.character(value)
+  value[value %in% "TRUE"] <- "visible"
+  value[value %in% "FALSE"] <- "hidden"
+  
+  exState <- rep("visible", length(wb$workbook$sheets))
+  exState[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  
+  if(length(value) != length(wb$workbook$sheets))
+    stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
+  
+  inds <- which(value != exState)
+  if(length(inds) == 0)
+    return(invisible(wb))
+  
+  for(i in inds)
+    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
+  
+  invisible(wb)
+  
 }
 
 

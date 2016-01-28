@@ -19,6 +19,9 @@ Character vector of worksheet names.
 
 TRUE if sheet is visible, FALSE if sheet is hidden
 }
+\description{
+DEPRECATED - Use function 'sheetVisibility()
+}
 \examples{
 
 wb <- createWorkbook()
