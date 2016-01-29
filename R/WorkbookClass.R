@@ -186,6 +186,7 @@ Workbook$methods(addWorksheet = function(sheetName
   
   
   ## fix visible value
+  visible <- tolower(visible)
   if(visible == "true")
     visible <- "visible"
   

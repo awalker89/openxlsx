@@ -3005,9 +3005,13 @@ sheetVisibility <- function(wb){
   value[value %in% "false"] <- "hidden"
   value[value %in% "veryhidden"] <- "veryHidden"
   
-  exState <- rep("visible", length(wb$workbook$sheets))
-  exState[grepl("hidden", wb$workbook$sheets, fixed = TRUE)] <- "hidden"
-  exState[grepl("veryHidden", wb$workbook$sheets, ignore.case = TRUE)]<- "veryHidden"
+
+  exState0 <- regmatches(wb$workbook$sheets, regexpr('(?<=state=")[^"]+', wb$workbook$sheets, perl = TRUE))
+  exState <- tolower(exState0)
+  exState[exState %in% "true"] <- "visible"
+  exState[exState %in% "hidden"] <- "hidden"
+  exState[exState %in% "false"] <- "hidden"
+  exState[exState %in% "veryhidden"] <- "veryHidden"
   
   if(length(value) != length(wb$workbook$sheets))
     stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
@@ -3016,8 +3020,8 @@ sheetVisibility <- function(wb){
   if(length(inds) == 0)
     return(invisible(wb))
   
-  for(i in inds)
-    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i], fixed = TRUE)
+  for(i in 1:length(wb$worksheets))
+    wb$workbook$sheets[i] <- gsub(exState0[i], value[i], wb$workbook$sheets[i], fixed = TRUE)
   
   invisible(wb)
   
