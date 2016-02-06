@@ -3332,7 +3332,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
               has_f = true;
             }
             
-            if(has_f & !has_v){
+            if(has_f & !has_v & type != "n"){
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = NA_STRING, Named("f") = func); 
+            }else if(has_f & !has_v){
               cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
             }else if(has_f){
               cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
