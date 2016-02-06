@@ -2004,6 +2004,11 @@ convertToDate <- function(x, origin = "1900-01-01", ...){
 #' convertToDateTime(x, tx = "Australia/Perth")
 convertToDateTime <- function(x, origin = "1900-01-01", ...){
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   rem <- x %% 1
   date <- convertToDate(x, origin)
   fraction <- 24*rem
