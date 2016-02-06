@@ -243,11 +243,33 @@ writeData <- function(wb,
     stop("Cannot write to chart sheet.")
     return(NULL)
   }
-    
+
   ## write autoFilter, can only have a single filter per worksheet
-  if(withFilter)
-    wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(startRow, startRow), "y" = c(startCol, startCol + nCol - 1L))), collapse = ":"))
-  
+  if(withFilter){
+    
+    coords <- data.frame("x" = c(startRow, startRow + nRow + colNames - 1L), "y" = c(startCol, startCol + nCol - 1L))
+    ref <- paste(getCellRefs(coords), collapse = ":")
+    
+    wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', ref)
+    
+    l <- .Call("openxlsx_convert2ExcelRef", unlist(coords[,2]), LETTERS, PACKAGE="openxlsx")
+    dfn <- sprintf("'%s'!%s", names(wb)[sheetX],  paste0("$", l, "$", coords[,1], collapse=":"))
+
+    dn <- sprintf('<definedName name="_xlnm._FilterDatabase" localSheetId="%s" hidden="1">%s</definedName>', sheetX - 1L, dfn)
+    
+    if(length(wb$workbook$definedNames) > 0){
+      
+      ind <- grepl('name="_xlnm._FilterDatabase"', wb$workbook$definedNames)
+      if(length(ind) > 0)
+        wb$workbook$definedNames[ind] <- dn  
+      
+    }else{
+      wb$workbook$definedNames <- dn
+    }
+    
+      
+  }
+    
   ## write data.frame
   wb$writeData(df = x,
                colNames = colNames,
