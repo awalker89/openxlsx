@@ -756,15 +756,8 @@ read.xlsx.Workbook <- function(xlsxFile,
 #' will return a row of NAs
 #' @param rowNames If \code{TRUE}, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
-#' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
-#' @param cols A numeric vector specifying which columns in the Excel file to read. 
-#' If NULL, all columns are read.
-#' @param rows A numeric vector specifying which rows in the Excel file to read. 
-#' If NULL, all rows are read.
-#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
-#' @param check.names logical. If TRUE then the names of the variables in the data frame 
-#' are checked to ensure that they are syntactically valid variable names
 #' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
+#' @inheritParams read.xlsx
 #' @author Alexander Walker
 #' @return data.frame
 #' @seealso \code{\link{getNamedRegions}}
