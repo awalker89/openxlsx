@@ -26,6 +26,8 @@ regardless of the value of startRow.}
 \item{skipEmptyRows}{If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
 will return a row of NAs.}
 
+\item{skipEmptyCols}{If \code{TRUE}, empty columns are skipped.}
+
 \item{rows}{A numeric vector specifying which rows in the Excel file to read. 
 If NULL, all rows are read.}
 
