@@ -10,7 +10,7 @@ openxlsxCoerce <- function(x, rowNames){
 
 openxlsxCoerce.default <- function(x, rowNames){
 
-  x <- as.data.frame(x)
+  x <- as.data.frame(x, stringsAsFactors = FALSE)
   return(x)
 
 }
@@ -20,7 +20,7 @@ openxlsxCoerce.data.frame <- function(x, rowNames){
   
   ## cbind rownames to x
   if(rowNames){
-    x <- cbind(data.frame("row names" = rownames(x)), x)
+    x <- cbind(data.frame("row names" = rownames(x), stringsAsFactors = FALSE), x)
     names(x)[[1]] <- ""
   }
   
@@ -31,11 +31,11 @@ openxlsxCoerce.data.frame <- function(x, rowNames){
 
 openxlsxCoerce.data.table <- function(x, rowNames){
 
-  x <- as.data.frame(x)
+  x <- as.data.frame(x, stringsAsFactors = FALSE)
   
   ## cbind rownames to x
   if(rowNames){
-    x <- cbind(data.frame("row names" = rownames(x)), x)
+    x <- cbind(data.frame("row names" = rownames(x), stringsAsFactors = FALSE), x)
     names(x)[[1]] <- ""
   }
   
@@ -49,7 +49,7 @@ openxlsxCoerce.matrix <- function(x, rowNames){
   x <- as.data.frame(x, stringsAsFactors = FALSE)
   
   if(rowNames){
-    x <- cbind(data.frame("row names" = rownames(x)), x)
+    x <- cbind(data.frame("row names" = rownames(x), stringsAsFactors = FALSE), x)
     names(x)[[1]] <- ""
   }
   
@@ -66,7 +66,7 @@ openxlsxCoerce.aov <- function(x, rowNames){
   
   x <- summary(x)
   x <- cbind(x[[1]])
-  x <- cbind(data.frame("row name" = rownames(x)), x)
+  x <- cbind(data.frame("row name" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)
@@ -76,7 +76,7 @@ openxlsxCoerce.aov <- function(x, rowNames){
 openxlsxCoerce.lm <- function(x, rowNames){
   
   x <- as.data.frame(summary(x)[["coefficients"]])
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
+  x <- cbind(data.frame("Variable" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)
@@ -88,7 +88,7 @@ openxlsxCoerce.anova <- function(x, rowNames){
   x <- as.data.frame(x)
   
   if(rowNames){
-    x <- cbind(data.frame("row name" = rownames(x)), x)
+    x <- cbind(data.frame("row name" = rownames(x), stringsAsFactors = FALSE), x)
     names(x)[1] <- ""
   }
   
@@ -99,7 +99,7 @@ openxlsxCoerce.anova <- function(x, rowNames){
 openxlsxCoerce.glm <- function(x, rowNames){
   
   x <- as.data.frame(summary(x)[["coefficients"]])
-  x <- cbind(data.frame("row name" = rownames(x)), x)
+  x <- cbind(data.frame("row name" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)
@@ -109,7 +109,7 @@ openxlsxCoerce.glm <- function(x, rowNames){
 openxlsxCoerce.table <- function(x, rowNames){
   
   x <- as.data.frame(unclass(x))
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
+  x <- cbind(data.frame("Variable" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)
@@ -119,7 +119,7 @@ openxlsxCoerce.table <- function(x, rowNames){
 openxlsxCoerce.prcomp <- function(x, rowNames){
   
   x <- as.data.frame(x$rotation)
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
+  x <- cbind(data.frame("Variable" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)
@@ -129,7 +129,7 @@ openxlsxCoerce.prcomp <- function(x, rowNames){
 openxlsxCoerce.summary.prcomp <- function(x, rowNames){
   
   x <- as.data.frame(x$importance)
-  x <- cbind(data.frame("Variable" = rownames(x)), x)
+  x <- cbind(data.frame("Variable" = rownames(x), stringsAsFactors = FALSE), x)
   names(x)[1] <- ""
   
   return(x)

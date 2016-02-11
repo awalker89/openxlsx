@@ -820,13 +820,12 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[[i]]) <- "character"
   }
 
-  
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-  
   for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
-    class(df[[i]]) <- "character"
+    df[[i]] <- as.character(df[[i]])
 
+  
   ## cell values
   v <- as.character(t(as.matrix(df)))
   
