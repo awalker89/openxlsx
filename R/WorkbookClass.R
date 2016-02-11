@@ -807,23 +807,26 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
-  
+
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[[i]]) <- "numeric"
   }
-  
+
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
       class(df[[i]]) <- "character"
   }
-  
+
   
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
   
+  for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
+    class(df[[i]]) <- "character"
+
   ## cell values
   v <- as.character(t(as.matrix(df)))
   
