@@ -1,6 +1,7 @@
 
 #' @name createWorkbook
 #' @title Create a new Workbook object
+#' @description Create a new Workbook object
 #' @param creator Creator of the workbook (your name). Defaults to login username
 #' @author Alexander Walker
 #' @return Workbook object
@@ -226,6 +227,10 @@ sheets <- function(wb){
 #' @param firstHeader document header for first page only.
 #' @param firstFooter document footer for first page only.
 #' @param visible If FALSE, sheet is hidden else visible.
+#' @param paperSize An integer corresponding to a paper size. See ?pageSetup for details.
+#' @param orientation One of "portrait" or "landscape"
+#' @param hdpi Horizontal DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.hdpi" = X)
+#' @param vdpi Vertical DPI. Can be set with options("openxlsx.dpi" = X) or options("openxlsx.vdpi" = X)
 #' @details Headers and footers can contain special tags
 #' \itemize{
 #'   \item{\bold{&[Page]}}{ Page number}
@@ -289,7 +294,13 @@ addWorksheet <- function(wb, sheetName,
                          evenFooter = NULL,
                          firstHeader = NULL,
                          firstFooter = NULL,
-                         visible = TRUE){
+                         visible = TRUE,
+                         paperSize = getOption("openxlsx.paperSize", default = 9),
+                         orientation = getOption("openxlsx.orientation", default = "portrait"),
+                         vdpi = getOption("openxlsx.vdpi", default = getOption("openxlsx.dpi", default = 300)),
+                         hdpi = getOption("openxlsx.hdpi", default = getOption("openxlsx.dpi", default = 300))){
+  
+  
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -330,9 +341,23 @@ addWorksheet <- function(wb, sheetName,
   if(!is.null(firstFooter) & length(firstFooter) != 3)
     stop("firstFooter must have length 3 where elements correspond to positions: left, center, right.")
   
+  visible <- tolower(visible[1])
+  if(!visible %in% c("true",  "false", "hidden", "visible", "veryhidden"))
+    stop("visible must be one of: TRUE, FALSE, 'hidden', 'visible', 'veryHidden'")
   
-  if(!is.logical(visible))
-    stop("visible must be TRUE or FALSE")
+  orientation <- tolower(orientation)
+  if(!orientation %in% c("portrait", "landscape"))
+    stop("orientation must be 'portrait' or 'landscape'.")
+  
+  vdpi <- as.integer(vdpi)
+  if(is.na(vdpi))
+    stop("vdpi must be numeric")
+  
+  hdpi <- as.integer(hdpi)
+  if(is.na(hdpi))
+    stop("hdpi must be numeric")
+  
+  
   
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
@@ -347,7 +372,11 @@ addWorksheet <- function(wb, sheetName,
                             evenFooter = headerFooterSub(evenFooter),
                             firstHeader = headerFooterSub(firstHeader),
                             firstFooter = headerFooterSub(firstFooter),
-                            visible = visible[1]))
+                            visible = visible,
+                            paperSize = paperSize,
+                            orientation = orientation,
+                            vdpi = vdpi,
+                            hdpi = hdpi))
 } 
 
 
@@ -1622,7 +1651,80 @@ setHeaderFooter <- function(wb, sheet,
 #' @param footer footer margin in inches
 #' @param fitToWidth If \code{TRUE}, worksheet is scaled to fit to page width on printing.
 #' @param fitToHeight If \code{TRUE}, worksheet is scaled to fit to page height on printing.
+#' @param paperSize See details. Default value is 9 (A4 paper).
+#' @param printTitleRows Rows to repeat at top of page when printing. Integer vector.
+#' @param printTitleCols Columns to repeat at left when printing. Integer vector.
 #' @export
+#' @details
+#' paperSize is an integer corresponding to: 
+#' \itemize{
+#' \item{\bold{1}}{ Letter paper (8.5 in. by 11 in.)} 
+#' \item{\bold{2}}{ Letter small paper (8.5 in. by 11 in.)} 
+#' \item{\bold{3}}{ Tabloid paper (11 in. by 17 in.)} 
+#' \item{\bold{4}}{ Ledger paper (17 in. by 11 in.)} 
+#' \item{\bold{5}}{ Legal paper (8.5 in. by 14 in.)} 
+#' \item{\bold{6}}{ Statement paper (5.5 in. by 8.5 in.)} 
+#' \item{\bold{7}}{ Executive paper (7.25 in. by 10.5 in.)} 
+#' \item{\bold{8}}{ A3 paper (297 mm by 420 mm)} 
+#' \item{\bold{9}}{ A4 paper (210 mm by 297 mm)} 
+#' \item{\bold{10}}{ A4 small paper (210 mm by 297 mm)} 
+#' \item{\bold{11}}{ A5 paper (148 mm by 210 mm)} 
+#' \item{\bold{12}}{ B4 paper (250 mm by 353 mm)} 
+#' \item{\bold{13}}{ B5 paper (176 mm by 250 mm)} 
+#' \item{\bold{14}}{ Folio paper (8.5 in. by 13 in.)} 
+#' \item{\bold{15}}{ Quarto paper (215 mm by 275 mm)} 
+#' \item{\bold{16}}{ Standard paper (10 in. by 14 in.)} 
+#' \item{\bold{17}}{ Standard paper (11 in. by 17 in.)} 
+#' \item{\bold{18}}{ Note paper (8.5 in. by 11 in.)} 
+#' \item{\bold{19}}{ #9 envelope (3.875 in. by 8.875 in.)} 
+#' \item{\bold{20}}{ #10 envelope (4.125 in. by 9.5 in.)} 
+#' \item{\bold{21}}{ #11 envelope (4.5 in. by 10.375 in.)} 
+#' \item{\bold{22}}{ #12 envelope (4.75 in. by 11 in.)} 
+#' \item{\bold{23}}{ #14 envelope (5 in. by 11.5 in.)} 
+#' \item{\bold{24}}{ C paper (17 in. by 22 in.)} 
+#' \item{\bold{25}}{ D paper (22 in. by 34 in.)} 
+#' \item{\bold{26}}{ E paper (34 in. by 44 in.)} 
+#' \item{\bold{27}}{ DL envelope (110 mm by 220 mm)} 
+#' \item{\bold{28}}{ C5 envelope (162 mm by 229 mm)} 
+#' \item{\bold{29}}{ C3 envelope (324 mm by 458 mm)} 
+#' \item{\bold{30}}{ C4 envelope (229 mm by 324 mm)} 
+#' \item{\bold{31}}{ C6 envelope (114 mm by 162 mm)} 
+#' \item{\bold{32}}{ C65 envelope (114 mm by 229 mm)} 
+#' \item{\bold{33}}{ B4 envelope (250 mm by 353 mm)} 
+#' \item{\bold{34}}{ B5 envelope (176 mm by 250 mm)} 
+#' \item{\bold{35}}{ B6 envelope (176 mm by 125 mm)} 
+#' \item{\bold{36}}{ Italy envelope (110 mm by 230 mm)} 
+#' \item{\bold{37}}{ Monarch envelope (3.875 in. by 7.5 in.).} 
+#' \item{\bold{38}}{ 6 3/4 envelope (3.625 in. by 6.5 in.)} 
+#' \item{\bold{39}}{ US standard fanfold (14.875 in. by 11 in.)} 
+#' \item{\bold{40}}{ German standard fanfold (8.5 in. by 12 in.)} 
+#' \item{\bold{41}}{ German legal fanfold (8.5 in. by 13 in.)} 
+#' \item{\bold{42}}{ ISO B4 (250 mm by 353 mm)} 
+#' \item{\bold{43}}{ Japanese double postcard (200 mm by 148 mm)} 
+#' \item{\bold{44}}{ Standard paper (9 in. by 11 in.)} 
+#' \item{\bold{45}}{ Standard paper (10 in. by 11 in.)} 
+#' \item{\bold{46}}{ Standard paper (15 in. by 11 in.)} 
+#' \item{\bold{47}}{ Invite envelope (220 mm by 220 mm)} 
+#' \item{\bold{50}}{ Letter extra paper (9.275 in. by 12 in.)} 
+#' \item{\bold{51}}{ Legal extra paper (9.275 in. by 15 in.)} 
+#' \item{\bold{52}}{ Tabloid extra paper (11.69 in. by 18 in.)} 
+#' \item{\bold{53}}{ A4 extra paper (236 mm by 322 mm)} 
+#' \item{\bold{54}}{ Letter transverse paper (8.275 in. by 11 in.)} 
+#' \item{\bold{55}}{ A4 transverse paper (210 mm by 297 mm)} 
+#' \item{\bold{56}}{ Letter extra transverse paper (9.275 in. by 12 in.)} 
+#' \item{\bold{57}}{ SuperA/SuperA/A4 paper (227 mm by 356 mm)} 
+#' \item{\bold{58}}{ SuperB/SuperB/A3 paper (305 mm by 487 mm)} 
+#' \item{\bold{59}}{ Letter plus paper (8.5 in. by 12.69 in.)} 
+#' \item{\bold{60}}{ A4 plus paper (210 mm by 330 mm)} 
+#' \item{\bold{61}}{ A5 transverse paper (148 mm by 210 mm)} 
+#' \item{\bold{62}}{ JIS B5 transverse paper (182 mm by 257 mm)} 
+#' \item{\bold{63}}{ A3 extra paper (322 mm by 445 mm)} 
+#' \item{\bold{64}}{ A5 extra paper (174 mm by 235 mm)} 
+#' \item{\bold{65}}{ ISO B5 extra paper (201 mm by 276 mm)} 
+#' \item{\bold{66}}{ A2 paper (420 mm by 594 mm)} 
+#' \item{\bold{67}}{ A3 transverse paper (297 mm by 420 mm)} 
+#' \item{\bold{68}}{ A3 extra transverse paper (322 mm by 445 mm)}
+#' }
 #' @examples
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "S1")
@@ -1636,35 +1738,122 @@ setHeaderFooter <- function(wb, sheet,
 #' ## portrait page scales to 300% with 0.5in left and right margins
 #' pageSetup(wb, sheet = 2, orientation = "portrait", scale = 300, left= 0.5, right = 0.5)
 #' 
+#' 
+#' ## print titles
+#' addWorksheet(wb, "print_title_rows")
+#' addWorksheet(wb, "print_title_cols")
+#'
+#' writeData(wb, "print_title_rows", rbind(iris, iris, iris, iris))
+#' writeData(wb, "print_title_cols", x = rbind(mtcars, mtcars, mtcars), rowNames = TRUE)
+#' 
+#' pageSetup(wb, sheet = "print_title_rows", printTitleRows = 1) ## first row
+#' pageSetup(wb, sheet = "print_title_cols", printTitleCols = 1, printTitleRows = 1)
+#' 
+#' 
 #' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
-pageSetup <- function(wb, sheet, orientation = "portrait", scale = 100,
+pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                       left = 0.7, right = 0.7, top = 0.75, bottom = 0.75,
                       header = 0.3, footer = 0.3,
-                      fitToWidth = FALSE, fitToHeight = FALSE){
+                      fitToWidth = FALSE, fitToHeight = FALSE, paperSize = NULL,
+                      printTitleRows = NULL, printTitleCols = NULL){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  orientation <- tolower(orientation)
-  if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+  xml <- wb$worksheets[[sheet]]$pageSetup
+  
+  if(!is.null(orientation)){
+    orientation <- tolower(orientation)
+    if(!orientation %in% c("portrait", "landscape")) stop("Invalid page orientation.")
+  }else{
+    orientation <- ifelse(grepl("landscape", xml), "landscape", "portrait") ## get existing
+  }
   
   if(scale < 10 | scale > 400)
     stop("Scale must be between 10 and 400.")
   
-  for(sheet in sheet){
+  if(!is.null(paperSize)){
+    paperSizes <- 1:68
+    paperSizes <- paperSizes[!paperSizes %in% 48:49]
+    if(!paperSize %in% paperSizes)
+      stop("paperSize must be an integer in range [1, 68]. See ?pageSetup details.")
+    paperSize <- as.integer(paperSize)
+  }else{
+    paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
+  }
+  
+ ## validate sheet - get sheet index
+  sheet <- wb$validateSheet(sheet)
+  
+  
+  ##############################
+  ## Keep defaults on orientation, hdpi, vdpi, paperSize
+  hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
+  vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
+  
+
+  
+  ##############################
+  ## Update
+  wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="%s" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="%s" verticalDpi="%s" r:id="rId2"/>', 
+                                              paperSize, orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight), hdpi, vdpi)
+  
+  if(fitToHeight | fitToWidth)
+    wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
+  
+  wb$worksheets[[sheet]]$pageMargins <- 
+    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+  
+  ## print Titles
+  if(!is.null(printTitleRows) & is.null(printTitleCols)){
     
-    sheet <- wb$validateSheet(sheet)
+    if(!is.numeric(printTitleRows))
+      stop("printTitleRows must be numeric.")
     
-    wb$worksheets[[sheet]]$pageSetup <- sprintf('<pageSetup paperSize="9" orientation="%s" scale = "%s" fitToWidth="%s" fitToHeight="%s" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>', 
-                                                orientation, scale, as.integer(fitToWidth), as.integer(fitToHeight))
+    wb$createNamedRegion(ref1 = paste0("$", min(printTitleRows)),
+                         ref2 = paste0("$", max(printTitleRows)),
+                         name = "_xlnm.Print_Titles",
+                         sheet = names(wb)[[sheet]],
+                         localSheetId = sheet - 1L)
     
-    if(fitToHeight | fitToWidth)
-      wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
+  
+  }else if(!is.null(printTitleCols) & is.null(printTitleRows)){
+
+    if(!is.numeric(printTitleCols))
+      stop("printTitleCols must be numeric.")
     
-    wb$worksheets[[sheet]]$pageMargins <- 
-      sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
+    wb$createNamedRegion(ref1 = paste0("$", cols[1]),
+                         ref2 = paste0("$", cols[2]),
+                         name = "_xlnm.Print_Titles",
+                         sheet = names(wb)[[sheet]],
+                         localSheetId = sheet - 1L)
+    
+
+  }else if(!is.null(printTitleCols) & !is.null(printTitleRows)){
+  
+    if(!is.numeric(printTitleRows))
+      stop("printTitleRows must be numeric.")
+    
+    if(!is.numeric(printTitleCols))
+      stop("printTitleCols must be numeric.")
+    
+    
+    
+    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
+    rows <- range(printTitleRows)
+    
+    cols <- paste(paste0("$", cols[1]), paste0("$", cols[2]), sep = ":")
+    rows <- paste(paste0("$", rows[1]), paste0("$", rows[2]), sep = ":")
+    localSheetId <- sheet - 1L
+    sheet <- names(wb)[[sheet]]
+    
+    wb$workbook$definedNames <<- c(wb$workbook$definedNames, 
+       sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
+    )
     
   }
+  
   
 }
 
@@ -1815,6 +2004,11 @@ convertToDate <- function(x, origin = "1900-01-01", ...){
 #' convertToDateTime(x, tx = "Australia/Perth")
 convertToDateTime <- function(x, origin = "1900-01-01", ...){
   
+  ## increase scipen to avoid writing in scientific 
+  exSciPen <- options("scipen")
+  options("scipen" = 10000)
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  
   rem <- x %% 1
   date <- convertToDate(x, origin)
   fraction <- 24*rem
@@ -1896,7 +2090,7 @@ names.Workbook <- function(x){
 #' @param sheet A name or index of a worksheet
 #' @param rows Numeric vector specifying rows to include in region
 #' @param cols Numeric vector specifying columns to include in region
-#' @param name Name for region. A character vector of length 1.
+#' @param name Name for region. A character vector of length 1. Note region names musts be case-insensitive unique.
 #' @details Region is given by: min(cols):max(cols) X min(rows):max(rows)
 #' @export
 #' @seealso \code{\link{getNamedRegions}}
@@ -1947,11 +2141,11 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   ## named region
   
   ex_names <- regmatches(wb$workbook$definedNames, regexpr('(?<=name=")[^"]+', wb$workbook$definedNames, perl = TRUE))
-  ex_names <- replaceXMLEntities(ex_names)
+  ex_names <- tolower(replaceXMLEntities(ex_names))
   
-  if(name %in% ex_names){
+  if(tolower(name) %in% ex_names){
     stop(sprintf("Named region with name '%s' already exists!", name))
-  }else if(grepl("[^A-Z0-9_]", name[1], ignore.case = TRUE)){
+  }else if(grepl("[^A-Z0-9_\\.]", name[1], ignore.case = TRUE)){
     stop("Invalid characters in name")
   }else if(grepl('^[A-Z]{1,3}[0-9]+$', name)){
     stop("name cannot look like a cell reference.")
@@ -2042,15 +2236,16 @@ getNamedRegions.default <- function(x){
   return(dn_names)
 }
 
+
 #' @export
 getNamedRegions.Workbook <- function(x){
-
+  
   dn <- x$workbook$definedNames
   if(length(dn) == 0)
     return(NULL)
   
   dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
-
+  
   return(dn_names)
 }
 
@@ -2244,6 +2439,134 @@ setFooter <- function(wb, text, position = "center"){
   wb$headFoot$text[wb$headFoot$pos == position & wb$headFoot$head == "foot"] <- as.character(text)
   
 }
+
+
+
+
+
+
+
+
+
+
+
+#' @name dataValidation
+#' @title Add data validation to cells
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param cols Columns to apply conditional formatting to
+#' @param rows Rows to apply conditional formatting to
+#' @param type One of 'whole', 'decimal', 'date', 'time', 'textLength'
+#' @param operator One of 'between', 'notBetween', 'equal',
+#'  'notEqual', 'greaterThan', 'lessThan', 'greaterThanOrEqual', 'lessThanOrEqual'
+#' @param value a vector of length 1 or 2 depending on operator
+#' @param allowBlank logial
+#' @param showInputMsg logical
+#' @param showErrorMsg logical
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' 
+#' writeDataTable(wb, 1, x = iris[1:30,])
+#' 
+#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "whole", operator = "between", value = c(1, 9))
+#' dataValidation(wb, 1, col = 5, rows = 2:31, type = "textLength", operator = "between", value = c(4, 6))
+#' 
+#' 
+#' ## Date and Time cell validation
+#' df <- data.frame("d" = as.Date("2016-01-01") + -5:5,
+#'                  "t" = as.POSIXct("2016-01-01")+ -5:5*10000)
+#'                  
+#' writeData(wb, 2, x = df)
+#' dataValidation(wb, 2, col = 1, rows = 2:12, type = "date", 
+#'    operator = "greaterThanOrEqual", value = as.Date("2016-01-01"))
+#'
+#' dataValidation(wb, 2, col = 2, rows = 2:12, type = "time", 
+#'    operator = "between", value = df$t[c(4, 8)]) 
+#' 
+#' saveWorkbook(wb, "dataValidationExample.xlsx", overwrite = TRUE)
+#' 
+dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBlank = TRUE, showInputMsg = TRUE, showErrorMsg = TRUE){
+  
+  ## rows and cols
+  if(!is.numeric(cols))
+    cols <- convertFromExcelRef(cols)  
+  rows <- as.integer(rows)
+  
+  ## check length of value
+  if(length(value) > 2)
+    stop("value argument must be length < 2")
+  
+  valid_types <- c("whole", 
+                   "decimal",
+                   "date",
+                   "time", ## need to conv
+                   "textLength"
+  )
+  
+  if(!tolower(type) %in% tolower(valid_types))
+    stop("Invalid 'type' argument!")
+  
+  
+  ## operator == 'between' we leave out
+  valid_operators <- c("between",
+                       "notBetween",
+                       "equal",
+                       "notEqual",
+                       "greaterThan",
+                       "lessThan",
+                       "greaterThanOrEqual",
+                       "lessThanOrEqual")
+  
+  if(!tolower(operator) %in% tolower(valid_operators))
+    stop("Invalid 'operator' argument!")
+  
+  if(!is.logical(allowBlank))
+    stop("Argument 'allowBlank' musts be logical!")
+  
+  if(!is.logical(showInputMsg))
+    stop("Argument 'showInputMsg' musts be logical!")
+  
+  if(!is.logical(showErrorMsg))
+    stop("Argument 'showErrorMsg' musts be logical!")
+  
+  ## All inputs validated
+  operator <- valid_operators[tolower(valid_operators) %in% tolower(operator)][1]
+  type <- valid_types[tolower(valid_types) %in% tolower(type)][1]
+  
+  ## check input combinations
+  if(type == "date" & !"Date" %in% class(value))
+    stop("If type == 'date' value argument must be a Date vector.")
+  
+  if(type == "time" & !any(tolower(class(value)) %in% c("posixct", "posixt")))
+    stop("If type == 'date' value argument must be a POSIXct or POSIXlt vector.")
+  
+  
+  value <- head(value, 2)
+  allowBlank <- as.integer(allowBlank[1])
+  showInputMsg <- as.integer(showInputMsg[1])
+  showErrorMsg <- as.integer(showErrorMsg[1])
+  
+  
+  invisible(wb$dataValidation(sheet = sheet, 
+                              startRow = min(rows),
+                              endRow = max(rows),
+                              startCol = min(cols),
+                              endCol = max(cols),
+                              type = type, 
+                              operator = operator, 
+                              value = value, 
+                              allowBlank = allowBlank, 
+                              showInputMsg = showInputMsg,
+                              showErrorMsg = showErrorMsg))
+  
+  invisible(0)
+  
+}
+
+
 
 
 
@@ -2643,12 +2966,12 @@ getSheetNames <- function(file){
 
 
 
-#' @name sheetVisible
+
+#' @name sheetVisibility
 #' @title Get worksheet visible state.
-#' @author Alexander Walker
 #' @param wb A workbook object 
 #' @return Character vector of worksheet names.
-#' @return  TRUE if sheet is visible, FALSE if sheet is hidden
+#' @return  Vector of "hidden", "visible", "veryHidden"
 #' @examples
 #' 
 #' wb <- createWorkbook()
@@ -2656,40 +2979,47 @@ getSheetNames <- function(file){
 #' addWorksheet(wb, sheetName = "S2", visible = TRUE)
 #' addWorksheet(wb, sheetName = "S3", visible = FALSE)
 #' 
-#' sheetVisible(wb)
-#' sheetVisible(wb)[1] <- TRUE ## show sheet 1
-#' sheetVisible(wb)[2] <- FALSE ## hide sheet 2
+#' sheetVisibility(wb)
+#' sheetVisibility(wb)[1] <- TRUE ## show sheet 1
+#' sheetVisibility(wb)[2] <- FALSE ## hide sheet 2
+#' sheetVisibility(wb)[3] <- "hidden" ## hide sheet 3
+#' sheetVisibility(wb)[3] <- "veryHidden" ## hide sheet 3 from UI
 #' 
 #' @export
-sheetVisible <- function(wb){
+sheetVisibility <- function(wb){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  state <- rep(TRUE, length(wb$workbook$sheets))
-  state[grepl("hidden", wb$workbook$sheets)] <- FALSE
+  state <- rep("visible", length(wb$workbook$sheets))
+  state[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  state[grepl("veryHidden", wb$workbook$sheets, ignore.case = TRUE)] <- "veryHidden"
+  
   
   return(state)
   
 }
 
-#' @rdname sheetVisible
-#' @param value a logical vector the same length as sheetVisible(wb)
+#' @rdname sheetVisibility
+#' @param value a logical/character vector the same length as sheetVisibility(wb)
 #' @export
-`sheetVisible<-` <- function(wb, value) {
-
-  if(!is.logical(value))
-    stop("value must be a logical vector.")
+`sheetVisibility<-` <- function(wb, value) {
   
-  if(!any(value))
+  value <- tolower(as.character(value))
+  if(!any(value %in% c("true", "visible")))
     stop("A workbook must have atleast 1 visible worksheet.")
   
-  value <- as.character(value)
-  value[value %in% "TRUE"] <- "visible"
-  value[value %in% "FALSE"] <- "hidden"
+  value[value %in% "true"] <- "visible"
+  value[value %in% "false"] <- "hidden"
+  value[value %in% "veryhidden"] <- "veryHidden"
   
-  exState <- rep("visible", length(wb$workbook$sheets))
-  exState[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+
+  exState0 <- regmatches(wb$workbook$sheets, regexpr('(?<=state=")[^"]+', wb$workbook$sheets, perl = TRUE))
+  exState <- tolower(exState0)
+  exState[exState %in% "true"] <- "visible"
+  exState[exState %in% "hidden"] <- "hidden"
+  exState[exState %in% "false"] <- "hidden"
+  exState[exState %in% "veryhidden"] <- "veryHidden"
   
   if(length(value) != length(wb$workbook$sheets))
     stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
@@ -2698,12 +3028,14 @@ sheetVisible <- function(wb){
   if(length(inds) == 0)
     return(invisible(wb))
   
-  for(i in inds)
-    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
-
+  for(i in 1:length(wb$worksheets))
+    wb$workbook$sheets[i] <- gsub(exState0[i], value[i], wb$workbook$sheets[i], fixed = TRUE)
+  
   invisible(wb)
   
 }
+
+
 
 
 
@@ -2965,7 +3297,6 @@ all.equal.Workbook <- function(target, current, ...){
   #   "worksheets",
   #   "worksheets_rels",
   #   "sheetOrder"
-  #   "printerSettings",
   #   "sharedStrings",
   #   "sheetData",
   #   "tables",
@@ -3408,6 +3739,75 @@ all.equal.Workbook <- function(target, current, ...){
   
   
   return(TRUE)
+}
+
+
+
+#' @name sheetVisible
+#' @title Get worksheet visible state.
+#' @description DEPRECATED - Use function 'sheetVisibility()
+#' @author Alexander Walker
+#' @param wb A workbook object 
+#' @return Character vector of worksheet names.
+#' @return  TRUE if sheet is visible, FALSE if sheet is hidden
+#' @examples
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, sheetName = "S1", visible = FALSE)
+#' addWorksheet(wb, sheetName = "S2", visible = TRUE)
+#' addWorksheet(wb, sheetName = "S3", visible = FALSE)
+#' 
+#' sheetVisible(wb)
+#' sheetVisible(wb)[1] <- TRUE ## show sheet 1
+#' sheetVisible(wb)[2] <- FALSE ## hide sheet 2
+#' 
+#' @export
+sheetVisible <- function(wb){
+  
+  warning("This function is deprecated. Use function 'sheetVisibility()'")
+  
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  state <- rep(TRUE, length(wb$workbook$sheets))
+  state[grepl("hidden", wb$workbook$sheets)] <- FALSE
+  
+  return(state)
+  
+}
+
+#' @rdname sheetVisible
+#' @param value a logical vector the same length as sheetVisible(wb)
+#' @export
+`sheetVisible<-` <- function(wb, value) {
+  
+  warning("This function is deprecated. Use function 'sheetVisibility()'")
+  
+  if(!is.logical(value))
+    stop("value must be a logical vector.")
+  
+  if(!any(value))
+    stop("A workbook must have atleast 1 visible worksheet.")
+  
+  value <- as.character(value)
+  value[value %in% "TRUE"] <- "visible"
+  value[value %in% "FALSE"] <- "hidden"
+  
+  exState <- rep("visible", length(wb$workbook$sheets))
+  exState[grepl("hidden", wb$workbook$sheets)] <- "hidden"
+  
+  if(length(value) != length(wb$workbook$sheets))
+    stop(sprintf("value vector must have length equal to number of worksheets in Workbook [%s]", length(exState)))
+  
+  inds <- which(value != exState)
+  if(length(inds) == 0)
+    return(invisible(wb))
+  
+  for(i in inds)
+    wb$workbook$sheets[i] <- gsub(exState[i], value[i], wb$workbook$sheets[i])
+  
+  invisible(wb)
+  
 }
 
 

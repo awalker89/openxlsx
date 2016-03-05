@@ -7,6 +7,45 @@
 using namespace Rcpp;
 using namespace std;
 
+
+
+// [[Rcpp::export]]
+std::vector<std::string> makeLetters(){
+  
+  std::vector<std::string> LETTERS(26);
+  
+  LETTERS[0] = "A";
+  LETTERS[1] = "B";
+  LETTERS[2] = "C";
+  LETTERS[3] = "D";
+  LETTERS[4] = "E";
+  LETTERS[5] = "F";
+  LETTERS[6] = "G";
+  LETTERS[7] = "H";
+  LETTERS[8] = "I";
+  LETTERS[9] = "J";
+  LETTERS[10] = "K";
+  LETTERS[11] = "L";
+  LETTERS[12] = "M";
+  LETTERS[13] = "N";
+  LETTERS[14] = "O";
+  LETTERS[15] = "P";
+  LETTERS[16] = "Q";
+  LETTERS[17] = "R";
+  LETTERS[18] = "S";
+  LETTERS[19] = "T";
+  LETTERS[20] = "U";
+  LETTERS[21] = "V";
+  LETTERS[22] = "W";
+  LETTERS[23] = "X";
+  LETTERS[24] = "Y";
+  LETTERS[25] = "Z";
+  
+  return(LETTERS);
+  
+}
+
+
 // [[Rcpp::export]]
 IntegerVector RcppConvertFromExcelRef2( std::vector<std::string>& r ){
   
@@ -104,7 +143,7 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
     
     tmp = as<std::vector<std::string> >(sheetData[i]);
     if(tmp[1] == "s"){
-      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 16; //-16 for shared string tags around text
+      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 37; //-37 for shared string tags around text
     }else{
       nLen = tmp[2].length();
       v[i] = min(nLen, 11); // For numerics - max width is 11
@@ -152,7 +191,37 @@ SEXP calcColumnWidths(List sheetData, std::vector<std::string> sharedStrings, In
 
 
 
+// [[Rcpp::export]]
+SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag){
+  
+  if(xml.length() == 0)
+    return wrap(NA_STRING);
+  
+  xml = " " + xml;
+  size_t pos = 0;
+  size_t endPos = 0;
+  
+  size_t k = open_tag.length();
+  size_t l = close_tag.length();
+  
+  std::vector<std::string> r;
 
+  while(1){
+    
+    pos = xml.find(open_tag, pos+1);
+    endPos = xml.find(close_tag, pos+k);
+    
+    if((pos == std::string::npos) | (endPos == std::string::npos))
+      break;
+    
+    r.push_back(xml.substr(pos, endPos-pos+l).c_str());
+    
+  }  
+  
+  return wrap(r) ;  
+  
+  
+}
 
 
 // [[Rcpp::export]]
@@ -292,6 +361,53 @@ std::vector<std::string> getChildlessNode_ss(std::string xml, std::string tag){
   return r ;  
   
 }
+
+
+// [[Rcpp::export]]
+CharacterVector get_extLst_Major(std::string xml){
+  
+  // find page margin or pagesetup then take the extLst after that
+  
+  if(xml.length() == 0)
+    return wrap(NA_STRING);
+  
+  std::vector<std::string> r;
+  std::string tagEnd = "</extLst>";
+  size_t endPos = 0;
+  std::string node;
+  
+  
+  size_t pos = xml.find("<pageSetup ", 0);   
+  if(pos == std::string::npos)
+    pos = xml.find("<pageMargins ", 0);   
+  
+  if(pos == std::string::npos)
+    pos = xml.find("</conditionalFormatting>", 0);   
+  
+  if(pos == std::string::npos)
+    return wrap(NA_STRING);
+  
+  while(1){
+    
+    pos = xml.find("<extLst>", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    endPos = xml.find(tagEnd, pos + 8);
+    
+    node = xml.substr(pos + 8, endPos - pos - 8);
+    pos = xml.find("conditionalFormattings", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    r.push_back(node.c_str());
+    
+  }
+  
+  return wrap(r) ;  
+  
+}
+
 
 
 // [[Rcpp::export]]
@@ -767,13 +883,13 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
   //  T	T	T
   //  F F	F	
   //  T F	T (must be a formula)	
-
+  
   int n = r.size();
   List cells(n);
   LogicalVector hasV = !is_na(v);
   LogicalVector hasR = !is_na(r);
   LogicalVector hasT = !is_na(t);
-
+  
   for(int i=0; i < n; i++){
     
     if(hasR[i]){
@@ -781,14 +897,14 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
       if(hasV[i]){
         
         if(hasT[i]){
-        
-        //  r t v	
-        //  T	T	T (2)
-        cells[i] = CharacterVector::create(
-          Named("r") = r[i],
-          Named("t") = t[i],
-          Named("v") = v[i],
-          Named("f") = NA_STRING); 
+          
+          //  r t v	
+          //  T	T	T (2)
+          cells[i] = CharacterVector::create(
+            Named("r") = r[i],
+                          Named("t") = t[i],
+                                        Named("v") = v[i],
+                                                      Named("f") = NA_STRING); 
           
         }else{
           
@@ -796,9 +912,9 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
           //  T	T	T (4 - formula)
           cells[i] = CharacterVector::create(
             Named("r") = r[i],
-            Named("t") = "str",
-            Named("v") = NA_STRING,
-            Named("f") = "<f>" + v[i] + "</f>"); 
+                          Named("t") = "str",
+                          Named("v") = NA_STRING,
+                          Named("f") = "<f>" + v[i] + "</f>"); 
           
           
         }
@@ -809,9 +925,9 @@ List buildCellList( CharacterVector r, CharacterVector t, CharacterVector v) {
         //  T	F	F	(1)
         cells[i] = CharacterVector::create(
           Named("r") = r[i],
-          Named("t") = NA_STRING,
-          Named("v") = NA_STRING,
-          Named("f") = NA_STRING); 
+                        Named("t") = NA_STRING,
+                        Named("v") = NA_STRING,
+                        Named("f") = NA_STRING); 
       }
       
     }else{
@@ -1082,7 +1198,7 @@ SEXP buildMatrixMixed(CharacterVector v,
       
       dfList[i] = datetmp;
       
-  
+      
       // character columns
     }else if(std::find(charCols.begin(), charCols.end(), i) != charCols.end()){
       
@@ -1471,11 +1587,11 @@ LogicalVector isInternalHyperlink(CharacterVector x){
   LogicalVector isInternal(n);
   
   for(int i = 0; i < n; i++){ 
-  
-      // find location tag  
+    
+    // find location tag  
     xml = x[i];
     found = xml.find(tag, 0);
-      
+    
     if (found != std::string::npos){
       isInternal[i] = false;
     }else{
@@ -1884,7 +2000,7 @@ SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, Int
       if(attrs[1]){
         //If we have a c value we might have an f value
         if(attrs[3]){
-
+          
           if(attrs[2]){ // If v is NOT NA
             cellXML += "\" t=\"" + cVal[1] + "\">" + cVal[3] + "<v>" + cVal[2] + "</v></c>";
           }else{
@@ -2324,6 +2440,7 @@ SEXP readWorkbook(CharacterVector v,
                   int nRows,
                   bool hasColNames,
                   bool skipEmptyRows,
+                  bool skipEmptyCols,
                   Function clean_names
 ){
   
@@ -2347,7 +2464,13 @@ SEXP readWorkbook(CharacterVector v,
   }
   
   IntegerVector colNumbers = RcppConvertFromExcelRef(r); 
-  colNumbers = match(colNumbers, sort_unique(colNumbers)) - 1;
+  IntegerVector uCols = sort_unique(colNumbers);
+  
+  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
+    uCols = seq(1, max(uCols));
+  }
+  
+  colNumbers = match(colNumbers, uCols) - 1;
   int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
   
   // Check if first row are all strings
@@ -2465,13 +2588,13 @@ SEXP readWorkbook(CharacterVector v,
     is_date.erase(is_date.begin(), is_date.begin() + pos);
   }
   
-
+  
   //Intialise return data.frame
   SEXP m; 
   v.erase(v.begin(), v.begin() + pos);
   
   if(allNumeric){
-
+    
     m = buildMatrixNumeric(v, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
@@ -2615,11 +2738,11 @@ List getCellInfo(std::string xmlFile,
         pos = row_xml_i.find("<row r=\"", 0);
         endPos = row_xml_i.find(tagEnd, pos + 8);
         row_i = atoi(row_xml_i.substr(pos + 8, endPos - pos - 8).c_str());
-
+        
         if (std::find(rows.begin()+place, rows.end(), row_i)!= rows.end()){
           xml += row_xml_i + ' ';
           place++;
-
+          
           if(place == nr_sub)
             break;
           
@@ -2630,7 +2753,7 @@ List getCellInfo(std::string xmlFile,
     }
     
   }
-
+  
   // count cells with children
   int ocs = 0;
   string::size_type start = 0;
@@ -2643,6 +2766,10 @@ List getCellInfo(std::string xmlFile,
     res = List::create(Rcpp::Named("nRows") = 0, Rcpp::Named("r") = 0);
     return res;
   }
+  
+  // pull out cell merges
+  CharacterVector merge_cell_xml = getChildlessNode(xml, "<mergeCell ");
+  
   
   CharacterVector r(ocs);
   CharacterVector t(ocs);
@@ -2684,7 +2811,7 @@ List getCellInfo(std::string xmlFile,
         pos = cell.find(rtag, 0);  // find r="
         endPos = cell.find(tagEnd, pos + 3);  // find next "
         r[i] = cell.substr(pos + 3, endPos - pos - 3).c_str();
-       
+        
         // Pull out type
         pos = cell.find(ttag, 0);  // find t="
         if(pos != std::string::npos){
@@ -2728,7 +2855,7 @@ List getCellInfo(std::string xmlFile,
             ss_ind = atoi(v[i]);
             v[i] = sharedStrings[ss_ind];
             
-            if(v[i] == "NA"){
+            if(v[i] == "openxlsx_na_vlu"){
               v[i] = NA_STRING;
             }
             
@@ -2763,21 +2890,14 @@ List getCellInfo(std::string xmlFile,
                      Rcpp::Named("string_refs") = string_refs,
                      Rcpp::Named("v") = v,
                      Rcpp::Named("s") = s,
-                     Rcpp::Named("nRows") = nRows
+                     Rcpp::Named("nRows") = nRows,
+                     Rcpp::Named("cellMerge") = merge_cell_xml
   );
   
-  
+
   return wrap(res);  
   
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -2802,6 +2922,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   List rowHeights(n_sheets);
   List dataCount(n_sheets);
   List hyperLinks(n_sheets);
+  List headerFooter(n_sheets);
   List wbstyleObjects;
   
   // loop over each worksheet file
@@ -2819,11 +2940,10 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
     }else{
       
-      
-      
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
       sheetData[i] = List(0);
+      headerFooter[i] = List(0);
       List this_worksheet = worksheets[i];
       
       
@@ -2874,17 +2994,17 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       
       // Freeze Panes
-      CharacterVector pane = getChildlessNode(xml_pre, "<pane ");
-      if(pane.size() > 0){
-        freezePane[i] = pane;
+      CharacterVector node_xml = getChildlessNode(xml_pre, "<pane ");
+      if(node_xml.size() > 0){
+        freezePane[i] = node_xml;
       }else{
         freezePane[i] = List(0);
       }
       
       // SheetViews
-      CharacterVector sheetViews = getNodes(xml_pre, "<sheetViews>");
-      if(sheetViews.size() > 0)
-        this_worksheet["sheetViews"] = sheetViews;
+      node_xml = getNodes(xml_pre, "<sheetViews>");
+      if(node_xml.size() > 0)
+        this_worksheet["sheetViews"] = node_xml;
       
       
       //colwidths
@@ -2951,27 +3071,27 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       std::string xml_post = xml.substr(pos_post);
       
       
-      CharacterVector autoFilter = getChildlessNode(xml_post, "<autoFilter ");
-      if(autoFilter.size() > 0)
-        this_worksheet["autoFilter"] = autoFilter;
+      node_xml = getChildlessNode(xml_post, "<autoFilter ");
+      if(node_xml.size() > 0)
+        this_worksheet["autoFilter"] = node_xml;
       
-      CharacterVector hyperlinks = getChildlessNode(xml_post, "<hyperlink ");
-      if(hyperlinks.size() > 0){
-        hyperLinks[i] = hyperlinks;
+      node_xml = getChildlessNode(xml_post, "<hyperlink ");
+      if(node_xml.size() > 0){
+        hyperLinks[i] = node_xml;
       }else{
         hyperLinks[i] = List(0);
       }
       
-      CharacterVector pageMargins = getChildlessNode(xml_post, "<pageMargins ");
-      if(pageMargins.size() > 0)
-        this_worksheet["pageMargins"] = pageMargins;
+      node_xml = getChildlessNode(xml_post, "<pageMargins ");
+      if(node_xml.size() > 0)
+        this_worksheet["pageMargins"] = node_xml;
       
       
-      CharacterVector pageSetup = getChildlessNode(xml_post, "<pageSetup ");
-      if(pageSetup.size() > 0){
-        for(int j = 0; j < pageSetup.size(); j++){
+      node_xml = getChildlessNode(xml_post, "<pageSetup ");
+      if(node_xml.size() > 0){
+        for(int j = 0; j < node_xml.size(); j++){
           
-          std::string pageSetup_tmp = as<std::string>(pageSetup[j]);
+          std::string pageSetup_tmp = as<std::string>(node_xml[j]);
           size_t ps_pos = pageSetup_tmp.find("r:id=\"rId", 0);
           if(ps_pos != std::string::npos){
             
@@ -2981,34 +3101,72 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
             
           }
           
-          pageSetup[j] = pageSetup_tmp;
+          node_xml[j] = pageSetup_tmp;
           
         }
-        this_worksheet["pageSetup"] = pageSetup;
+        this_worksheet["pageSetup"] = node_xml;
       }
       
+      node_xml = getChildlessNode(xml_post, "<mergeCell ");
+      if(node_xml.size() > 0)
+        this_worksheet["mergeCells"] = node_xml;
       
       
-      CharacterVector mergeCells = getChildlessNode(xml_post, "<mergeCell ");
-      if(mergeCells.size() > 0)
-        this_worksheet["mergeCells"] = mergeCells;
+      node_xml = getNodes(xml_post, "<oleObjects>");
+      if(node_xml.size() > 0)
+        this_worksheet["oleObjects"] = node_xml;
       
       
-      CharacterVector drawingId = getChildlessNode(xml_post, "<drawing ");
-      if(drawingId.size() == 0)
-        drawingId = getChildlessNode(xml_post, "<legacyDrawing ");
+      // headerfooter
+      CharacterVector xml_hf = getNodes(xml_post, "<headerFooter");
+      if(xml_hf.size() > 0){
+        
+        List hf = List(0);
+        
+        node_xml = getNodes(xml_post, "<oddHeader>");
+        if(node_xml.size() > 0)
+          hf["oddHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<oddFooter>");
+        if(node_xml.size() > 0)
+          hf["oddFooter"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<evenHeader>");
+        if(node_xml.size() > 0)
+          hf["evenHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<evenFooter>");
+        if(node_xml.size() > 0)
+          hf["evenFooter"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<firstHeader>");
+        if(node_xml.size() > 0)
+          hf["firstHeader"] = node_xml;
+        
+        node_xml = getNodes(xml_post, "<firstFooter>");
+        if(node_xml.size() > 0)
+          hf["firstFooter"] = node_xml;
+        
+        this_worksheet["headerFooter"] = hf;
+        
+      }
       
-      if(drawingId.size() > 0){
-        for(int j = 0; j < drawingId.size(); j++){
+
+      node_xml = getChildlessNode(xml_post, "<drawing ");
+      if(node_xml.size() == 0)
+        node_xml = getChildlessNode(xml_post, "<legacyDrawing ");
+      
+      if(node_xml.size() > 0){
+        for(int j = 0; j < node_xml.size(); j++){
           
-          std::string drawingId_tmp = as<std::string>(drawingId[j]);
+          std::string drawingId_tmp = as<std::string>(node_xml[j]);
           size_t ps_pos = drawingId_tmp.find("r:id=\"rId", 0);
           
           std::string drawingId_tmp2 = drawingId_tmp.substr(0, ps_pos + 9) + "1";
           ps_pos = drawingId_tmp.find("\"", ps_pos + 9);
           
           drawingId_tmp  = drawingId_tmp2 + drawingId_tmp.substr(ps_pos);
-          drawingId[j] = drawingId_tmp;
+          node_xml[j] = drawingId_tmp;
           
         }
       }
@@ -3067,6 +3225,18 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
       } // end of if(conForm.size() > 0)
       
+      
+      //data validation
+      node_xml = getOpenClosedNode(xml_post, "<dataValidation ", "</dataValidation>");
+      if(node_xml.size() > 0)
+        this_worksheet["dataValidations"] = node_xml;
+      
+      // extLst
+      node_xml = get_extLst_Major(xml_post);
+      if(node_xml.size() > 0)
+        this_worksheet["extLst"] = node_xml;
+      
+
       // clean pre and post xml
       xml_post.clear();
       xml_pre.clear();
@@ -3162,7 +3332,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
               has_f = true;
             }
             
-            if(has_f & !has_v){
+            if(has_f & !has_v & type != "n"){
+              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = NA_STRING, Named("f") = func); 
+            }else if(has_f & !has_v){
               cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
             }else if(has_f){
               cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
@@ -3612,9 +3784,90 @@ SEXP readWorkbook2(std::vector<std::string>& v,
   
 }
 
+// [[Rcpp::export]]
+SEXP mergeCell2mappingDF(CharacterVector x){
+  
+  int n = x.size();
+  int ref_pos;
+  int colon_pos;
+  int end_pos;
+  
+  std::string tag_end = "\"";
+  std::string cell;
+  std::string left_val;
+  std::string right_val;
+  
+  std::vector<std::string> lv(n);
+  std::vector<std::string> rv(n);
+  
+  IntegerVector start_col(n);
+  IntegerVector end_col(n);
+  
+  IntegerVector start_row(n);
+  IntegerVector end_row(n);
+
+  std::vector<std::string> LETTERS = makeLetters();
+  
+  for(int i = 0; i < n; i++){
+    
+    cell = as<std::string>(x[i]);
+    
+    ref_pos = cell.find("ref=", 0);  // find ref=
+    colon_pos = cell.find(":", ref_pos + 6);  // find :
+    end_pos = cell.find(tag_end, colon_pos + 1);  // find next 
+    
+    lv[i] = cell.substr(ref_pos + 5, colon_pos - ref_pos - 5).c_str();
+    rv[i] = cell.substr(colon_pos + 1, end_pos - colon_pos - 1).c_str();
+    
+    left_val = lv[i];
+    right_val = rv[i];
+   
+    left_val.erase(std::remove_if(left_val.begin(), left_val.end(), ::isalpha), left_val.end());
+    start_row[i] = atoi(left_val.c_str()); 
+    
+    right_val.erase(std::remove_if(right_val.begin(), right_val.end(), ::isalpha), right_val.end());
+    end_row[i] = atoi(right_val.c_str()); 
+    
+   
+  }
+
+  
+  start_col = RcppConvertFromExcelRef2(lv);
+  end_col = RcppConvertFromExcelRef2(rv);
+  
+  int n_rows = sum((end_row - start_row + 1) * (end_col - start_col + 1));
+  CharacterVector anchor_cell(n_rows);
+  CharacterVector ref(n_rows);
+  IntegerVector tmpi(1);
 
 
+  int k = 0;
+  for(int i = 0; i < n; ++i){
+    
+    int n_cols =  (end_col[i] - start_col[i] + 1);
+    int n_rows =  (end_row[i] - start_row[i] + 1);
+    
+    //Rcout << "n_cols: " << n_cols << endl;
+    //Rcout << "n_rows: " << n_rows << endl;
 
+    for(int r = 0; r < n_rows; r++){
+      for(int c = 0; c < n_cols; c++){
+      
+        tmpi[0] = start_col[i] + c;
+        CharacterVector tmp = convert2ExcelRef(tmpi, LETTERS = LETTERS);
+        ref[k] = as<std::string>(tmp[0]) + itos(start_row[i] + r);
+        anchor_cell[k] = lv[i];
+        k++;
+      }
+    }
+  }
+  
+  DataFrame mapping = DataFrame::create(Rcpp::Named("anchor_cell") = anchor_cell,
+                                    Rcpp::Named("ref") = ref);
+  
+  return(wrap(mapping));
+  
+}
 
 
 

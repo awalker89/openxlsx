@@ -19,6 +19,9 @@
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
 #' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
+#' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
+#' @param fillMergedCells If TRUE, the value in a merged cell is given to all cells within the merge.
+#' @param skipEmptyCols If \code{TRUE}, empty columns are skipped.
 #' @seealso \code{\link{getNamedRegions}}
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to be evaluated when the file is opened in Excel.
@@ -58,10 +61,13 @@ read.xlsx <- function(xlsxFile,
                       rowNames = FALSE,
                       detectDates = FALSE, 
                       skipEmptyRows = TRUE, 
+                      skipEmptyCols = TRUE, 
                       rows = NULL,
                       cols = NULL,
                       check.names = FALSE,
-                      namedRegion = NULL){
+                      namedRegion = NULL,
+                      na.strings = "NA",
+                      fillMergedCells = FALSE){
   
   UseMethod("read.xlsx", xlsxFile) 
   
@@ -75,10 +81,13 @@ read.xlsx.default <- function(xlsxFile,
                               rowNames = FALSE,
                               detectDates = FALSE, 
                               skipEmptyRows = TRUE, 
+                              skipEmptyCols = TRUE, 
                               rows = NULL,
                               cols = NULL,
                               check.names = FALSE,
-                              namedRegion = NULL){
+                              namedRegion = NULL,
+                              na.strings = "NA",
+                              fillMergedCells = FALSE){
   
   
   ## Validate inputs and get files
@@ -159,9 +168,9 @@ read.xlsx.default <- function(xlsxFile,
     
     dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
     
-    ind <- dn_names == namedRegion
+    ind <- tolower(dn_names) == tolower(namedRegion)
     if(!any(ind))
-      stop(sprintf("Region '%s' not found!", region))
+      stop(sprintf("Region '%s' not found!", namedRegion))
     
     ## pull out first node value
     dn <- dn[ind] 
@@ -209,10 +218,13 @@ read.xlsx.default <- function(xlsxFile,
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
+    if(!is.null(na.strings)){
+      sharedStrings[sharedStrings %in% na.strings] <- "openxlsx_na_vlu"
+    }
   }else{
     sharedStrings <- ""
   }
-  
+
   
   if("character" %in% class(startRow)){
     startRowStr <- startRow
@@ -220,7 +232,7 @@ read.xlsx.default <- function(xlsxFile,
   }else{
     startRowStr <- NULL
   }
-  
+
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,
@@ -231,6 +243,52 @@ read.xlsx.default <- function(xlsxFile,
                      getDates = detectDates,
                      PACKAGE = "openxlsx")
   
+  
+  if(fillMergedCells & length(cell_info$cellMerge) > 0){
+    
+
+    merge_mapping <- mergeCell2mapping(cell_info$cellMerge) # .Call("openxlsx_mergeCell2mappingDF", cell_info$cellMerge, package = "openxlsx")
+
+    ## remove any elements from  r, string_refs, b, s that existing in merge_mapping
+    ## insert all missing refs into r
+    
+    to_remove_inds <- cell_info$r %in% merge_mapping$ref
+    to_remove_elems <- cell_info$r[to_remove_inds]
+    
+    if(any(to_remove_inds)){
+
+      cell_info$r <- cell_info$r[!to_remove_inds]
+      cell_info$s <- cell_info$s[!to_remove_inds]
+      cell_info$v <- cell_info$v[!to_remove_inds]
+      cell_info$string_refs <- cell_info$string_refs[!cell_info$string_refs %in% to_remove_elems]
+ 
+    }
+    
+    ## Now insert
+    inds <- match(merge_mapping$anchor_cell, cell_info$r)
+    
+    ## String refs (must sort)
+    new_string_refs <- merge_mapping$ref[merge_mapping$anchor_cell %in% cell_info$string_refs]
+    cell_info$string_refs <- c(cell_info$string_refs, new_string_refs)
+    cell_info$string_refs <- cell_info$string_refs[order(as.integer(gsub("[A-Z]", "", cell_info$string_refs)), nchar(cell_info$string_refs), cell_info$string_refs)]
+    
+    ## r
+    cell_info$r <- c(cell_info$r, merge_mapping$ref)
+    cell_info$v <- c(cell_info$v, cell_info$v[inds])
+    
+    ord <- order(as.integer(gsub("[A-Z]", "", cell_info$r)), nchar(cell_info$r), cell_info$r)
+    
+    cell_info$r <- cell_info$r[ord]
+    cell_info$v <- cell_info$v[ord]
+    
+    if(length(cell_info$s) > 0){
+      cell_info$s <- c(cell_info$s, cell_info$s[inds])
+      cell_info$s <- cell_info$s[ord]
+    }
+
+    cell_info$nRows <- .Call("openxlsx_calcNRows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
+    
+  }
   
   nRows <- cell_info$nRows
   r <- cell_info$r
@@ -333,7 +391,7 @@ read.xlsx.default <- function(xlsxFile,
   }
 
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
@@ -362,10 +420,13 @@ read.xlsx.Workbook <- function(xlsxFile,
                                rowNames = FALSE,
                                detectDates = FALSE, 
                                skipEmptyRows = TRUE, 
+                               skipEmptyCols = TRUE, 
                                rows = NULL,
                                cols = NULL,
                                check.names = FALSE,
-                               namedRegion = NULL){
+                               namedRegion = NULL,
+                               na.strings = "NA",
+                               fillMergedCells = FALSE){
   
   
   ## Validate inputs and get files
@@ -397,7 +458,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     }
     
     dn_names <- replaceXMLEntities(regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE)))
-    ind <- dn_names == namedRegion
+    ind <- tolower(dn_names) == tolower(namedRegion)
     if(!any(ind))
       stop(sprintf("Region '%s' not found!", namedRegion))
     
@@ -665,7 +726,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   
 
   ## Build data.frame
-  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, clean_names, PACKAGE = "openxlsx")
+  m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
@@ -696,14 +757,8 @@ read.xlsx.Workbook <- function(xlsxFile,
 #' will return a row of NAs
 #' @param rowNames If \code{TRUE}, first column of data will be used as row names.
 #' @details Creates a data.frame of all data in worksheet.
-#' @param detectDates If \code{TRUE}, attempt to recognise dates and perform conversion.
-#' @param cols A numeric vector specifying which columns in the Excel file to read. 
-#' If NULL, all columns are read.
-#' @param rows A numeric vector specifying which rows in the Excel file to read. 
-#' If NULL, all rows are read.
-#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
-#' @param check.names logical. If TRUE then the names of the variables in the data frame 
-#' are checked to ensure that they are syntactically valid variable names
+#' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
+#' @inheritParams read.xlsx
 #' @author Alexander Walker
 #' @return data.frame
 #' @seealso \code{\link{getNamedRegions}}
@@ -723,10 +778,13 @@ readWorkbook <- function(xlsxFile,
                          rowNames = FALSE,
                          detectDates = FALSE, 
                          skipEmptyRows = TRUE, 
+                         skipEmptyCols = TRUE, 
                          rows = NULL,
                          cols = NULL,
                          check.names = FALSE,
-                         namedRegion = NULL){
+                         namedRegion = NULL,
+                         na.strings = "NA",
+                         fillMergedCells = FALSE){
   
   read.xlsx(xlsxFile = xlsxFile,
             sheet = sheet,
@@ -735,10 +793,13 @@ readWorkbook <- function(xlsxFile,
             rowNames = rowNames,
             detectDates = detectDates, 
             skipEmptyRows = skipEmptyRows, 
+            skipEmptyCols = skipEmptyCols, 
             rows = rows,
             cols = cols,
             check.names = check.names,
-            namedRegion = namedRegion)
+            namedRegion = namedRegion,
+            na.strings = na.strings,
+            fillMergedCells = fillMergedCells)
 }
 
 

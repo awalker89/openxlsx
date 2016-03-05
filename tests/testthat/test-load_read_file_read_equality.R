@@ -95,19 +95,17 @@ test_that("Empty workbook", {
   
   writeData(wb, 1, Sys.Date())
   x <- read.xlsx(wb)
-  expect_equal(nrow(x), 1)  
+  expect_equal(nrow(x), 0)  
+  expect_equal(convertToDate(as.integer(names(x)[1])), Sys.Date())
   
+
   x <- read.xlsx(wb, sheet = 1, colNames = FALSE)
-  expect_equal(nrow(x), 2)  
-  
-  x <- read.xlsx(wb, sheet = 1, colNames = TRUE)
   expect_equal(nrow(x), 1)  
-  expect_equal(names(x), "x") 
   
   x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)
-  expect_equal(class(x[[1]]), "character")
+  expect_equal(class(x[[1]]), "Date")
   
-  x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = TRUE)
+  x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)
   expect_equal(x[[1]], Sys.Date())
   
   expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))

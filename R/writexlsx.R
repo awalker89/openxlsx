@@ -345,7 +345,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }else if(any("" %in% nms)){
       nms[nms %in% ""] <- paste("Sheet", (1:nSheets)[nms %in% ""])
     }else{
-      nms <- make.names(nms, unique  = TRUE)
+      nms <- make.unique(nms)
     }
     
     if(any(nchar(nms) > 31)){

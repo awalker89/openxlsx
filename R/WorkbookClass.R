@@ -1,59 +1,63 @@
 
 
-Workbook <- setRefClass("Workbook", fields = c(".rels",
-                                               "app",
-                                               "charts",
-                                               "isChartSheet",
-                                               
-                                               "colWidths",
-                                               "connections",
-                                               "Content_Types",
-                                               "core",
-                                               "dataCount",
-                                               "drawings",
-                                               "drawings_rels",
-                                               "externalLinks",
-                                               "externalLinksRels",
-                                               "freezePane",
-                                               "headFoot",
-                                               "hyperlinks",
-                                               "media",
-                                               "printerSettings",
-                                               
-                                               "pivotTables",
-                                               "pivotTables.xml.rels",
-                                               "pivotDefinitions",
-                                               "pivotRecords",
-                                               "pivotDefinitionsRels",
-                                               
-                                               "queryTables",
-                                               "rowHeights",
-                                               
-                                               "slicers",
-                                               "slicerCaches",
-                                               
-                                               "sharedStrings",
-                                               "sheetData",
-                                               
-                                               "styleObjects",
-                                               # "cellStyleObjects",
-                                               
-                                               
-                                               "styles",
-                                               "styleInds",
-                                               "tables",
-                                               "tables.xml.rels",
-                                               "theme",
-                                               
-                                               "vbaProject",
-                                               "vmlDrawing",
-                                               "comments",
-                                               
-                                               "workbook",
-                                               "workbook.xml.rels",
-                                               "worksheets",
-                                               "worksheets_rels",
-                                               "sheetOrder")
+Workbook <- setRefClass("Workbook", fields = c(
+  
+  #".rels",
+  #"app",
+  
+  "charts",
+  "isChartSheet",
+  
+  "colWidths",
+  "connections",
+  "Content_Types",
+  "core",
+  "dataCount",
+  "drawings",
+  "drawings_rels",
+  "embeddings",
+  "externalLinks",
+  "externalLinksRels",
+  "freezePane",
+  "headFoot",
+  "hyperlinks",
+  "media",
+  
+  "pivotTables",
+  "pivotTables.xml.rels",
+  "pivotDefinitions",
+  "pivotRecords",
+  "pivotDefinitionsRels",
+  
+  "queryTables",
+  "rowHeights",
+  
+  "slicers",
+  "slicerCaches",
+  
+  "sharedStrings",
+  "sheetData",
+  
+  "styleObjects",
+  # "cellStyleObjects",
+  
+  
+  "styles",
+  "styleInds",
+  "tables",
+  "tables.xml.rels",
+  "theme",
+  
+  "vbaProject",
+  "vml",
+  "vml_rels",
+  "comments",
+  
+  "workbook",
+  "workbook.xml.rels",
+  "worksheets",
+  "worksheets_rels",
+  "sheetOrder")
 )
 
 
@@ -62,18 +66,21 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   if(length(creator) == 0)
     creator <- ""
   
+  # .rels <<- genBaseRels()
+  # app <<- genBaseApp()
+  # printerSettings <<- list()
+  
   Content_Types <<- genBaseContent_Type()
-  .rels <<- genBaseRels()
+  
   drawings <<- list()
   drawings_rels <<- list()
   media <<- list()
   charts <<- list()
   isChartSheet <<- NULL
   
-  app <<- genBaseApp()
   core <<- genBaseCore(creator)
   workbook.xml.rels <<- genBaseWorkbook.xml.rels()
-  theme <<- genBaseTheme()
+  theme <<- NULL #genBaseTheme()
   worksheets <<- list()
   worksheets_rels <<- list()
   
@@ -95,10 +102,11 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   tables.xml.rels <<- NULL
   queryTables <<- NULL
   connections <<- NULL
+  embeddings <<- NULL
   externalLinks <<- NULL
   externalLinksRels <<- NULL
   headFoot <<- NULL
-  printerSettings <<- list()
+  
   hyperlinks <<- list()
   sheetOrder <<- NULL
   
@@ -112,7 +120,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   slicerCaches <<- NULL
   
   vbaProject <<- NULL
-  vmlDrawing <<- NULL
+  vml <<- list()
+  vml_rels <<- list()
   comments <<- list()
   
   sharedStrings <<- list()
@@ -121,6 +130,10 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 })
 
 Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
+  
+  ## set time on files to a point in time so files can
+  sapply(list.files(no.. = FALSE, recursive = TRUE, full.names = FALSE, include.dirs = TRUE), Sys.setFileTime, time = "2015-01-01")
+  Sys.setFileTime(path = "_rels/.rels", time = "2015-01-01")
   
   ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
@@ -139,18 +152,29 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
   
   if(res != 0){
     stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
-         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH.', call. = FALSE)
+         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
+         or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
   }
   
   invisible(res)
 })
 
 
-Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabColour = NULL, zoom = 100,
-                                         oddHeader = NULL, oddFooter = NULL,
-                                         evenHeader = NULL, evenFooter = NULL,
-                                         firstHeader = NULL, firstFooter = NULL,
-                                         visible = TRUE){
+Workbook$methods(addWorksheet = function(sheetName
+                                         , showGridLines = TRUE
+                                         , tabColour = NULL
+                                         , zoom = 100
+                                         , oddHeader = NULL
+                                         , oddFooter = NULL
+                                         , evenHeader = NULL
+                                         , evenFooter = NULL
+                                         , firstHeader = NULL
+                                         , firstFooter = NULL
+                                         , visible = TRUE
+                                         , paperSize = 9
+                                         , orientation = 'portrait'
+                                         , hdpi = 300
+                                         , vdpi = 300){
   
   newSheetIndex = length(worksheets) + 1L
   
@@ -160,22 +184,38 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
     sheetId <- 1
   }
   
-  if(visible){
+  
+  ## fix visible value
+  visible <- tolower(visible)
+  if(visible == "true")
     visible <- "visible"
-  }else{
+  
+  if(visible == "false")
     visible <- "hidden"
-  }
+  
+  if(visible == "veryhidden")
+    visible <- "veryHidden"
+  
   
   ##  Add sheet to workbook.xml
-  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state = "%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state="%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName, showGridLines = showGridLines, 
-                                                 tabSelected = newSheetIndex == 1, 
-                                                 tabColour = tabColour, zoom = zoom,
-                                                 oddHeader = oddHeader, oddFooter = oddFooter,
-                                                 evenHeader = evenHeader, evenFooter = evenFooter,
-                                                 firstHeader = firstHeader, firstFooter = firstFooter))
+  worksheets <<- append(worksheets, genBaseSheet(sheetName = sheetName
+                                                 , showGridLines = showGridLines
+                                                 , tabSelected = newSheetIndex == 1
+                                                 , tabColour = tabColour
+                                                 , zoom = zoom
+                                                 , oddHeader = oddHeader
+                                                 , oddFooter = oddFooter
+                                                 , evenHeader = evenHeader
+                                                 , evenFooter = evenFooter
+                                                 , firstHeader = firstHeader
+                                                 , firstFooter = firstFooter
+                                                 , paperSize = paperSize
+                                                 , orientation = orientation
+                                                 , hdpi = hdpi
+                                                 , vdpi = vdpi))
   
   ## update content_tyes
   ## add a drawing.xml for the worksheet
@@ -193,6 +233,9 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   drawings_rels[[newSheetIndex]] <<- list()
   drawings[[newSheetIndex]] <<- list()
   
+  vml_rels[[newSheetIndex]] <<- list()
+  vml[[newSheetIndex]] <<- list()
+  
   isChartSheet[[newSheetIndex]] <<- FALSE
   comments[[newSheetIndex]] <<- list()
   
@@ -202,7 +245,6 @@ Workbook$methods(addWorksheet = function(sheetName, showGridLines = TRUE, tabCol
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
-  printerSettings[[newSheetIndex]] <<- genPrinterSettings()
   hyperlinks[[newSheetIndex]] <<- list()
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
@@ -256,7 +298,10 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
   freezePane[[newSheetIndex]] <<- list()
-  printerSettings[[newSheetIndex]] <<- genPrinterSettings()
+  
+  vml_rels[[newSheetIndex]] <<- list()
+  vml[[newSheetIndex]] <<- list()
+  
   dataCount[[newSheetIndex]] <<- 0
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
@@ -282,9 +327,10 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   nSheets <- length(worksheets)
   nThemes <- length(theme)
-  nPivots <- length(pivotTables)
+  nPivots <- length(pivotDefinitions)
   nSlicers <- length(slicers)
   nComments <- sum(sapply(comments, length) > 0)
+  nVML <- sum(sapply(vml, length) > 0)
   
   relsDir <- file.path(tmpDir, "_rels")
   dir.create(path = relsDir, recursive = TRUE)
@@ -309,10 +355,25 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = xlmediaDir, recursive = TRUE)
   }
   
-  if(nThemes > 0){
-    xlthemeDir <- file.path(tmpDir, "xl", "theme")
-    dir.create(path = xlthemeDir, recursive = TRUE)
+  
+  ## will always have a theme
+  xlthemeDir <- file.path(tmpDir, "xl", "theme")
+  dir.create(path = xlthemeDir, recursive = TRUE)
+  
+  if(is.null(theme)){
+    con <- file(file.path(xlthemeDir, "theme1.xml"), open = "wb")
+    writeBin(charToRaw(genBaseTheme()), con)
+    close(con)  
+  }else{
+    lapply(1:nThemes, function(i){
+      con <- file(file.path(xlthemeDir, paste0("theme", i, ".xml")), open = "wb")
+      writeBin(charToRaw(pxml(theme[[i]])), con)
+      close(con)        
+    })
   }
+  
+  
+  
   
   ## will always have drawings
   xlworksheetsDir <- file.path(tmpDir, "xl", "worksheets")
@@ -333,7 +394,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   
   ## xl/comments.xml
-  if(nComments > 0){
+  if(nComments > 0 | nVML > 0){
     for(i in 1:nSheets){
       if(length(comments[[i]]) > 0){
         
@@ -353,9 +414,14 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
   }
   
+  if(length(embeddings) > 0){
+    
+    embeddingsDir <- file.path(tmpDir, "xl", "embeddings")
+    dir.create(path = embeddingsDir, recursive = TRUE)
+    for(fl in embeddings)
+      file.copy(from = fl, to = embeddingsDir, overwrite = TRUE)
+  }
   
-  printDir <- file.path(tmpDir, "xl", "printerSettings")
-  dir.create(path = printDir, recursive = TRUE)
   
   if(nPivots > 0){
     
@@ -370,13 +436,23 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     pivotCacheRelsDir <- file.path(tmpDir, "xl", "pivotCache", "_rels")
     dir.create(path = pivotCacheRelsDir, recursive = TRUE)
-    for(i in 1:nPivots){
-      .Call("openxlsx_writeFile", "", pivotTables[[i]], "", file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)))
+    
+    for(i in 1:length(pivotTables))
+      file.copy(from = pivotTables[i], to =  file.path(pivotTablesDir, sprintf("pivotTable%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+    
+    for(i in 1:length(pivotDefinitions))
+      file.copy(from = pivotDefinitions[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)), overwrite = TRUE, copy.date = TRUE)    
+    
+    for(i in 1:length(pivotRecords))
+      file.copy(from = pivotRecords[i], to =  file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)), overwrite = TRUE, copy.date = TRUE)
+    
+    for(i in 1:length(pivotDefinitionsRels))
+      file.copy(from = pivotDefinitionsRels[i], to =  file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)), overwrite = TRUE, copy.date = TRUE)
+    
+    for(i in 1:length(pivotTables.xml.rels))
       .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
-      .Call("openxlsx_writeFile", "", pivotDefinitions[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheDefinition%s.xml", i)))
-      .Call("openxlsx_writeFile", "", pivotRecords[[i]], "", file.path(pivotCacheDir, sprintf("pivotCacheRecords%s.xml", i)))
-      .Call("openxlsx_writeFile", "", pivotDefinitionsRels[[i]], "", file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)))   
-    }
+    
+    
     
   }
   
@@ -389,9 +465,12 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     slicerCachesDir <- file.path(tmpDir, "xl", "slicerCaches")
     dir.create(path = slicerCachesDir, recursive = TRUE)
     
-    for(i in 1:length(slicers))
-      if(nchar(slicers[[i]]) > 0)
-        .Call("openxlsx_writeFile", "", slicers[[i]], "", file.path(slicersDir, sprintf("slicer%s.xml", i)))
+    for(i in 1:length(slicers)){
+      if(nchar(slicers[i]) > 0)
+        file.copy(from = slicers[i], to = file.path(slicersDir, sprintf("slicer%s.xml", i)))
+    }
+    
+    
     
     for(i in 1:length(slicerCaches))
       .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
@@ -404,14 +483,16 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## write .rels
   .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-        pxml(.rels),
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+         <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+         <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>',
         '</Relationships>',
         file.path(relsDir, ".rels"))
   
   
   ## write app.xml
   .Call("openxlsx_writeFile", '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">',
-        pxml(app),
+        '<Application>Microsoft Excel</Application>',
         '</Properties>',
         file.path(docPropsDir, "app.xml"))
   
@@ -470,19 +551,14 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   } 
   
   # printerSettings
+  printDir <- file.path(tmpDir, "xl", "printerSettings")
+  dir.create(path = printDir, recursive = TRUE)
   for(i in 1:nSheets)
-    writeLines(printerSettings[[i]], file.path(printDir, sprintf("printerSettings%s.bin", i)))
+    writeLines(genPrinterSettings(), file.path(printDir, sprintf("printerSettings%s.bin", i)))
   
   ## media (copy file from origin to destination)
   for(x in media)
     file.copy(x, file.path(xlmediaDir, names(media)[which(media == x)]))
-  
-  ## will always have a theme
-  lapply(1:nThemes, function(i){
-    con <- file(file.path(xlthemeDir, paste0("theme", i, ".xml")), open = "wb")
-    writeBin(charToRaw(pxml(theme[[i]])), con)
-    close(con)        
-  })
   
   ## VBA Macro
   if(!is.null(vbaProject))
@@ -507,8 +583,6 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   if(nComments > 0)
     ct <- c(ct, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
-  
-  
   
   ## write [Content_type]       
   .Call("openxlsx_writeFile", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
@@ -652,7 +726,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
 
 
 
-Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames, keepNA){
+Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, colClasses, hlinkNames, keepNA, list_sep){
   
   sheet <- validateSheet(sheet)
   nCols <- ncol(df)
@@ -661,7 +735,11 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   allColClasses <- unlist(colClasses)  
   
   ## pull out NaN values
-  nans <- unlist(lapply(1:ncol(df), function(i) is.nan(df[[i]]) | is.infinite(df[[i]])))
+  nans <- unlist(lapply(1:ncol(df), function(i) {
+    if(!"character" %in% class(df[[i]]) & !"list" %in% class(df[[i]]))
+      return(is.nan(df[[i]]) | is.infinite(df[[i]]))
+    return(rep(FALSE, nRows))
+  }))
   
   ## convert any Dates to integers and create date style object
   if(any(c("date", "posixct", "posixt") %in% allColClasses)){
@@ -675,33 +753,45 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     for(i in dInds)
       df[[i]] <- as.integer(df[[i]]) + origin
     
-    t <- format(Sys.time(), "%z")
-    offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
     
-    if(is.na(offSet))
-      offSet <- 0
     
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
-    for(i in pInds)
-      df[[i]] <- as.numeric(as.POSIXct(df[[i]])) / 86400L + origin + offSet
+    if(length(pInds) > 0){
+      t <- sapply(pInds,  function(i) format(df[[i]][[1]], "%z"))
+      
+      offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
+      
+      for(i in 1:length(pInds)){
+        
+        if(is.na(offSet[i]))
+          offSet[i] <- 0
+        
+        df[[pInds[i]]] <- as.numeric(as.POSIXct(df[[pInds[i]]])) / 86400 + origin + offSet[i]
+        
+      }
+      
+      
+    }
+    
   }
   
   ## convert any Dates to integers and create date style object
   if(any(c("currency", "accounting", "percentage", "3", "comma") %in% allColClasses)){
     cInds <- which(sapply(colClasses, function(x) any(c("accounting", "currency", "percentage", "3", "comma") %in% tolower(x))))
     for(i in cInds)
-      df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]]))
-  }
-  
-  if("hyperlink" %in% allColClasses){
-    for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
-      class(df[[i]]) <- "hyperlink"
+      df[[i]] <- as.numeric(gsub("[^0-9\\.-]", "", df[[i]], perl = TRUE))
   }
   
   ## convert scientific
   if("scientific" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "scientific" %in% x)))
       class(df[[i]]) <- "numeric"
+  }
+  
+  ##
+  if("list" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "list" %in% x)))
+      df[[i]] <- sapply(lapply(df[[i]], unlist), paste, collapse = list_sep)
   }
   
   if("formula" %in% allColClasses){
@@ -711,23 +801,30 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     }
   }
   
-  colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
+  if("hyperlink" %in% allColClasses){
+    for(i in which(sapply(colClasses, function(x) "hyperlink" %in% x)))
+      class(df[[i]]) <- "hyperlink"
+  }
   
+  colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
+
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[[i]]) <- "numeric"
   }
-  
+
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
       class(df[[i]]) <- "character"
   }
-  
-  
+
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
+  for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
+    df[[i]] <- as.character(df[[i]])
+
   
   ## cell values
   v <- as.character(t(as.matrix(df)))
@@ -741,7 +838,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## If any NaN values
-  if(length(nans) > 0){
+  if(any(nans) > 0){
     nans <- which(t(matrix(nans, nrow = nrow(df), ncol = ncol(df))))
     t[nans] <- "e"
     v[nans] <- "#NUM!"
@@ -789,7 +886,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if(length(newStrs) > 0){
     
     newStrs <- replaceIllegalCharacters(newStrs)
-    newStrs <- paste0("<si><t>", newStrs, "</t></si>")
+    newStrs <- paste0("<si><t xml:space=\"preserve\">", newStrs, "</t></si>")
     
     uNewStr <- unique(newStrs)
     
@@ -946,11 +1043,13 @@ Workbook$methods(writeDrawingVML = function(dir){
   
   for(i in 1:length(comments)){
     
-    cd <- unlist(lapply(comments[[i]],"[[", "clientData"))
-    nComments <- length(cd)
     id <- 1025
     
-    if(nComments > 0){
+    cd <- unlist(lapply(comments[[i]],"[[", "clientData"))
+    nComments <- length(cd)
+    
+    ## write head
+    if(nComments > 0 | length(vml[[i]]) > 0){
       
       write(x = paste('<xml xmlns:v="urn:schemas-microsoft-com:vml"
                     xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -964,18 +1063,24 @@ Workbook$methods(writeDrawingVML = function(dir){
                     <v:path gradientshapeok="t" o:connecttype="rect"/>
                     </v:shapetype>'), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)))
       
+    }
+    
+    if(nComments > 0){
       for(j in 1:nComments){
         id <- id + 1L
         write(x = genBaseShapeVML(cd[j], id), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
       }
-      
-      write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
-      
-      worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
-      
     }
+    
+    if(length(vml[[i]]) > 0)
+      write(x = vml[[i]], file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+    
+    if(nComments > 0 | length(vml[[i]]) > 0){
+      write(x = '</xml>', file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), append = TRUE)
+      worksheets[[i]]$legacyDrawing <<- '<legacyDrawing r:id="rIdvml"/>'
+    }
+    
   }
-  
 })
 
 
@@ -1347,7 +1452,7 @@ Workbook$methods(createFillNode = function(style, patternType = "solid"){
   ## gradientFill
   if(any(grepl("gradientFill", fill))){
     
-    fillNode <- paste0("<fill>", fill, "</fill>")
+    fillNode <- fill #paste0("<fill>", fill, "</fill>")
     
   }else if(!is.null(fill$fillFg) | !is.null(fill$fillBg)){
     
@@ -1409,8 +1514,15 @@ Workbook$methods(setSheetName = function(sheet, newSheetName){
     
     belongTo <- getDefinedNamesSheet(workbook$definedNames)
     toChange <- belongTo == oldName
-    if(any(toChange))
-      workbook$definedNames[toChange] <<- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+    if(any(toChange)){
+      
+      newSheetName <- sprintf("'%s'", newSheetName)
+      tmp <- gsub(oldName, newSheetName, workbook$definedName[toChange], fixed = TRUE)
+      tmp <- gsub("'+", "'", tmp)
+      workbook$definedNames[toChange] <<- tmp
+      
+    }
+    
     
   }
   
@@ -1421,7 +1533,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
   
   ## write worksheets  
   nSheets <- length(worksheets)
-  header <- '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' 
+  header <- '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' 
   
   for(i in 1:nSheets){
     
@@ -1441,6 +1553,12 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     }else{
       worksheets[[i]]$drawing <<- NULL
     }
+    
+    ## vml drawing
+    if(length(vml_rels[[i]]) > 0)
+      file.copy(from = vml_rels[[i]], to = file.path(xldrawingsRelsDir, paste0("vmlDrawing", i,".vml.rels")))
+    
+    
     
     if(isChartSheet[i]){
       
@@ -1473,8 +1591,11 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(!is.null(ws$cols))
         ws$cols <- pxml(c("<cols>", worksheets[[i]]$cols, "</cols>"))
       
+      if(length(ws$dataValidations) > 0)
+        ws$dataValidations <- paste0(sprintf('<dataValidations count="%s">', length(ws$dataValidations)), pxml(ws$dataValidations), '</dataValidations>')
+      
       if(length(freezePane[[i]]) > 0)
-        ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews)
+        ws$sheetViews <- gsub("/></sheetViews>", paste0(">", freezePane[[i]], "</sheetView></sheetViews>"), ws$sheetViews, fixed = TRUE)
       
       if(length(worksheets[[i]]$mergeCells) > 0)
         ws$mergeCells <- paste0(sprintf('<mergeCells count="%s">', length(worksheets[[i]]$mergeCells)), pxml(worksheets[[i]]$mergeCells), '</mergeCells>')
@@ -1501,7 +1622,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
                                paste(ws$colBreaks, collapse = ""),
                                '</colBreaks>')
       }
-       
+      
       
       if(!is.null(ws$sheetPr))
         ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
@@ -1628,7 +1749,7 @@ Workbook$methods(setColWidths = function(sheet){
       if(is.null(baseFontName)){
         baseFontName <- "calibri"
       }else{
-        baseFontName <- gsub(" ", ".", tolower(baseFontName))
+        baseFontName <- gsub(" ", ".", tolower(baseFontName), fixed = TRUE)
         if(!baseFontName %in% names(openxlsxFontSizeLookupTable)){
           baseFontName <- "calibri"
         }
@@ -1663,7 +1784,7 @@ Workbook$methods(setColWidths = function(sheet){
           if(is.null(fN)){
             fN <- "calibri"
           }else{
-            fN <- gsub(" ", ".", tolower(fN))
+            fN <- gsub(" ", ".", tolower(fN), fixed = TRUE)
             if(!fN %in% names(openxlsxFontSizeLookupTable)){
               fN <- "calibri"
             }
@@ -1707,7 +1828,7 @@ Workbook$methods(setColWidths = function(sheet){
         col <- lapply(comps, convertFromExcelRef)
         col <- lapply(col, function(x) x[x %in% cols[auto2Inds]]) ## subset to auto2Inds
         
-        rows <- lapply(comps, function(x) as.numeric(gsub("[A-Z]", "", x)))
+        rows <- lapply(comps, function(x) as.numeric(gsub("[A-Z]", "", x, perl = TRUE)))
         rows <- rows[sapply(col, length) > 0]
         col <- col[sapply(col, length) > 0]
         
@@ -1786,6 +1907,10 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # Remove highest sheet from Content_Types
   # Remove drawings element
   # Remove drawings_rels element
+  
+  # Remove vml element
+  # Remove vml_rels element
+  
   # Remove rowHeights element
   # Remove sheetData
   # Remove styleObjects on sheet
@@ -1817,6 +1942,10 @@ Workbook$methods(deleteWorksheet = function(sheet){
   
   drawings[[sheet]] <<- NULL
   drawings_rels[[sheet]] <<- NULL
+  
+  vml[[sheet]] <<- NULL
+  vml_rels[[sheet]] <<- NULL
+  
   rowHeights[[sheet]] <<- NULL
   sheetData[[sheet]] <<- NULL
   hyperlinks[[sheet]] <<- NULL
@@ -1837,7 +1966,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Need to remove reference from workbook.xml.rels to pivotCache
   removeRels <- worksheets_rels[[sheet]][grepl("pivotTables", worksheets_rels[[sheet]])]
   if(length(removeRels) > 0){
-    print('here')
+    
     ## sheet rels links to a pivotTable file, the corresponding pivotTable_rels file links to the cacheDefn which is listing in workbook.xml.rels
     ## remove reference to this file from the workbook.xml.rels
     fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))
@@ -1888,7 +2017,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Reset rIds
   if(nSheets > 1){
     for(i in (sheet+1L):nSheets)
-      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets)
+      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets, fixed = TRUE)
   }else{
     workbook$sheets <<- NULL
   }
@@ -1932,6 +2061,46 @@ Workbook$methods(addDXFS = function(style){
 })
 
 
+
+Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, endCol, type, operator, value, allowBlank, showInputMsg, showErrorMsg){
+  
+  sheet = validateSheet(sheet)
+  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  
+  header <- sprintf('<dataValidation type="%s" operator="%s" allowBlank="%s" showInputMessage="%s" showErrorMessage="%s" sqref="%s">',
+                    type, operator, allowBlank, showInputMsg, showErrorMsg, sqref)
+  
+  
+  if(type == "date"){
+    
+    origin <- 25569L
+    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+    
+    value <- as.integer(value) + origin
+    
+  }
+  
+  if(type == "time"){
+    
+    origin <- 25569L
+    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+      origin <- 24107L
+    
+    t <- format(value[1], "%z")
+    offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
+    if(is.na(offSet)) offSet[i] <- 0
+    
+    value <- as.numeric(as.POSIXct(value)) / 86400 + origin + offSet
+    
+  }    
+  
+  form <- sapply(1:length(value), function(i) sprintf("<formula%s>%s</formula%s>", i, value[i], i))
+  worksheets[[sheet]]$dataValidations <<- c(worksheets[[sheet]]$dataValidation, paste0(header, paste(form, collapse = ""), "</dataValidation>"))
+  
+  invisible(0)
+  
+})
 
 
 
@@ -2231,7 +2400,6 @@ Workbook$methods(preSaveCleanUp = function(){
   
   nSheets <- length(sheetRIds)
   nWorksheets <- length(worksheets)
-  nThemes <- length(theme)
   nExtRefs <- length(externalLinks)
   nPivots <- length(pivotDefinitions)
   
@@ -2308,7 +2476,7 @@ Workbook$methods(preSaveCleanUp = function(){
     
     for(i in 1:length(workbook$definedNames)){
       if(!is.na(newId[i]))
-        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]])
+        workbook$definedNames[[i]] <<- gsub(sprintf('localSheetId=\"%s\"', oldId[i]), sprintf('localSheetId=\"%s\"', newId[i]), workbook$definedNames[[i]], fixed = TRUE)
     }
   }
   
@@ -2491,12 +2659,19 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
 
 
 
-Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet){
+Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet, localSheetId = NULL){
   
-  names <- replaceIllegalCharacters(name)
-  workbook$definedNames <<- c(workbook$definedNames, 
-                             sprintf('<definedName name="%s">\'%s\'!%s:%s</definedName>', name, sheet, ref1, ref2 )
-  )
+  name <- replaceIllegalCharacters(name)
+  
+  if(is.null(localSheetId)){
+    workbook$definedNames <<- c(workbook$definedNames, 
+                                sprintf('<definedName name="%s">\'%s\'!%s:%s</definedName>', name, sheet, ref1, ref2 )
+    )
+  }else{
+    workbook$definedNames <<- c(workbook$definedNames, 
+                                sprintf('<definedName name="%s" localSheetId="%s">\'%s\'!%s:%s</definedName>', name, localSheetId, sheet, ref1, ref2)
+    )
+  }
   
 })
 
@@ -3095,7 +3270,6 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
 
 
 Workbook$methods(loadStyles = function(stylesXML){
-  
   
   ## Build style objects from the styles XML
   stylesTxt <- readLines(stylesXML, warn = FALSE, encoding = "UTF-8")

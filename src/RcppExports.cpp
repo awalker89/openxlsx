@@ -5,6 +5,16 @@
 
 using namespace Rcpp;
 
+// makeLetters
+std::vector<std::string> makeLetters();
+RcppExport SEXP openxlsx_makeLetters() {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    __result = Rcpp::wrap(makeLetters());
+    return __result;
+END_RCPP
+}
 // RcppConvertFromExcelRef2
 IntegerVector RcppConvertFromExcelRef2(std::vector<std::string>& r);
 RcppExport SEXP openxlsx_RcppConvertFromExcelRef2(SEXP rSEXP) {
@@ -41,6 +51,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< float >::type minW(minWSEXP);
     Rcpp::traits::input_parameter< float >::type maxW(maxWSEXP);
     __result = Rcpp::wrap(calcColumnWidths(sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW));
+    return __result;
+END_RCPP
+}
+// getOpenClosedNode
+SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag);
+RcppExport SEXP openxlsx_getOpenClosedNode(SEXP xmlSEXP, SEXP open_tagSEXP, SEXP close_tagSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    Rcpp::traits::input_parameter< std::string >::type open_tag(open_tagSEXP);
+    Rcpp::traits::input_parameter< std::string >::type close_tag(close_tagSEXP);
+    __result = Rcpp::wrap(getOpenClosedNode(xml, open_tag, close_tag));
     return __result;
 END_RCPP
 }
@@ -98,6 +121,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
     Rcpp::traits::input_parameter< std::string >::type tag(tagSEXP);
     __result = Rcpp::wrap(getChildlessNode_ss(xml, tag));
+    return __result;
+END_RCPP
+}
+// get_extLst_Major
+CharacterVector get_extLst_Major(std::string xml);
+RcppExport SEXP openxlsx_get_extLst_Major(SEXP xmlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    __result = Rcpp::wrap(get_extLst_Major(xml));
     return __result;
 END_RCPP
 }
@@ -573,8 +607,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // readWorkbook
-SEXP readWorkbook(CharacterVector v, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, Function clean_names);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP clean_namesSEXP) {
+SEXP readWorkbook(CharacterVector v, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, Function clean_names);
+RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP clean_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -585,8 +619,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
     Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
+    Rcpp::traits::input_parameter< bool >::type skipEmptyCols(skipEmptyColsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
-    __result = Rcpp::wrap(readWorkbook(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names));
+    __result = Rcpp::wrap(readWorkbook(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, skipEmptyCols, clean_names));
     return __result;
 END_RCPP
 }
@@ -663,6 +698,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
     __result = Rcpp::wrap(readWorkbook2(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, clean_names));
+    return __result;
+END_RCPP
+}
+// mergeCell2mappingDF
+SEXP mergeCell2mappingDF(CharacterVector x);
+RcppExport SEXP openxlsx_mergeCell2mappingDF(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    __result = Rcpp::wrap(mergeCell2mappingDF(x));
     return __result;
 END_RCPP
 }

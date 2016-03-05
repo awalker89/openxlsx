@@ -601,10 +601,9 @@ buildFillList <- function(fills){
   inds <- grepl("patternFill", fills)
   fillAttrs[inds] <- lapply(fills[inds], nodeAttributes)
   
-  
   ## gradientFill
   inds <- grepl("gradientFill", fills)
-  fillAttrs[inds] <- lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
+  fillAttrs[inds] <- fills[inds] #lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
   
   return(fillAttrs)
   
@@ -635,7 +634,7 @@ getSharedStringsFromFile <- function(sharedStringsFile, isFile){
   z <- tolower(sharedStrings)
   sharedStrings[z == "true"] <- "TRUE"
   sharedStrings[z == "false"] <- "FALSE"
-  rm(z)
+  z <- NULL ## effectivel remove z
   
   ## XML replacements
   sharedStrings <- replaceXMLEntities(sharedStrings)
@@ -649,6 +648,73 @@ clean_names <- function(x){
   x <- gsub("^[[:space:]]+|[[:space:]]+$", "", x)
   x <- gsub("[[:space:]]+", ".", x)
   return(x)
+}
+
+
+
+mergeCell2mapping <- function(x){
+  
+  refs <- regmatches(x, regexpr("(?<=ref=\")[A-Z0-9:]+", x, perl = TRUE))
+  refs <- strsplit(refs, split = ":")
+  rows <- lapply(refs, function(r) {
+    r <- as.integer(gsub("[A-Z]", "", r))
+    seq(from = r[1], to = r[2], by = 1)
+  })
+  
+  cols <- lapply(refs, function(r) {
+    r <- convertFromExcelRef(r)
+    seq(from = r[1], to = r[2], by = 1)
+  })
+  
+  ## for each we grid.expand
+  refs <- do.call("rbind", lapply(1:length(rows), function(i){
+    tmp <- expand.grid("cols" = cols[[i]], "rows" = rows[[i]])
+    tmp$ref <- paste0(.Call("openxlsx_convert2ExcelRef", tmp$cols, LETTERS), tmp$rows)
+    tmp$anchor_cell <- tmp$ref[1]
+    return(tmp[, c("anchor_cell", "ref", "rows")])
+  }))
+
+  
+  refs <- refs[refs$anchor_cell != refs$ref,  ]
+  
+  return(refs)
+}
+
+
+
+
+splitHeaderFooter <- function(x){
+  
+  tmp <- gsub("<(/|)(odd|even|first)(Header|Footer)>(&amp;|)", "", x, perl = TRUE)
+  special_tags <- regmatches(tmp, regexpr("&amp;[^LCR]", tmp))
+  if(length(special_tags) > 0){
+    for(i in 1:length(special_tags))
+      tmp <- gsub(special_tags[i], sprintf("openxlsx__%s67298679", i), tmp, fixed = TRUE)
+  }
+  
+  tmp <- strsplit(tmp, split = "&amp;")[[1]]
+  
+  if(length(special_tags) > 0){
+    for(i in 1:length(special_tags))
+      tmp <- gsub(sprintf("openxlsx__%s67298679", i), special_tags[i], tmp, fixed = TRUE)
+  }
+  
+
+  res <- rep(list(NULL), 3)
+  ind <- substr(tmp, 1, 1) == "L"
+  if(any(ind))
+    res[[1]] = substring(tmp, 2)[ind]
+  
+  ind <- substr(tmp, 1, 1) == "C"
+  if(any(ind))
+    res[[2]] = substring(tmp, 2)[ind]
+  
+  ind <- substr(tmp, 1, 1) == "R"
+  if(any(ind))
+    res[[3]] = substring(tmp, 2)[ind]
+  
+  res
+  
 }
 
 
