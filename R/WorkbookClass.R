@@ -1175,7 +1175,7 @@ Workbook$methods(updateStyles = function(style){
   
   
   ## Alignment
-  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation) |!is.null(style$indent)){
+  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation) | !is.null(style$indent)){
     
     attrs <- list()
     alignNode <- "<alignment"
@@ -2590,13 +2590,17 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
       if(sheet == styleObjects[[i]]$sheet){
         
         ## Now check rows and cols intersect
-        ## toRemove are the elements that will be used in the merge
-        ## mergeInds are the intersection of the two styles that will need to merge
-        ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
-        
+        ## toRemove are the elements that the new style doesn't apply to, we remove these from the style object as it
+        ## is copied, merged with the new style and given the new data points
         toRemoveInds <- which(styleObjects[[i]]$rows %in% rows & styleObjects[[i]]$cols %in% cols) 
-        #which(!is.na(match(styleObjects[[i]]$rows, rows)) & !is.na(match(styleObjects[[i]]$cols, cols)))
+        toRemoveInds <- toRemoveInds[styleObjects[[i]]$rows[toRemoveInds] == styleObjects[[i]]$cols[toRemoveInds]]
+        
+        
+        
+        ## mergeInds are the intersection of the two styles that will need to merge
         mergeInds <- which(rows %in% styleObjects[[i]]$rows & cols %in% styleObjects[[i]]$cols)
+        
+        ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
         newInds <- newInds[!newInds %in% mergeInds]
         
         if(length(toRemoveInds) > 0){
@@ -2617,7 +2621,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
           keepStyle <- c(keepStyle, TRUE)
           
           styleObjects <<- append(styleObjects, list(list(style = mergeStyle(styleObjects[[i]]$style, newStyle = style),
-                                                          sheet =  sheet,
+                                                          sheet = sheet,
                                                           rows = rows[mergeInds],
                                                           cols = cols[mergeInds])))        
         }
