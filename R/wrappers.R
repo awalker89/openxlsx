@@ -2255,7 +2255,8 @@ getNamedRegions.Workbook <- function(x){
 
 
 #' @name addFilter
-#' @title add filters to columns
+#' @title Add column filters
+#' @description Add excel column filters to a worksheet
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols columns to add filter to. 

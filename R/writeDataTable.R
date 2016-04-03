@@ -179,9 +179,10 @@ writeDataTable <- function(wb, sheet, x,
   if(length(wb$tables) > 0){
     
     tableSheets <- attr(wb$tables, "sheet")
-    if(sheet %in% tableSheets){ ## only look at tables on this sheet
+    sheetNo <- wb$validateSheet(sheet)
+    if(sheetNo %in% tableSheets){ ## only look at tables on this sheet
 
-      exTable <- wb$tables[tableSheets %in% sheet]
+      exTable <- wb$tables[tableSheets %in% sheetNo]
     
       newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
       newCols <- c(startCol, startCol + ncol(x) - 1L)

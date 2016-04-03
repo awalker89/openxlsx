@@ -1175,7 +1175,7 @@ Workbook$methods(updateStyles = function(style){
   
   
   ## Alignment
-  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation)){
+  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation) |!is.null(style$indent)){
     
     attrs <- list()
     alignNode <- "<alignment"
