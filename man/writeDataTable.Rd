@@ -2,7 +2,7 @@
 % Please edit documentation in R/writeDataTable.R
 \name{writeDataTable}
 \alias{writeDataTable}
-\title{Write to a worksheet and format as a table}
+\title{Write to a worksheet as an Excel table}
 \usage{
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
@@ -38,6 +38,9 @@ A vector of the form c(startCol, startRow)}
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 
 \item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
+}
+\description{
+Write to a worksheet and format as an Excel table
 }
 \details{
 columns of x with class Date/POSIXt, currency, accounting, 

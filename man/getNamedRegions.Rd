@@ -2,12 +2,16 @@
 % Please edit documentation in R/wrappers.R
 \name{getNamedRegions}
 \alias{getNamedRegions}
-\title{Get named regions.}
+\title{Get named regions}
 \usage{
 getNamedRegions(x)
 }
 \arguments{
 \item{x}{An xlsx file or Workbook object}
+}
+\description{
+Return a vector of named regions in a xlsx file or
+Workbook object
 }
 \examples{
 ## create named regions

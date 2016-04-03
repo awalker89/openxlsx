@@ -14,9 +14,12 @@ replaceStyle(wb, index, newStyle)
 \item{newStyle}{A style to replace the exising style as position index}
 }
 \description{
+Replace an existing cell style
+
 Replace a style object
 }
 \examples{
+
 ## load a workbook 
 wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{getDateOrigin}
 \alias{getDateOrigin}
-\title{Return the date origin used internally by an xlsx or xlsm file}
+\title{Get the date origin an xlsx file is using}
 \usage{
 getDateOrigin(xlsxFile)
 }
@@ -11,6 +11,9 @@ getDateOrigin(xlsxFile)
 }
 \value{
 One of "1900-01-01" or "1904-01-01".
+}
+\description{
+Return the date origin used internally by an xlsx or xlsm file
 }
 \details{
 Excel stores dates as the number of days from either 1904-01-01 or 1900-01-01. This function

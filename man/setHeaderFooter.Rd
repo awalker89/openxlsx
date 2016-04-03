@@ -25,6 +25,9 @@ setHeaderFooter(wb, sheet, header = NULL, footer = NULL,
 
 \item{firstFooter}{document footer for first page only.}
 }
+\description{
+Set document headers and footers
+}
 \details{
 Headers and footers can contain special tags
 \itemize{

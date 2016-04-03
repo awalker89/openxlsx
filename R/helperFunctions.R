@@ -34,19 +34,23 @@
 #'   , startCol = 3)
 #' 
 #' ## Internal - No text to display using makeHyperlinkString() function
-#' writeFormula(wb, "Sheet1", startRow = 1, x = makeHyperlinkString(sheet = "Sheet 3", row = 1, col = 2))
+#' writeFormula(wb, "Sheet1", startRow = 1
+#' , x = makeHyperlinkString(sheet = "Sheet 3", row = 1, col = 2))
 #' 
 #' ## Internal - Text to display
-#' writeFormula(wb, "Sheet1", startRow = 2, x = makeHyperlinkString(sheet = "Sheet 3", row = 1, col = 2
-#'   , text = "Link to Sheet 3"))
+#' writeFormula(wb, "Sheet1", startRow = 2, 
+#'   x = makeHyperlinkString(sheet = "Sheet 3", row = 1, col = 2
+#'     , text = "Link to Sheet 3"))
 #' 
 #' ## Link to file - No text to display
-#' writeFormula(wb, "Sheet1", startRow = 4, x = makeHyperlinkString(sheet = "testing", row = 3, col = 10
-#'  , file = system.file("loadExample.xlsx", package = "openxlsx")))
+#' writeFormula(wb, "Sheet1", startRow = 4
+#'  , x = makeHyperlinkString(sheet = "testing", row = 3, col = 10
+#'    , file = system.file("loadExample.xlsx", package = "openxlsx")))
 #' 
 #' ## Link to file - Text to display
-#' writeFormula(wb, "Sheet1", startRow = 3, x = makeHyperlinkString(sheet = "testing", row = 3, col = 10
-#'   , file = system.file("loadExample.xlsx", package = "openxlsx"), text = "Link to File."))
+#' writeFormula(wb, "Sheet1", startRow = 3
+#'   , x = makeHyperlinkString(sheet = "testing", row = 3, col = 10
+#'     , file = system.file("loadExample.xlsx", package = "openxlsx"), text = "Link to File."))
 #' 
 #' saveWorkbook(wb, "internalHyperlinks.xlsx")
 makeHyperlinkString <- function(sheet, row = 1, col = 1, text = NULL, file = NULL){

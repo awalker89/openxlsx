@@ -20,6 +20,9 @@ freezePane(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL,
 
 \item{firstCol}{If \code{TRUE}, freezes the first column (equivalent to firstActiveCol = 2)}
 }
+\description{
+Freeze a worksheet pane
+}
 \examples{
 ## Create a new workbook
 wb <- createWorkbook("Kenshin")

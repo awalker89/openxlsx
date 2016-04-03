@@ -49,6 +49,9 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 \value{
 XML tree
 }
+\description{
+Add a worksheet to a Workbook object
+}
 \details{
 Headers and footers can contain special tags
 \itemize{

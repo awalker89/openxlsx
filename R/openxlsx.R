@@ -6,6 +6,9 @@
 #' @name openxlsx
 #' @docType package
 #' @useDynLib openxlsx
+#' @import grDevices
+#' @import stats
+#' @import utils
 #' @importFrom Rcpp sourceCpp 
 #' 
 #' @seealso

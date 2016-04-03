@@ -26,6 +26,9 @@ insertImage(wb, sheet, file, width = 6, height = 3, startRow = 1,
 
 \item{dpi}{Image resolution used for conversion between units.}
 }
+\description{
+Insert an image into a worksheet
+}
 \examples{
 ## Create a new workbook
 wb <- createWorkbook("Ayanami")

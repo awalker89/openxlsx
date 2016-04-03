@@ -13,6 +13,9 @@ convertToDate(x, origin = "1900-01-01", ...)
 
 \item{...}{additional parameters passed to as.Date()}
 }
+\description{
+Convert from excel date number to R Date type
+}
 \details{
 Excel stores dates as number of days from some origin day
 }

@@ -19,7 +19,7 @@ deleteData(wb, sheet, cols, rows, gridExpand = FALSE)
 will be removed.}
 }
 \description{
-Remove contents and styling from a cell.
+Delete contents and styling from a cell.
 }
 \examples{
 ## load a workbook 

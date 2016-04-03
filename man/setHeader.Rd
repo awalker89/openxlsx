@@ -13,6 +13,9 @@ setHeader(wb, text, position = "center")
 
 \item{position}{Postion of text in header. One of "left", "center" or "right"}
 }
+\description{
+DEPRECATED
+}
 \examples{
 \dontrun{
 wb <- createWorkbook("Edgar Anderson")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{removeFilter}
 \alias{removeFilter}
-\title{removes worksheet filter from addFilter and writeData}
+\title{Remove a worksheet filter}
 \usage{
 removeFilter(wb, sheet)
 }
@@ -10,6 +10,9 @@ removeFilter(wb, sheet)
 \item{wb}{A workbook object}
 
 \item{sheet}{A vector of names or indices of worksheets}
+}
+\description{
+Removes filters from addFilter() and writeData()
 }
 \examples{
 wb <- createWorkbook()

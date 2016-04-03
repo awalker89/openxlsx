@@ -1,5 +1,7 @@
+
 #' @name writeDataTable
-#' @title Write to a worksheet and format as a table
+#' @title Write to a worksheet as an Excel table
+#' @description Write to a worksheet and format as an Excel table
 #' @author Alexander Walker
 #' @param wb A Workbook object containing a worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.

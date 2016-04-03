@@ -9,14 +9,14 @@ convertFromExcelRef(col)
 \arguments{
 \item{col}{An excel column reference}
 }
+\description{
+Convert excel column name to integer index e.g. "J" to 10
+}
 \examples{
 convertFromExcelRef("DOG")
 convertFromExcelRef("COW")
 
 ## numbers will be removed
 convertFromExcelRef("R22")
-}
-\author{
-Alexander Walker
 }
 

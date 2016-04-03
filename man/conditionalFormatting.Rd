@@ -22,6 +22,9 @@ conditionalFormatting(wb, sheet, cols, rows, rule = NULL, style = NULL,
 
 \item{type}{Either 'expression', 'colorscale', 'databar', 'duplicates' or "contains' (case insensitive).}
 }
+\description{
+Add conditional formatting to cells
+}
 \details{
 See Examples.
 

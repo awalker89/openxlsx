@@ -15,6 +15,9 @@ mergeCells(wb, sheet, cols, rows)
 
 \item{rows}{corresponding rows to merge}
 }
+\description{
+Merge cells within a worksheet
+}
 \details{
 As merged region must be rectangular, only min and max of cols and rows are used.
 }

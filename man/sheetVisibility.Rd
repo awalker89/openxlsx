@@ -3,7 +3,7 @@
 \name{sheetVisibility}
 \alias{sheetVisibility}
 \alias{sheetVisibility<-}
-\title{Get worksheet visible state.}
+\title{Get/set worksheet visible state}
 \usage{
 sheetVisibility(wb)
 
@@ -18,6 +18,9 @@ sheetVisibility(wb) <- value
 Character vector of worksheet names.
 
 Vector of "hidden", "visible", "veryHidden"
+}
+\description{
+Get and set worksheet visible state
 }
 \examples{
 

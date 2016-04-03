@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{renameWorksheet}
 \alias{renameWorksheet}
-\title{Rename an exisiting worksheet}
+\title{Rename a worksheet}
 \usage{
 renameWorksheet(wb, sheet, newName)
 }
@@ -12,6 +12,9 @@ renameWorksheet(wb, sheet, newName)
 \item{sheet}{The name or index of the worksheet to rename}
 
 \item{newName}{The new name of the worksheet. No longer than 31 chars.}
+}
+\description{
+Rename a worksheet
 }
 \details{
 DEPRECATED. Use \code{\link{names}}

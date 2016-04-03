@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{getBaseFont}
 \alias{getBaseFont}
-\title{Return the workbook defaul font}
+\title{Return the workbook default font}
 \usage{
 getBaseFont(wb)
 }
@@ -10,6 +10,8 @@ getBaseFont(wb)
 \item{wb}{A workbook object}
 }
 \description{
+Return the workbook default font
+
 Returns the base font used in the workbook.
 }
 \examples{

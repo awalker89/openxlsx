@@ -2,7 +2,7 @@
 % Please edit documentation in R/CommentClass.R
 \name{createComment}
 \alias{createComment}
-\title{write a cell comment}
+\title{create a Comment object}
 \usage{
 createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
   visible = TRUE, width = 2, height = 4)
@@ -19,6 +19,9 @@ createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
 \item{width}{Textbox integer width in number of cells}
 
 \item{height}{Textbox integer height in number of cells}
+}
+\description{
+Create a cell Comment object to pass to writeComment()
 }
 \examples{
 wb <- createWorkbook()

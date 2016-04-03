@@ -40,6 +40,9 @@ pageSetup(wb, sheet, orientation = NULL, scale = 100, left = 0.7,
 
 \item{printTitleCols}{Columns to repeat at left when printing. Integer vector.}
 }
+\description{
+Set page margins, orientation and print scaling
+}
 \details{
 paperSize is an integer corresponding to: 
 \itemize{
