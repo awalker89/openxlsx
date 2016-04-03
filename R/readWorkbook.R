@@ -142,8 +142,8 @@ read.xlsx.default <- function(xlsxFile,
   workbookRelsXML <- paste(readLines(workbookRelsXML, warn = FALSE, encoding = "UTF-8"), collapse = "")
   workbookRelsXML <- .Call("openxlsx_getChildlessNode", workbookRelsXML, "<Relationship ", PACKAGE="openxlsx")
   
-  
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
+  workbook <- removeHeadTag(workbook)
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
   
   ## make sure sheetId is 1 based
@@ -158,7 +158,7 @@ read.xlsx.default <- function(xlsxFile,
   ## Named region logic
   if(!is.null(namedRegion)){
     
-    dn <- .Call("openxlsx_getNodes", removeHeadTag(workbook), "<definedNames>", PACKAGE = "openxlsx")
+    dn <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
     dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
 
     if(length(dn) == 0){
@@ -345,7 +345,7 @@ read.xlsx.default <- function(xlsxFile,
   if(detectDates){
     
     ## get date origin
-    if(grepl('date1904="1"|date1904="true"', paste(workbook, collapse = ""), ignore.case = TRUE))
+    if(grepl('date1904="1"|date1904="true"', workbook, ignore.case = TRUE))
       origin <- 24107L
     
     stylesXML <- xmlFiles[grepl("styles.xml", xmlFiles)]
