@@ -151,6 +151,15 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
   }
   
   if(res != 0){
+    
+    ## try zipping using *
+    args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
+    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
+  }
+  
+  
+  if(res != 0){
+    
     stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
          Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
          or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
@@ -807,24 +816,24 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
-
+  
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[[i]]) <- "numeric"
   }
-
+  
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
       class(df[[i]]) <- "character"
   }
-
+  
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
   for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
     df[[i]] <- as.character(df[[i]])
-
+  
   
   ## cell values
   v <- as.character(t(as.matrix(df)))
