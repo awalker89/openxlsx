@@ -32,6 +32,7 @@ createWorkbook <- function(creator = Sys.getenv("USERNAME")){
 
 #' @name saveWorkbook
 #' @title save Workbook to file
+#' @description save a Workbook object to file
 #' @author Alexander Walker
 #' @param wb A Workbook object to write to file
 #' @param file A character string naming an xlsx file
@@ -85,6 +86,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
 
 #' @name mergeCells
 #' @title Merge cells within a worksheet
+#' @description Merge cells within a worksheet
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols Columns to merge
@@ -175,6 +177,7 @@ removeCellMerge <- function(wb, sheet, cols, rows){
 
 #' @name sheets
 #' @title Returns names of worksheets.
+#' @description DEPRECATED. Use names().
 #' @param wb A workbook object
 #' @return Name of worksheet(s) for a given index
 #' @author Alexander Walker
@@ -214,6 +217,7 @@ sheets <- function(wb){
 
 #' @name addWorksheet
 #' @title Add a worksheet to a workbook
+#' @description Add a worksheet to a Workbook object
 #' @author Alexander Walker
 #' @param wb A Workbook object to attach the new worksheet
 #' @param sheetName A name for the new worksheet
@@ -381,7 +385,8 @@ addWorksheet <- function(wb, sheetName,
 
 
 #' @name renameWorksheet
-#' @title Rename an exisiting worksheet
+#' @title Rename a worksheet
+#' @description Rename a worksheet
 #' @author Alexander Walker
 #' @param wb A Workbook object containing a worksheet
 #' @param sheet The name or index of the worksheet to rename
@@ -419,8 +424,8 @@ renameWorksheet <- function(wb, sheet, newName){
 
 
 #' @name convertFromExcelRef
-#' @author Alexander Walker
 #' @title Convert excel column name to integer index
+#' @description Convert excel column name to integer index e.g. "J" to 10
 #' @param col An excel column reference
 #' @export
 #' @examples
@@ -846,6 +851,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
 
 #' @name getCellRefs
 #' @title Return excel cell coordinates from (x,y) coordinates
+#' @description Return excel cell coordinates from (x,y) coordinates
 #' @author Alexander Walker
 #' @param cellCoords A data.frame with two columns coordinate pairs. 
 #' @return Excel alphanumeric cell reference
@@ -866,6 +872,7 @@ getCellRefs <- function(cellCoords){
 
 #' @name freezePane
 #' @title Freeze a worksheet pane
+#' @description Freeze a worksheet pane 
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -938,6 +945,7 @@ convert2EMU <- function(d, units){
 
 #' @name insertImage
 #' @title Insert an image into a worksheet 
+#' @description Insert an image into a worksheet
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1014,6 +1022,7 @@ pixels2ExcelColWidth <- function(pixels){
 
 #' @name setRowHeights
 #' @title Set worksheet row heights
+#' @description Set worksheet row heights
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1137,7 +1146,8 @@ setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
 
 
 #' @name removeColWidths
-#' @title Remove custom column widths from a worksheet
+#' @title Remove column widths from a worksheet
+#' @description Remove column widths from a worksheet
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1184,6 +1194,7 @@ removeColWidths <- function(wb, sheet, cols){
 
 #' @name removeRowHeights
 #' @title Remove custom row heights from a worksheet
+#' @description Remove row heights from a worksheet
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1304,6 +1315,7 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 
 #' @name replaceStyle
 #' @title Replace an existing cell style
+#' @description Replace an existing cell style
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param index Index of style object to replace
@@ -1312,6 +1324,7 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 #' @export
 #' @seealso \code{\link{getStyles}}
 #' @examples
+#' 
 #' ## load a workbook 
 #' wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 #' 
@@ -1345,7 +1358,7 @@ replaceStyle <- function(wb, index, newStyle){
 
 #' @name getStyles
 #' @title Returns a list of all styles in the workbook
-#' @author Alexander Walker
+#' @description Returns list of style objects in the workbook
 #' @param wb A workbook object
 #' @export
 #' @seealso \code{\link{replaceStyle}}
@@ -1369,6 +1382,7 @@ getStyles <- function(wb){
 
 #' @name removeWorksheet
 #' @title Remove a worksheet from a workbook
+#' @description Remove a worksheet from a Workbook object
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1398,6 +1412,7 @@ removeWorksheet <- function(wb, sheet){
 
 #' @name deleteData
 #' @title Delete cell data
+#' @description Delete contents and styling from a cell.
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1405,7 +1420,6 @@ removeWorksheet <- function(wb, sheet){
 #' @param cols columns to delete data from.
 #' @param gridExpand If \code{TRUE}, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
 #' will be removed.
-#' @description Remove contents and styling from a cell.
 #' @export
 #' @examples
 #' ## load a workbook 
@@ -1452,14 +1466,14 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
 
 #' @name modifyBaseFont
 #' @title Modify the default font
+#' @description Modify the default font for this workbook
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param fontSize font size
 #' @param fontColour font colour
 #' @param fontName Name of a font
-#' @description Base font is black, size 11, Calibri
-#' @details  The font name is not validated in anyway.  Excel replaces unknown font names
-#' with Arial.
+#' @details The font name is not validated in anyway.  Excel replaces unknown font names
+#' with Arial. Base font is black, size 11, Calibri.
 #' @export
 #' @examples
 #' ## create a workbook
@@ -1486,7 +1500,8 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "black", fontName = "
 
 
 #' @name getBaseFont
-#' @title Return the workbook defaul font
+#' @title Return the workbook default font
+#' @description Return the workbook default font
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @description Returns the base font used in the workbook.
@@ -1513,6 +1528,7 @@ getBaseFont <- function(wb){
 
 #' @name setHeaderFooter
 #' @title Set document headers and footers
+#' @description Set document headers and footers
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1638,6 +1654,7 @@ setHeaderFooter <- function(wb, sheet,
 
 #' @name pageSetup
 #' @title Set page margins, orientation and print scaling
+#' @description Set page margins, orientation and print scaling
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1862,6 +1879,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
 
 #' @name showGridLines
 #' @title Set worksheet gridlines to show or hide.
+#' @description Set worksheet gridlines to show or hide.
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -1902,6 +1920,7 @@ showGridLines <- function(wb, sheet, showGridLines = FALSE){
 
 #' @name worksheetOrder
 #' @title Order of worksheets in xlsx file
+#' @description Get/set order of worksheets in a Workbook object
 #' @details This function does not reorder the worksheets within the workbook object, it simply
 #' shuffles the order when writing to file.
 #' @export
@@ -1967,6 +1986,7 @@ worksheetOrder <- function(wb){
 
 #' @name convertToDate
 #' @title Convert from excel date number to R Date type
+#' @description Convert from excel date number to R Date type
 #' @param x A vector of integers
 #' @param origin date. Default value is for Windows Excel 2010
 #' @param ... additional parameters passed to as.Date()
@@ -1992,6 +2012,7 @@ convertToDate <- function(x, origin = "1900-01-01", ...){
 
 #' @name convertToDateTime
 #' @title Convert from excel time number to R POSIXct type.
+#' @description Convert from excel time number to R POSIXct type.
 #' @param x A numeric vector
 #' @param origin date. Default value is for Windows Excel 2010
 #' @param ... Additional parameters passed to as.POSIXct
@@ -2030,10 +2051,11 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
 
 
 #' @name names
+#' @title get or set worksheet names
+#' @description get or set worksheet names
 #' @aliases names.Workbook
 #' @export
 #' @method names Workbook
-#' @title get or set worksheet names
 #' @param x A \code{Workbook} object
 #' @examples
 #' 
@@ -2084,7 +2106,7 @@ names.Workbook <- function(x){
 
 #' @name createNamedRegion
 #' @title Create a named region.
-#' @title Insert an image into a worksheet 
+#' @description Create a named region
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -2173,7 +2195,9 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
 
 
 #' @name getNamedRegions
-#' @title Get named regions.
+#' @title Get named regions
+#' @description Return a vector of named regions in a xlsx file or
+#' Workbook object
 #' @param x An xlsx file or Workbook object
 #' @export
 #' @seealso \code{\link{createNamedRegion}}
@@ -2255,7 +2279,8 @@ getNamedRegions.Workbook <- function(x){
 
 
 #' @name addFilter
-#' @title add filters to columns
+#' @title Add column filters
+#' @description Add excel column filters to a worksheet
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols columns to add filter to. 
@@ -2303,7 +2328,8 @@ addFilter <- function(wb, sheet, rows, cols){
 
 
 #' @name removeFilter
-#' @title removes worksheet filter from addFilter and writeData
+#' @title Remove a worksheet filter
+#' @description Removes filters from addFilter() and writeData()
 #' @param wb A workbook object
 #' @param sheet A vector of names or indices of worksheets
 #' @export
@@ -2353,6 +2379,7 @@ removeFilter <- function(wb, sheet){
 
 #' @name setHeader
 #' @title Set header for all worksheets
+#' @description DEPRECATED
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param text header text. A character vector of length 1.
@@ -2398,6 +2425,7 @@ setHeader <- function(wb, text, position = "center"){
 
 #' @name setFooter
 #' @title Set footer for all worksheets
+#' @description DEPRECATED
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param text footer text. A character vector of length 1.
@@ -2452,6 +2480,7 @@ setFooter <- function(wb, text, position = "center"){
 
 #' @name dataValidation
 #' @title Add data validation to cells
+#' @description Add Excel data validation to cells 
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols Columns to apply conditional formatting to
@@ -2471,8 +2500,11 @@ setFooter <- function(wb, text, position = "center"){
 #' 
 #' writeDataTable(wb, 1, x = iris[1:30,])
 #' 
-#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "whole", operator = "between", value = c(1, 9))
-#' dataValidation(wb, 1, col = 5, rows = 2:31, type = "textLength", operator = "between", value = c(4, 6))
+#' dataValidation(wb, 1, col = 1:3, rows = 2:31, type = "whole"
+#'    , operator = "between", value = c(1, 9))
+#' 
+#' dataValidation(wb, 1, col = 5, rows = 2:31, type = "textLength"
+#'    , operator = "between", value = c(4, 6))
 #' 
 #' 
 #' ## Date and Time cell validation
@@ -2573,6 +2605,7 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
 
 #' @name conditionalFormatting
 #' @title Add conditional formatting to cells
+#' @description Add conditional formatting to cells
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
@@ -2878,7 +2911,8 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
 
 
 #' @name getDateOrigin
-#' @title Return the date origin used internally by an xlsx or xlsm file
+#' @title Get the date origin an xlsx file is using
+#' @description Return the date origin used internally by an xlsx or xlsm file
 #' @author Alexander Walker
 #' @param xlsxFile An xlsx or xlsm file.
 #' @details Excel stores dates as the number of days from either 1904-01-01 or 1900-01-01. This function
@@ -2931,7 +2965,8 @@ getDateOrigin <- function(xlsxFile){
 
 
 #' @name getSheetNames
-#' @title Returns the worksheet names within an xlsx file
+#' @title Get names of worksheets
+#' @description Returns the worksheet names within an xlsx file
 #' @author Alexander Walker
 #' @param file An xlsx or xlsm file.
 #' @return Character vector of worksheet names.
@@ -2968,7 +3003,8 @@ getSheetNames <- function(file){
 
 
 #' @name sheetVisibility
-#' @title Get worksheet visible state.
+#' @title Get/set worksheet visible state
+#' @description Get and set worksheet visible state
 #' @param wb A workbook object 
 #' @return Character vector of worksheet names.
 #' @return  Vector of "hidden", "visible", "veryHidden"
@@ -3041,6 +3077,7 @@ sheetVisibility <- function(wb){
 
 #' @name pageBreak
 #' @title add a page break to a worksheet
+#' @description insert page breaks into a worksheet
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param i row or column number to insert page break.
@@ -3267,9 +3304,9 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
 
 #' @name all.equal
 #' @aliases all.equal.Workbook
-#' @export
-#' @method all.equal Workbook
 #' @title Check equality of workbooks
+#' @description Check equality of workbooks
+#' @method all.equal Workbook
 #' @param target A \code{Workbook} object
 #' @param current A \code{Workbook} object
 #' @param ... ignored

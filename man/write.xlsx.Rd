@@ -2,7 +2,7 @@
 % Please edit documentation in R/writexlsx.R
 \name{write.xlsx}
 \alias{write.xlsx}
-\title{write directly to an xlsx file}
+\title{write data to an xlsx file}
 \usage{
 write.xlsx(x, file, asTable = FALSE, ...)
 }
@@ -26,6 +26,9 @@ see details.}
 }
 \value{
 A workbook object
+}
+\description{
+write a data.frame or list of data.frames to an xlsx file
 }
 \details{
 Optional parameters are:

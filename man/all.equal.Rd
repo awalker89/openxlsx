@@ -14,4 +14,7 @@
 
 \item{...}{ignored}
 }
+\description{
+Check equality of workbooks
+}
 

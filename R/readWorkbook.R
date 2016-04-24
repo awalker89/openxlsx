@@ -2,7 +2,8 @@
 
 
 #' @name read.xlsx
-#' @title Read data from an Excel file or Workbook object into a data.frame
+#' @title  Read from an Excel file or Workbook object
+#' @description Read data from an Excel file or Workbook object into a data.frame
 #' @param xlsxFile An xlsx file or Workbook object
 #' @param sheet The name or index of the sheet to read data from.
 #' @param startRow first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
@@ -142,8 +143,8 @@ read.xlsx.default <- function(xlsxFile,
   workbookRelsXML <- paste(readLines(workbookRelsXML, warn = FALSE, encoding = "UTF-8"), collapse = "")
   workbookRelsXML <- .Call("openxlsx_getChildlessNode", workbookRelsXML, "<Relationship ", PACKAGE="openxlsx")
   
-  
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
+  workbook <- removeHeadTag(workbook)
   sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
   
   ## make sure sheetId is 1 based
@@ -158,7 +159,7 @@ read.xlsx.default <- function(xlsxFile,
   ## Named region logic
   if(!is.null(namedRegion)){
     
-    dn <- .Call("openxlsx_getNodes", removeHeadTag(workbook), "<definedNames>", PACKAGE = "openxlsx")
+    dn <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
     dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
 
     if(length(dn) == 0){
@@ -345,7 +346,7 @@ read.xlsx.default <- function(xlsxFile,
   if(detectDates){
     
     ## get date origin
-    if(grepl('date1904="1"|date1904="true"', paste(workbook, collapse = ""), ignore.case = TRUE))
+    if(grepl('date1904="1"|date1904="true"', workbook, ignore.case = TRUE))
       origin <- 24107L
     
     stylesXML <- xmlFiles[grepl("styles.xml", xmlFiles)]
@@ -747,22 +748,13 @@ read.xlsx.Workbook <- function(xlsxFile,
 
 
 #' @name readWorkbook
-#' @title Read data from a worksheet into a data.frame
-#' @param xlsxFile An xlsx file
-#' @param sheet The name or index of the sheet to read data 
-#' @param startRow first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
-#' regardless of the value of startRow.
-#' @param colNames If \code{TRUE}, first row of data will be used as column names. 
-#' @param skipEmptyRows If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
-#' will return a row of NAs
-#' @param rowNames If \code{TRUE}, first column of data will be used as row names.
-#' @details Creates a data.frame of all data in worksheet.
-#' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
+#' @title  Read from an Excel file or Workbook object
+#' @description Read data from an Excel file or Workbook object into a data.frame
 #' @inheritParams read.xlsx
+#' @details Creates a data.frame of all data in worksheet.
 #' @author Alexander Walker
 #' @return data.frame
 #' @seealso \code{\link{getNamedRegions}}
-#' @export
 #' @seealso \code{\link{read.xlsx}}
 #' @export
 #' @examples

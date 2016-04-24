@@ -17,6 +17,9 @@ createNamedRegion(wb, sheet, cols, rows, name)
 
 \item{name}{Name for region. A character vector of length 1. Note region names musts be case-insensitive unique.}
 }
+\description{
+Create a named region
+}
 \details{
 Region is given by: min(cols):max(cols) X min(rows):max(rows)
 }

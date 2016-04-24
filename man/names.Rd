@@ -15,6 +15,9 @@
 
 \item{value}{a character vector the same length as wb}
 }
+\description{
+get or set worksheet names
+}
 \examples{
 
 wb <- createWorkbook()

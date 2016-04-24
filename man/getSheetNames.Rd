@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{getSheetNames}
 \alias{getSheetNames}
-\title{Returns the worksheet names within an xlsx file}
+\title{Get names of worksheets}
 \usage{
 getSheetNames(file)
 }
@@ -11,6 +11,9 @@ getSheetNames(file)
 }
 \value{
 Character vector of worksheet names.
+}
+\description{
+Returns the worksheet names within an xlsx file
 }
 \examples{
 getSheetNames(system.file("readTest.xlsx", package = "openxlsx"))

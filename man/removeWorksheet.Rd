@@ -12,6 +12,8 @@ removeWorksheet(wb, sheet)
 \item{sheet}{A name or index of a worksheet}
 }
 \description{
+Remove a worksheet from a Workbook object
+
 Remove a worksheet from a workbook
 }
 \examples{

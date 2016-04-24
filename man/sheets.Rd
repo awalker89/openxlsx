@@ -12,6 +12,9 @@ sheets(wb)
 \value{
 Name of worksheet(s) for a given index
 }
+\description{
+DEPRECATED. Use names().
+}
 \details{
 DEPRECATED. Use \code{\link{names}}
 }

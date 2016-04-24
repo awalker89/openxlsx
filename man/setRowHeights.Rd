@@ -15,6 +15,9 @@ setRowHeights(wb, sheet, rows, heights)
 
 \item{heights}{Heights to set rows to specified in Excel column height units.}
 }
+\description{
+Set worksheet row heights
+}
 \examples{
 ## Create a new workbook
 wb <- createWorkbook()

@@ -15,6 +15,9 @@ pageBreak(wb, sheet, i, type = "row")
 
 \item{type}{One of "row" or "column" for a row break or column break.}
 }
+\description{
+insert page breaks into a worksheet
+}
 \examples{
 wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")

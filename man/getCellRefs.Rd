@@ -12,6 +12,9 @@ getCellRefs(cellCoords)
 \value{
 Excel alphanumeric cell reference
 }
+\description{
+Return excel cell coordinates from (x,y) coordinates
+}
 \author{
 Alexander Walker
 }

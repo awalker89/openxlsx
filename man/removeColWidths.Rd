@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{removeColWidths}
 \alias{removeColWidths}
-\title{Remove custom column widths from a worksheet}
+\title{Remove column widths from a worksheet}
 \usage{
 removeColWidths(wb, sheet, cols)
 }
@@ -12,6 +12,9 @@ removeColWidths(wb, sheet, cols)
 \item{sheet}{A name or index of a worksheet}
 
 \item{cols}{Indices of colunss to remove custom width (if any) from.}
+}
+\description{
+Remove column widths from a worksheet
 }
 \examples{
 ## Create a new workbook

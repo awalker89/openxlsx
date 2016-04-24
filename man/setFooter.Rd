@@ -13,6 +13,9 @@ setFooter(wb, text, position = "center")
 
 \item{position}{Postion of text in footer. One of "left", "center" or "right"}
 }
+\description{
+DEPRECATED
+}
 \examples{
 \dontrun{
 wb <- createWorkbook("Edgar Anderson")

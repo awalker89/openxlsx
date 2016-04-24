@@ -18,6 +18,9 @@ removeComment(wb, sheet, cols, rows, gridExpand = TRUE)
 \item{gridExpand}{If \code{TRUE}, all data in rectangle min(rows):max(rows) X min(cols):max(cols)
 will be removed.}
 }
+\description{
+Remove a cell comment from a worksheet
+}
 \seealso{
 \code{\link{createComment}}
 

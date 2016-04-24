@@ -69,7 +69,8 @@ Comment$methods(show = function(){
 
 
 #' @name createComment
-#' @title write a cell comment
+#' @title create a Comment object
+#' @description Create a cell Comment object to pass to writeComment()
 #' @param comment Comment text. Character vector of length 1
 #' @param author Author of comment. Character vector of length 1
 #' @param style A Style object. See \code{\link{createStyle}}.
@@ -144,6 +145,7 @@ createComment <- function(comment,
 
 #' @name writeComment
 #' @title write a cell comment
+#' @description Write a Comment object to a worksheet
 #' @param wb A workbook object
 #' @param sheet A vector of names or indices of worksheets
 #' @param col Column a column number of letter 
@@ -219,6 +221,7 @@ writeComment <- function(wb, sheet, col, row, comment, xy = NULL){
 
 #' @name removeComment
 #' @title Remove a comment from a cell
+#' @description Remove a cell comment from a worksheet
 #' @param wb A workbook object
 #' @param sheet A vector of names or indices of worksheets
 #' @param cols Columns to delete comments from

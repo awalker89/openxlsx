@@ -21,6 +21,9 @@ writeComment(wb, sheet, col, row, comment, xy = NULL)
 \code{row} individually.  A vector of the form
 \code{c(col, row)}.}
 }
+\description{
+Write a Comment object to a worksheet
+}
 \examples{
 wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")

@@ -17,11 +17,11 @@ modifyBaseFont(wb, fontSize = 11, fontColour = "black",
 \item{fontName}{Name of a font}
 }
 \description{
-Base font is black, size 11, Calibri
+Modify the default font for this workbook
 }
 \details{
 The font name is not validated in anyway.  Excel replaces unknown font names
-with Arial.
+with Arial. Base font is black, size 11, Calibri.
 }
 \examples{
 ## create a workbook

@@ -13,6 +13,9 @@ saveWorkbook(wb, file, overwrite = FALSE)
 
 \item{overwrite}{If \code{TRUE}, overwrite any existing file.}
 }
+\description{
+save a Workbook object to file
+}
 \examples{
 ## Create a new workbook and add a worksheet
 wb <- createWorkbook("Creator of workbook")

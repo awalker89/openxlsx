@@ -13,6 +13,9 @@ removeRowHeights(wb, sheet, rows)
 
 \item{rows}{Indices of rows to remove custom height (if any) from.}
 }
+\description{
+Remove row heights from a worksheet
+}
 \examples{
 ## Create a new workbook
 wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))

@@ -151,6 +151,15 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
   }
   
   if(res != 0){
+    
+    ## try zipping using *
+    args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
+    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
+  }
+  
+  
+  if(res != 0){
+    
     stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
          Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
          or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
@@ -807,24 +816,24 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   colClasses <- sapply(df, function(x) tolower(class(x))[[1]]) ## by here all cols must have a single class only
-
+  
   ## convert logicals (Excel stores logicals as 0 & 1)
   if("logical" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[[i]]) <- "numeric"
   }
-
+  
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
       class(df[[i]]) <- "character"
   }
-
+  
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
   for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
     df[[i]] <- as.character(df[[i]])
-
+  
   
   ## cell values
   v <- as.character(t(as.matrix(df)))
@@ -1175,7 +1184,7 @@ Workbook$methods(updateStyles = function(style){
   
   
   ## Alignment
-  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation)){
+  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation) | !is.null(style$indent)){
     
     attrs <- list()
     alignNode <- "<alignment"
@@ -2590,13 +2599,17 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
       if(sheet == styleObjects[[i]]$sheet){
         
         ## Now check rows and cols intersect
-        ## toRemove are the elements that will be used in the merge
-        ## mergeInds are the intersection of the two styles that will need to merge
-        ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
-        
+        ## toRemove are the elements that the new style doesn't apply to, we remove these from the style object as it
+        ## is copied, merged with the new style and given the new data points
         toRemoveInds <- which(styleObjects[[i]]$rows %in% rows & styleObjects[[i]]$cols %in% cols) 
-        #which(!is.na(match(styleObjects[[i]]$rows, rows)) & !is.na(match(styleObjects[[i]]$cols, cols)))
+        toRemoveInds <- toRemoveInds[styleObjects[[i]]$rows[toRemoveInds] == styleObjects[[i]]$cols[toRemoveInds]]
+        
+        
+        
+        ## mergeInds are the intersection of the two styles that will need to merge
         mergeInds <- which(rows %in% styleObjects[[i]]$rows & cols %in% styleObjects[[i]]$cols)
+        
+        ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
         newInds <- newInds[!newInds %in% mergeInds]
         
         if(length(toRemoveInds) > 0){
@@ -2617,7 +2630,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
           keepStyle <- c(keepStyle, TRUE)
           
           styleObjects <<- append(styleObjects, list(list(style = mergeStyle(styleObjects[[i]]$style, newStyle = style),
-                                                          sheet =  sheet,
+                                                          sheet = sheet,
                                                           rows = rows[mergeInds],
                                                           cols = cols[mergeInds])))        
         }

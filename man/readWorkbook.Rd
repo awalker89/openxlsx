@@ -2,7 +2,7 @@
 % Please edit documentation in R/readWorkbook.R
 \name{readWorkbook}
 \alias{readWorkbook}
-\title{Read data from a worksheet into a data.frame}
+\title{Read from an Excel file or Workbook object}
 \usage{
 readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
@@ -10,21 +10,21 @@ readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   namedRegion = NULL, na.strings = "NA", fillMergedCells = FALSE)
 }
 \arguments{
-\item{xlsxFile}{An xlsx file}
+\item{xlsxFile}{An xlsx file or Workbook object}
 
-\item{sheet}{The name or index of the sheet to read data}
+\item{sheet}{The name or index of the sheet to read data from.}
 
 \item{startRow}{first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
 regardless of the value of startRow.}
 
-\item{colNames}{If \code{TRUE}, first row of data will be used as column names.}
+\item{colNames}{If \code{TRUE}, the first row of data will be used as column names.}
 
 \item{rowNames}{If \code{TRUE}, first column of data will be used as row names.}
 
 \item{detectDates}{If \code{TRUE}, attempt to recognise dates and perform conversion.}
 
 \item{skipEmptyRows}{If \code{TRUE}, empty rows are skipped else empty rows after the first row containing data 
-will return a row of NAs}
+will return a row of NAs.}
 
 \item{skipEmptyCols}{If \code{TRUE}, empty columns are skipped.}
 
@@ -45,6 +45,9 @@ are checked to ensure that they are syntactically valid variable names}
 }
 \value{
 data.frame
+}
+\description{
+Read data from an Excel file or Workbook object into a data.frame
 }
 \details{
 Creates a data.frame of all data in worksheet.

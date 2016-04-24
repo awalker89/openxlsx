@@ -13,6 +13,9 @@ convertToDateTime(x, origin = "1900-01-01", ...)
 
 \item{...}{Additional parameters passed to as.POSIXct}
 }
+\description{
+Convert from excel time number to R POSIXct type.
+}
 \details{
 Excel stores dates as number of days from some origin date
 }

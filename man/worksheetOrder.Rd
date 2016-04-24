@@ -14,6 +14,9 @@ worksheetOrder(wb) <- value
 
 \item{value}{Vector specifying order to write worksheets to file}
 }
+\description{
+Get/set order of worksheets in a Workbook object
+}
 \details{
 This function does not reorder the worksheets within the workbook object, it simply
 shuffles the order when writing to file.

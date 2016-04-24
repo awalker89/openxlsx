@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrappers.R
 \name{addFilter}
 \alias{addFilter}
-\title{add filters to columns}
+\title{Add column filters}
 \usage{
 addFilter(wb, sheet, rows, cols)
 }
@@ -14,6 +14,9 @@ addFilter(wb, sheet, rows, cols)
 \item{rows}{A row number.}
 
 \item{cols}{columns to add filter to.}
+}
+\description{
+Add excel column filters to a worksheet
 }
 \details{
 adds filters to worksheet columns, same as filter parameters in writeData.

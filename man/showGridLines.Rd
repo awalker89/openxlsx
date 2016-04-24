@@ -13,6 +13,9 @@ showGridLines(wb, sheet, showGridLines = FALSE)
 
 \item{showGridLines}{A logical. If \code{TRUE}, grid lines are hidden.}
 }
+\description{
+Set worksheet gridlines to show or hide.
+}
 \examples{
 wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 names(wb) ## list worksheets in workbook
