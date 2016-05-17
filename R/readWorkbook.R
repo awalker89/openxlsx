@@ -176,7 +176,7 @@ read.xlsx.default <- function(xlsxFile,
     ## pull out first node value
     dn <- dn[ind] 
     region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
-    sheet <- sheetNames[sapply(sheetNames, function(x) grepl(x, dn))]
+    sheet <- sheetNames[sapply(sheetNames, function(x) grepl(paste0(">",x,"!"), dn))]
     
     region <- gsub(sheet, "", region, fixed = TRUE)
     region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
