@@ -379,7 +379,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   file_names <- file_names[match(sheetrId, file_rIds)]
   
   worksheetsXML <- file.path(dirname(worksheetsXML), file_names)
-  wb <- .Call("openxlsx_loadworksheets", wb, styleObjects, worksheetsXML, is_chart_sheet)
+  wb <- .Call("openxlsx_loadworksheets", wb, styleObjects, worksheetsXML, is_chart_sheet, PACKAGE = 'openxlsx')
   
   ## Fix styleobject encoding
   if(length(wb$styleObjects) > 0){
