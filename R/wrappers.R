@@ -1865,7 +1865,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     localSheetId <- sheet - 1L
     sheet <- names(wb)[[sheet]]
     
-    wb$workbook$definedNames <<- c(wb$workbook$definedNames, 
+    wb$workbook$definedNames <- c(wb$workbook$definedNames, 
        sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
     )
     
