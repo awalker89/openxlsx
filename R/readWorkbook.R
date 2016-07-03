@@ -158,7 +158,7 @@ read.xlsx.default <- function(xlsxFile,
   
   ## Named region logic
   if(!is.null(namedRegion)){
-    
+   
     dn <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
     dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
 
@@ -181,11 +181,18 @@ read.xlsx.default <- function(xlsxFile,
     region <- gsub(sheet, "", region, fixed = TRUE)
     region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
     
-    cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
-    rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
-    
-    cols <- seq(from = cols[1], to = cols[2], by = 1)
-    rows <- seq(from = rows[1], to = rows[2], by = 1)
+    if(grepl(":", region, fixed = TRUE)){
+      cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
+      rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x, perl = TRUE))))
+      
+      cols <- seq(from = cols[1], to = cols[2], by = 1)
+      rows <- seq(from = rows[1], to = rows[2], by = 1)
+      
+    }else{
+      cols <- convertFromExcelRef(region)
+      rows <- as.integer(gsub("[A-Z]", "", region, perl = TRUE))
+    }
+
     startRow <- 1
     
   }
