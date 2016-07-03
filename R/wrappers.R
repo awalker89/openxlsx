@@ -2030,6 +2030,7 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
   options("scipen" = 10000)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
+  x <- as.numeric(x)
   rem <- x %% 1
   date <- convertToDate(x, origin)
   fraction <- 24*rem
