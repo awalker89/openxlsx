@@ -22,7 +22,6 @@ Imports:
     grDevices,
     stats,
     utils
-Repository: CRAN
 VignetteBuilder: knitr
 Suggests:
     knitr,
