@@ -2118,10 +2118,24 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
   sheet = validateSheet(sheet)
   sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
   
+  
+  
   ## Increment priority of conditional formatting rule
-  if(length((worksheets[[sheet]]$conditionalFormatting)) > 0){
-    for(i in length(worksheets[[sheet]]$conditionalFormatting):1)
-      worksheets[[sheet]]$conditionalFormatting[[i]] <<- gsub('(?<=priority=")[0-9]+', i+1L, worksheets[[sheet]]$conditionalFormatting[[i]], perl = TRUE)
+  if(length(worksheets[[sheet]]$conditionalFormatting) > 0){
+    
+    for(i in length(worksheets[[sheet]]$conditionalFormatting):1){
+      
+      priority <- regmatches(worksheets[[sheet]]$conditionalFormatting[[i]], regexpr('(?<=priority=")[0-9]+', worksheets[[sheet]]$conditionalFormatting[[i]], perl = TRUE))
+      priority_new <- as.integer(priority) + 1L
+      
+      priority_pattern <- sprintf('priority="%s"', priority)
+      priority_new <- sprintf('priority="%s"', priority_new)
+      
+      ## now replace
+      worksheets[[sheet]]$conditionalFormatting[[i]] <<- gsub(priority_pattern, priority_new, worksheets[[sheet]]$conditionalFormatting[[i]], fixed = TRUE)
+      
+    }
+      
   }
   
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
