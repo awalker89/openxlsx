@@ -2822,7 +2822,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     # - style = createStyle()
     # - rule is an expression to evaluate
     
-    rule <- toupper(gsub(" ", "", rule))
+    # rule <- gsub(" ", "", rule)
     rule <- replaceIllegalCharacters(rule)
     rule <- gsub("!=", "&lt;&gt;", rule)
     rule <- gsub("==", "=", rule)
