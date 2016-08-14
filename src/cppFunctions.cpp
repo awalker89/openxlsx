@@ -1095,9 +1095,16 @@ SEXP convert2ExcelRef(IntegerVector cols, std::vector<std::string> LETTERS){
 // [[Rcpp::export]]
 SEXP buildMatrixNumeric(CharacterVector v, IntegerVector rowInd, IntegerVector colInd,
                         CharacterVector colNames, int nRows, int nCols){
-  
-  //Rcout << "Running buildMatrixNumeric" << endl;
-  
+
+  LogicalVector isNA_element = is_na(v);
+  if(is_true(any(isNA_element))){
+    
+    v = v[!isNA_element];
+    rowInd = rowInd[!isNA_element];
+    colInd = colInd[!isNA_element];
+    
+  }
+
   int k = v.size();
   NumericMatrix m(nRows, nCols);
   std::fill(m.begin(), m.end(), NA_REAL);
@@ -2594,7 +2601,7 @@ SEXP readWorkbook(CharacterVector v,
   v.erase(v.begin(), v.begin() + pos);
   
   if(allNumeric){
-    
+
     m = buildMatrixNumeric(v, rowNumbers, colNumbers, colNames, nRows, nCols);
     
   }else{
