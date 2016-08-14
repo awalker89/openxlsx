@@ -595,21 +595,19 @@ createStyle <- function(fontName = NULL,
   ### Error checking
   
   ## if num fmt is made up of dd, mm, yy
-  
-  numFmt <- tolower(numFmt[[1]])
+  numFmt_original <- numFmt[[1]]
+  numFmt <- tolower(numFmt_original)
   validNumFmt <- c("general", "number", "currency", "accounting", "date", "longdate", "time", "percentage", "scientific", "text", "3", "4", "comma")
   
   if(numFmt == "date"){
     numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
+  }else if(numFmt == "longdate"){
+      numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
   }else if(!numFmt %in% validNumFmt){
-    # if(grepl("[^mdyhsap[[:punct:] 0\\.#\\$\\*]", numFmt))
-    # stop("Invalid numFmt")
-    numFmt <- replaceIllegalCharacters(numFmt)
+    numFmt <- replaceIllegalCharacters(numFmt_original)
   }
   
-  if(numFmt == "longdate"){
-    numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
-  }
+
   
   
   numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
