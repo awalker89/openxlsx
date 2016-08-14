@@ -519,8 +519,9 @@ convertFromExcelRef <- function(col){
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
 #'    
-#' @param bgFill Cell background fill colour. 
-#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
+#' @param bgFill Cell background fill colour.
+#' A valid colour (belonging to colours()) or a valid hex colour beginning with "#". 
+#' --  Use for conditional formatting styles only.
 #' @param fgFill Cell foreground fill colour.
 #' A valid colour (belonging to colours()) or a valid hex colour beginning with "#"   
 #'   

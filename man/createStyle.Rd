@@ -73,8 +73,9 @@ A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
    \item{\bold{slantDashDot}}{ slanted dash-dot border}
   }}
 
-\item{bgFill}{Cell background fill colour. 
-A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
+\item{bgFill}{Cell background fill colour.
+A valid colour (belonging to colours()) or a valid hex colour beginning with "#". 
+--  Use for conditional formatting styles only.}
 
 \item{fgFill}{Cell foreground fill colour.
 A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
