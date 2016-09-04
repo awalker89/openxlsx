@@ -1175,7 +1175,7 @@ SEXP buildMatrixMixed(CharacterVector v,
   
   // loop over each column and check type
   for(int i = 0; i < nCols; i++){
-    
+
     CharacterVector tmp(nRows);
     
     for(int ri = 0; ri < nRows; ri++)
@@ -2529,11 +2529,14 @@ SEXP readWorkbook(CharacterVector v,
     // tidy up column names
     colNames = clean_names(colNames);
     
-    
     //If nothing left return a data.frame with 0 rows
     if(r.size() == 0){
       List dfList(nCols);
       IntegerVector rowNames(0);
+      
+      for(int i =0; i < nCols; i++){
+        dfList[i] = LogicalVector(0);
+      }
       
       dfList.attr("names") = colNames;
       dfList.attr("row.names") = rowNames;
