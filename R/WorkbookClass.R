@@ -2135,7 +2135,7 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
       worksheets[[sheet]]$conditionalFormatting[[i]] <<- gsub(priority_pattern, priority_new, worksheets[[sheet]]$conditionalFormatting[[i]], fixed = TRUE)
       
     }
-      
+    
   }
   
   nms <- c(names(worksheets[[sheet]]$conditionalFormatting), sqref)
@@ -2600,8 +2600,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
                                rows = rows,
                                cols = cols))   
   }else if(stack){
-    
-    
+
     nStyles <- length(styleObjects)
     
     ## ********** Assume all styleObjects cells have one a single worksheet **********
@@ -2615,39 +2614,49 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
         ## Now check rows and cols intersect
         ## toRemove are the elements that the new style doesn't apply to, we remove these from the style object as it
         ## is copied, merged with the new style and given the new data points
-        toRemoveInds <- which(styleObjects[[i]]$rows %in% rows & styleObjects[[i]]$cols %in% cols) 
-        toRemoveInds <- toRemoveInds[styleObjects[[i]]$rows[toRemoveInds] == styleObjects[[i]]$cols[toRemoveInds]]
         
+        ex_row_cols <- paste(styleObjects[[i]]$rows, styleObjects[[i]]$cols, sep = "-")
+        new_row_cols <- paste(rows, cols, sep = "-")
         
         
         ## mergeInds are the intersection of the two styles that will need to merge
-        mergeInds <- which(rows %in% styleObjects[[i]]$rows & cols %in% styleObjects[[i]]$cols)
+        mergeInds <- which(new_row_cols %in% ex_row_cols)
         
         ## newInds are inds that don't exist in the current - this cumulates until the end to see if any are new
         newInds <- newInds[!newInds %in% mergeInds]
         
-        if(length(toRemoveInds) > 0){
-          
-          ## remove these from style object
-          styleObjects[[i]]$rows <<- styleObjects[[i]]$rows[-toRemoveInds]
-          styleObjects[[i]]$cols <<- styleObjects[[i]]$cols[-toRemoveInds]
-          
-          if(length(styleObjects[[i]]$rows) == 0 | length(styleObjects[[i]]$cols) == 0)
-            keepStyle[[i]] <- FALSE
-          
-          
-        }
         
-        ## append style object for intersecting cells
+        ## If the new style does not merge 
         if(length(mergeInds) > 0){
           
-          keepStyle <- c(keepStyle, TRUE)
+          to_remove_from_this_style_object <- which(ex_row_cols %in% new_row_cols)
           
+          ## the new style intersects with this styleObjects[[i]], we need to remove the intersecting rows and
+          ## columns from styleObjects[[i]]
+          if(length(to_remove_from_this_style_object) > 0){
+            
+            ## remove these from style object
+            styleObjects[[i]]$rows <<- styleObjects[[i]]$rows[-to_remove_from_this_style_object]
+            styleObjects[[i]]$cols <<- styleObjects[[i]]$cols[-to_remove_from_this_style_object]
+            
+            if(length(styleObjects[[i]]$rows) == 0 | length(styleObjects[[i]]$cols) == 0)
+              keepStyle[i] <- FALSE ## this style applies to no rows or columns anymore
+            
+            
+          }
+          
+          ## append style object for intersecting cells
+          
+          ## we are appending a new style
+          keepStyle <- c(keepStyle, TRUE) ## keepStyle is used to remove styles that apply to 0 rows OR 0 columns
+          
+          ## Merge Style and append to styleObjects
           styleObjects <<- append(styleObjects, list(list(style = mergeStyle(styleObjects[[i]]$style, newStyle = style),
                                                           sheet = sheet,
                                                           rows = rows[mergeInds],
                                                           cols = cols[mergeInds])))        
-        }
+          
+        } 
         
         
       } ## if sheet == styleObjects[[i]]$sheet
@@ -2656,7 +2665,8 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
     } ## End of loop through styles
     
     ## remove any styles that no longer have any affect
-    styleObjects <<- styleObjects[keepStyle]
+    if(!all(keepStyle))
+      styleObjects <<- styleObjects[keepStyle]
     
     ## append style object for non-intersecting cells
     if(length(newInds) > 0){
