@@ -3849,4 +3849,31 @@ sheetVisible <- function(wb){
 
 
 
+#' @name copyWorkbook
+#' @title Copy a Workbook object.
+#' @description Just a wrapper of wb$copy() 
+#' @param wb A workbook object 
+#' @return Workbook
+#' @examples
+#' 
+#' wb <- createWorkbook()  
+#' wb2 <- wb ## does not create a copy
+#' wb3 <- copyWorkbook(wb) ## wrapper for wb$copy()
+#' 
+#' addWorksheet(wb, "Sheet1") ## adds worksheet to both wb and wb2 but not wb3
+#' 
+#' names(wb)
+#' names(wb2)
+#' names(wb3)
+#' 
+#' @export
+copyWorkbook <- function(wb){
+  
+  if(!inherits(wb, "Workbook"))
+    stop("argument must be a Workbook.")
+  
+  return(wb$copy())
+  
+}
+  
 
