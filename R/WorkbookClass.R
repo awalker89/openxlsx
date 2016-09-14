@@ -153,20 +153,23 @@ Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = 
     }
   }
 
-  if(res != 0){
-
-    ## try zipping using *
-    args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
-    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
+  if (res != 0) {
+      ## try zipping using *
+      args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
+      res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
   }
 
-
-  if(res != 0){
-
+    if (res != 0) {
+        ## My inclination would be to use system2() with stdout and stderr = TRUE in the lines above.
+        ## Then check the character vectors for errors returned.
+        ## If that is acceptable, I will do so rather than this silly warning().
+        warning("In linux, a 'cannot allocate memory' error may be solved by enabling memory
+overcommit by echoing 1 to /procy/sys/vm/overcommit_memory, but this entails
+a risk of starving the system.")
     stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
          Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH
          or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
-  }
+    }
 
   invisible(res)
 })
