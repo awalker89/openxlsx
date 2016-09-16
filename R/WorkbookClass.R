@@ -2313,19 +2313,24 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     paneNode <- '<pane xSplit="1" topLeftCell="B1" activePane="topRight" state="frozen"/>'
   }
   
+
   if(is.null(paneNode)){
     
-    attrs <- NULL
+    if(firstActiveRow == 1 & firstActiveCol == 1) ## nothing to do
+      return(NULL)
     
-    if(firstActiveRow > 1)
-      attrs <- c(attrs, sprintf('ySplit="%s"', firstActiveRow - 1L))
+    if(firstActiveRow > 1 & firstActiveCol == 1){
+      attrs <- sprintf('ySplit="%s"', firstActiveRow - 1L)
+      activePane <- "bottomLeft"
+    }
     
-    if(firstActiveCol > 1)
-      attrs <- c(attrs, sprintf('xSplit="%s"', firstActiveCol - 1L))
-    
-    if(firstActiveRow == 1){
+    if(firstActiveRow == 1 & firstActiveCol > 1){
+      attrs <- sprintf('xSplit="%s"', firstActiveCol - 1L)
       activePane <- "topRight"
-    }else{
+    }
+    
+    if(firstActiveRow > 1 & firstActiveCol > 1){
+      attrs <- sprintf('ySplit="%s" xSplit="%s"', firstActiveRow - 1L, firstActiveCol - 1L)
       activePane <- "bottomRight"
     }
     
@@ -2333,7 +2338,7 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     
     paneNode <- sprintf('<pane %s topLeftCell="%s" activePane="%s" state="frozen"/><selection pane="%s"/>', 
                         paste(attrs, collapse = " "), topLeftCell, activePane, activePane)
-    
+    print(paneNode)
   } 
   
   freezePane[[sheet]] <<- paneNode

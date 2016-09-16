@@ -901,25 +901,38 @@ getCellRefs <- function(cellCoords){
 freezePane <- function(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL, firstRow = FALSE, firstCol = FALSE){
   
   
-  ## Convert to numeric if column letter given
-  firstActiveRow <- convertFromExcelRef(firstActiveRow)
-  firstActiveCol <- convertFromExcelRef(firstActiveCol)
+  if(is.null(firstActiveRow) & is.null(firstActiveCol) & !firstRow & !firstCol)
+    return(invisible(0))
   
-  if(is.null(firstActiveRow)) firstActiveRow <- 1L
-  if(is.null(firstActiveCol)) firstActiveCol <- 1L
-  if(!is.logical(firstRow)) firstRow <- FALSE
-  if(!is.logical(firstCol)) firstCol <- FALSE
+  if(!is.logical(firstRow)) 
+    stop("firstRow must be TRUE/FALSE")
+  
+  if(!is.logical(firstCol)) 
+    stop("firstCol must be TRUE/FALSE")
+  
+  
+
   
   if(firstRow & !firstCol){
     invisible(wb$freezePanes(sheet, firstRow = firstRow))
-  }else if(firstCol &! firstRow){
+  }else if(firstCol & !firstRow){
     invisible(wb$freezePanes(sheet, firstCol = firstCol))
   }else if(firstRow & firstCol){
     invisible(wb$freezePanes(sheet, firstActiveRow = 2L, firstActiveCol = 2L))
-  }else{ 
+  }else{ ## else both firstRow and firstCol are FALSE
     
-    if(!is.numeric(firstActiveRow))
-      stop("firstActiveRow must be numeric.")
+    ## Convert to numeric if column letter given
+    if(!is.null(firstActiveRow)){
+      firstActiveRow <- convertFromExcelRef(firstActiveRow)
+    }else{
+      firstActiveRow <- 1L
+    }
+    
+    if(!is.null(firstActiveCol)){
+      firstActiveCol <- convertFromExcelRef(firstActiveCol)
+    }else{
+      firstActiveCol <- 1L
+    }
     
     invisible(wb$freezePanes(sheet, firstActiveRow = firstActiveRow, firstActiveCol = firstActiveCol, firstRow = firstRow, firstCol = firstCol)  )
   }
