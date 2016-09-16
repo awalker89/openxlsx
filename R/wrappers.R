@@ -1831,7 +1831,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     wb$worksheets[[sheet]]$sheetPr <- unique(c(wb$worksheets[[sheet]]$sheetPr, '<pageSetUpPr fitToPage="1"/>'))
   
   wb$worksheets[[sheet]]$pageMargins <- 
-    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>"', left, right, top, bottom, header, footer)
+    sprintf('<pageMargins left="%s" right="%s" top="%s" bottom="%s" header="%s" footer="%s"/>', left, right, top, bottom, header, footer)
   
   ## print Titles
   if(!is.null(printTitleRows) & is.null(printTitleCols)){
