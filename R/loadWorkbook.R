@@ -26,6 +26,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   if(!is.null(xlsxFile))
     file <- xlsxFile
   
+  file <- getFile(file)
   if(!file.exists(file))
     stop("File does not exist.")
   

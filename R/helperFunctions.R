@@ -791,3 +791,23 @@ splitHeaderFooter <- function(x){
 }
 
 
+
+
+getFile <- function(xlsxFile){
+  
+  ## Is this a file or URL (code taken from read.table())
+  on.exit(try(close(fl), silent = TRUE), add = TRUE)
+  
+  fl <- file(description = xlsxFile)
+  
+  ## If URL download
+  if("url" %in% class(fl)){
+    tmpFile <- tempfile(fileext = ".xlsx")
+    download.file(url = xlsxFile, destfile = tmpFile, cacheOK = FALSE,  mode = "wb")
+    xlsxFile <- tmpFile
+  }
+  
+  return(xlsxFile)
+  
+}
+

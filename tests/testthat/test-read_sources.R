@@ -7,7 +7,7 @@ context("Read Sources")
 
 
 
-test_that("Read from different sources", {
+test_that("read.xlsx from different sources", {
   
   ## URL
   xlsxFile <- "https://github.com/awalker89/openxlsx/raw/master/inst/readTest.xlsx"
@@ -31,6 +31,47 @@ test_that("Read from different sources", {
   
   
 })
+
+
+
+
+test_that("loadWorkbook from different sources", {
+  
+  ## URL
+  xlsxFile <- "https://github.com/awalker89/openxlsx/raw/master/inst/readTest.xlsx"
+  wb_url <- loadWorkbook(xlsxFile)
+  
+  ## File 
+  xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
+  wb_file <- loadWorkbook(xlsxFile)
+  
+  ## check
+  expect_true(all.equal.Workbook(wb_url, wb_file), "Loading from URL vs local not equal")
+  
+  
+  
+  
+})
+
+
+
+test_that("getDateOrigin from different sources", {
+  
+  ## URL
+  xlsxFile <- "https://github.com/awalker89/openxlsx/raw/master/inst/readTest.xlsx"
+  origin_url <- getDateOrigin(xlsxFile)
+  
+  ## File 
+  xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
+  origin_file <- getDateOrigin(xlsxFile)
+  
+  ## check
+  expect_equal(origin_url, origin_file)
+  expect_equal(origin_url, "1900-01-01")
+
+  
+})
+
 
 
 

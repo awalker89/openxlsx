@@ -2950,6 +2950,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
 #' @export
 getDateOrigin <- function(xlsxFile){
   
+  xlsxFile <- getFile(xlsxFile)
   if(!file.exists(xlsxFile))
     stop("File does not exist.")
   
@@ -3366,18 +3367,6 @@ all.equal.Workbook <- function(target, current, ...){
   
   
   nSheets <- length(names(x))
-  
-  flag <- all(unlist(x$.rels) %in% unlist(y$.rels)) & all(unlist(y$.rels) %in% unlist(x$.rels))
-  if(!flag){
-    message(".rels not equal")
-    return(FALSE)
-  } 
-  
-  flag <- all(unlist(x$app) %in% unlist(y$app)) & all(unlist(y$app) %in% unlist(x$app))
-  if(!flag){
-    message("app not equal")
-    return(FALSE)
-  } 
   
   flag <- all(names(x$charts) %in% names(y$charts)) & all(names(y$charts) %in% names(x$charts))
   if(!flag){
