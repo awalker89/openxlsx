@@ -632,7 +632,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   
   ## compress to xlsx
   setwd(tmpDir)
-  tmpFile <- tempfile(tmpdir = tmpDir, fileext = ".xlsx")
+  tmpFile <- tempfile(tmpdir = tmpDir, fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm"))
   tmpFile <- basename(tmpFile)
   
   zipWorkbook(tmpFile, list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
