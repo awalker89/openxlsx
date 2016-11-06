@@ -34,9 +34,10 @@ or one of colours(). If fontColour is NULL, the workbook base font colours is us
   \item{\bold{PERCENTAGE}}
   \item{\bold{FRACTION}}
   \item{\bold{SCIENTIFIC}}
+  \item{\bold{TEXT}}
   \item{\bold{COMMA}{  for comma seperated thousands}}
   \item{For date/datetime styling a combination of d, m, y and punctuation marks}
-  \item{For numeric rouding use "0.00" with the preferred number of deciaml places}
+  \item{For numeric rouding use "0.00" with the preferred number of decimal places}
 }}
 
 \item{border}{Cell border 

@@ -480,9 +480,10 @@ convertFromExcelRef <- function(col){
 #'   \item{\bold{PERCENTAGE}}
 #'   \item{\bold{FRACTION}}
 #'   \item{\bold{SCIENTIFIC}}
+#'   \item{\bold{TEXT}}
 #'   \item{\bold{COMMA}{  for comma seperated thousands}}
 #'   \item{For date/datetime styling a combination of d, m, y and punctuation marks}
-#'   \item{For numeric rouding use "0.00" with the preferred number of deciaml places}
+#'   \item{For numeric rouding use "0.00" with the preferred number of decimal places}
 #' }
 #' 
 #' @param border Cell border 
@@ -619,7 +620,7 @@ createStyle <- function(fontName = NULL,
                         list("numFmtId" = 167), # TIME
                         list("numFmtId" = 10),  # PERCENTAGE
                         list("numFmtId" = 11),  # SCIENTIFIC
-                        list("numFmtId" = 49),
+                        list("numFmtId" = 49),  # TEXT
                         
                         list("numFmtId" = 3),
                         list("numFmtId" = 4),
