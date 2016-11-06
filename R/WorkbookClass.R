@@ -1633,9 +1633,11 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       }
       
       
-      if(!is.null(ws$sheetPr))
-        ws$sheetPr <- ws$sheetPr #paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
-      
+      if(!is.null(ws$sheetPr)){
+        if(!any(grepl("<sheetPr>", ws$sheetPr, fixed = TRUE)))
+          ws$sheetPr <- paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
+      }
+
       if(length(worksheets[[i]]$tableParts) > 0)
         ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
       
@@ -1649,20 +1651,32 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         ws$hyperlinks <- paste("<hyperlinks>", paste(sapply(1:length(hInds), function(j) hyperlinks[[i]][[j]]$to_xml(hInds[j])), collapse = ""), "</hyperlinks>")
       }
       
+
+      ## Sort sheetData before writing
+      if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
+        r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
+        ord <- order(as.integer(names(r)), nchar(r), r)
+        sheetData[[i]] <<- sheetData[[i]][ord]
+        dataCount[[i]] <<- 1L
+        
+        ## update sheet dimensions
+        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", r[head(ord, 1)], r[tail(ord, 1)])
+
+        if(length(styleInds[[i]]) > 0)
+          styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
+      }else if(length(sheetData[[i]]) > 0){
+        
+        ## update sheet dimensions
+        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", 
+                                sheetData[[i]][[1]][["r"]], 
+                                sheetData[[i]][[length(sheetData[[i]])]][["r"]])
+      }
+      
       
       sheetDataInd <- which(names(ws) == "sheetData")
       prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))
       post <- paste0(pxml(ws[(sheetDataInd + 1L):length(ws)]), "</worksheet>")
       
-      ## Sort sheetData before writing
-      if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
-        r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
-        sheetData[[i]] <<- sheetData[[i]][order(as.integer(names(r)), nchar(r), r)]
-        dataCount[[i]] <<- 1L
-        
-        if(length(styleInds[[i]]) > 0)
-          styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
-      }
       
       if(length(rowHeights[[i]]) == 0){
         
