@@ -3332,9 +3332,7 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
 all.equal.Workbook <- function(target, current, ...){
   
   
-  print("Comparing workbooks...")
-  
-  
+  # print("Comparing workbooks...")
   #   ".rels",
   #   "app",
   #   "charts",

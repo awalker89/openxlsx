@@ -797,7 +797,6 @@ getFile <- function(xlsxFile){
   
   ## Is this a file or URL (code taken from read.table())
   on.exit(try(close(fl), silent = TRUE), add = TRUE)
-  
   fl <- file(description = xlsxFile)
   
   ## If URL download
