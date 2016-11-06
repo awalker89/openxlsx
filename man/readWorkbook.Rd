@@ -10,7 +10,7 @@ readWorkbook(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   namedRegion = NULL, na.strings = "NA", fillMergedCells = FALSE)
 }
 \arguments{
-\item{xlsxFile}{An xlsx file or Workbook object}
+\item{xlsxFile}{An xlsx file, Workbook object or URL to xlsx file.}
 
 \item{sheet}{The name or index of the sheet to read data from.}
 

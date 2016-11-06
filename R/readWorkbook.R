@@ -4,7 +4,7 @@
 #' @name read.xlsx
 #' @title  Read from an Excel file or Workbook object
 #' @description Read data from an Excel file or Workbook object into a data.frame
-#' @param xlsxFile An xlsx file or Workbook object
+#' @param xlsxFile An xlsx file, Workbook object or URL to xlsx file.
 #' @param sheet The name or index of the sheet to read data from.
 #' @param startRow first row to begin looking for data.  Empty rows at the top of a file are always skipped, 
 #' regardless of the value of startRow.
@@ -54,6 +54,11 @@
 #' #df3 <- read.xlsx(wb, sheet = 2, skipEmptyRows = FALSE,
 #' # cols = c(1, 4), rows = c(1, 3, 4))
 #' 
+#' ## URL
+#' xlsxFile <- "https://github.com/awalker89/openxlsx/raw/master/inst/readTest.xlsx"
+#' head(read.xlsx(xlsxFile))
+#' 
+#' 
 #' @export
 read.xlsx <- function(xlsxFile,
                       sheet = 1,
@@ -92,8 +97,10 @@ read.xlsx.default <- function(xlsxFile,
   
   
   ## Validate inputs and get files
+  xlsxFile <- getFile(xlsxFile)
+  
   if(!file.exists(xlsxFile))
-    stop("Excel file does not exist.")
+    stop("File does not exist.")
   
   if(grepl("\\.xls$|\\.xlm$", xlsxFile))
     stop("openxlsx can not read .xls or .xlm files!")
@@ -158,10 +165,10 @@ read.xlsx.default <- function(xlsxFile,
   
   ## Named region logic
   if(!is.null(namedRegion)){
-   
+    
     dn <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
     dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
-
+    
     if(length(dn) == 0){
       warning("Workbook has no named regions.")
       return(NULL)
@@ -192,7 +199,7 @@ read.xlsx.default <- function(xlsxFile,
       cols <- convertFromExcelRef(region)
       rows <- as.integer(gsub("[A-Z]", "", region, perl = TRUE))
     }
-
+    
     startRow <- 1
     
   }
@@ -232,7 +239,7 @@ read.xlsx.default <- function(xlsxFile,
   }else{
     sharedStrings <- ""
   }
-
+  
   
   if("character" %in% class(startRow)){
     startRowStr <- startRow
@@ -240,7 +247,7 @@ read.xlsx.default <- function(xlsxFile,
   }else{
     startRowStr <- NULL
   }
-
+  
   ## single function get all r, s (if detect dates is TRUE), t, v
   cell_info <- .Call("openxlsx_getCellInfo",
                      xmlFile = worksheet,
@@ -254,9 +261,9 @@ read.xlsx.default <- function(xlsxFile,
   
   if(fillMergedCells & length(cell_info$cellMerge) > 0){
     
-
+    
     merge_mapping <- mergeCell2mapping(cell_info$cellMerge) # .Call("openxlsx_mergeCell2mappingDF", cell_info$cellMerge, package = "openxlsx")
-
+    
     ## remove any elements from  r, string_refs, b, s that existing in merge_mapping
     ## insert all missing refs into r
     
@@ -264,12 +271,12 @@ read.xlsx.default <- function(xlsxFile,
     to_remove_elems <- cell_info$r[to_remove_inds]
     
     if(any(to_remove_inds)){
-
+      
       cell_info$r <- cell_info$r[!to_remove_inds]
       cell_info$s <- cell_info$s[!to_remove_inds]
       cell_info$v <- cell_info$v[!to_remove_inds]
       cell_info$string_refs <- cell_info$string_refs[!cell_info$string_refs %in% to_remove_elems]
- 
+      
     }
     
     ## Now insert
@@ -293,7 +300,7 @@ read.xlsx.default <- function(xlsxFile,
       cell_info$s <- c(cell_info$s, cell_info$s[inds])
       cell_info$s <- cell_info$s[ord]
     }
-
+    
     cell_info$nRows <- .Call("openxlsx_calcNRows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
     
   }
@@ -397,7 +404,7 @@ read.xlsx.default <- function(xlsxFile,
   }else{
     isDate <- as.logical(NA)
   }
-
+  
   ## Build data.frame
   m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   
@@ -483,7 +490,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     cols <- seq(from = cols[1], to = cols[2], by = 1)
     rows <- seq(from = rows[1], to = rows[2], by = 1)
     startRow <- 1
-
+    
   }
   
   
@@ -732,7 +739,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     }
   }
   
-
+  
   ## Build data.frame
   m <- .Call("openxlsx_readWorkbook", v, r, string_refs, isDate,  nRows, colNames, skipEmptyRows, skipEmptyCols, clean_names, PACKAGE = "openxlsx")
   

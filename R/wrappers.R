@@ -2951,7 +2951,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
 getDateOrigin <- function(xlsxFile){
   
   if(!file.exists(xlsxFile))
-    stop("Excel file does not exist.")
+    stop("File does not exist.")
   
   if(grepl("\\.xls$|\\.xlm$", xlsxFile))
     stop("openxlsx can not read .xls or .xlm files!")
