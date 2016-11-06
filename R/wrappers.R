@@ -756,6 +756,11 @@ createStyle <- function(fontName = NULL,
   if(!is.null(textRotation)){
     if(!is.numeric(textRotation))
       stop("textRotation must be numeric.")
+    
+    if(textRotation < 0 & textRotation >= -90) {
+      textRotation <- (textRotation * -1) + 90
+    }
+    
     style$textRotation <- round(textRotation[[1]], 0)
   }
   
