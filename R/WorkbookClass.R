@@ -1650,8 +1650,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         hInds <- paste0(1:length(hyperlinks[[i]]), "h")
         ws$hyperlinks <- paste("<hyperlinks>", paste(sapply(1:length(hInds), function(j) hyperlinks[[i]][[j]]$to_xml(hInds[j])), collapse = ""), "</hyperlinks>")
       }
-      
-      
+
       ## Sort sheetData before writing
       if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
         r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
@@ -1662,7 +1661,9 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         ## update sheet dimensions
         dm1 <- head(na.omit(r[ord]), 1)
         dm2 <- tail(na.omit(r[ord]), 1)
-        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        if(!is.na(dm1) & !is.na(dm2))
+          ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+
         
         if(length(styleInds[[i]]) > 0)
           styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
@@ -1670,11 +1671,17 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       }else if(length(sheetData[[i]]) > 0){
         
         ## update sheet dimensions
-        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", 
-                                sheetData[[i]][[1]][["r"]], 
-                                sheetData[[i]][[length(sheetData[[i]])]][["r"]])
+        dm1 <- sheetData[[i]][[1]][["r"]]
+        dm2 <- sheetData[[i]][[length(sheetData[[i]])]][["r"]]
+        
+        if(!is.na(dm1) & !is.na(dm2))
+          ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        
+
       }
       
+      
+
       
       sheetDataInd <- which(names(ws) == "sheetData")
       prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))
