@@ -2352,7 +2352,7 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     
     paneNode <- sprintf('<pane %s topLeftCell="%s" activePane="%s" state="frozen"/><selection pane="%s"/>', 
                         paste(attrs, collapse = " "), topLeftCell, activePane, activePane)
-    print(paneNode)
+   
   } 
   
   freezePane[[sheet]] <<- paneNode
