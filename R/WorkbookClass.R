@@ -1637,7 +1637,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         if(!any(grepl("<sheetPr>", ws$sheetPr, fixed = TRUE)))
           ws$sheetPr <- paste0("<sheetPr>", paste(ws$sheetPr, collapse = ""), "</sheetPr>")
       }
-
+      
       if(length(worksheets[[i]]$tableParts) > 0)
         ws$tableParts <- paste0(sprintf('<tableParts count="%s">', length(worksheets[[i]]$tableParts)), pxml(worksheets[[i]]$tableParts), '</tableParts>')
       
@@ -1651,7 +1651,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         ws$hyperlinks <- paste("<hyperlinks>", paste(sapply(1:length(hInds), function(j) hyperlinks[[i]][[j]]$to_xml(hInds[j])), collapse = ""), "</hyperlinks>")
       }
       
-
+      
       ## Sort sheetData before writing
       if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
         r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
@@ -1660,10 +1660,13 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         dataCount[[i]] <<- 1L
         
         ## update sheet dimensions
-        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", r[head(ord, 1)], r[tail(ord, 1)])
-
+        dm1 <- head(na.omit(r[ord]), 1)
+        dm2 <- tail(na.omit(r[ord]), 1)
+        ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        
         if(length(styleInds[[i]]) > 0)
           styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
+        
       }else if(length(sheetData[[i]]) > 0){
         
         ## update sheet dimensions
@@ -2327,7 +2330,7 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     paneNode <- '<pane xSplit="1" topLeftCell="B1" activePane="topRight" state="frozen"/>'
   }
   
-
+  
   if(is.null(paneNode)){
     
     if(firstActiveRow == 1 & firstActiveCol == 1) ## nothing to do
@@ -2352,7 +2355,7 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     
     paneNode <- sprintf('<pane %s topLeftCell="%s" activePane="%s" state="frozen"/><selection pane="%s"/>', 
                         paste(attrs, collapse = " "), topLeftCell, activePane, activePane)
-   
+    
   } 
   
   freezePane[[sheet]] <<- paneNode
@@ -2619,7 +2622,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
                                rows = rows,
                                cols = cols))   
   }else if(stack){
-
+    
     nStyles <- length(styleObjects)
     
     ## ********** Assume all styleObjects cells have one a single worksheet **********
