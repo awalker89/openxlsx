@@ -331,7 +331,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   success <- dir.create(path = tmpDir, recursive = TRUE)
   if(!success)
     stop(sprintf("Failed to create temporary directory '%s'", tmpDir))
-
+  
   .self$preSaveCleanUp()
   
   nSheets <- length(worksheets)
@@ -1650,7 +1650,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         hInds <- paste0(1:length(hyperlinks[[i]]), "h")
         ws$hyperlinks <- paste("<hyperlinks>", paste(sapply(1:length(hInds), function(j) hyperlinks[[i]][[j]]$to_xml(hInds[j])), collapse = ""), "</hyperlinks>")
       }
-
+      
       ## Sort sheetData before writing
       if(dataCount[[i]] > 1L | length(rowHeights[[i]]) > 0){
         r <- unlist(lapply(sheetData[[i]], "[[", "r"), use.names = TRUE)     
@@ -1659,11 +1659,18 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         dataCount[[i]] <<- 1L
         
         ## update sheet dimensions
-        dm1 <- head(na.omit(r[ord]), 1)
-        dm2 <- tail(na.omit(r[ord]), 1)
-        if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
-          ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        if(length(r) > 0){
+          dm1 <- head(na.omit(r[ord]), 1)
+          dm2 <- tail(na.omit(r[ord]), 1)
+          
+          if(length(dm1) == 1 & length(dm2) != 1){
+            if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
+              ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+          }
+          
 
+        }
+        
         
         if(length(styleInds[[i]]) > 0)
           styleInds[[i]] <<- styleInds[[i]][match(unlist(lapply(sheetData[[i]], "[[", "r"), use.names = FALSE), names(styleInds[[i]]))]
@@ -1674,14 +1681,16 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         dm1 <- sheetData[[i]][[1]][["r"]]
         dm2 <- sheetData[[i]][[length(sheetData[[i]])]][["r"]]
         
-        if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
-          ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        if(length(dm1) == 1 & length(dm2) != 1){
+          if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
+            ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+        }
         
-
+        
       }
       
       
-
+      
       
       sheetDataInd <- which(names(ws) == "sheetData")
       prior <- paste0(header, pxml(ws[1:(sheetDataInd - 1L)]))
@@ -2562,7 +2571,7 @@ Workbook$methods(preSaveCleanUp = function(){
           numFmtIds <- numFmtIds + 1L
         }
       }
-
+      
       
       ## convert sheet name to index
       sheet <- which(names(worksheets) == x$sheet)
@@ -2577,7 +2586,7 @@ Workbook$methods(preSaveCleanUp = function(){
         tmp <- rep.int(sId, length(toAppend))
         names(tmp) <- toAppend
         styleInds[[sheet]] <<- c(styleInds[[sheet]], tmp)
-
+        
         ## Now append new cells to sheetData - incremenet dataCount so sorting will take place
         newCells <- .Call("openxlsx_buildCellList", toAppend , rep(as.character(NA), length(toAppend)) , rep(as.character(NA), length(toAppend)), PACKAGE="openxlsx")
         names(newCells) <- gsub("[A-Z]", "", toAppend)
@@ -2594,7 +2603,7 @@ Workbook$methods(preSaveCleanUp = function(){
   # .self$updateCellStyles()
   
   
-
+  
   ## Make sure all rowHeights have rows, if not append them!
   for(i in 1:length(worksheets)){
     
@@ -2671,7 +2680,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
             if(length(styleObjects[[i]]$rows) == 0 | length(styleObjects[[i]]$cols) == 0)
               keepStyle[i] <- FALSE ## this style applies to no rows or columns anymore
             
-
+            
           }
           
           ## append style object for intersecting cells
@@ -2684,7 +2693,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
                                                           sheet = sheet,
                                                           rows = rows[mergeInds],
                                                           cols = cols[mergeInds])))        
-
+          
         } 
         
         
@@ -2699,7 +2708,7 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
     
     ## append style object for non-intersecting cells
     if(length(newInds) > 0){
-
+      
       styleObjects <<- append(styleObjects, list(list(style = style,
                                                       sheet =  sheet,
                                                       rows = rows[newInds],
