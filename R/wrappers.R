@@ -829,6 +829,9 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
   
   if(!is.logical(stack))
     stop("stack parameter must be a logical!")
+
+  if(length(cols) == 0 | length(rows) == 0)
+    return(invisible(0))
   
   cols <- convertFromExcelRef(cols)
   rows <- as.integer(rows)
