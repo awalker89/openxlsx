@@ -740,14 +740,20 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   sheet <- validateSheet(sheet)
   nCols <- ncol(df)
   nRows <- nrow(df)  
+  df_nms <- names(df)
   
   allColClasses <- unlist(colClasses)  
-  
+  df <- as.list(df)
+
   ## pull out NaN values
-  nans <- unlist(lapply(1:ncol(df), function(i) {
-    if(!"character" %in% class(df[[i]]) & !"list" %in% class(df[[i]]))
-      return(is.nan(df[[i]]) | is.infinite(df[[i]]))
-    return(rep(FALSE, nRows))
+  nans <- unlist(lapply(1:nCols, function(i) {
+    tmp <- df[[i]]
+    if(!"character" %in% class(tmp) & !"list" %in% class(tmp)){
+      v <- which(is.nan(tmp) | is.infinite(tmp))
+      if(length(v) == 0) 
+        return(v)
+      return(as.integer(nCols * (v - 1) + i)) ## row position
+    }
   }))
   
   ## convert any Dates to integers and create date style object
@@ -822,7 +828,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     for(i in which(sapply(colClasses, function(x) "logical" %in% x)))
       class(df[[i]]) <- "numeric"
   }
-  
+
   ## convert all numerics to character (this way preserves digits)
   if("numeric" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "numeric" %in% x)))
@@ -831,12 +837,14 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ## cell types
   t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
-  for(i in which(sapply(colClasses, function(x) !"character" %in% x)))
+  for(i in which(sapply(colClasses, function(x) !"character" %in% x & !"numeric" %in% x)))
     df[[i]] <- as.character(df[[i]])
   
   
   ## cell values
-  v <- as.character(t(as.matrix(df)))
+  v <- as.character(t(as.matrix(
+    data.frame(df, stringsAsFactors = FALSE, check.names = FALSE, fix.empty.names = FALSE)
+  ))); rm(df)
   
   if(keepNA){
     t[is.na(v)] <- "e"
@@ -847,8 +855,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## If any NaN values
-  if(any(nans) > 0){
-    nans <- which(t(matrix(nans, nrow = nrow(df), ncol = ncol(df))))
+  if(length(nans) > 0){
     t[nans] <- "e"
     v[nans] <- "#NUM!"
   }
@@ -857,7 +864,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   #prepend column headers 
   if(colNames){
     t <- c(rep.int('s', nCols), t)
-    v <- c(names(df), v)
+    v <- c(df_nms, v)
     nRows <- nRows + 1L
   }
   
@@ -904,9 +911,9 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## Create cell list of lists
-  
-  cells <- .Call("openxlsx_buildCellList", r , t ,v , PACKAGE="openxlsx")
+  cells <- .Call("openxlsx_buildCellList", r , t , v , PACKAGE="openxlsx")
   names(cells) <- as.integer(names(r))
+  rm(t); rm(v); 
   
   if(dataCount[[sheet]] > 0){
     sheetData[[sheet]] <<- .Call("openxlsx_uniqueCellAppend", sheetData[[sheet]], r, cells, PACKAGE = "openxlsx")
@@ -1668,7 +1675,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
               ws$dimension <- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
           }
           
-
+          
         }
         
         
