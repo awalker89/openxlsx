@@ -713,7 +713,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   tSheets <- attr(tables, "sheet")
   tNames <- attr(tables, "tableName") 
   
-  tables <<- c(tables, .Call("openxlsx_buildTableXML", table, ref, colNames, showColNames, tableStyle, withFilter, PACKAGE = "openxlsx"))
+  tables <<- c(tables, .Call("openxlsx_build_table_xml", table, ref, colNames, showColNames, tableStyle, withFilter, PACKAGE = "openxlsx"))
   names(tables) <<- c(nms, ref)
   attr(tables, "sheet") <<- c(tSheets, sheet)
   attr(tables, "tableName") <<- c(tNames, tableName)
@@ -869,7 +869,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   ## create references
-  r <- .Call("openxlsx_ExcelConvertExpand", startCol:(startCol+nCols-1L), LETTERS, as.character(startRow:(startRow+nRows-1L)))
+  r <- .Call("openxlsx_convert_to_excel_ref_expand", startCol:(startCol+nCols-1L), LETTERS, as.character(startRow:(startRow+nRows-1L)))
   
   ##Append hyperlinks, convert h to s in cell type
   if("hyperlink" %in% colClasses){
@@ -916,7 +916,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   rm(t); rm(v); 
   
   if(dataCount[[sheet]] > 0){
-    sheetData[[sheet]] <<- .Call("openxlsx_uniqueCellAppend", sheetData[[sheet]], r, cells, PACKAGE = "openxlsx")
+    sheetData[[sheet]] <<- .Call("openxlsx_unique_cell_append", sheetData[[sheet]], r, cells, PACKAGE = "openxlsx")
     if(attr(sheetData[[sheet]], "overwrite"))
       warning("Overwriting existing cell data.", call. = FALSE)
     
@@ -933,126 +933,6 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
 
 
 
-
-Workbook$methods(updateStyles2 = function(style){
-  
-  
-  ## Updates styles.xml
-  xfNode <- list(numFmtId = 0,
-                 fontId = 0,
-                 fillId = 0,
-                 borderId = 0,
-                 xfId = 0)
-  
-  baseFont <- .self$getBaseFont()
-  defaultFontSize <- sprintf('<sz %s=\"%s\"/>', names(baseFont$size), baseFont$size)
-  defaultFontColour <- sprintf('<color %s=\"%s\"/>', names(baseFont$colour), baseFont$colour)
-  defaultFontName <- sprintf('<name %s=\"%s\"/>', names(baseFont$name), baseFont$name)
-  
-  style <- style$as.list()
-  alignmentFlag <- FALSE
-  
-  ## Font
-  if(!is.null(style$fontName) | !is.null(style$fontSize) |  !is.null(style$fontColour) | !is.null(style$fontDecoration)){
-    
-    if(!is.null(style$fontSize$val))
-      style$fontSize$val <- as.character(style$fontSize$val)
-    
-    if(!is.null(style$fontDecoration))
-      style$fontDecoration <- c("BOLD", "ITALIC", "UNDERLINE", "UNDERLINE2", "STRIKEOUT")[c("BOLD", "ITALIC", "UNDERLINE", "UNDERLINE2", "STRIKEOUT") %in% style$fontDecoration]
-    
-    fontNode <- .Call("openxlsx_createFontNode", style, defaultFontSize, defaultFontColour, defaultFontName)
-    fontId <- which(styles$font == fontNode) - 1L
-    
-    if(length(fontId) == 0){
-      
-      fontId <- length(styles$fonts)
-      styles$fonts <<- c(styles[["fonts"]], fontNode)        
-      
-    }
-    
-    xfNode$fontId <- fontId
-    xfNode <- append(xfNode, list("applyFont" = "1"))
-  }
-  
-  
-  ## numFmt
-  if(!is.null(style$numFmt)){
-    if(as.integer(style$numFmt$numFmtId) > 0){
-      
-      style$numFmt$numFmtId <- as.character(style$numFmt$numFmtId)
-      numFmtId <- style$numFmt$numFmtId
-      
-      if(as.integer(numFmtId) > 163L){
-        
-        tmp <- style$numFmt$formatCode
-        styles$numFmts <<- unique(c(styles$numFmts, sprintf('<numFmt numFmtId="%s" formatCode="%s"/>', numFmtId, tmp)))
-        
-      }
-      
-      xfNode$numFmtId <- numFmtId
-      xfNode <- append(xfNode, list("applyNumberFormat" = "1"))
-      
-    }
-  }
-  
-  ## Fill
-  if(!is.null(style$fillFg) | !is.null(style$fillBg)){
-    
-    fillNode <- .Call("openxlsx_createFillNode", style)
-    fillId <- which(styles$fill == fillNode) - 1L
-    
-    if(length(fillId) == 0){      
-      fillId <- length(styles$fills)
-      styles$fills <<- c(styles$fills, fillNode)
-    }
-    
-    xfNode$fillId <- fillId
-    xfNode <- append(xfNode, list("applyFill" = "1"))
-  }
-  
-  ## Border
-  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
-    
-    borderNode <-  .Call("openxlsx_createBorderNode", style, c("borderLeft", "borderRight", "borderTop", "borderBottom"))
-    borderId <- which(styles$borders == borderNode) - 1L
-    
-    if(length(borderId) == 0){
-      borderId <- length(styles$borders)
-      styles$borders <<- c(styles$borders, borderNode)
-    }
-    
-    xfNode$borderId <- borderId
-    xfNode <- append(xfNode, list("applyBorder" = "1"))
-  }
-  
-  ## Alignment
-  if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation)){
-    
-    if(!is.null(style$textRotation))
-      style$textRotation <- as.character(style$textRotation)
-    alignmentFlag <- TRUE
-    
-    alignNode <- .Call("openxlsx_createAlignmentNode", style)
-    xfNode <- append(xfNode, list("applyAlignment" = "1"))
-  }
-  
-  if(alignmentFlag){
-    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="', xfNode, '"'), collapse = " "), ">", alignNode, '</xf>')  
-  }else{
-    xfNode <- paste0("<xfv", paste(paste0(names(xfNode), '="', xfNode, '"'), collapse = " "), "/>")
-  }
-  
-  styleId <- which(styles$cellXfs == xfNode) - 1L
-  if(length(styleId) == 0){
-    styleId <- length(styles$cellXfs)
-    styles$cellXfs <<- c(styles$cellXfs, xfNode)
-  }
-  
-  
-  return(as.integer(styleId))
-  
-})
 
 
 Workbook$methods(writeDrawingVML = function(dir){
@@ -1885,7 +1765,7 @@ Workbook$methods(setColWidths = function(sheet){
           
           allCells <- lapply(1:length(col), function(i) expand.grid( min(col[[i]]):max(col[[i]]),  min(rows[[i]]):max(rows[[i]])))
           allCells <- do.call("rbind", allCells)
-          allCells <- paste0(convert2ExcelRef(allCells[[1]], LETTERS), allCells[[2]])
+          allCells <- paste0(.Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', allCells[[1]], LETTERS), allCells[[2]])
           
           r <- lapply(sheetData[[sheet]], "[[", "r")
           sd <-  sheetData[[sheet]][!r %in% allCells]
@@ -1901,7 +1781,7 @@ Workbook$methods(setColWidths = function(sheet){
       }
       
       ## Now that we have the max character width for the largest font on the page calculate the column widths
-      calculatedWidths <- .Call("openxlsx_calcColumnWidths",
+      calculatedWidths <- .Call("openxlsx_calc_column_widths",
                                 sheetData = sd,
                                 sharedStrings = unlist(sharedStrings, use.names = FALSE),
                                 columnInds = as.integer(autoCols),
@@ -2297,8 +2177,8 @@ Workbook$methods(mergeCells = function(sheet, startRow, endRow, startCol, endCol
   if(!is.null(exMerges)){
     
     comps <- lapply(exMerges, function(rectCoords) unlist(strsplit(rectCoords, split = ":")))  
-    exMergedCells <- .Call("openxlsx_buildCellMerges", comps, PACKAGE = "openxlsx")
-    newMerge <- unlist(.Call("openxlsx_buildCellMerges", list(sqref), PACKAGE = "openxlsx"))
+    exMergedCells <- .Call("openxlsx_build_cell_merges", comps, PACKAGE = "openxlsx")
+    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref), PACKAGE = "openxlsx"))
     
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
@@ -2324,8 +2204,8 @@ Workbook$methods(removeCellMerge = function(sheet, startRow, endRow, startCol, e
   if(!is.null(exMerges)){
     
     comps <- lapply(exMerges, function(x) unlist(strsplit(x, split = ":")))  
-    exMergedCells <- .Call("openxlsx_buildCellMerges", comps)
-    newMerge <- unlist(.Call("openxlsx_buildCellMerges", list(sqref)))
+    exMergedCells <- .Call("openxlsx_build_cell_merges", comps)
+    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref)))
     
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
@@ -2585,7 +2465,7 @@ Workbook$methods(preSaveCleanUp = function(){
       sId <- .self$updateStyles(this.sty) ## this creates the XML for styles.XML
       
       ## In here we create any styleInds that don't yet have a sheetData
-      refsToStyle <- paste0(.Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', x$cols, LETTERS), x$rows)
+      refsToStyle <- paste0(.Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', x$cols, LETTERS), x$rows)
       styleInds[[sheet]][names(styleInds[[sheet]]) %in% refsToStyle] <<- sId
       
       toAppend <- refsToStyle[!refsToStyle %in% names(styleInds[[sheet]])]

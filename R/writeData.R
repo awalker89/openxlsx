@@ -252,7 +252,7 @@ writeData <- function(wb,
     
     wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', ref)
     
-    l <- .Call("openxlsx_convert2ExcelRef", unlist(coords[,2]), LETTERS, PACKAGE="openxlsx")
+    l <- .Call("openxlsx_convert_to_excel_ref", unlist(coords[,2]), LETTERS, PACKAGE="openxlsx")
     dfn <- sprintf("'%s'!%s", names(wb)[sheetX],  paste0("$", l, "$", coords[,1], collapse=":"))
 
     dn <- sprintf('<definedName name="_xlnm._FilterDatabase" localSheetId="%s" hidden="1">%s</definedName>', sheetX - 1L, dfn)
@@ -295,8 +295,8 @@ writeData <- function(wb,
   ## named region
   if(!is.null(name)){
     
-    ref1 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol, LETTERS), "$", startRow)
-    ref2 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol + nCol - 1L, LETTERS), "$", startRow + nRow - 1L + colNames)
+    ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS), "$", startRow)
+    ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol + nCol - 1L, LETTERS), "$", startRow + nRow - 1L + colNames)
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = names(wb$worksheets)[sheet])
     
   }

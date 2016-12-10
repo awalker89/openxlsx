@@ -262,7 +262,7 @@ read.xlsx.default <- function(xlsxFile,
   if(fillMergedCells & length(cell_info$cellMerge) > 0){
     
     
-    merge_mapping <- mergeCell2mapping(cell_info$cellMerge) # .Call("openxlsx_mergeCell2mappingDF", cell_info$cellMerge, package = "openxlsx")
+    merge_mapping <- mergeCell2mapping(cell_info$cellMerge)
     
     ## remove any elements from  r, string_refs, b, s that existing in merge_mapping
     ## insert all missing refs into r
@@ -301,7 +301,7 @@ read.xlsx.default <- function(xlsxFile,
       cell_info$s <- cell_info$s[ord]
     }
     
-    cell_info$nRows <- .Call("openxlsx_calcNRows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
+    cell_info$nRows <- .Call("openxlsx_calc_number_rows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
     
   }
   
@@ -335,7 +335,7 @@ read.xlsx.default <- function(xlsxFile,
     flag <- which(convertFromExcelRef(string_refs) %in% cols)
     string_refs <- string_refs[flag]
     
-    nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
+    nRows <- .Call("openxlsx_calc_number_rows", r, skipEmptyRows, PACKAGE = "openxlsx")
   }
   
   
@@ -349,7 +349,7 @@ read.xlsx.default <- function(xlsxFile,
         string_refs <- string_refs[!string_refs %in% r[toRemove]]
         v <- v[-toRemove]
         r <- r[-toRemove]
-        nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
+        nRows <- .Call("openxlsx_calc_number_rows", r, skipEmptyRows, PACKAGE = "openxlsx")
       }
     }
   }
@@ -575,7 +575,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     warning("No data found on worksheet.", call. = FALSE)
     return(NULL)
   }else{
-    nRows <- .Call("openxlsx_calcNRows", r, skipEmptyRows, PACKAGE = "openxlsx")
+    nRows <- .Call("openxlsx_calc_number_rows", r, skipEmptyRows, PACKAGE = "openxlsx")
   }
   
   ## get references for string cells
@@ -724,8 +724,7 @@ read.xlsx.Workbook <- function(xlsxFile,
       
       rows <- unlist(lapply(sO, "[[", "rows"))
       cols <- unlist(lapply(sO, "[[", "cols"))    
-      refs <- paste0(convert2ExcelRef(cols = cols, LETTERS), rows)
-      
+      refs <- paste0(.Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', cols, LETTERS), rows)
       isDate <- r %in% refs
       
       ## check numbers are also integers

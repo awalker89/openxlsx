@@ -147,7 +147,7 @@ int2col <- function(x){
   if(!is.numeric(x))
     stop("x must be numeric.")
   
-  .Call('openxlsx_convert2ExcelRef', PACKAGE = 'openxlsx', x, LETTERS)
+  .Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', x, LETTERS)
 }
 
 
@@ -864,7 +864,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
 #' @param cellCoords A data.frame with two columns coordinate pairs. 
 #' @return Excel alphanumeric cell reference
 getCellRefs <- function(cellCoords){
-  l <- .Call("openxlsx_convert2ExcelRef", unlist(cellCoords[,2]), LETTERS, PACKAGE="openxlsx")
+  l <- .Call("openxlsx_convert_to_excel_ref", unlist(cellCoords[,2]), LETTERS, PACKAGE="openxlsx")
   paste0(l, cellCoords[,1])
 }
 
@@ -1476,7 +1476,7 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
     stop("Length of rows and cols must be equal.")
   }
   
-  comb <- paste0(.Call('openxlsx_convert2ExcelRef', cols, LETTERS, PACKAGE="openxlsx"), rows)
+  comb <- paste0(.Call('openxlsx_convert_to_excel_ref', cols, LETTERS, PACKAGE="openxlsx"), rows)
   
   cellRefs <- sapply(wb$sheetData[[sheet]], "[[", "r")  
   wb$sheetData[[sheet]] <- wb$sheetData[[sheet]][!cellRefs %in% comb]
@@ -1860,7 +1860,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     if(!is.numeric(printTitleCols))
       stop("printTitleCols must be numeric.")
     
-    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
+    cols <- .Call('openxlsx_convert_to_excel_ref', range(printTitleCols), LETTERS, PACKAGE="openxlsx")
     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
                          ref2 = paste0("$", cols[2]),
                          name = "_xlnm.Print_Titles",
@@ -1877,8 +1877,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
       stop("printTitleCols must be numeric.")
     
     
-    
-    cols <- convert2ExcelRef(cols = range(printTitleCols), LETTERS)
+    cols <- .Call("openxlsx_convert_to_excel_ref", range(printTitleCols), LETTERS)
     rows <- range(printTitleRows)
     
     cols <- paste(paste0("$", cols[1]), paste0("$", cols[2]), sep = ":")
@@ -2205,8 +2204,8 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   startRow <- min(rows)
   endRow <- max(rows)
   
-  ref1 <- paste0("$", .Call("openxlsx_convert2ExcelRef", startCol, LETTERS), "$", startRow)
-  ref2 <- paste0("$", .Call("openxlsx_convert2ExcelRef", endCol, LETTERS), "$", endRow)
+  ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS), "$", startRow)
+  ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", endCol, LETTERS), "$", endRow)
   
   invisible(
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = names(wb$worksheets)[sheet])

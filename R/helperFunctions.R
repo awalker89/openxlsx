@@ -700,7 +700,7 @@ getDefinedNamesSheet <- function(x){
 getSharedStringsFromFile <- function(sharedStringsFile, isFile){
   
   ## read in, get si tags, get t tag value and  pull out all string nodes
-  sharedStrings = .Call("openxlsx_getSharedStrings", sharedStringsFile, isFile, PACKAGE = 'openxlsx') ## read from file
+  sharedStrings = .Call("openxlsx_get_shared_strings", sharedStringsFile, isFile, PACKAGE = 'openxlsx') ## read from file
   
   
   Encoding(sharedStrings) <- "UTF-8"
@@ -742,7 +742,7 @@ mergeCell2mapping <- function(x){
   ## for each we grid.expand
   refs <- do.call("rbind", lapply(1:length(rows), function(i){
     tmp <- expand.grid("cols" = cols[[i]], "rows" = rows[[i]])
-    tmp$ref <- paste0(.Call("openxlsx_convert2ExcelRef", tmp$cols, LETTERS), tmp$rows)
+    tmp$ref <- paste0(.Call("openxlsx_convert_to_excel_ref", tmp$cols, LETTERS), tmp$rows)
     tmp$anchor_cell <- tmp$ref[1]
     return(tmp[, c("anchor_cell", "ref", "rows")])
   }))
