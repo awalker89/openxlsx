@@ -27,3 +27,22 @@ Suggests:
     knitr,
     testthat
 RoxygenNote: 5.0.1
+Collate:
+    'CommentClass.R'
+    'HyperlinkClass.R'
+    'RcppExports.R'
+    'StyleClass.R'
+    'class_definitions.R'
+    'WorkbookClass.R'
+    'baseXML.R'
+    'borderFunctions.R'
+    'helperFunctions.R'
+    'loadWorkbook.R'
+    'openXL.R'
+    'openxlsx.R'
+    'openxlsxCoerce.R'
+    'readWorkbook.R'
+    'wrappers.R'
+    'writeData.R'
+    'writeDataTable.R'
+    'writexlsx.R'

@@ -1,74 +1,11 @@
 
-
-Workbook <- setRefClass("Workbook", fields = c(
-  
-  #".rels",
-  #"app",
-  
-  "charts",
-  "isChartSheet",
-  
-  "colWidths",
-  "connections",
-  "Content_Types",
-  "core",
-  "dataCount",
-  "drawings",
-  "drawings_rels",
-  "embeddings",
-  "externalLinks",
-  "externalLinksRels",
-  "freezePane",
-  "headFoot",
-  "hyperlinks",
-  "media",
-  
-  "pivotTables",
-  "pivotTables.xml.rels",
-  "pivotDefinitions",
-  "pivotRecords",
-  "pivotDefinitionsRels",
-  
-  "queryTables",
-  "rowHeights",
-  
-  "slicers",
-  "slicerCaches",
-  
-  "sharedStrings",
-  "sheetData",
-  
-  "styleObjects",
-  # "cellStyleObjects",
-  
-  
-  "styles",
-  "styleInds",
-  "tables",
-  "tables.xml.rels",
-  "theme",
-  
-  "vbaProject",
-  "vml",
-  "vml_rels",
-  "comments",
-  
-  "workbook",
-  "workbook.xml.rels",
-  "worksheets",
-  "worksheets_rels",
-  "sheetOrder")
-)
-
+#' @include class_definitions.R
 
 Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   
   if(length(creator) == 0)
     creator <- ""
   
-  # .rels <<- genBaseRels()
-  # app <<- genBaseApp()
-  # printerSettings <<- list()
   
   Content_Types <<- genBaseContent_Type()
   
@@ -80,7 +17,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   
   core <<- genBaseCore(creator)
   workbook.xml.rels <<- genBaseWorkbook.xml.rels()
-  theme <<- NULL #genBaseTheme()
+  theme <<- NULL
   worksheets <<- list()
   worksheets_rels <<- list()
   
@@ -123,6 +60,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   vml <<- list()
   vml_rels <<- list()
   comments <<- list()
+  
+  sheet_names <<- character(0)
   
   sharedStrings <<- list()
   attr(sharedStrings, "uniqueCount") <<- 0
@@ -256,7 +195,9 @@ Workbook$methods(addWorksheet = function(sheetName
   freezePane[[newSheetIndex]] <<- list()
   hyperlinks[[newSheetIndex]] <<- list()
   dataCount[[newSheetIndex]] <<- 0
+  
   sheetOrder <<- c(sheetOrder, newSheetIndex)
+  sheet_names <<- c(sheet_names, sheetName)
   
   invisible(newSheetIndex)
   
@@ -277,8 +218,7 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, sheetId, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseChartSheet(sheetName = sheetName,
-                                                      tabSelected = newSheetIndex == 1, 
+  worksheets <<- append(worksheets, genBaseChartSheet(tabSelected = newSheetIndex == 1, 
                                                       tabColour = tabColour, zoom = zoom))
   
   
@@ -662,39 +602,35 @@ Workbook$methods(updateSharedStrings = function(uNewStr){
 
 
 Workbook$methods(validateSheet = function(sheetName){
-  
-  exSheets <- names(worksheets)
-  
+
   if(!is.numeric(sheetName))
     sheetName <- replaceIllegalCharacters(sheetName)
   
-  if(is.null(exSheets))
+  if(is.null(sheet_names))
     stop("Workbook does not contain any worksheets.", call.=FALSE)
   
   if(is.numeric(sheetName)){
-    if(sheetName > length(exSheets))
-      stop(sprintf("This Workbook only has %s sheets.", length(exSheets)), call.=FALSE)
+    if(sheetName > length(sheet_names))
+      stop(sprintf("This Workbook only has %s sheets.", length(sheet_names)), call.=FALSE)
     
     return(sheetName)
     
-  }else if(!sheetName %in% exSheets){
+  }else if(!sheetName %in% sheet_names){
     stop(sprintf("Sheet '%s' does not exist.", sheetName), call.=FALSE)
   }
   
-  return(which(exSheets == sheetName))
+  return(which(sheet_names == sheetName))
   
 })
 
 
 
 Workbook$methods(getSheetName = function(sheetIndex){
+
+  if(any(length(sheet_names) < sheetIndex))
+    stop(sprintf("Workbook only contains %s sheet(s).", length(sheet_names)))
   
-  sheetNames <- names(worksheets)
-  
-  if(any(length(sheetNames) < sheetIndex))
-    stop(sprintf("Sheet only contains %s sheet(s).", length(sheetNames)))
-  
-  sheetNames[sheetIndex]
+  sheet_names[sheetIndex]
   
 })
 
@@ -1378,13 +1314,13 @@ Workbook$methods(createFillNode = function(style, patternType = "solid"){
 
 Workbook$methods(setSheetName = function(sheet, newSheetName){
   
-  if(newSheetName %in% names(worksheets))
+  if(newSheetName %in% sheet_names)
     stop(sprintf("Sheet %s already exists!", newSheetName))  
   
   sheet <- validateSheet(sheet)
   
-  oldName <- names(worksheets)[[sheet]]
-  names(worksheets)[[sheet]] <<- newSheetName
+  oldName <- sheet_names[[sheet]]
+  sheet_names[[sheet]] <<- newSheetName
   
   ## Rename in workbook
   sheetId <- regmatches(workbook$sheets[[sheet]], regexpr('(?<=sheetId=")[0-9]+', workbook$sheets[[sheet]], perl = TRUE))
@@ -1699,7 +1635,7 @@ Workbook$methods(setColWidths = function(sheet){
       ## get char widths for each style object
       if(length(styleObjects) > 0 & any(!is.na(styleInds[[sheet]]))){
         
-        thisSheetName <- names(worksheets)[sheet]
+        thisSheetName <- sheet_names[sheet]
         
         ## Calc font width for all styles on this worksheet
         styleIds <- styleInds[[sheet]]
@@ -1857,11 +1793,12 @@ Workbook$methods(deleteWorksheet = function(sheet){
   # remove tables
   
   sheet <- validateSheet(sheet)
-  sheetNames <- names(worksheets)
+  sheetNames <- sheet_names
   nSheets <- length(unlist(sheetNames, use.names = FALSE))
   sheetName <- sheetNames[[sheet]]
   
   colWidths[[sheet]] <<- NULL
+  sheet_names <<- sheet_names[-sheet]
   
   ## remove last drawings(sheet).xml from Content_Types
   Content_Types <<- Content_Types[!grepl(sprintf("drawing%s.xml", nSheets), Content_Types)]
@@ -2414,7 +2351,7 @@ Workbook$methods(preSaveCleanUp = function(){
   
   if(length(workbook$definedNames) > 0){
     
-    sheetNames <- names(worksheets)[sheetOrder]
+    sheetNames <- sheet_names[sheetOrder]
     
     belongTo <- getDefinedNamesSheet(workbook$definedNames)
     
@@ -2461,7 +2398,7 @@ Workbook$methods(preSaveCleanUp = function(){
       
       
       ## convert sheet name to index
-      sheet <- which(names(worksheets) == x$sheet)
+      sheet <- which(sheet_names == x$sheet)
       sId <- .self$updateStyles(this.sty) ## this creates the XML for styles.XML
       
       ## In here we create any styleInds that don't yet have a sheetData
@@ -2516,7 +2453,7 @@ Workbook$methods(preSaveCleanUp = function(){
 
 Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
   
-  sheet <- names(worksheets)[[sheet]]
+  sheet <- sheet_names[[sheet]]
   
   if(length(styleObjects) == 0){
     
@@ -2645,7 +2582,7 @@ Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet, localShee
 Workbook$methods(show = function(){
   
   
-  exSheets <- names(worksheets)
+  exSheets <- sheet_names
   nSheets <- length(exSheets)
   nImages <- length(media)
   nCharts <- length(charts)

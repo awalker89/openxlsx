@@ -207,7 +207,7 @@ sheets <- function(wb){
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  nms <- names(wb$worksheets)
+  nms <- wb$sheet_names
   nms <- replaceXMLEntities(nms)
   
   return(nms)
@@ -309,7 +309,7 @@ addWorksheet <- function(wb, sheetName,
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  if(tolower(sheetName) %in% tolower(names(wb$worksheets)))
+  if(tolower(sheetName) %in% tolower(wb$sheet_names))
     stop("A worksheet by that name already exists! Sheet names must be unique case-insensitive.")
   
   if(!is.logical(gridLines) | length(gridLines) > 1)
@@ -1971,10 +1971,6 @@ worksheetOrder <- function(wb){
   if(!"Workbook" %in% class(wb))
     stop("Argument must be a Workbook.")
   
-  #   nms <- names(wb$worksheets)
-  #   nms <- replaceXMLEntities(nms)
-  #   sprintf('%s: "%s"', wb$sheetOrder, nms[wb$sheetOrder])
-  
   wb$sheetOrder
   
 }
@@ -2090,7 +2086,7 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
 #' names(wb)
 #' names(wb) <- paste("Sheet", 1:3)
 names.Workbook <- function(x){
-  nms <- names(x$worksheets)
+  nms <- x$sheet_names
   nms <- replaceXMLEntities(nms)
 }
 
@@ -2102,14 +2098,14 @@ names.Workbook <- function(x){
   if(any(duplicated(tolower(value))))
     stop("Worksheet names must be unique.")
   
-  exSheets <- names(x$worksheets)
-  inds <- which(value != exSheets)
+  existing_sheets <- x$sheet_names
+  inds <- which(value != existing_sheets)
   
   if(length(inds) == 0)
     return(invisible(x))
   
   if(length(value) != length(x$worksheets))
-    stop(sprintf("names vector must have length equal to number of worksheets in Workbook [%s]", length(exSheets)))
+    stop(sprintf("names vector must have length equal to number of worksheets in Workbook [%s]", length(existing_sheets)))
   
   if(any(nchar(value) > 31)){
     warning("Worksheet names must less than 32 characters. Truncating names...")
@@ -2208,7 +2204,7 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", endCol, LETTERS), "$", endRow)
   
   invisible(
-    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = names(wb$worksheets)[sheet])
+    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
   )
   
 }
@@ -3679,7 +3675,7 @@ all.equal.Workbook <- function(target, current, ...){
   }
   
   
-  flag <- all(names(x$workbook) %in% names(y$workbook)) & all(names(y$workbook) %in% names(x$workbook))
+  flag <- all(x$sheet_names %in% y$sheet_names) & all(y$sheet_names %in% x$sheet_names)
   if(!flag){
     message("names workbook not equal")
     return(FALSE)

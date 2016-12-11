@@ -102,7 +102,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     hyperlinkstyle <- createStyle(textDecoration = "underline")
     hyperlinkstyle$fontColour <- list("theme"="10")
     styleElements <- list("style" = hyperlinkstyle,
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -116,7 +116,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     inds <- which(sapply(colClasses, function(x) "date" %in% x)) 
     coords <- expand.grid(rowInds, inds +startCol)   
     styleElements <- list("style" = createStyle(numFmt = "date"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -131,7 +131,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)   
     
     styleElements <- list("style" = createStyle(numFmt = "LONGDATE"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -146,7 +146,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list("style" = createStyle(numFmt = "CURRENCY"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -159,7 +159,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list("style" = createStyle(numFmt = "ACCOUNTING"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -173,7 +173,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list("style" = createStyle(numFmt = "percentage"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -186,7 +186,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list("style" = createStyle(numFmt = "scientific"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -199,7 +199,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)  
     
     styleElements <- list("style" = createStyle(numFmt = "3"),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     
@@ -212,7 +212,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
     coords <- expand.grid(rowInds, inds +startCol)
     
     styleElements <- list("style" = createStyle(numFmt = getOption("openxlsx.numFmt", "0")),
-                          "sheet" =  names(wb$worksheets)[[sheet]],
+                          "sheet" =  wb$sheet_names[sheet],
                           "rows" = coords[[1]],
                           "cols" = coords[[2]])
     

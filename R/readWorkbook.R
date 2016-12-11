@@ -514,7 +514,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     stop("Workbook has no worksheets")
   
   ## get workbook names
-  sheetNames <- names(xlsxFile$worksheets)
+  sheetNames <- xlsxFile$sheet_names
   
   if("character" %in% class(sheet)){
     if(!sheet %in% sheetNames)

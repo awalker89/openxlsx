@@ -57,7 +57,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   
   List worksheets = wb.field("worksheets");
   int n_sheets = is_chart_sheet.size();
-  CharacterVector sheetNames = worksheets.attr("names");
+  CharacterVector sheetNames = wb.field("sheet_names");
   
   // variable set up
   std::string tagEnd = "\"";

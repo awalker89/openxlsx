@@ -157,9 +157,7 @@ genBaseSheet <- function(sheetName,
                    tableParts = NULL,
                    extLst = NULL
   ))
-  
-  names(tmp) <- sheetName
-  
+
   return(tmp)
 }
 
@@ -255,8 +253,7 @@ genBaseTable <- function(id, ref, colNames){
 
 
 
-genBaseChartSheet <- function(sheetName, 
-                              tabSelected = FALSE, 
+genBaseChartSheet <- function(tabSelected = FALSE, 
                               tabColour = NULL, 
                               zoom = 100){
   
@@ -276,8 +273,6 @@ genBaseChartSheet <- function(sheetName,
                    # pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
                    drawing = '<drawing r:id=\"rId1\"/>' ## will always be 1
   ))
-  
-  names(tmp) <- sheetName
   
   return(tmp)
 }
