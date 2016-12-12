@@ -19,10 +19,12 @@ test_that("Writing to sheetData with keepNA = FALSE", {
   addWorksheet(wb, "Sheet 1")
   writeData(wb, 1, a, keepNA = FALSE)
   
-  sheet_v <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "v")))
-  sheet_t <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "t")))
-  sheet_f <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "f")))
-  sheet_r <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "r")))
+  sheet_data <- wb$worksheets[[1]]$sheetData
+  
+  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
+  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
+  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
+  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
   
   sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
   sheet_col <- convertFromExcelRef(sheet_r)

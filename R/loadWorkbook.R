@@ -392,7 +392,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## Fix headers/footers
   for(i in 1:length(worksheetsXML)){
-    if(!is.null(wb$worksheets[[i]]$headerFooter))
+    if(length(wb$worksheets[[i]]$headerFooter) > 0)
       wb$worksheets[[i]]$headerFooter <- lapply(wb$worksheets[[i]]$headerFooter, splitHeaderFooter)
   }
   
@@ -482,7 +482,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           
           slicer_xml_exists <- FALSE
           ## Append slicer to worksheet extLst
-          if(!is.null(wb$worksheets[[i]]$extLst)){
+          
+          if(length(wb$worksheets[[i]]$extLst) > 0){
             if(grepl('x14:slicer r:id="rId[0-9]+"', wb$worksheets[[i]]$extLst)){
               wb$worksheets[[i]]$extLst <- sub('x14:slicer r:id="rId[0-9]+"', 'x14:slicer r:id="rId0"', wb$worksheets[[i]]$extLst)
               slicer_xml_exists <- TRUE
@@ -566,8 +567,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     
     ## might we have some external hyperlinks
-    if(any(sapply(wb$hyperlinks, length) > 0)){
-      
+    if(any(sapply(wb$worksheets, function(x) length(x$hyperlinks)) > 0)){
+
       ## Do we have external hyperlinks
       hlinks <- lapply(xml, function(x) x[grepl("hyperlink", x) & grepl("External", x)])
       hlinksInds <- which(sapply(hlinks, length) > 0)
@@ -582,12 +583,12 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           targets <- unlist(lapply(hlinks[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           targets <- gsub('"$', "", targets)
           
-          ids2 <- lapply(wb$hyperlinks[[i]], function(x) regmatches(x, gregexpr('(?<=r:id=").*?"', x, perl = TRUE))[[1]])
+          ids2 <- lapply(wb$worksheets[[i]]$hyperlinks, function(x) regmatches(x, gregexpr('(?<=r:id=").*?"', x, perl = TRUE))[[1]])
           ids2[sapply(ids2, length) == 0] <- NA
           ids2 <- gsub('"$', "", unlist(ids2))
           
           targets <- targets[match(ids2, ids)]
-          names(wb$hyperlinks[[i]]) <- targets
+          names(wb$worksheets[[i]]$hyperlinks) <- targets
           
         }
       }
@@ -846,9 +847,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   } ## end of worksheetRels
   
   ## convert hyperliks to hyperlink objects
-  if(any(sapply(wb$hyperlinks, length) > 0)) 
-    wb$hyperlinks <- lapply(1:nSheets, function(i) xml_to_hyperlink(wb$hyperlinks[[i]]))
-  
+  for(i in 1:nSheets)
+    wb$worksheets[[i]]$hyperlinks <- xml_to_hyperlink(wb$worksheets[[i]]$hyperlinks)
+
   
   ## queryTables
   if(length(queryTablesXML) > 0){

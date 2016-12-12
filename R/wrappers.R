@@ -1984,6 +1984,11 @@ worksheetOrder <- function(wb){
   if(!"Workbook" %in% class(wb))
     stop("Argument must be a Workbook.")
   
+  if(any(value != as.integer(value)))
+    stop("values must be integers")
+  
+  value <- as.integer(value)
+  
   value <- unique(value)
   if(length(value) != length(wb$worksheets))
     stop(sprintf("Worksheet order must be same length as number of worksheets [%s]", length(wb$worksheets)))
@@ -3341,9 +3346,7 @@ all.equal.Workbook <- function(target, current, ...){
   #   "dataCount",  
   #   "drawings",
   #   "drawings_rels", 
-  #   "hyperlinks",
   #   "media", 
-  #   "freezePane",
   #   "rowHeights",
   #   "workbook",
   #   "workbook.xml.rels",
@@ -3413,17 +3416,8 @@ all.equal.Workbook <- function(target, current, ...){
     return(FALSE)
   } 
   
-  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(x$freezePane[[i]], y$freezePane[[i]]))))
-  if(!flag){
-    message("freezePane not equal")
-    return(FALSE)
-  } 
   
-  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(x$hyperlinks[[i]], y$hyperlinks[[i]]))))
-  if(!flag){
-    message("hyperlinks not equal")
-    return(FALSE)
-  } 
+  
   
   flag <- all(names(x$media) %in% names(y$media) & names(y$media) %in% names(x$media))
   if(!flag){
@@ -3449,13 +3443,13 @@ all.equal.Workbook <- function(target, current, ...){
     return(FALSE)
   } 
   
-  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(names(x$sheetData[[i]]), names(y$sheetData[[i]])))))
+  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(names(x$worksheets[[i]]$sheetData), names(y$worksheets[[i]]$sheetData)))))
   if(!flag){
     message("names sheetData elements not equal")
     return(FALSE)
   } 
   
-  flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$sheetData[[i]], y$sheetData[[i]])))
+  flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets[[i]]$sheetData, y$worksheets[[i]]$sheetData)))
   if(!all(flag)){
     
     tmp_x <- x$sheetData[[which(!flag)[[1]]]]

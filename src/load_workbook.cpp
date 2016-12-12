@@ -63,11 +63,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   std::string tagEnd = "\"";
   std::string cell;
   List sheetData(n_sheets);
-  List freezePane(n_sheets);
   List colWidths(n_sheets);
   List rowHeights(n_sheets);
-  List dataCount(n_sheets);
-  List hyperLinks(n_sheets);
+  IntegerVector dataCount(n_sheets);
   List headerFooter(n_sheets);
   List wbstyleObjects;
   
@@ -79,19 +77,17 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
       sheetData[i] = List(0);
-      freezePane[i] = List(0);
       rowHeights[i] = List(0);
       dataCount[i] = 0;
-      hyperLinks[i] = List(0);
-      
+
     }else{
       
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
       sheetData[i] = List(0);
       headerFooter[i] = List(0);
-      List this_worksheet = worksheets[i];
-      
+      Reference this_worksheet(worksheets[i]);
+
       
       //read in file
       std::string xmlFile = xmlFiles[i];
@@ -135,22 +131,19 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         sheetPr = getChildlessNode(xml_pre, "<sheetPr");
       
       if(sheetPr.size() > 0)
-        this_worksheet["sheetPr"] = sheetPr;
+        this_worksheet.field("sheetPr") = sheetPr;
       
       
       
       // Freeze Panes
       CharacterVector node_xml = getChildlessNode(xml_pre, "<pane ");
-      if(node_xml.size() > 0){
-        freezePane[i] = node_xml;
-      }else{
-        freezePane[i] = List(0);
-      }
+      if(node_xml.size() > 0)
+        this_worksheet.field("freezePane") = node_xml;
       
       // SheetViews
       node_xml = getNodes(xml_pre, "<sheetViews>");
       if(node_xml.size() > 0)
-        this_worksheet["sheetViews"] = node_xml;
+        this_worksheet.field("sheetViews") = node_xml;
       
       
       //colwidths
@@ -219,18 +212,17 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       node_xml = getChildlessNode(xml_post, "<autoFilter ");
       if(node_xml.size() > 0)
-        this_worksheet["autoFilter"] = node_xml;
+        this_worksheet.field("autoFilter") = node_xml;
+      
       
       node_xml = getChildlessNode(xml_post, "<hyperlink ");
-      if(node_xml.size() > 0){
-        hyperLinks[i] = node_xml;
-      }else{
-        hyperLinks[i] = List(0);
-      }
+      if(node_xml.size() > 0)
+        this_worksheet.field("hyperlinks") = node_xml;
+      
       
       node_xml = getChildlessNode(xml_post, "<pageMargins ");
       if(node_xml.size() > 0)
-        this_worksheet["pageMargins"] = node_xml;
+        this_worksheet.field("pageMargins") = node_xml;
       
       
       node_xml = getChildlessNode(xml_post, "<pageSetup ");
@@ -250,17 +242,17 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           node_xml[j] = pageSetup_tmp;
           
         }
-        this_worksheet["pageSetup"] = node_xml;
+        this_worksheet.field("pageSetup") = node_xml;
       }
       
       node_xml = getChildlessNode(xml_post, "<mergeCell ");
       if(node_xml.size() > 0)
-        this_worksheet["mergeCells"] = node_xml;
+        this_worksheet.field("mergeCells") = node_xml;
       
       
       node_xml = getNodes(xml_post, "<oleObjects>");
       if(node_xml.size() > 0)
-        this_worksheet["oleObjects"] = node_xml;
+        this_worksheet.field("oleObjects") = node_xml;
       
       
       // headerfooter
@@ -293,7 +285,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         if(node_xml.size() > 0)
           hf["firstFooter"] = node_xml;
         
-        this_worksheet["headerFooter"] = hf;
+        this_worksheet.field("headerFooter") = hf;
         
       }
       
@@ -367,7 +359,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         } // end of loop through conditional formats
         
         cf.attr("names") = cf_names;
-        this_worksheet["conditionalFormatting"] = cf;
+        this_worksheet.field("conditionalFormatting") = cf;
         
       } // end of if(conForm.size() > 0)
       
@@ -375,12 +367,12 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       //data validation
       node_xml = getOpenClosedNode(xml_post, "<dataValidation ", "</dataValidation>");
       if(node_xml.size() > 0)
-        this_worksheet["dataValidations"] = node_xml;
+        this_worksheet.field("dataValidations") = node_xml;
       
       // extLst
       node_xml = get_extLst_Major(xml_post);
       if(node_xml.size() > 0)
-        this_worksheet["extLst"] = node_xml;
+        this_worksheet.field("extLst") = node_xml;
       
       
       // clean pre and post xml
@@ -502,7 +494,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
         if(ocs > 0){
           cells.attr("names") = r_nms;
-          sheetData[i] = cells;
+          this_worksheet.field("sheetData") = cells;
         }
         
         // count number of rows
@@ -619,22 +611,16 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         dataCount[i] = 0;
       } // end of if(has_data)
       
-      
-      worksheets[i] = this_worksheet;
-      
     } 
   }
   
   // assign back to workbook
   wb.field("worksheets") = worksheets;
-  wb.field("sheetData") = sheetData;
-  wb.field("freezePane") = freezePane;
   wb.field("rowHeights") = rowHeights;
   wb.field("colWidths") = colWidths;
   wb.field("styleObjects") = wbstyleObjects;
   wb.field("dataCount") = dataCount;
-  wb.field("hyperlinks") = hyperLinks;
-  
+
   return wrap(wb);
   
   

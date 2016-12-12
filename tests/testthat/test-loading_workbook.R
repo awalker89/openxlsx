@@ -10,10 +10,11 @@ test_that("Loading readTest.xlsx Sheet 1", {
   fl <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(fl)
   
-  sheet_v <- unlist(unname(lapply(wb$sheetData[[2]], "[[", "v")))
-  sheet_t <- unlist(unname(lapply(wb$sheetData[[2]], "[[", "t")))
+  sheet_data <- wb$worksheets[[2]]$sheetData
+  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
+  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
   
-  sheet_r <- unlist(unname(lapply(wb$sheetData[[2]], "[[", "r")))
+  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
   sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
   sheet_col <- convertFromExcelRef(sheet_r)
   
@@ -111,11 +112,11 @@ test_that("Loading readTest.xlsx Sheet 1", {
   fl <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(fl)
   
-  
-  sheet_v <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "v")))
-  sheet_t <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "t")))
-  sheet_r <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "r")))
-  sheet_f <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "f")))
+  sheet_data <- wb$worksheets[[1]]$sheetData
+  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
+  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
+  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
+  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
   
   
   sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))

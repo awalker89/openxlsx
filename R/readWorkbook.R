@@ -535,7 +535,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
-  sheetData <- xlsxFile$sheetData[[sheet]]
+  sheetData <- xlsxFile$worksheets[[sheet]]$sheetData
   if(!is.na(rows[1]))
     sheetData <- sheetData[as.numeric(names(sheetData)) %in% rows]
   

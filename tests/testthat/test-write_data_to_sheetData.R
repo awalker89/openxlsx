@@ -17,11 +17,12 @@ test_that("Converting R types to Excel types", {
   
   n_values <- prod(dim(iris)) + ncol(iris)
   
-  sheet_v <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "v")))
-  sheet_t <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "t")))
-  sheet_f <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "f")))
+  sheet_data <- wb$worksheets[[1]]$sheetData
+  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
+  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
+  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
   
-  sheet_r <- unlist(unname(lapply(wb$sheetData[[1]], "[[", "r")))
+  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
   sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
   sheet_col <- convertFromExcelRef(sheet_r)
   sheet_v <- as.numeric(sheet_v)
@@ -127,12 +128,13 @@ test_that("Converting R types to Excel types", {
   
   
   ## Get all data
+  sheet_data <- wb$worksheets[[3]]$sheetData
   n_values <- (nrow(df) + 1) * (ncol(df) + 1)
-  sheet_v <- unlist(unname(lapply(wb$sheetData[[3]], "[[", "v")))
-  sheet_t <- unlist(unname(lapply(wb$sheetData[[3]], "[[", "t")))
-  sheet_f <- unlist(unname(lapply(wb$sheetData[[3]], "[[", "f")))
+  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
+  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
+  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
   
-  sheet_r <- unlist(unname(lapply(wb$sheetData[[3]], "[[", "r")))
+  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
   sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
   sheet_col <- convertFromExcelRef(sheet_r)
   sheet_v <- as.numeric(sheet_v)

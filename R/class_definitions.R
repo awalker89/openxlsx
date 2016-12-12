@@ -1,61 +1,108 @@
 
 
 
-Workbook <- setRefClass("Workbook", fields = c(
-  
-  #"app",
-  
-  "charts",
-  "isChartSheet",
-  
-  "colWidths",
-  "connections",
-  "Content_Types",
-  "core",
-  "dataCount",
-  "drawings",
-  "drawings_rels",
-  "embeddings",
-  "externalLinks",
-  "externalLinksRels",
-  "freezePane",
-  "headFoot",
-  "hyperlinks",
-  "media",
-  
-  "pivotTables",
-  "pivotTables.xml.rels",
-  "pivotDefinitions",
-  "pivotRecords",
-  "pivotDefinitionsRels",
-  
-  "queryTables",
-  "rowHeights",
-  
-  "slicers",
-  "slicerCaches",
-  
-  "sharedStrings",
-  "sheetData",
-  
-  "styleObjects",
-  "sheet_names",
-  
-  "styles",
-  "styleInds",
-  "tables",
-  "tables.xml.rels",
-  "theme",
-  
-  "vbaProject",
-  "vml",
-  "vml_rels",
-  "comments",
-  
-  "workbook",
-  "workbook.xml.rels",
-  "worksheets",
-  "worksheets_rels",
-  "sheetOrder")
+
+Workbook <- setRefClass("Workbook", 
+                        
+                        fields = c("sheet_names" = "character",
+                                   
+                                   "charts" = "ANY",
+                                   "isChartSheet" = "logical",
+                                   
+                                   "colWidths" = "ANY",
+                                   "connections" = "ANY",
+                                   "Content_Types" = "character",
+                                   "core" = "character",
+                                   "drawings" = "ANY",
+                                   "drawings_rels" = "ANY",
+                                   "embeddings" = "ANY",
+                                   "externalLinks" = "ANY",
+                                   "externalLinksRels" = "ANY",
+                                   
+                                   "headFoot" = "ANY",
+                                   "media" = "ANY",
+                                   
+                                   "pivotTables" = "ANY",
+                                   "pivotTables.xml.rels" = "ANY",
+                                   "pivotDefinitions" = "ANY",
+                                   "pivotRecords" = "ANY",
+                                   "pivotDefinitionsRels" = "ANY",
+                                   
+                                   "queryTables" = "ANY",
+                                   "rowHeights" = "ANY",
+                                   
+                                   "slicers" = "ANY",
+                                   "slicerCaches" = "ANY",
+                                   
+                                   "sharedStrings" = "ANY",
+                                   "styleObjects" = "ANY",
+                                   
+                                   "styles" = "ANY",
+                                   "styleInds" = "ANY",
+                                   "tables" = "ANY",
+                                   "tables.xml.rels" = "ANY",
+                                   "theme" = "ANY",
+                                   
+                                   "vbaProject" = "ANY",
+                                   "vml" = "ANY",
+                                   "vml_rels" = "ANY",
+                                   "comments" = "ANY",
+                                   
+                                   "workbook" = "ANY",
+                                   "workbook.xml.rels" = "ANY",
+                                   "worksheets" = "ANY",
+                                   "worksheets_rels" = "ANY",
+                                   "sheetOrder" = "integer",
+                                   "dataCount" = "numeric")
 )
+
+
+
+# SheetData <- setRefClass("SheetData", 
+#                          
+#                          fields = c("row" = "integer",
+#                                     "col" = "integer",
+#                                     "t" = "integer",
+#                                     "v" = "numeric",
+#                                     "f" = "character",
+#                                     "dataCount" = "integer",
+#                                     "n_elements" = "integer")
+#                          
+# )
+# 
+
+
+
+
+WorkSheet <- setRefClass("WorkSheet", 
+                         
+                         fields = c("sheetPr" = "character",
+                                    "dimension" = "character",
+                                    "sheetViews" =  "character",
+                                    "sheetFormatPr" = "character",
+                                    "cols" = "character",
+                                    
+                                    "sheetData" = "ANY",
+                                    
+                                    "autoFilter" = "character",
+                                    "mergeCells" = "ANY",
+                                    "conditionalFormatting" = "character",
+                                    "dataValidations" = "ANY", 
+                                    
+                                    "freezePane" = "character",
+                                    "hyperlinks" = "ANY",
+                                    
+                                    "pageMargins" = "character",
+                                    "pageSetup" = "character",
+                                    "headerFooter" = "ANY",
+                                    "rowBreaks" = "character",
+                                    "colBreaks" = "character",
+                                    "drawing" = "character",
+                                    "legacyDrawing" = "character",
+                                    "legacyDrawingHF" = "character",
+                                    "oleObjects" = "character",
+                                    "tableParts" = "character",
+                                    "extLst" = "character")
+)
+
 

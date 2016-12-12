@@ -42,6 +42,8 @@ Collate:
     'openxlsx.R'
     'openxlsxCoerce.R'
     'readWorkbook.R'
+    'workbook_write_data.R'
+    'worksheet_class.R'
     'wrappers.R'
     'writeData.R'
     'writeDataTable.R'

@@ -25,7 +25,7 @@ Hyperlink$methods(initialize = function(ref, target, location, display = NULL, i
 
 Hyperlink$methods(to_xml = function(id){
   
-
+  
   loc <- sprintf('location="%s"', location)
   disp <- sprintf('display="%s"', display)
   rf <- sprintf('ref="%s"', ref)
@@ -48,13 +48,13 @@ Hyperlink$methods(to_target_xml = function(id){
   }else{
     return(NULL)
   }
-
+  
 })
 
 
 
 xml_to_hyperlink <- function(xml){
- 
+  
   # xml <- c('<hyperlink ref="A1" r:id="rId1" location="Authority"/>',
   # '<hyperlink ref="B1" r:id="rId2"/>',
   # '<hyperlink ref="A1" location="Sheet2!A1" display="Sheet2!A1"/>')
@@ -72,8 +72,8 @@ xml_to_hyperlink <- function(xml){
   names = lapply(a, function(xml) regmatches(xml, regexpr('[a-zA-Z]+(?=\\=".*?")', xml, perl = TRUE)))
   vals =  lapply(a, function(xml) regmatches(xml, regexpr('(?<=").*?(?=")', xml, perl = TRUE)))
   vals <- lapply(vals, function(x) {Encoding(x) <- "UTF-8"; x})
-
-  lapply(1:length(xml), function(i){
+  
+  hyperlink_objects <- lapply(1:length(xml), function(i){
     
     tmp_vals <- vals[[i]]
     tmp_nms <- names[[i]]
@@ -104,10 +104,12 @@ xml_to_hyperlink <- function(xml){
       is_external <- TRUE
       target <- targets[i]
     }
-
+    
     Hyperlink$new(ref = ref, target = target, location = location, display = display, is_external = is_external)
     
   })
+  
+  return(hyperlink_objects)
   
 }
 

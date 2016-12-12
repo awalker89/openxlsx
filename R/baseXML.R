@@ -70,11 +70,9 @@ genClientData <- function(col, row, visible, height, width){
 
 
 genBaseCore <- function(creator){  
-  
-  list('<dcterms:created xsi:type="dcterms:W3CDTF">2014-03-07T16:08:25Z</dcterms:created>',
-       sprintf('<dc:creator>%s</dc:creator>', creator))
-  
+  sprintf('<dcterms:created xsi:type="dcterms:W3CDTF">2014-03-07T16:08:25Z</dcterms:created><dc:creator>%s</dc:creator>', creator)
 } 
+
 
 genBaseWorkbook.xml.rels <- function(){
   
@@ -98,68 +96,7 @@ genBaseWorkbook <- function(){
   
 }
 
-genBaseSheet <- function(sheetName, 
-                         showGridLines = TRUE, 
-                         tabSelected = FALSE, 
-                         tabColour = NULL, 
-                         zoom = 100, 
-                         oddHeader, oddFooter, evenHeader, evenFooter, firstHeader, firstFooter,
-                         paperSize, orientation,
-                         hdpi = 300, vdpi = 300){
-  
-  if(!is.null(tabColour))
-    tabColour <- sprintf('<sheetPr><tabColor rgb="%s"/></sheetPr>', tabColour)
-  
-  if(zoom < 10){
-    zoom <- 10
-  }else if(zoom > 400){
-    zoom <- 400
-  }
-  
-  naToNULLList <- function(x){
-    lapply(x, function(x) {
-      if(is.na(x))
-        return(NULL)
-      x})
-  }
-  
-  hf <- list(oddHeader = naToNULLList(oddHeader),
-             oddFooter = naToNULLList(oddFooter),
-             evenHeader = naToNULLList(evenHeader),
-             evenFooter = naToNULLList(evenFooter), 
-             firstHeader = naToNULLList(firstHeader),
-             firstFooter = naToNULLList(firstFooter))
-  
-  if(all(sapply(hf, length) == 0))
-    hf <- NULL
-  
-  ## list of all possible children
-  tmp <- list(list(sheetPr = tabColour,
-                   dimension = '<dimension ref="A1"/>',
-                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" zoomScale="%s" showGridLines="%s" tabSelected="%s"/></sheetViews>', as.integer(zoom), as.integer(showGridLines), as.integer(tabSelected)),
-                   sheetFormatPr = '<sheetFormatPr defaultRowHeight="15.0"/>',
-                   cols = NULL,
-                   sheetData = '<sheetData/>',
-                   autoFilter = NULL,
-                   mergeCells = NULL,
-                   conditionalFormatting = NULL,
-                   dataValidations = NULL, 
-                   hyperlinks = NULL,
-                   pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
-                   pageSetup = sprintf('<pageSetup paperSize="%s" orientation="%s" horizontalDpi="%s" verticalDpi="%s" r:id="rId2"/>', paperSize, orientation, hdpi, vdpi),  ## will always be 2
-                   headerFooter = hf,
-                   rowBreaks = NULL,
-                   colBreaks = NULL,
-                   drawing = '<drawing r:id=\"rId1\"/>', ## will always be 1
-                   legacyDrawing = NULL,
-                   legacyDrawingHF = NULL,
-                   oleObjects = NULL,
-                   tableParts = NULL,
-                   extLst = NULL
-  ))
 
-  return(tmp)
-}
 
 
 genBaseSheetRels <- function(sheetInd){
