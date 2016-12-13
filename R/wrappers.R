@@ -3188,66 +3188,6 @@ pageBreak <- function(wb, sheet, i, type = "row"){
 #' by a formula.  If colorScale cells are coloured based on cell value. See examples.
 #' @seealso \code{\link{createStyle}}
 #' @export
-#' @examples
-#' wb <- createWorkbook()
-#' addWorksheet(wb, "cellIs")
-#' addWorksheet(wb, "moving Row")
-#' addWorksheet(wb, "moving Col")
-#' addWorksheet(wb, "Dependent on 1")
-#' addWorksheet(wb, "colourScale 2 Colours")
-#' addWorksheet(wb, "databar")
-#' 
-#' negStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-#' posStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
-#' 
-#' ## rule applies to all each cell in range
-#' writeData(wb, 1, -5:5)
-#' writeData(wb, 1, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 1, cols=1, rows=1:11, rule="!=0", style = negStyle)
-#' conditionalFormat(wb, 1, cols=1, rows=1:11, rule="==0", style = posStyle)
-#' 
-#' ## highlight row dependent on first cell in row
-#' writeData(wb, 2, -5:5)
-#' writeData(wb, 2, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1<0", style = negStyle)
-#' conditionalFormat(wb, 2, cols=1:2, rows=1:11, rule="$A1>0", style = posStyle)
-#' 
-#' ## highlight column dependent on first cell in column
-#' writeData(wb, 3, -5:5)
-#' writeData(wb, 3, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1<0", style = negStyle)
-#' conditionalFormat(wb, 3, cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
-#' 
-#' 
-#' ## highlight entire range cols X rows dependent only on cell A1
-#' writeData(wb, 4, -5:5)
-#' writeData(wb, 4, LETTERS[1:11], startCol=2)
-#' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
-#' conditionalFormat(wb, 4, cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
-#' 
-#' ## colourscale colours cells based on cell value
-#' 
-#' df <- read.xlsx(system.file("readTest.xlsx", package = "openxlsx"), sheet = 4)
-#' writeData(wb, 5, df, colNames=FALSE)  ## write data.frame
-#' 
-#' ## rule is a vector or colours of length 2 or 3 (any hex colour or any of colours())
-#' conditionalFormat(wb, 5, cols=1:ncol(df), rows=1:nrow(df),
-#'    rule =c("black", "white"), type = "colourScale")
-#'    
-#' setColWidths(wb, 5, cols=1:ncol(df), widths=1.07)
-#' setRowHeights(wb, 5, rows=1:nrow(df), heights=7.5) 
-#'
-#' ## Databars
-#' writeData(wb, "databar", -5:5)
-#' conditionalFormat(wb, "databar", cols = 1, rows = 1:12, type = "databar") ## Default colours
-#' 
-#' writeData(wb, "databar", -5:5, startCol = 2)
-#' ## set negative and positive colours
-#' conditionalFormat(wb, "databar", cols = 2, rows = 1:12,
-#'  rule = c("yellow", "green"), type = "databar")
-#' 
-#' ## Save workbook
-#' saveWorkbook(wb, "conditionalFormatExample.xlsx", overwrite = TRUE)
 conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression"){
   
   warning("conditionalFormat() has been deprecated. Use conditionalFormatting().")
@@ -3351,7 +3291,6 @@ all.equal.Workbook <- function(target, current, ...){
   #   "workbook",
   #   "workbook.xml.rels",
   #   "worksheets",
-  #   "worksheets_rels",
   #   "sheetOrder"
   #   "sharedStrings",
   #   "sheetData",
@@ -3711,12 +3650,6 @@ all.equal.Workbook <- function(target, current, ...){
     }
     
   }
-  
-  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets_rels[[i]], y$worksheets_rels[[i]]))))
-  if(!flag){
-    message("worksheets_rels not equal")
-    return(FALSE)
-  } 
   
   
   flag <- all(unlist(x$sheetOrder) %in% unlist(y$sheetOrder)) & all(unlist(y$sheetOrder) %in% unlist(x$sheetOrder))

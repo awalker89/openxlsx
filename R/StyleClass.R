@@ -1,32 +1,7 @@
 
 
 
-Style <- setRefClass("Style", 
-                     
-                     fields = c("fontName",
-                                "fontColour",
-                                "fontSize",
-                                "fontFamily",
-                                "fontScheme",
-                                "fontDecoration",
-                                "borderTop",
-                                "borderLeft",
-                                "borderRight",
-                                "borderBottom",
-                                "borderTopColour",
-                                "borderLeftColour",
-                                "borderRightColour",
-                                "borderBottomColour",
-                                "halign",
-                                "valign",
-                                "indent",
-                                "textRotation",
-                                "numFmt",
-                                "fill",
-                                "wrapText",
-                                "xfId"),
-  methods = list()
-)
+#' @include class_definitions.R
 
 
 Style$methods(initialize = function(){
