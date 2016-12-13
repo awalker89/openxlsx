@@ -256,7 +256,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
                               sprintf('<Override PartName="/xl/pivotCache/pivotCacheRecords%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml"/>', 1:length(pivotRecordsXML))) 
       
     }
-      
+    
     if(length(pivotDefRelsXML) > 0)
       wb$pivotDefinitionsRels[1:length(pivotDefRelsXML)] <- pivotDefRelsXML
     
@@ -267,7 +267,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## update content_types
     wb$Content_Types <- c(wb$Content_Types, pivot_content_type)
-
+    
     
     ## workbook rels
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
@@ -392,8 +392,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## Fix headers/footers
   for(i in 1:length(worksheetsXML)){
-    if(length(wb$worksheets[[i]]$headerFooter) > 0)
-      wb$worksheets[[i]]$headerFooter <- lapply(wb$worksheets[[i]]$headerFooter, splitHeaderFooter)
+    if(!is_chart_sheet[i]){
+      if(length(wb$worksheets[[i]]$headerFooter) > 0)
+        wb$worksheets[[i]]$headerFooter <- lapply(wb$worksheets[[i]]$headerFooter, splitHeaderFooter)
+    }
   }
   
   
@@ -565,14 +567,13 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       }
     } ## if(length(tablesXML) > 0)
     
-    
     ## might we have some external hyperlinks
-    if(any(sapply(wb$worksheets, function(x) length(x$hyperlinks)) > 0)){
-
+    if(any(sapply(wb$worksheets[!is_chart_sheet], function(x) length(x$hyperlinks) > 0))){
+      
       ## Do we have external hyperlinks
       hlinks <- lapply(xml, function(x) x[grepl("hyperlink", x) & grepl("External", x)])
       hlinksInds <- which(sapply(hlinks, length) > 0)
-      
+
       ## If it's an external hyperlink it will have a target in the sheet_rels
       if(length(hlinksInds) > 0){
         for(i in hlinksInds){
@@ -849,7 +850,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ## convert hyperliks to hyperlink objects
   for(i in 1:nSheets)
     wb$worksheets[[i]]$hyperlinks <- xml_to_hyperlink(wb$worksheets[[i]]$hyperlinks)
-
+  
+  
   
   ## queryTables
   if(length(queryTablesXML) > 0){

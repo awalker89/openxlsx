@@ -191,10 +191,10 @@ genBaseTable <- function(id, ref, colNames){
 
 
 genBaseChartSheet <- function(tabSelected = FALSE, 
-                              tabColour = NULL, 
+                              tabColour = character(0), 
                               zoom = 100){
   
-  if(!is.null(tabColour))
+  if(length(tabColour) > 0)
     tabColour <- sprintf('<sheetPr>%s</sheetPr>', tabColour)
   
   if(zoom < 10){
@@ -203,15 +203,12 @@ genBaseChartSheet <- function(tabSelected = FALSE,
     zoom <- 400
   }
   
-  ## list of all possible children
-  tmp <- list(list(sheetPr = tabColour,
-                   sheetViews = sprintf('<sheetViews><sheetView workbookViewId="0" zoomScale="%s" tabSelected="%s"/></sheetViews>', as.integer(zoom), as.integer(tabSelected)),
-                   pageMargins = '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>',
-                   # pageSetup = '<pageSetup paperSize="9" orientation="portrait" horizontalDpi="300" verticalDpi="300" r:id="rId2"/>',  ## will always be 2
-                   drawing = '<drawing r:id=\"rId1\"/>' ## will always be 1
-  ))
+  sheetPr <<- tabColour
+  sheetViews <<- sprintf('<sheetViews><sheetView workbookViewId="0" zoomScale="%s" tabSelected="%s"/></sheetViews>', as.integer(zoom), as.integer(tabSelected))
+  pageMargins <<- '<pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>'
+  drawing <<- '<drawing r:id=\"rId1\"/>'
   
-  return(tmp)
+  return(invisible(0))
 }
 
 

@@ -224,9 +224,8 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" r:id="rId%s"/>', sheetName, sheetId, newSheetIndex))
   
   ## append to worksheets list
-  worksheets <<- append(worksheets, genBaseChartSheet(tabSelected = newSheetIndex == 1, 
-                                                      tabColour = tabColour, zoom = zoom))
-  
+  worksheets <<- append(worksheets, ChartSheet$new(tabSelected = newSheetIndex == 1, tabColour = tabColour, zoom = zoom))
+  sheet_names <<- c(sheet_names, sheetName)
   
   ## update content_tyes
   Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/chartsheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml"/>', newSheetIndex))
@@ -1212,13 +1211,14 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       }
       
       .Call("openxlsx_writeFile", 
-            '<chartsheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">>',
-            pxml(worksheets[[i]]),
-            '</chartsheet>',
+            "",
+            worksheets[[i]]$get_prior_sheet_data(),
+            "",
             file.path(chartSheetDir, paste0("sheet", i,".xml")))
       
       
-      .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
+      .Call("openxlsx_writeFile",
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
             pxml(worksheets_rels[[i]]),
             '</Relationships>',
             file.path(chartSheetRelsDir, sprintf("sheet%s.xml.rels", i)))
@@ -2108,10 +2108,17 @@ Workbook$methods(preSaveCleanUp = function(){
   ## styles
   numFmtIds <- 50000L
   styleInds <<- lapply(1:length(worksheets), function(i){
+    
+    if(isChartSheet[i])
+      return(NULL)
+    
     y <- rep.int(NA, length(worksheets[[i]]$sheetData))
     names(y) <- unlist(lapply(worksheets[[i]]$sheetData, "[[", "r"), use.names = FALSE)
     return(y)
+    
   })
+  
+  
   
   for(x in styleObjects){
     if(length(x$rows) > 0 & length(x$cols) > 0){

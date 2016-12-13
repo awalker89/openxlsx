@@ -106,3 +106,15 @@ WorkSheet <- setRefClass("WorkSheet",
 )
 
 
+
+
+ChartSheet <- setRefClass("ChartSheet", 
+                         
+                         fields = c("sheetPr" = "character",
+                                    "sheetViews" =  "character",
+                                    "pageMargins" = "character",
+                                    "drawing" = "character",
+                                    "hyperlinks" = "ANY")
+)
+
+

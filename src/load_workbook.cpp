@@ -2,6 +2,7 @@
 #include "openxlsx.h"
 
 
+#include <unistd.h>
 
 
 // [[Rcpp::export]]
@@ -62,33 +63,27 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   // variable set up
   std::string tagEnd = "\"";
   std::string cell;
-  List sheetData(n_sheets);
   List colWidths(n_sheets);
   List rowHeights(n_sheets);
+  List wbstyleObjects(0);
+  
   IntegerVector dataCount(n_sheets);
-  List headerFooter(n_sheets);
-  List wbstyleObjects;
+  std::fill(dataCount.begin(), dataCount.end(), 0);
   
   // loop over each worksheet file
   for(int i = 0; i < n_sheets; i++){
-    
+
     if(is_chart_sheet[i]){
       
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
-      sheetData[i] = List(0);
-      rowHeights[i] = List(0);
-      dataCount[i] = 0;
 
     }else{
       
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
-      sheetData[i] = List(0);
-      headerFooter[i] = List(0);
       Reference this_worksheet(worksheets[i]);
-
-      
+    
       //read in file
       std::string xmlFile = xmlFiles[i];
       
@@ -308,8 +303,8 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           
         }
       }
-      
-      
+
+
       //  conditionalFormatting
       CharacterVector conForm = getNodes(xml_post, "<conditionalFormatting");
       if(conForm.size() > 0){
@@ -323,7 +318,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
         
         for(int ci = 0; ci < conForm.size(); ci++){
-          
+
           buf = conForm[ci];
           
           tmp_pos = buf.find("sqref=\"", 0);
@@ -379,7 +374,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       xml_post.clear();
       xml_pre.clear();
       
-      
+
       /* --------------------------- sheet Data --------------------------- */
       
       if(has_data){
@@ -491,12 +486,12 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         }  // END OF CELL AND ATTRIBUTION GATHERING
         
         // get names of cells
-        
+
         if(ocs > 0){
           cells.attr("names") = r_nms;
           this_worksheet.field("sheetData") = cells;
         }
-        
+
         // count number of rows
         int row_ocs = 0;
         start = 0;
@@ -553,7 +548,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           heights.attr("names") = rowNumbers;
           rowHeights[i] = heights;
         }
-        
+
         // styleObjects
         std::string this_sheetname = as<std::string>(sheetNames[i]);
         
@@ -569,7 +564,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           std::string ref_j;
           CharacterVector styleElementNames = CharacterVector::create("style", "sheet", "rows", "cols");
           
-          for(int j = 0; j < nsu; j ++){
+          for(int j = 0; j < nsu; j++){
             
             List styleElement(4);
             int styleInd = atoi(as<std::string>(uStyleInds[j]).c_str());
@@ -607,12 +602,11 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         }
         
         dataCount[i] = 1;
-      }else{
-        dataCount[i] = 0;
       } // end of if(has_data)
       
-    } 
-  }
+    } // end if is_chart_sheet[i] else
+    
+  } // end of loop over sheets
   
   // assign back to workbook
   wb.field("worksheets") = worksheets;

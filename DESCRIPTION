@@ -36,6 +36,7 @@ Collate:
     'WorkbookClass.R'
     'baseXML.R'
     'borderFunctions.R'
+    'chartsheet_class.R'
     'helperFunctions.R'
     'loadWorkbook.R'
     'openXL.R'
