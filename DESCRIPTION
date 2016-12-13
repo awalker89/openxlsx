@@ -1,8 +1,8 @@
 Package: openxlsx
 Type: Package
 Title: Read, Write and Edit XLSX Files
-Version: 3.1.25
-Date: 2016-11-09
+Version: 3.1.28
+Date: 2016-12-13
 Authors@R: c(
     person("Alexander", "Walker",
     email = "Alexander.Walker1989@gmail.com", role = c("aut", "cre")),
@@ -31,8 +31,8 @@ Collate:
     'CommentClass.R'
     'HyperlinkClass.R'
     'RcppExports.R'
-    'StyleClass.R'
     'class_definitions.R'
+    'StyleClass.R'
     'WorkbookClass.R'
     'baseXML.R'
     'borderFunctions.R'
