@@ -169,7 +169,7 @@ writeDataTable <- function(wb, sheet, x,
   }
   ## If zero rows, append an empty row (prevent XML from corrupting)
   if(nrow(x) == 0){
-    x <- rbind(x, matrix("", nrow = 1, ncol = ncol(x)))
+    x <- rbind(as.data.frame(x), matrix("", nrow = 1, ncol = ncol(x), dimnames = list(character(), colnames(x))))
     names(x) <- colNames
   }
     
