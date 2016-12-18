@@ -22,7 +22,7 @@ test_that("read.xlsx from different sources", {
   
   ## Non-existing URL
   xlsxFile <- "https://github.com/awalker89/openxlsx/raw/master/inst/readTest2.xlsx"
-  expect_error(read.xlsx(xlsxFile), regexp = "cannot open URL")
+  expect_error(suppressWarnings(read.xlsx(xlsxFile)), regexp = "cannot open URL")
   
   
   ## Non-existing File

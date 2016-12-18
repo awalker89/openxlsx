@@ -2,11 +2,11 @@
 
 
 
-context("Writing NA to SheetData")
+context("Writing NA to sheet_data")
 
 
 
-test_that("Writing to sheetData with keepNA = FALSE", {
+test_that("Writing to sheet_data with keepNA = FALSE", {
   
   
   a <- head(iris)
@@ -19,25 +19,23 @@ test_that("Writing to sheetData with keepNA = FALSE", {
   addWorksheet(wb, "Sheet 1")
   writeData(wb, 1, a, keepNA = FALSE)
   
-  sheet_data <- wb$worksheets[[1]]$sheetData
+  sheet_data <- wb$worksheets[[1]]$sheet_data
   
-  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
-  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
-  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
-  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
+  sheet_v <- sheet_data$v
+  sheet_t <- sheet_data$t
+  sheet_f <- sheet_data$f
+  sheet_row <- sheet_data$rows
+  sheet_col <- sheet_data$cols
   
-  sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
-  sheet_col <- convertFromExcelRef(sheet_r)
   sheet_v <- as.numeric(sheet_v)
   
   sheet_v <- sheet_v[!is.na(sheet_v)]
   sheet_t <- sheet_t[!is.na(sheet_t)]
   sheet_f <- sheet_f[!is.na(sheet_f)]
-  sheet_r <- sheet_r[!is.na(sheet_r)]
   sheet_row <- sheet_row[!is.na(sheet_row)]
   sheet_col <- sheet_col[!is.na(sheet_col)]
 
-  n_values <- prod(dim(a)) + ncol(a) ## number of NAs
+  n_values <- prod(dim(a)) + ncol(a)
   
   expect_length(sheet_row, n_values)
   expect_length(sheet_col, n_values)
@@ -45,17 +43,20 @@ test_that("Writing to sheetData with keepNA = FALSE", {
   expect_length(sheet_v, n_values - 4)
   expect_length(sheet_f, 0)
 
-  ## check sheetData vector
+  ## rows/cols
   expect_equal(sheet_row, rep(1:7, each = 5))
   expect_equal(sheet_col, rep(1:5, times = 7))
   
   ## header types
-  expect_equal(sheet_t[1:5], rep("s", ncol(a)))
+  expect_equal(sheet_t[1:5], rep(1, ncol(a)))
   
   ## data.frame t & v
-  expect_equal(sheet_t[6:n_values], c("n", "n", "n", "n", "s", "n", "n", "n", "s", "n", "n", "n", 
-                                      "n", "n", "n", "n", "n", "s", "n", "n", "n", "n", "n", "n", "n", 
-                                      "s", NA, NA, NA, NA))
+  expected_t <-   c("n", "n", "n", "n", "s", "n", "n", "n", "s", "n", "n", "n", 
+                    "n", "n", "n", "n", "n", "s", "n", "n", "n", "n", "n", "n", "n", 
+                    "s", NA, NA, NA, NA)
+  
+  expected_t <- .Call("openxlsx_map_cell_types_to_integer", expected_t, PACKAGE = "openxlsx")
+  expect_equal(sheet_t[6:n_values], expected_t)
   
   expect_equal(sheet_v[1:5], 0:4)
 

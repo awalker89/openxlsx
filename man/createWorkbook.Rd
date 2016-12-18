@@ -20,7 +20,7 @@ Create a new Workbook object
 wb <- createWorkbook()
 
 ## Save workbook to working directory
-saveWorkbook(wb, file = "createWorkbookExample", overwrite = TRUE)
+saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
 }
 \author{
 Alexander Walker

@@ -7,65 +7,67 @@
 
 
 // [[Rcpp::export]]
-SEXP calc_column_widths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW){
+SEXP calc_column_widths(Reference sheet_data
+                          , std::vector<std::string> sharedStrings
+                          , IntegerVector autoColumns
+                          , NumericVector widths
+                          , float baseFontCharWidth
+                          , float minW
+                          , float maxW){
   
-  size_t n = sheetData.size();
   
-  IntegerVector v(n);
+  int n = sheet_data.field("n_elements");
+  IntegerVector cell_types = sheet_data.field("t");
+  StringVector cell_values(sheet_data.field("v"));
+  IntegerVector cell_cols = sheet_data.field("cols");
+  
+  NumericVector cell_n_character(n);
   CharacterVector r(n);
   int nLen;
   
-  std::vector<std::string> tmp;
-  //** tmp[2] is element "v" of sheetData
-  
+  std::string tmp;
+
   // get widths of all values
-  for(size_t i = 0; i < n; i++){
-    
-    tmp = as<std::vector<std::string> >(sheetData[i]);
-    if(tmp[1] == "s"){
-      v[i] = sharedStrings[atoi(tmp[2].c_str())].length() - 37; //-37 for shared string tags around text
+  for(int i = 0; i < n; i++){
+
+    if(cell_types[i] == 1){ // "s"
+      cell_n_character[i] = sharedStrings[atoi(cell_values[i])].length() - 37; //-37 for shared string tags around text
     }else{
-      nLen = tmp[2].length();
-      v[i] = min(nLen, 11); // For numerics - max width is 11
-      
+      tmp = cell_values[i];
+      nLen = tmp.length();
+      cell_n_character[i] = min(nLen, 11); // For numerics - max width is 11
     }
-    
-    r[i] = tmp[0];
     
   }
   
   
   // get column for each value
-  IntegerVector colNumbers = convert_from_excel_ref(r);
-  IntegerVector colGroups = match(colNumbers, autoColumns);
-  
+
   // reducing to only the columns that are auto
-  LogicalVector notNA = !is_na(colGroups);
-  colNumbers = colNumbers[notNA];
-  v = v[notNA];
+  LogicalVector notNA = !is_na(match(cell_cols, autoColumns));
+  cell_cols = cell_cols[notNA];
+  cell_n_character = cell_n_character[notNA];
   widths = widths[notNA];
-  IntegerVector uCols = sort_unique(colNumbers);
+  IntegerVector unique_cell_cols = sort_unique(cell_cols);
   
-  size_t nUnique = uCols.size();
-  NumericVector wTmp; // this will hold the widths for a specific column
-  
-  NumericVector columnWidths(nUnique);
-  NumericVector thisColWidths;
+  size_t k = unique_cell_cols.size();
+  NumericVector column_widths(k);
+
   
   // for each unique column, get all widths for that column and take max
-  for(size_t i = 0; i < nUnique; i++){
-    wTmp = v[colNumbers == uCols[i]];
-    thisColWidths = widths[colNumbers == uCols[i]];
-    columnWidths[i] = max(wTmp * thisColWidths / baseFontCharWidth); 
+  for(size_t i = 0; i < k; i++){
+    NumericVector wTmp = cell_n_character[cell_cols == unique_cell_cols[i]];
+    NumericVector thisColWidths = widths[cell_cols == unique_cell_cols[i]];
+    column_widths[i] = max(wTmp * thisColWidths / baseFontCharWidth); 
   }
   
-  columnWidths[columnWidths < minW] = minW;
-  columnWidths[columnWidths > maxW] = maxW;    
+  column_widths[column_widths < minW] = minW;
+  column_widths[column_widths > maxW] = maxW;    
   
   // assign column names
-  columnWidths.attr("names") = uCols;
+  column_widths.attr("names") = unique_cell_cols;
   
-  return(wrap(columnWidths));
+  return(wrap(column_widths));
   
 }
 

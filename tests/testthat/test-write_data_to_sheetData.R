@@ -17,14 +17,14 @@ test_that("Converting R types to Excel types", {
   
   n_values <- prod(dim(iris)) + ncol(iris)
   
-  sheet_data <- wb$worksheets[[1]]$sheetData
-  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
-  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
-  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
+  sheet_data <- wb$worksheets[[1]]$sheet_data
+
+  sheet_v <- sheet_data$v
+  sheet_t <- sheet_data$t
+  sheet_f <- sheet_data$f
+  sheet_row <- sheet_data$rows
+  sheet_col <- sheet_data$cols
   
-  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
-  sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
-  sheet_col <- convertFromExcelRef(sheet_r)
   sheet_v <- as.numeric(sheet_v)
   
   expect_length(sheet_row, n_values)
@@ -34,15 +34,15 @@ test_that("Converting R types to Excel types", {
   expect_length(sheet_f, n_values)
 
   
-  ## check sheetData vector
+  ## rows/cols
   expect_equal(sheet_row, rep(1:151, each = 5))
   expect_equal(sheet_col, rep(1:5, times = 151))
   
   ## header types
-  expect_equal(sheet_t[1:5], rep("s", 5))
+  expect_equal(sheet_t[1:5], rep(1, 5))
   
   ## data.frame t & v
-  expect_equal(sheet_t[6:n_values], rep(c("n","n","n","n","s"), 150))
+  expect_equal(sheet_t[6:n_values], rep(c(0, 0, 0, 0, 1), 150))
   expect_equal(sheet_v[1:5], 0:4)
   
   expected_v <- c(5.1, 3.5, 1.4, 0.2, 5, 4.9, 3, 1.4, 0.2, 5, 4.7, 3.2, 1.3, 
@@ -128,31 +128,29 @@ test_that("Converting R types to Excel types", {
   
   
   ## Get all data
-  sheet_data <- wb$worksheets[[3]]$sheetData
+  sheet_data <- wb$worksheets[[3]]$sheet_data
   n_values <- (nrow(df) + 1) * (ncol(df) + 1)
-  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
-  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
-  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
+  sheet_v <- sheet_data$v
+  sheet_t <- sheet_data$t
+  sheet_f <- sheet_data$f
+  sheet_row <- sheet_data$rows
+  sheet_col <- sheet_data$cols
   
-  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
-  sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
-  sheet_col <- convertFromExcelRef(sheet_r)
   sheet_v <- as.numeric(sheet_v)
-  
   
   
   expect_length(sheet_row, n_values)
   expect_length(sheet_t, n_values)
 
-  ## check sheetData vector
+  ## rows/cols
   expect_equal(sheet_row, rep(4:24, each = ncol(df)+1L) )
   expect_equal(sheet_col, rep(1:10, times = nrow(df) + 1L) )
   
   ## header types
-  expect_equal(sheet_t[1:(ncol(df)+1)], rep("s", ncol(df) + 1))
+  expect_equal(sheet_t[1:(ncol(df)+1)], rep(1, ncol(df) + 1))
   
   ## data.frame t & v
-  expect_equal(sheet_t[(ncol(df) + 2):n_values], rep(c("s", "n", "b", "b", "n", "n", "n", "s", "n", "n"), 20))
+  expect_equal(sheet_t[(ncol(df) + 2):n_values], rep(c(1, 0, 2, 2, 0, 0, 0, 1, 0, 0), 20))
   expect_equal(sheet_v[1:(ncol(df)+1)], 8:17)
   
   

@@ -14,7 +14,7 @@
 #' wb <- createWorkbook()
 #' 
 #' ## Save workbook to working directory
-#' saveWorkbook(wb, file = "createWorkbookExample", overwrite = TRUE)
+#' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
 createWorkbook <- function(creator = Sys.getenv("USERNAME")){
   
   if(class(creator) != "character")
@@ -1427,7 +1427,8 @@ removeWorksheet <- function(wb, sheet){
     stop("sheet must have length 1.")
   
   wb$deleteWorksheet(sheet)
-  invisible(NULL)
+  
+  invisible(0)
 }
 
 
@@ -1443,16 +1444,16 @@ removeWorksheet <- function(wb, sheet){
 #' will be removed.
 #' @export
 #' @examples
-#' ## load a workbook 
+#' ## write some data
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "Worksheet 1")
 #' x <- data.frame(matrix(runif(200), ncol = 10)) 
-#' names(x) <- paste("Variable", 1:10)
-#' writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = TRUE)
+#' writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = FALSE)
 #' 
-#' ## delete cell contents
+#' ## delete some data
 #' deleteData(wb, sheet = 1, cols = 3:5, rows = 5:7, gridExpand = TRUE)
 #' deleteData(wb, sheet = 1, cols = 7:9, rows = 5:7, gridExpand = TRUE)
+#' deleteData(wb, sheet = 1, cols = LETTERS, rows = 18, gridExpand = TRUE)
 #' 
 #' saveWorkbook(wb, "deleteDataExample.xlsx", overwrite = TRUE)
 deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
@@ -1462,26 +1463,11 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-  cols <- convertFromExcelRef(cols)
-  rows <- as.integer(rows)
+
+  wb$worksheets[[sheet]]$sheet_data$delete(row_in = rows, col_in = cols, grid_expand = gridExpand)
+
   
-  ## rows and cols need to be the same length
-  if(gridExpand){
-    combs <- expand.grid(rows, cols) 
-    rows <- combs[,1]
-    cols <- combs[,2]
-  }
-  
-  if(length(rows) != length(cols)){
-    stop("Length of rows and cols must be equal.")
-  }
-  
-  comb <- paste0(.Call('openxlsx_convert_to_excel_ref', cols, LETTERS, PACKAGE="openxlsx"), rows)
-  
-  cellRefs <- sapply(wb$sheetData[[sheet]], "[[", "r")  
-  wb$sheetData[[sheet]] <- wb$sheetData[[sheet]][!cellRefs %in% comb]
-  
-  invisible(1)
+  invisible(0)
 }
 
 
@@ -2382,7 +2368,7 @@ removeFilter <- function(wb, sheet){
   
   for(s in sheet){
     s <- wb$validateSheet(s)
-    wb$worksheets[[s]]$autoFilter <- NULL  
+    wb$worksheets[[s]]$autoFilter <- character(0)  
   }
   
   invisible(wb)
@@ -3283,7 +3269,6 @@ all.equal.Workbook <- function(target, current, ...){
   #   "colWidths",
   #   "Content_Types",
   #   "core",
-  #   "dataCount",  
   #   "drawings",
   #   "drawings_rels", 
   #   "media", 
@@ -3293,11 +3278,13 @@ all.equal.Workbook <- function(target, current, ...){
   #   "worksheets",
   #   "sheetOrder"
   #   "sharedStrings",
-  #   "sheetData",
   #   "tables",
   #   "tables.xml.rels",
   #   "theme"
   
+  
+  ## TODO
+  # sheet_data
   
   x <- target
   y <- current
@@ -3331,11 +3318,6 @@ all.equal.Workbook <- function(target, current, ...){
     return(FALSE)
   } 
   
-  flag <- isTRUE(all.equal(unlist(x$dataCount), unlist(y$dataCount)))
-  if(!flag){
-    message("dataCount not equal")
-    return(FALSE)
-  } 
   
   flag <- all(unlist(x$drawings) %in% unlist(y$drawings)) & all(unlist(y$drawings) %in% unlist(x$drawings))
   if(!flag){
@@ -3382,55 +3364,51 @@ all.equal.Workbook <- function(target, current, ...){
     return(FALSE)
   } 
   
-  flag <- all(sapply(1:nSheets, function(i) isTRUE(all.equal(names(x$worksheets[[i]]$sheetData), names(y$worksheets[[i]]$sheetData)))))
-  if(!flag){
-    message("names sheetData elements not equal")
-    return(FALSE)
-  } 
+
   
-  flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets[[i]]$sheetData, y$worksheets[[i]]$sheetData)))
-  if(!all(flag)){
-    
-    tmp_x <- x$sheetData[[which(!flag)[[1]]]]
-    tmp_y <- y$sheetData[[which(!flag)[[1]]]]
-    
-    tmp_x_e <- sapply(tmp_x, "[[", "r")
-    tmp_y_e <- sapply(tmp_y, "[[", "r")
-    flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
-    if(any(flag)){
-      message(sprintf("sheetData %s not equal", which(!flag)[[1]]))
-      message(sprintf("r elements: %s", paste(which(flag), collapse = ", ")))
-      return(FALSE)
-    }
-    
-    tmp_x_e <- sapply(tmp_x, "[[", "t")
-    tmp_y_e <- sapply(tmp_y, "[[", "t")
-    flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
-    if(any(flag)){
-      message(sprintf("sheetData %s not equal", which(!flag)[[1]]))
-      message(sprintf("t elements: %s", paste(which(isTRUE(flag)), collapse = ", ")))
-      return(FALSE)
-    }
-    
-    
-    tmp_x_e <- sapply(tmp_x, "[[", "v")
-    tmp_y_e <- sapply(tmp_y, "[[", "v")
-    flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
-    if(any(flag)){
-      message(sprintf("sheetData %s not equal", which(!flag)[[1]]))
-      message(sprintf("v elements: %s", paste(which(flag), collapse = ", ")))
-      return(FALSE)
-    }
-    
-    tmp_x_e <- sapply(tmp_x, "[[", "f")
-    tmp_y_e <- sapply(tmp_y, "[[", "f")
-    flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
-    if(any(flag)){
-      message(sprintf("sheetData %s not equal", which(!flag)[[1]]))
-      message(sprintf("f elements: %s", paste(which(flag), collapse = ", ")))
-      return(FALSE)
-    }
-  } 
+  # flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets[[i]]$sheet_data, y$worksheets[[i]]$sheet_data)))
+  # if(!all(flag)){
+  #   
+  #   tmp_x <- x$sheet_data[[which(!flag)[[1]]]]
+  #   tmp_y <- y$sheet_data[[which(!flag)[[1]]]]
+  #   
+  #   tmp_x_e <- sapply(tmp_x, "[[", "r")
+  #   tmp_y_e <- sapply(tmp_y, "[[", "r")
+  #   flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
+  #   if(any(flag)){
+  #     message(sprintf("sheet_data %s not equal", which(!flag)[[1]]))
+  #     message(sprintf("r elements: %s", paste(which(flag), collapse = ", ")))
+  #     return(FALSE)
+  #   }
+  #   
+  #   tmp_x_e <- sapply(tmp_x, "[[", "t")
+  #   tmp_y_e <- sapply(tmp_y, "[[", "t")
+  #   flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
+  #   if(any(flag)){
+  #     message(sprintf("sheet_data %s not equal", which(!flag)[[1]]))
+  #     message(sprintf("t elements: %s", paste(which(isTRUE(flag)), collapse = ", ")))
+  #     return(FALSE)
+  #   }
+  #   
+  #   
+  #   tmp_x_e <- sapply(tmp_x, "[[", "v")
+  #   tmp_y_e <- sapply(tmp_y, "[[", "v")
+  #   flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
+  #   if(any(flag)){
+  #     message(sprintf("sheet_data %s not equal", which(!flag)[[1]]))
+  #     message(sprintf("v elements: %s", paste(which(flag), collapse = ", ")))
+  #     return(FALSE)
+  #   }
+  #   
+  #   tmp_x_e <- sapply(tmp_x, "[[", "f")
+  #   tmp_y_e <- sapply(tmp_y, "[[", "f")
+  #   flag <- paste0(tmp_x_e, "") != paste0(tmp_x_e, "")
+  #   if(any(flag)){
+  #     message(sprintf("sheet_data %s not equal", which(!flag)[[1]]))
+  #     message(sprintf("f elements: %s", paste(which(flag), collapse = ", ")))
+  #     return(FALSE)
+  #   }
+  # } 
   
   
   flag <- all(names(x$styles) %in% names(y$styles)) & all(names(y$styles) %in% names(x$styles))

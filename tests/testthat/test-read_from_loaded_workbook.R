@@ -1,7 +1,7 @@
 
 
 
-context("Reading from workbook is identical to reading from file 5")
+context("Reading from workbook is identical to reading from file readTest.xlsx")
 
 
 
@@ -83,16 +83,16 @@ test_that("Reading example workbook", {
   y <- read.xlsx(wb, sheet, startRow = 3, colNames = FALSE, detectDates = TRUE)
   expect_equal(x, y)
   
-  x <- read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = TRUE, detectDates = TRUE)
-  y <- read.xlsx(wb, sheet, rows = 2:4, colNames = TRUE, detectDates = TRUE)
+  x <- suppressWarnings(read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = TRUE, detectDates = TRUE))
+  y <- suppressWarnings(read.xlsx(wb, sheet, rows = 2:4, colNames = TRUE, detectDates = TRUE))
   expect_equal(x, y)
   
-  x <- read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = FALSE, detectDates = TRUE)
-  y <- read.xlsx(wb, sheet, rows = 2:4, colNames = FALSE, detectDates = TRUE)
+  x <- suppressWarnings(read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = FALSE, detectDates = TRUE))
+  y <- suppressWarnings(read.xlsx(wb, sheet, rows = 2:4, colNames = FALSE, detectDates = TRUE))
   expect_equal(x, y)
   
-  x <- read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = FALSE, detectDates = FALSE)
-  y <- read.xlsx(wb, sheet, rows = 2:4, colNames = FALSE, detectDates = FALSE)
+  x <- suppressWarnings(read.xlsx(xlsxFile, sheet, rows = 2:4, colNames = FALSE, detectDates = FALSE))
+  y <- suppressWarnings(read.xlsx(wb, sheet, rows = 2:4, colNames = FALSE, detectDates = FALSE))
   expect_equal(x, y)
   
   
@@ -131,3 +131,4 @@ test_that("Reading example workbook", {
   
   
 })
+

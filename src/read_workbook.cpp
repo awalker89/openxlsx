@@ -4,7 +4,10 @@
 
 
 
-
+IntegerVector which_cpp(Rcpp::LogicalVector x) {
+  IntegerVector v = seq(0, x.size() - 1);
+  return v[x];
+}
 
 
 // [[Rcpp::export]]
@@ -394,21 +397,26 @@ List getCellInfo(std::string xmlFile,
 
 
 
+
+
 // [[Rcpp::export]]
-SEXP readWorkbook(CharacterVector v,
-                  CharacterVector r,
-                  CharacterVector string_refs,
-                  LogicalVector is_date,
-                  int nRows,
-                  bool hasColNames,
-                  bool skipEmptyRows,
-                  bool skipEmptyCols,
-                  Function clean_names
+SEXP read_workbook(IntegerVector cols_in,
+                   IntegerVector rows_in,
+                   CharacterVector v,
+                   
+                   IntegerVector string_inds,
+                   LogicalVector is_date,
+                   bool hasColNames,
+                   bool skipEmptyRows,
+                   bool skipEmptyCols,
+                   Function clean_names
 ){
   
   
-  // Convert r to column number and shift to scale 0:nCols  (from eg. J:AA in the worksheet)
-  int nCells = r.size();
+  IntegerVector cols = clone(cols_in);
+  IntegerVector rows = clone(rows_in);
+  
+  int nCells = rows.size();
   int nDates = is_date.size();
   
   /* do we have any dates */
@@ -425,122 +433,127 @@ SEXP readWorkbook(CharacterVector v,
     has_date = false;
   }
   
-  IntegerVector colNumbers = convert_from_excel_ref(r); 
-  IntegerVector uCols = sort_unique(colNumbers);
+  bool has_strings = true;
+  IntegerVector st_inds0 (1);
+  st_inds0[0] = string_inds[0];
+  if(is_true(all(is_na(st_inds0))))
+    has_strings = false;
   
-  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
-    uCols = seq(1, max(uCols));
-  }
   
-  colNumbers = match(colNumbers, uCols) - 1;
-  int nCols = *std::max_element(colNumbers.begin(), colNumbers.end()) + 1;
+  
+  
+  //  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
+  //    uni_cols = seq(1, max(uni_cols));
+  //  }
+  
+  // scale columns from i:j to 1:(j-i+1)
+  IntegerVector uni_cols = sort_unique(cols);
+  cols = match(cols, uni_cols) - 1;
+  int nCols = *std::max_element(cols.begin(), cols.end()) + 1;
+  
+  // scale rows from i:j to 1:(j-i+1)
+  IntegerVector uni_rows = sort_unique(rows);
+  rows = match(rows, uni_rows) - 1;
+  int nRows = *std::max_element(rows.begin(), rows.end()) + 1;
   
   // Check if first row are all strings
   //get first row number
   
-  CharacterVector colNames(nCols);
+  CharacterVector col_names(nCols);
   IntegerVector removeFlag;
   int pos = 0;
   
-  // If we are told colNames exist take the first row and fill any gaps with X.i
+  // If we are told col_names exist take the first row and fill any gaps with X.i
   if(hasColNames){
     
+    int row_1 = rows[0];
     char name[6];
-    std::vector<std::string> firstRowNumbers(nCols);
-    std::string ref;
     
-    // convert first nCols r to firstRowNumbers
-    // get r for which firstRowNumbers == firstRowNumbers[0];
-    for(int i = 0; i < nCols; i++){
-      ref = r[i];
-      ref.erase(std::remove_if(ref.begin(), ref.end(), ::isalpha), ref.end());
-      firstRowNumbers[i] = ref;
-    }
+    IntegerVector row_inds = which_cpp(rows == row_1);
+    IntegerVector header_cols = cols[row_inds];
+    IntegerVector header_inds = match(seq(0, nCols), na_omit(header_cols));
+    LogicalVector missing_header = is_na(header_inds);
     
-    ref = firstRowNumbers[0];
-    
-    for(int i = 0; i < nCols; i++){
-      if((i == colNumbers[pos]) & (firstRowNumbers[pos] == ref)){
-        colNames[i] = v[pos];
-        pos = pos + 1;
-      }else{
+    // looping over each column
+    for(int i=0; i < nCols; i++){
+      
+      if(missing_header[i]){  // a missing header element
+        
         sprintf(&(name[0]), "X%d", i+1);
-        colNames[i] = name;
+        col_names[i] = name;
+        
+      }else{  // this is a header elements 
+        
+        col_names[i] = v[pos];
+        pos++;
+        
       }
+      
     }
-    
-    // remove elements in string_refs that appear in the first row (if there are numerics in first row this will remove less elements than pos)
-    CharacterVector::iterator first = r.begin();
-    CharacterVector::iterator last = r.begin() + pos;
-    CharacterVector toRemove(first, last);
-    removeFlag = match(string_refs, toRemove);
-    string_refs.erase(string_refs.begin(), string_refs.begin() + sum(!is_na(removeFlag)));
-    
-    // remove elements that are now being used as colNames (there are int pos many of these)    
-    //check we have some r left if not return a data.frame with zero rows
-    if(pos > 0)
-      r.erase(r.begin(), r.begin() +  pos); 
     
     // tidy up column names
-    colNames = clean_names(colNames);
+    col_names = clean_names(col_names);
+    
+    //--------------------------------------------------------------------------------
+    // Remove elements from rows, cols, v that have been used as headers
+    
+    // I've used the first pos elements as headers
+    // stringInds contains the indexes of v which are strings
+    // string_inds <- string_inds[string_inds > pos]
+    if(has_strings){
+      string_inds = string_inds[string_inds > pos];
+      string_inds = string_inds - pos;
+    }
+    
+    
+    rows.erase (rows.begin(), rows.begin() + pos);
+    rows = rows - 1;
+    v.erase (v.begin(), v.begin() + pos);
     
     //If nothing left return a data.frame with 0 rows
-    if(r.size() == 0){
+    if(rows.size() == 0){
+      
       List dfList(nCols);
       IntegerVector rowNames(0);
       
-      for(int i =0; i < nCols; i++){
-        dfList[i] = LogicalVector(0);
+      for(int i = 0; i < nCols; i++){
+        dfList[i] = LogicalVector(0); // this is what read.table does (bool type)
       }
       
-      dfList.attr("names") = colNames;
+      dfList.attr("names") = col_names;
       dfList.attr("row.names") = rowNames;
       dfList.attr("class") = "data.frame";
       return wrap(dfList);
     }
     
-    colNumbers.erase(colNumbers.begin(), colNumbers.begin() + pos); 
-    nRows--; // decrement number of rows as first row is now being used as colNames
+    cols.erase(cols.begin(), cols.begin() + pos);
+    nRows--; // decrement number of rows as first row is now being used as col_names
     nCells = nCells - pos;
     
-  }else{ // else colNames is FALSE
+    // End Remove elements from rows, cols, v that have been used as headers
+    //--------------------------------------------------------------------------------
+    
+    
+    
+  }else{ // else col_names is FALSE
     char name[6];
     for(int i =0; i < nCols; i++){
       sprintf(&(name[0]), "X%d", i+1);
-      colNames[i] = name;
+      col_names[i] = name;
     }
   }
   
-  /* column names now sorted */
   
-  // getRow numbers from r 
-  IntegerVector rowNumbers(nCells);  
-  if(nCells == nRows*nCols){
-    
-    IntegerVector uRows = seq(0, nRows-1);
-    rowNumbers = rep_each(uRows, nCols); 
-    
-  }else{
-    
-    std::vector<std::string> rs = as<std::vector<std::string> >(r);
-    for(int i = 0; i < nCells; i++){
-      std::string a = rs[i];
-      a.erase(std::remove_if(a.begin(), a.end(), ::isalpha), a.end());
-      rowNumbers[i] = atoi(a.c_str()) - 1; 
-    }
-    
-    if(skipEmptyRows){
-      rowNumbers = matrixRowInds(rowNumbers);
-    }else{
-      rowNumbers = rowNumbers - rowNumbers[0];
-    }
-    
-  }
+  // ------------------ column names complete
   
-  // Possible there are no stringInds to begin with and value of stringInds is 0
-  // Possible we have stringInds but they have now all been used up by string_refs
+  
+  
+  
+  
+  // Possible there are no string_inds to begin with and value of string_inds is 0
+  // Possible we have string_inds but they have now all been used up by headers
   bool allNumeric = false;
-  if((string_refs.size() == 0) | all(is_na(string_refs)))
+  if((string_inds.size() == 0) | all(is_na(string_inds)))
     allNumeric = true;
   
   if(has_date){
@@ -548,59 +561,74 @@ SEXP readWorkbook(CharacterVector v,
       allNumeric = false;
   }
   
-  // If we build colnames we remove the ref & values for the pos number of elements used 
-  if(hasColNames & has_date){
+  // If we have colnames some elements where used to create these -so we remove the corresponding number of elements
+  if(hasColNames & has_date)
     is_date.erase(is_date.begin(), is_date.begin() + pos);
-  }
+  
   
   
   //Intialise return data.frame
   SEXP m; 
-  v.erase(v.begin(), v.begin() + pos);
   
   if(allNumeric){
     
-    m = buildMatrixNumeric(v, rowNumbers, colNumbers, colNames, nRows, nCols);
+    m = buildMatrixNumeric(v, rows, cols, col_names, nRows, nCols);
     
   }else{
     
     // If it contains any strings it will be a character column
-    IntegerVector charCols;
-    if(all(is_na(string_refs))){
-      charCols = -1;
+    IntegerVector char_cols_unique;
+    if(all(is_na(string_inds))){
+      char_cols_unique = -1;
     }else{
-      charCols = match(string_refs, r);
-      IntegerVector charColNumbers = colNumbers[charCols-1];
-      charCols = unique(charColNumbers);
+      
+      IntegerVector columns_which_are_characters = cols[string_inds - 1];
+      char_cols_unique = unique(columns_which_are_characters);
+      
     }
     
-    //Rcout << "colNumbers.size(): " << colNumbers.size() << endl; 
-    //Rcout << "is_date.size(): " << is_date.size() << endl; 
-    //Rcout << "v.size(): " << v.size() << endl; 
-    //Rcout << "vn.size(): " << vn.size() << endl; 
-    //Rcout << "rowNumbers.size(): " << rowNumbers.size() << endl; 
+    // for(int i = 0; i < char_cols_unique.size(); i++)
+    //   Rcout << "char_cols_unique[i]: " << char_cols_unique[i] << endl;
+    // 
+    // Rcout << "nRows " << nRows << endl;
+    // Rcout << "nCols: " << nCols << endl;
+    // Rcout << "cols.size(): " << cols.size() << endl;
+    // Rcout << "rows.size(): " << rows.size() << endl;
+    // Rcout << "is_date.size(): " << is_date.size() << endl;
+    // Rcout << "v.size(): " << v.size() << endl;
+    // Rcout << "has_date: " << has_date << endl;
     
     //date columns
-    IntegerVector dateCols(1);
+    IntegerVector date_columns(1);
     if(has_date){
       
-      dateCols = colNumbers[is_date];
-      dateCols = sort_unique(dateCols);
+      date_columns = cols[is_date];
+      date_columns = sort_unique(date_columns);
       
     }else{
-      dateCols[0] = -1;
+      date_columns[0] = -1;
     }
     
-    m = buildMatrixMixed(v, rowNumbers, colNumbers, colNames, nRows, nCols, charCols, dateCols);
+    // List d(10);
+    // d[0] = v;
+    // d[2] = rows;
+    // d[3] = cols;
+    // d[4] = col_names;
+    // d[5] = nRows;
+    // d[6] = nCols;
+    // d[7] = char_cols_unique;
+    // d[8] = date_columns;
+    // return(wrap(d));
+    // Rcout << "Running buildMatrixMixed" << endl;
+    
+    m = buildMatrixMixed(v, rows, cols, col_names, nRows, nCols, char_cols_unique, date_columns);
     
   }
   
   return wrap(m) ;
   
+  
 }
-
-
-
 
 
 

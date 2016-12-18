@@ -802,7 +802,7 @@ getFile <- function(xlsxFile){
   ## If URL download
   if("url" %in% class(fl)){
     tmpFile <- tempfile(fileext = ".xlsx")
-    download.file(url = xlsxFile, destfile = tmpFile, cacheOK = FALSE,  mode = "wb")
+    download.file(url = xlsxFile, destfile = tmpFile, cacheOK = FALSE,  mode = "wb", quiet = TRUE)
     xlsxFile <- tmpFile
   }
   

@@ -209,7 +209,7 @@ writeDataTable <- function(wb, sheet, x,
   colClasses <- lapply(x, function(x) tolower(class(x)))
   classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = TRUE, nRow = nrow(x), colClasses = colClasses)
   
-  ## write data to sheetData
+  ## write data to worksheet
   wb$writeData(df = x,
                colNames = TRUE,
                sheet = sheet,

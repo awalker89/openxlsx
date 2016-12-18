@@ -56,7 +56,7 @@ WorkSheet$methods(initialize = function(showGridLines = TRUE,
   cols <<- character(0)
   
   autoFilter <<- character(0)
-  mergeCells <<- list()
+  mergeCells <<- character(0)
   conditionalFormatting <<- character(0)
   dataValidations <<- NULL
   hyperlinks <<- list()
@@ -74,8 +74,7 @@ WorkSheet$methods(initialize = function(showGridLines = TRUE,
   
   freezePane <<- character(0)
   
-  sheetData <<- list()
-  
+  sheet_data <<- Sheet_Data$new()
   
 })
 
@@ -103,8 +102,11 @@ WorkSheet$methods(get_prior_sheet_data = function(){
     xml <- paste(xml, dimension, collapse = "")
   
   ## sheetViews handled here
-  if(length(freezePane) > 0)
+  if(length(freezePane) > 0){
     xml <- paste(xml, gsub("/></sheetViews>", paste0(">", freezePane, "</sheetView></sheetViews>"), sheetViews, fixed = TRUE), collapse = "")
+  }else if(length(sheetViews) > 0){
+    xml <- paste(xml, sheetViews, collapse = "")
+  }
   
   if(length(sheetFormatPr) > 0)
     xml <- paste(xml, sheetFormatPr, collapse = "")
@@ -227,23 +229,35 @@ WorkSheet$methods(get_post_sheet_data = function(){
 
 WorkSheet$methods(order_sheetdata = function(){
   
-  if(length(sheetData) == 0)
+  if(sheet_data$n_elements == 0)
     return(invisible(0))
   
-  r <- unlist(lapply(sheetData, "[[", "r"), use.names = TRUE)     
-  ord <- order(as.integer(names(r)), nchar(r), r)
-  sheetData <<- sheetData[ord]
-  
-  dm1 <- head(na.omit(r[ord]), 1)
-  dm2 <- tail(na.omit(r[ord]), 1)
-  
-  if(length(dm1) == 1 & length(dm2) != 1){
-    if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
-      dimension <<- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+  if(sheet_data$data_count > 1){
+    
+    ord <- order(sheet_data$rows, sheet_data$cols, method = "radix", na.last = TRUE)
+    sheet_data$rows <<- sheet_data$rows[ord]
+    sheet_data$cols <<- sheet_data$cols[ord]
+    sheet_data$t <<- sheet_data$t[ord]
+    sheet_data$v <<- sheet_data$v[ord]
+    sheet_data$f <<- sheet_data$f[ord]
+    
+    sheet_data$style_id <<- sheet_data$style_id[ord]
+    
+    sheet_data$data_count <<- 1L
+    
+    dm1 <- paste0(.Call("openxlsx_int_2_cell_ref", sheet_data$cols[1], LETTERS), sheet_data$rows[1])
+    dm2 <- paste0(.Call("openxlsx_int_2_cell_ref", sheet_data$cols[sheet_data$n_elements], LETTERS), sheet_data$rows[sheet_data$n_elements])
+    
+    if(length(dm1) == 1 & length(dm2) != 1){
+      if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")
+        dimension <<- sprintf("<dimension ref=\"%s:%s\"/>", dm1, dm2)
+    }
+    
+    
   }
   
+  
   invisible(0)
-    
+  
 })
-  
-  
+

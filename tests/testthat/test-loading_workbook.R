@@ -10,14 +10,13 @@ test_that("Loading readTest.xlsx Sheet 1", {
   fl <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(fl)
   
-  sheet_data <- wb$worksheets[[2]]$sheetData
-  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
-  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
-  
-  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
-  sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
-  sheet_col <- convertFromExcelRef(sheet_r)
-  
+  sheet_data <- wb$worksheets[[2]]$sheet_data
+  sheet_v <- sheet_data$v
+  sheet_t <- sheet_data$t
+  sheet_f <- sheet_data$f
+  sheet_row <- sheet_data$rows
+  sheet_col <- sheet_data$cols
+
   
   ## Sheet 2
   expected_row <- c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 
@@ -45,15 +44,15 @@ test_that("Loading readTest.xlsx Sheet 1", {
   expect_equal(sheet_col, expected_col)
 
   
-  expected_t <- c("s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", "n", 
-                  "n", "n", "n")
+  expected_t <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                  0, 0, 0)
 
   expect_equal(sheet_t, expected_t)
 
@@ -112,15 +111,12 @@ test_that("Loading readTest.xlsx Sheet 1", {
   fl <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(fl)
   
-  sheet_data <- wb$worksheets[[1]]$sheetData
-  sheet_v <- unlist(unname(lapply(sheet_data, "[[", "v")))
-  sheet_t <- unlist(unname(lapply(sheet_data, "[[", "t")))
-  sheet_r <- unlist(unname(lapply(sheet_data, "[[", "r")))
-  sheet_f <- unlist(unname(lapply(sheet_data, "[[", "f")))
-  
-  
-  sheet_row <- as.integer(gsub("[A-Z]", "", sheet_r))
-  sheet_col <- convertFromExcelRef(sheet_r)
+  sheet_data <- wb$worksheets[[1]]$sheet_data
+  sheet_v <- sheet_data$v
+  sheet_t <- sheet_data$t
+  sheet_f <- sheet_data$f
+  sheet_row <- sheet_data$rows
+  sheet_col <- sheet_data$cols
   
   ## sheet 1
   
@@ -141,11 +137,11 @@ test_that("Loading readTest.xlsx Sheet 1", {
   
   
   
-  expected_t <- c("s", "s", "s", "s", "s", "s", "s", "b", "n", "n", "s", "n", 
-                  "str", "e", "b", "e", "s", "n", "e", "b", "n", "n", "s", "n", 
-                  "e", "b", "n", "e", NA, "b", "n", "n", "s", NA, "b", "n", "n", 
-                  "s", "n", "n", "b", "n", "n", "s", "n", "b", "n", "n", "s", "n", 
-                  "n", "n", "n")
+  expected_t <- c(1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 1, 0, 
+                  3, 4, 2, 4, 1, 0, 4, 2, 0, 0, 1, 0, 
+                  4, 2, 0, 4, NA, 2, 0, 0, 1, NA, 2, 0, 0, 
+                  1, 0, 0, 2, 0, 0, 1, 0, 2, 0, 0, 1, 0, 
+                  0, 0, 0)
   
   expect_equal(sheet_t, expected_t)
   

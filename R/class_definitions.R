@@ -38,7 +38,6 @@ Workbook <- setRefClass("Workbook",
                                    "styleObjects" = "ANY",
                                    
                                    "styles" = "ANY",
-                                   "styleInds" = "ANY",
                                    "tables" = "ANY",
                                    "tables.xml.rels" = "ANY",
                                    "theme" = "ANY",
@@ -52,8 +51,7 @@ Workbook <- setRefClass("Workbook",
                                    "workbook.xml.rels" = "ANY",
                                    "worksheets" = "ANY",
                                    "worksheets_rels" = "ANY",
-                                   "sheetOrder" = "integer",
-                                   "dataCount" = "numeric")
+                                   "sheetOrder" = "integer")
 )
 
 
@@ -85,18 +83,19 @@ Style <- setRefClass("Style",
                      methods = list()
 )
 
-# SheetData <- setRefClass("SheetData", 
-#                          
-#                          fields = c("row" = "integer",
-#                                     "col" = "integer",
-#                                     "t" = "integer",
-#                                     "v" = "numeric",
-#                                     "f" = "character",
-#                                     "dataCount" = "integer",
-#                                     "n_elements" = "integer")
-#                          
-# )
-# 
+Sheet_Data <- setRefClass("Sheet_Data",
+                          
+                          fields = c("rows" = "integer",
+                                     "cols" = "integer",
+                                     "t" = "integer",
+                                     "v" = "character",
+                                     "f" = "character",
+                                     "style_id" = "ANY",
+                                     "data_count" = "integer",
+                                     "n_elements" = "integer")
+                          
+)
+
 
 
 
@@ -109,7 +108,7 @@ WorkSheet <- setRefClass("WorkSheet",
                                     "sheetFormatPr" = "character",
                                     "cols" = "character",
                                     
-                                    "sheetData" = "ANY",
+                                    "sheet_data" = "Sheet_Data",
                                     
                                     "autoFilter" = "character",
                                     "mergeCells" = "ANY",
@@ -136,12 +135,12 @@ WorkSheet <- setRefClass("WorkSheet",
 
 
 ChartSheet <- setRefClass("ChartSheet", 
-                         
-                         fields = c("sheetPr" = "character",
-                                    "sheetViews" =  "character",
-                                    "pageMargins" = "character",
-                                    "drawing" = "character",
-                                    "hyperlinks" = "ANY")
+                          
+                          fields = c("sheetPr" = "character",
+                                     "sheetViews" =  "character",
+                                     "pageMargins" = "character",
+                                     "drawing" = "character",
+                                     "hyperlinks" = "ANY")
 )
 
 

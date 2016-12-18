@@ -6,71 +6,121 @@
 
 
 
+
 // [[Rcpp::export]]   
-List unique_cell_append(List sheetData, CharacterVector r, List newCells){
+IntegerVector map_cell_types_to_integer(CharacterVector t){
   
-  int n = sheetData.size();
-  int cn = newCells.size();
+  // 0: "n"
+  // 1: "s"
+  // 2: "b"
+  // 3: "str"
+  // 4: "e"
+  // 9: "h"
   
-  // get all r values
-  CharacterVector exCells(n);
-  CharacterVector tmp;
-  for(int i =0; i < n; i ++){
-    tmp = sheetData[i];
-    exCells[i] = tmp[0];
-  }
-  
-  // find which exCells we keep
-  IntegerVector overwrite = match(exCells, r);
-  LogicalVector toKeep = is_na(overwrite);
-  int k = sum(toKeep);
-  
-  //If no cells to keep
-  if(k == 0){
-    newCells.attr("overwrite") = true;
-    return wrap(newCells); 
-  }
-  
-  //If keeping all cells (no cells to be overwritten)
-  List newSheetData(k + cn);
-  CharacterVector exNames = sheetData.attr("names");
-  CharacterVector newCellNames = newCells.attr("names");
-  CharacterVector newNames(k + cn);
-  
-  // create new List of toKeep + newCells
-  int j = 0;
-  for(int i = 0; i < n; i ++){
+  size_t n = t.size();
+  IntegerVector t_res(n);
+
+  for(size_t i = 0; i < n; i++){
     
-    if(toKeep[i]){
-      newSheetData[j] = sheetData[i];
-      newNames[j] = exNames[i];
-      j++;
+    if(CharacterVector::is_na(t[i])){
+      t_res[i] = NA_INTEGER;
+    }else if(t[i] == "n"){
+      t_res[i] = 0;
+    }else if(t[i] == "s"){
+      t_res[i] = 1;
+    }else if(t[i] == "b"){
+      t_res[i] = 2;
+    }else if(t[i] == "str"){
+      t_res[i] = 3;
+    }else if(t[i] == "e"){
+      t_res[i] = 4;
     }
     
-    if(j == k)
-      break;
   }
   
-  for(int i = 0; i < cn; i++){
-    newSheetData[j] = newCells[i];
-    newNames[j] = newCellNames[i];
-    j++;
-  }
-  
-  newSheetData.attr("names") = newNames;
-  if(k < n){
-    newSheetData.attr("overwrite") = true;
-  }else{
-    newSheetData.attr("overwrite") = false;
-  }
-  
-  return wrap(newSheetData) ;
+  return t_res;
   
 }
 
 
 
 
+// [[Rcpp::export]]   
+CharacterVector map_cell_types_to_char(IntegerVector t){
+  
+  // 0: "n"
+  // 1: "s"
+  // 2: "b"
+  // 3: "str"
+  // 4: "e"
+  // 9: "h"
+
+  size_t n = t.size();
+  CharacterVector t_res(n);
+
+  for(size_t i = 0; i < n; i++){
+    
+    if(IntegerVector::is_na(t[i])){
+      t_res[i] = NA_STRING;
+    }else if(t[i] == 0){
+      t_res[i] = "n";
+    }else if(t[i] == 1){
+      t_res[i] = "s";
+    }else if(t[i] == 2){
+      t_res[i] = "b";
+    }else if(t[i] == 3){
+      t_res[i] = "str";
+    }else if(t[i] == 4){
+      t_res[i] = "e";
+    }else{
+      t_res[i] = "s";
+    }
+    
+  }
+  
+  return t_res;
+  
+}
+
+
+
+// [[Rcpp::export]]  
+IntegerVector build_cell_types_integer(CharacterVector classes, int n_rows){
+  
+  // 0: "n"
+  // 1: "s"
+  // 2: "b"
+  // 9: "h"
+  // 4: TBC
+  // 5: TBC
+  
+  size_t n_cols = classes.size();
+  IntegerVector col_t(n_cols);
+
+  for(size_t i = 0; i < n_cols; i++){
+    
+    if((classes[i] == "numeric") | (classes[i] == "integer") | (classes[i] == "raw") ){
+      col_t[i] = 0; 
+    }else if(classes[i] == "character"){
+      col_t[i] = 1; 
+    }else if(classes[i] == "logical"){
+      col_t[i] = 2;
+    }else if(classes[i] == "hyperlink"){
+      col_t[i] = 9;
+    }else if(classes[i] == "openxlsx_formula"){
+      col_t[i] = NA_INTEGER;
+    }else{
+      col_t[i] = 1;
+    }
+    
+  }
+  
+  IntegerVector cell_types = rep(col_t, n_rows); 
+  
+  return cell_types;
+  
+  
+}
 
 // [[Rcpp::export]]  
 CharacterVector buildCellTypes(CharacterVector classes, int nRows){

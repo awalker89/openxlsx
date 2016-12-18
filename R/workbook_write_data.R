@@ -13,6 +13,10 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   allColClasses <- unlist(colClasses)  
   df <- as.list(df)
   
+  ###################################################################### 
+  ## standardise all column types
+  
+  
   ## pull out NaN values
   nans <- unlist(lapply(1:nCols, function(i) {
     tmp <- df[[i]]
@@ -52,11 +56,9 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
         df[[pInds[i]]] <- as.numeric(as.POSIXct(df[[pInds[i]]])) / 86400 + origin + offSet[i]
         
       }
-      
-      
     }
-    
   }
+  
   
   ## convert any Dates to integers and create date style object
   if(any(c("currency", "accounting", "percentage", "3", "comma") %in% allColClasses)){
@@ -103,38 +105,67 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
       class(df[[i]]) <- "character"
   }
   
+  ## End standardise all column types
+  ###################################################################### 
+  
+  
   ## cell types
-  t <- .Call("openxlsx_buildCellTypes", colClasses, nRows, PACKAGE = "openxlsx")
+  t <- .Call("openxlsx_build_cell_types_integer", colClasses, nRows, PACKAGE = "openxlsx")
+  
   for(i in which(sapply(colClasses, function(x) !"character" %in% x & !"numeric" %in% x)))
     df[[i]] <- as.character(df[[i]])
-  
   
   ## cell values
   v <- as.character(t(as.matrix(
     data.frame(df, stringsAsFactors = FALSE, check.names = FALSE, fix.empty.names = FALSE)
-  ))); rm(df)
+  )));
+  
+  
+  
+  
   
   if(keepNA){
-    t[is.na(v)] <- "e"
+    t[is.na(v)] <- 4L
     v[is.na(v)] <- "#N/A"
   }else{
-    t[is.na(v)] <- as.character(NA)  
+    t[is.na(v)] <- as.integer(NA)  
     v[is.na(v)] <- as.character(NA)
   }
   
   ## If any NaN values
   if(length(nans) > 0){
-    t[nans] <- "e"
+    t[nans] <- 4L
     v[nans] <- "#NUM!"
   }
   
   
   #prepend column headers 
   if(colNames){
-    t <- c(rep.int('s', nCols), t)
+    t <- c(rep.int(1L, nCols), t)
     v <- c(df_nms, v)
     nRows <- nRows + 1L
   }
+  
+  
+  
+  ## Forumlas
+  f_in <- rep.int(as.character(NA), length(t))
+  if("openxlsx_formula" %in% colClasses){
+    
+    ## alter the elements of t where we have a formula to be "str"
+    formula_cols <- which(sapply(colClasses, function(x) "openxlsx_formula" %in% x, USE.NAMES = FALSE), useNames = FALSE)
+    formula_strs <- paste0("<f>", unlist(df[formula_cols], use.names = FALSE), "</f>")
+    formula_inds <- unlist(lapply(formula_cols, function(i) i + (1:(nRows - colNames) - 1)*nCols + (colNames * nCols)), use.names = FALSE)
+    f_in[formula_inds] <- formula_strs
+    
+    rm(formula_cols)
+    rm(formula_strs)
+    rm(formula_inds)
+    
+  }
+  
+  rm(df)
+  
   
   ## create references
   r <- .Call("openxlsx_convert_to_excel_ref_expand", startCol:(startCol+nCols-1L), LETTERS, as.character(startRow:(startRow+nRows-1L)))
@@ -142,10 +173,10 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ##Append hyperlinks, convert h to s in cell type
   if("hyperlink" %in% colClasses){
     
-    hInds <- which(t == "h")
+    hInds <- which(t == 9L)
     
     if(length(hInds) > 0){
-      t[hInds] <- "s"
+      t[hInds] <- 1L
       
       exHlinks <- worksheets[[sheet]]$hyperlinks
       newHlinks <- r[hInds]
@@ -164,8 +195,14 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     }
   }
   
+  
+  
+  
+  
+  
+  
   ## convert all strings to references in sharedStrings and update values (v)
-  strFlag <- which(t == "s")
+  strFlag <- which(t == 1L)
   newStrs <- v[strFlag]
   if(length(newStrs) > 0){
     
@@ -178,22 +215,16 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     v[strFlag] <- match(newStrs, sharedStrings) - 1L
   }
   
-  ## Create cell list of lists
-  cells <- .Call("openxlsx_buildCellList", r , t , v , PACKAGE="openxlsx")
-  names(cells) <- as.integer(names(r))
-  rm(t); rm(v); 
+  # ## Create cell list of lists
+  worksheets[[sheet]]$sheet_data$write( row_in = startRow:(startRow + nRows - 1L)
+                                        , col_in = startCol:(startCol + nCols - 1L)
+                                        , t_in = t
+                                        , v_in = v
+                                        , f_in = f_in)
   
-  if(dataCount[[sheet]] > 0){
-    worksheets[[sheet]]$sheetData <<- .Call("openxlsx_unique_cell_append", worksheets[[sheet]]$sheetData, r, cells, PACKAGE = "openxlsx")
-    if(attr(worksheets[[sheet]]$sheetData, "overwrite"))
-      warning("Overwriting existing cell data.", call. = FALSE)
-    
-    attr(worksheets[[sheet]]$sheetData, "overwrite") <<- NULL
-  }else{
-    worksheets[[sheet]]$sheetData <<- cells
-  }
   
-  dataCount[[sheet]] <<- dataCount[[sheet]] + 1L
+  
+  invisible(0)
   
 })
 

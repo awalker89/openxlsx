@@ -56,19 +56,41 @@ test_that("Empty workbook", {
   wb <- createWorkbook()
   addWorksheet(wb, "Sheet 1")
   
-  expect_equal(NULL, read.xlsx(wb))  
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE))  
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb)))  
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = FALSE))
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = FALSE))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE)))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE)))
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE))
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = FALSE)))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = FALSE)))
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE)))
+  
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10)))
+  expect_equal(NULL, suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10)))
+  
+  
+  
+  
+  expect_warning(read.xlsx(wb))  
+  
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = FALSE))
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = TRUE))
+  
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = FALSE))
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = FALSE))
+  
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE))
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE))
+  
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_warning(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  
+  
+  
+  
   
   
   ## 1 element
@@ -92,8 +114,7 @@ test_that("Empty workbook", {
   expect_equal(nrow(x), 0)  
   expect_equal(names(x), "a") 
   
-  
-  writeData(wb, 1, Sys.Date())
+  writeData(wb, 1, Sys.Date(), startCol = 1, startRow = 1)
   x <- read.xlsx(wb)
   expect_equal(nrow(x), 0)  
   expect_equal(convertToDate(as.integer(names(x)[1])), Sys.Date())
@@ -108,10 +129,14 @@ test_that("Empty workbook", {
   x <- read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE)
   expect_equal(x[[1]], Sys.Date())
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  x <- suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_equal(NULL, x)
+  
+  x <- suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  expect_equal(NULL, x)
   
   
+
   addWorksheet(wb, "Sheet 2")
   removeWorksheet(wb, 1)
   
@@ -133,9 +158,13 @@ test_that("Empty workbook", {
   x <- read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = TRUE)
   expect_equal(as.Date(names(x)), Sys.Date())
   
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
-  expect_equal(NULL, read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  x <- suppressWarnings(read.xlsx(wb, sheet = 1, colNames = FALSE, skipEmptyRows = TRUE, detectDates = TRUE, rows = 4:10))
+  expect_equal(NULL, x)
   
+  x <- suppressWarnings(read.xlsx(wb, sheet = 1, colNames = TRUE, skipEmptyRows = TRUE, detectDates = FALSE, cols = 4:10))
+  expect_equal(NULL, x)
+  
+
   
   
 })
@@ -295,8 +324,8 @@ test_that("Reading from new workbook cols/rows", {
   
   cols <- 1:3
   rows <- 12:13
-  x <- read.xlsx(wb, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
-  y <- read.xlsx(tempFile, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols)
+  x <- suppressWarnings(read.xlsx(wb, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols))
+  y <- suppressWarnings(read.xlsx(tempFile, sheet = 2, colNames = TRUE, rowNames = FALSE, rows = rows, cols = cols))
   
   
   expect_equal(object = NULL, expected = x, check.attributes = FALSE)

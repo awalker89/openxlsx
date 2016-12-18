@@ -445,7 +445,7 @@ writeFormula <- function(wb,
   dfx <- data.frame("X" = x, stringsAsFactors = FALSE)
   class(dfx$X) <- c("character", "formula")
   
-  if(grepl("^(=|)HYPERLINK\\(", x, ignore.case = TRUE))
+  if(any(grepl("^(=|)HYPERLINK\\(", x, ignore.case = TRUE)))
     class(dfx$X) <- c("character", "formula", "hyperlink")
     
     

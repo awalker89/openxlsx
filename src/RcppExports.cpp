@@ -6,19 +6,19 @@
 using namespace Rcpp;
 
 // calc_column_widths
-SEXP calc_column_widths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
-RcppExport SEXP openxlsx_calc_column_widths(SEXP sheetDataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthsSEXP, SEXP baseFontCharWidthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
+SEXP calc_column_widths(Reference sheet_data, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
+RcppExport SEXP openxlsx_calc_column_widths(SEXP sheet_dataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthsSEXP, SEXP baseFontCharWidthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP);
+    Rcpp::traits::input_parameter< Reference >::type sheet_data(sheet_dataSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type sharedStrings(sharedStringsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type autoColumns(autoColumnsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type widths(widthsSEXP);
     Rcpp::traits::input_parameter< float >::type baseFontCharWidth(baseFontCharWidthSEXP);
     Rcpp::traits::input_parameter< float >::type minW(minWSEXP);
     Rcpp::traits::input_parameter< float >::type maxW(maxWSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_column_widths(sheetData, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW));
+    rcpp_result_gen = Rcpp::wrap(calc_column_widths(sheet_data, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -115,17 +115,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_extLst_Major
-CharacterVector get_extLst_Major(std::string xml);
-RcppExport SEXP openxlsx_get_extLst_Major(SEXP xmlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_extLst_Major(xml));
-    return rcpp_result_gen;
-END_RCPP
-}
 // loadworksheets
 SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet);
 RcppExport SEXP openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP, SEXP is_chart_sheetSEXP) {
@@ -201,6 +190,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_extLst_Major
+CharacterVector get_extLst_Major(std::string xml);
+RcppExport SEXP openxlsx_get_extLst_Major(SEXP xmlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type xml(xmlSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_extLst_Major(xml));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cell_ref_to_col
+int cell_ref_to_col(std::string x);
+RcppExport SEXP openxlsx_cell_ref_to_col(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cell_ref_to_col(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// int_2_cell_ref
+CharacterVector int_2_cell_ref(IntegerVector cols);
+RcppExport SEXP openxlsx_int_2_cell_ref(SEXP colsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type cols(colsSEXP);
+    rcpp_result_gen = Rcpp::wrap(int_2_cell_ref(cols));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_shared_strings
 CharacterVector get_shared_strings(std::string xmlFile, bool isFile);
 RcppExport SEXP openxlsx_get_shared_strings(SEXP xmlFileSEXP, SEXP isFileSEXP) {
@@ -229,22 +251,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// readWorkbook
-SEXP readWorkbook(CharacterVector v, CharacterVector r, CharacterVector string_refs, LogicalVector is_date, int nRows, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, Function clean_names);
-RcppExport SEXP openxlsx_readWorkbook(SEXP vSEXP, SEXP rSEXP, SEXP string_refsSEXP, SEXP is_dateSEXP, SEXP nRowsSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP clean_namesSEXP) {
+// read_workbook
+SEXP read_workbook(IntegerVector cols_in, IntegerVector rows_in, CharacterVector v, IntegerVector string_inds, LogicalVector is_date, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, Function clean_names);
+RcppExport SEXP openxlsx_read_workbook(SEXP cols_inSEXP, SEXP rows_inSEXP, SEXP vSEXP, SEXP string_indsSEXP, SEXP is_dateSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP clean_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type cols_in(cols_inSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type rows_in(rows_inSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type v(vSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type r(rSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type string_refs(string_refsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type string_inds(string_indsSEXP);
     Rcpp::traits::input_parameter< LogicalVector >::type is_date(is_dateSEXP);
-    Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
     Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyCols(skipEmptyColsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(readWorkbook(v, r, string_refs, is_date, nRows, hasColNames, skipEmptyRows, skipEmptyCols, clean_names));
+    rcpp_result_gen = Rcpp::wrap(read_workbook(cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, clean_names));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -260,16 +282,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// unique_cell_append
-List unique_cell_append(List sheetData, CharacterVector r, List newCells);
-RcppExport SEXP openxlsx_unique_cell_append(SEXP sheetDataSEXP, SEXP rSEXP, SEXP newCellsSEXP) {
+// map_cell_types_to_integer
+IntegerVector map_cell_types_to_integer(CharacterVector t);
+RcppExport SEXP openxlsx_map_cell_types_to_integer(SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type r(rSEXP);
-    Rcpp::traits::input_parameter< List >::type newCells(newCellsSEXP);
-    rcpp_result_gen = Rcpp::wrap(unique_cell_append(sheetData, r, newCells));
+    Rcpp::traits::input_parameter< CharacterVector >::type t(tSEXP);
+    rcpp_result_gen = Rcpp::wrap(map_cell_types_to_integer(t));
+    return rcpp_result_gen;
+END_RCPP
+}
+// map_cell_types_to_char
+CharacterVector map_cell_types_to_char(IntegerVector t);
+RcppExport SEXP openxlsx_map_cell_types_to_char(SEXP tSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type t(tSEXP);
+    rcpp_result_gen = Rcpp::wrap(map_cell_types_to_char(t));
+    return rcpp_result_gen;
+END_RCPP
+}
+// build_cell_types_integer
+IntegerVector build_cell_types_integer(CharacterVector classes, int n_rows);
+RcppExport SEXP openxlsx_build_cell_types_integer(SEXP classesSEXP, SEXP n_rowsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type classes(classesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_cell_types_integer(classes, n_rows));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -309,36 +352,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// quickBuildCellXML
-SEXP quickBuildCellXML(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, std::string R_fileName);
-RcppExport SEXP openxlsx_quickBuildCellXML(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP styleIndsSEXP, SEXP R_fileNameSEXP) {
+// write_worksheet_xml
+SEXP write_worksheet_xml(std::string prior, std::string post, Reference sheet_data, std::string R_fileName);
+RcppExport SEXP openxlsx_write_worksheet_xml(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP R_fileNameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP);
     Rcpp::traits::input_parameter< std::string >::type post(postSEXP);
-    Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type styleInds(styleIndsSEXP);
+    Rcpp::traits::input_parameter< Reference >::type sheet_data(sheet_dataSEXP);
     Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP);
-    rcpp_result_gen = Rcpp::wrap(quickBuildCellXML(prior, post, sheetData, rowNumbers, styleInds, R_fileName));
-    return rcpp_result_gen;
-END_RCPP
-}
-// quickBuildCellXML2
-SEXP quickBuildCellXML2(std::string prior, std::string post, List sheetData, IntegerVector rowNumbers, CharacterVector styleInds, CharacterVector rowHeights, std::string R_fileName);
-RcppExport SEXP openxlsx_quickBuildCellXML2(SEXP priorSEXP, SEXP postSEXP, SEXP sheetDataSEXP, SEXP rowNumbersSEXP, SEXP styleIndsSEXP, SEXP rowHeightsSEXP, SEXP R_fileNameSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP);
-    Rcpp::traits::input_parameter< std::string >::type post(postSEXP);
-    Rcpp::traits::input_parameter< List >::type sheetData(sheetDataSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type rowNumbers(rowNumbersSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type styleInds(styleIndsSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type rowHeights(rowHeightsSEXP);
-    Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP);
-    rcpp_result_gen = Rcpp::wrap(quickBuildCellXML2(prior, post, sheetData, rowNumbers, styleInds, rowHeights, R_fileName));
+    rcpp_result_gen = Rcpp::wrap(write_worksheet_xml(prior, post, sheet_data, R_fileName));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -400,6 +424,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type tableStyle(tableStyleSEXP);
     Rcpp::traits::input_parameter< bool >::type withFilter(withFilterSEXP);
     rcpp_result_gen = Rcpp::wrap(build_table_xml(table, ref, colNames, showColNames, tableStyle, withFilter));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_worksheet_xml_2
+SEXP write_worksheet_xml_2(std::string prior, std::string post, Reference sheet_data, CharacterVector row_heights, std::string R_fileName);
+RcppExport SEXP openxlsx_write_worksheet_xml_2(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP row_heightsSEXP, SEXP R_fileNameSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< std::string >::type post(postSEXP);
+    Rcpp::traits::input_parameter< Reference >::type sheet_data(sheet_dataSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type row_heights(row_heightsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP);
+    rcpp_result_gen = Rcpp::wrap(write_worksheet_xml_2(prior, post, sheet_data, row_heights, R_fileName));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -2,56 +2,6 @@
 #include "openxlsx.h"
 
 
-#include <unistd.h>
-
-
-// [[Rcpp::export]]
-CharacterVector get_extLst_Major(std::string xml){
-  
-  // find page margin or pagesetup then take the extLst after that
-  
-  if(xml.length() == 0)
-    return wrap(NA_STRING);
-  
-  std::vector<std::string> r;
-  std::string tagEnd = "</extLst>";
-  size_t endPos = 0;
-  std::string node;
-  
-  
-  size_t pos = xml.find("<pageSetup ", 0);   
-  if(pos == std::string::npos)
-    pos = xml.find("<pageMargins ", 0);   
-  
-  if(pos == std::string::npos)
-    pos = xml.find("</conditionalFormatting>", 0);   
-  
-  if(pos == std::string::npos)
-    return wrap(NA_STRING);
-  
-  while(1){
-    
-    pos = xml.find("<extLst>", pos + 1);  
-    if(pos == std::string::npos)
-      break;
-    
-    endPos = xml.find(tagEnd, pos + 8);
-    
-    node = xml.substr(pos + 8, endPos - pos - 8);
-    pos = xml.find("conditionalFormattings", pos + 1);  
-    if(pos == std::string::npos)
-      break;
-    
-    r.push_back(node.c_str());
-    
-  }
-  
-  return wrap(r) ;  
-  
-}
-
-
-
 
 // [[Rcpp::export]]
 SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet){
@@ -66,24 +16,22 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   List colWidths(n_sheets);
   List rowHeights(n_sheets);
   List wbstyleObjects(0);
-  
-  IntegerVector dataCount(n_sheets);
-  std::fill(dataCount.begin(), dataCount.end(), 0);
-  
+
   // loop over each worksheet file
   for(int i = 0; i < n_sheets; i++){
-
+    
     if(is_chart_sheet[i]){
       
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
-
+      
     }else{
       
       colWidths[i] = List(0);
       rowHeights[i] = List(0);
       Reference this_worksheet(worksheets[i]);
-    
+      Reference sheet_data(this_worksheet.field("sheet_data"));
+      
       //read in file
       std::string xmlFile = xmlFiles[i];
       
@@ -94,7 +42,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       // while (file >> buf)
       // xml += buf + ' ';
       
-      std::size_t pos = xml.find("<sheetData>");  // find sheetData
+      size_t pos = xml.find("<sheetData>");  // find <sheetData>
       size_t endPos = 0;
       size_t tmp_pos = 0;
       
@@ -303,8 +251,8 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           
         }
       }
-
-
+      
+      
       //  conditionalFormatting
       CharacterVector conForm = getNodes(xml_post, "<conditionalFormatting");
       if(conForm.size() > 0){
@@ -318,7 +266,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
         
         for(int ci = 0; ci < conForm.size(); ci++){
-
+          
           buf = conForm[ci];
           
           tmp_pos = buf.find("sqref=\"", 0);
@@ -374,12 +322,12 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       xml_post.clear();
       xml_pre.clear();
       
-
+      
       /* --------------------------- sheet Data --------------------------- */
       
       if(has_data){
         
-        xml = xml.substr(pos + 11, pos_post - pos - 11);     // get from "sheetData" to the end
+        xml = xml.substr(pos + 11, pos_post - pos - 11);     // get from "<sheetData>" to the end
         
         // count cells with children
         int ocs = 0;
@@ -394,18 +342,30 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         CharacterVector v(ocs);
         CharacterVector s(ocs);
         
+        
         std::fill(v.begin(), v.end(), NA_STRING);
         std::fill(s.begin(), s.end(), NA_STRING);
         
+        // rebuild
+        CharacterVector t(ocs);
+        std::fill(t.begin(), t.end(), "n");
+        
+        IntegerVector rows_cell_ref(ocs);
+        IntegerVector cols_cell_ref(ocs);
+        
+        CharacterVector f(ocs);
+        std::fill(f.begin(), f.end(), NA_STRING);
+        // rebuild end
         
         int j = 0;
         size_t nextPos = 3;
         pos = xml.find("<c ", 0);
         bool has_v = false;
         bool has_f = false;
-        List cells(ocs); // sheetData
         std::string func;
-        std::string type;
+        
+        size_t pos_t = pos;
+        size_t pos_f = pos;
         
         // PULL OUT CELL AND ATTRIBUTES
         while(j < ocs){
@@ -414,7 +374,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
             
             has_v = false;
             has_f = false;
-            type = "n";
             
             nextPos = xml.find("<c ", pos + 9);
             cell = xml.substr(pos, nextPos - pos);
@@ -425,8 +384,13 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
             r[j] = cell.substr(pos + 3, endPos - pos - 3).c_str();
             
             buf = cell.substr(pos + 3, endPos - pos - 3);      
+            cols_cell_ref[j] = cell_ref_to_col(buf);
+            
             buf.erase(std::remove_if(buf.begin(), buf.end(), ::isalpha), buf.end());
             r_nms[j] = buf;
+            
+            rows_cell_ref[j] = atoi(buf.c_str());
+            
             
             // Pull out style
             pos = cell.find(" s=", 0);  // find s="
@@ -434,14 +398,6 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
               endPos = cell.find(tagEnd, pos + 4);  // find next "
               s[j] = cell.substr(pos + 4, endPos - pos - 4);
             }
-            
-            // Pull out type
-            pos = cell.find(" t=", 0);  // find t="
-            if(pos != std::string::npos){
-              endPos = cell.find(tagEnd, pos + 4);  // find next "
-              type = cell.substr(pos + 4, endPos - pos - 4);
-            }
-            
             
             // find <v> tag and </v> end tag
             endPos = cell.find("</v>", 0);
@@ -452,46 +408,96 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
               has_v = true;
             }
             
-            // get<f>
-            pos = cell.find("<f", 0);
-            if(pos != std::string::npos){
-              endPos = cell.find("</f>", pos + 3);
+            
+            // Pull out type
+            pos_t = cell.find(" t=", 0);
+            pos_f = cell.find("<f", 0);
+            
+            // have both
+            if((pos_f != std::string::npos) & (pos_t != std::string::npos)){ // have f
+              
+              
+              // will always have f
+              endPos = cell.find("</f>", pos_f + 3);
               if(endPos == std::string::npos){
-                endPos = cell.find("/>", pos + 3);
-                func = cell.substr(pos, endPos - pos + 2);
+                endPos = cell.find("/>", pos_f + 3);
+                f[j] = cell.substr(pos_f, endPos - pos_f + 2);
               }else{
-                func = cell.substr(pos, endPos - pos + 4);
+                f[j] = cell.substr(pos_f, endPos - pos_f + 4);
               }
               has_f = true;
+              
+              // do we really have t
+              if(pos_t < pos_f){
+                endPos = cell.find(tagEnd, pos_t + 4);  // find next "
+                t[j] = cell.substr(pos_t + 4, endPos - pos_t - 4);
+              }
+              
+              
+            }else if(pos_t != std::string::npos){ // only have t
+              
+              endPos = cell.find(tagEnd, pos_t + 4);  // find next "
+              t[j] = cell.substr(pos_t + 4, endPos - pos_t - 4);
+              
+              
+            }else if(pos_f != std::string::npos){ // only have f
+              
+              endPos = cell.find("</f>", pos_f + 3);
+              if(endPos == std::string::npos){
+                endPos = cell.find("/>", pos_f + 3);
+                f[j] = cell.substr(pos_f, endPos - pos_f + 2);
+              }else{
+                f[j] = cell.substr(pos_f, endPos - pos_f + 4);
+              }
+              has_f = true;
+              
             }
             
-            if(has_f & (!has_v) & (type != "n")){
-              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = NA_STRING, Named("f") = func); 
+            
+            if(has_f & (!has_v) & (t[j] != "n")){
+              
+              v[j] = NA_STRING;
+              
             }else if(has_f & !has_v){
-              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = func); 
-            }else if(has_f){
-              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = func); 
-            }else if(has_v){
-              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = type, Named("v") = v[j], Named("f") = NA_STRING); 
+              
+              t[j] = NA_STRING;
+              v[j] = NA_STRING;
+              
+            }else if(has_f | has_v){
+ 
             }else{ //only have s and r
-              cells[j] = CharacterVector::create(Named("r") = r[j], Named("t") = NA_STRING, Named("v") = NA_STRING, Named("f") = NA_STRING);
+              t[j] = NA_STRING;
+              v[j] = NA_STRING;
             }
             
             
             
             j++; // INCREMENT OVER OCCURENCES
             pos = nextPos;
+            pos_t = nextPos;
+            pos_f = nextPos;
+            
             
           }  // end of while loop over occurences
         }  // END OF CELL AND ATTRIBUTION GATHERING
         
         // get names of cells
-
+        
         if(ocs > 0){
-          cells.attr("names") = r_nms;
-          this_worksheet.field("sheetData") = cells;
+          
+          // may be a problem when we have a formula, no value and we now write t="n" in it's place
+          sheet_data.field("rows") = rows_cell_ref;
+          sheet_data.field("cols") = cols_cell_ref;
+          
+          sheet_data.field("t") = map_cell_types_to_integer(t);
+          sheet_data.field("v") = v;
+          sheet_data.field("f") = f;
+          
+          sheet_data.field("data_count") = 1;
+          sheet_data.field("n_elements") = ocs;
+          
         }
-
+        
         // count number of rows
         int row_ocs = 0;
         start = 0;
@@ -548,7 +554,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           heights.attr("names") = rowNumbers;
           rowHeights[i] = heights;
         }
-
+        
         // styleObjects
         std::string this_sheetname = as<std::string>(sheetNames[i]);
         
@@ -599,9 +605,8 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
           }
           
           
-        }
+        } // end if(any(!is_na(s)))
         
-        dataCount[i] = 1;
       } // end of if(has_data)
       
     } // end if is_chart_sheet[i] else
@@ -613,10 +618,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
   wb.field("rowHeights") = rowHeights;
   wb.field("colWidths") = colWidths;
   wb.field("styleObjects") = wbstyleObjects;
-  wb.field("dataCount") = dataCount;
 
-  return wrap(wb);
   
+  return wrap(wb);
   
 }
 
@@ -801,6 +805,102 @@ CharacterVector getChildlessNode(std::string xml, std::string tag){
 
 
 
+// [[Rcpp::export]]
+CharacterVector get_extLst_Major(std::string xml){
+  
+  // find page margin or pagesetup then take the extLst after that
+  
+  if(xml.length() == 0)
+    return wrap(NA_STRING);
+  
+  std::vector<std::string> r;
+  std::string tagEnd = "</extLst>";
+  size_t endPos = 0;
+  std::string node;
+  
+  
+  size_t pos = xml.find("<pageSetup ", 0);   
+  if(pos == std::string::npos)
+    pos = xml.find("<pageMargins ", 0);   
+  
+  if(pos == std::string::npos)
+    pos = xml.find("</conditionalFormatting>", 0);   
+  
+  if(pos == std::string::npos)
+    return wrap(NA_STRING);
+  
+  while(1){
+    
+    pos = xml.find("<extLst>", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    endPos = xml.find(tagEnd, pos + 8);
+    
+    node = xml.substr(pos + 8, endPos - pos - 8);
+    pos = xml.find("conditionalFormattings", pos + 1);  
+    if(pos == std::string::npos)
+      break;
+    
+    r.push_back(node.c_str());
+    
+  }
+  
+  return wrap(r) ;  
+  
+}
+
+// [[Rcpp::export]]
+int cell_ref_to_col( std::string x ){
+  
+  // This function converts the Excel column letter to an integer
+  char A = 'A';
+  int a_value = (int)A - 1;
+  int sum = 0;
+  
+  // remove digits from string
+  x.erase(std::remove_if(x.begin()+1, x.end(), ::isdigit),x.end());
+  int k = x.length();
+  
+  for (int j = 0; j < k; j++){
+    sum *= 26;
+    sum += (x[j] - a_value);
+  }
+  
+  return sum;
+  
+}
 
 
+// [[Rcpp::export]]
+CharacterVector int_2_cell_ref(IntegerVector cols){
+  
+  std::vector<std::string> LETTERS = get_letters();
+  
+  int n = cols.size();  
+  CharacterVector res(n);
+  std::fill(res.begin(), res.end(), NA_STRING);
+  
+  int x;
+  int modulo;
 
+  
+  for(int i = 0; i < n; i++){
+    
+    if(!IntegerVector::is_na(cols[i])){
+
+      string columnName;
+      x = cols[i];
+      while(x > 0){  
+        modulo = (x - 1) % 26;
+        columnName = LETTERS[modulo] + columnName;
+        x = (x - modulo) / 26;
+      }
+      res[i] = columnName;
+    }
+    
+  }
+  
+  return res ;
+  
+}

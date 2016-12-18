@@ -10,11 +10,18 @@ using namespace std;
 
 
 
+// load workbook
+int cell_ref_to_col(string );
+CharacterVector int_2_cell_ref(IntegerVector);
+
 // write file
+SEXP write_worksheet_xml(string, string, List, Reference, IntegerVector, CharacterVector, string );
 
 
-
-
+// write_data.cpp
+CharacterVector map_cell_types_to_char(IntegerVector);
+IntegerVector map_cell_types_to_integer(CharacterVector);
+  
 
 
 std::vector<std::string> get_letters();
@@ -22,7 +29,7 @@ std::vector<std::string> get_letters();
 
 IntegerVector convert_from_excel_ref( CharacterVector x );
 
-SEXP calc_column_widths(List sheetData, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
+SEXP calc_column_widths(Reference sheet_data, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
 
 SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag);
 
@@ -66,7 +73,6 @@ SEXP convert_to_excel_ref_expand(const std::vector<int>& cols, const std::vector
 
 IntegerVector matrixRowInds(IntegerVector indices);
 CharacterVector build_table_xml(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle, bool withFilter);
-List unique_cell_append(List sheetData, CharacterVector r, List newCells);
 int calc_number_rows(CharacterVector x, bool skipEmptyRows);
 CharacterVector buildCellTypes(CharacterVector classes, int nRows);
 LogicalVector isInternalHyperlink(CharacterVector x);

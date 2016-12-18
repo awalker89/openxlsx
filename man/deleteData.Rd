@@ -22,16 +22,16 @@ will be removed.}
 Delete contents and styling from a cell.
 }
 \examples{
-## load a workbook 
+## write some data
 wb <- createWorkbook()
 addWorksheet(wb, "Worksheet 1")
 x <- data.frame(matrix(runif(200), ncol = 10)) 
-names(x) <- paste("Variable", 1:10)
-writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = TRUE)
+writeData(wb, sheet = 1, x = x, startCol = 2, startRow = 3, colNames = FALSE)
 
-## delete cell contents
+## delete some data
 deleteData(wb, sheet = 1, cols = 3:5, rows = 5:7, gridExpand = TRUE)
 deleteData(wb, sheet = 1, cols = 7:9, rows = 5:7, gridExpand = TRUE)
+deleteData(wb, sheet = 1, cols = LETTERS, rows = 18, gridExpand = TRUE)
 
 saveWorkbook(wb, "deleteDataExample.xlsx", overwrite = TRUE)
 }
