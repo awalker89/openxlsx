@@ -20,24 +20,23 @@ Sheet_Data$methods(initialize = function(){
 
 
 
-Sheet_Data$methods(delete = function(row_in, col_in, grid_expand){
+Sheet_Data$methods(delete = function(rows_in, cols_in, grid_expand){
   
-  col_in <- convertFromExcelRef(col_in)
-  row_in <- as.integer(row_in)
+  cols_in <- convertFromExcelRef(cols_in)
+  rows_in <- as.integer(rows_in)
   
   ## rows and cols need to be the same length
   if(grid_expand){
-    combs <- expand.grid(row_in, col_in) 
-    row_in <- combs[,1]
-    col_in <- combs[,2]
+    combs <- expand.grid(rows_in, cols_in) 
+    rows_in <- combs[,1]
+    cols_in <- combs[,2]
   }
   
-  if(length(row_in) != length(col_in)){
+  if(length(rows_in) != length(cols_in)){
     stop("Length of rows and cols must be equal.")
   }
   
-  
-  inds <- which(paste(rows, cols, sep = ",") %in% paste(row_in, col_in, sep = ","))
+  inds <- which(paste(rows, cols, sep = ",") %in% paste(rows_in, cols_in, sep = ","))
   
   if(length(inds) > 0){ ## writing over existing data 
     
@@ -46,9 +45,9 @@ Sheet_Data$methods(delete = function(row_in, col_in, grid_expand){
     t    <<- t[-inds]
     v    <<- v[-inds]
     f    <<- f[-inds]
-  
+    
     n_elements <<- as.integer(length(rows))
-
+    
     if(n_elements == 0)
       data_count <<- 0L
   }
@@ -57,50 +56,49 @@ Sheet_Data$methods(delete = function(row_in, col_in, grid_expand){
 
 
 
-Sheet_Data$methods(write = function(row_in, col_in, t_in, v_in, f_in){
+Sheet_Data$methods(write = function(rows_in, cols_in, t_in, v_in, f_in){
   
-  coords <- expand.grid(col_in, row_in)
-  col_in <- coords[[1]]
-  row_in <- coords[[2]]
+  if(length(rows_in) == 0 | length(cols_in) == 0)
+    return(invisible(0))
+  
+  
+  possible_overlap <- FALSE
+  if(n_elements > 0){
+    possible_overlap <- (min(cols_in) <= max(cols)) &
+      (max(cols_in) >= min(cols)) & 
+      (min(rows_in) <= max(rows)) & 
+      (max(rows_in) >= min(rows))
+  }
+  
+  
+  coords <- expand.grid(cols_in, rows_in)
+  cols_in <- coords[[1]]
+  rows_in <- coords[[2]]
   
   v_in[!is.na(f_in)] <- as.character(NA)
   t_in[!is.na(f_in)] <- 3L ## "str"
   
-  if(length(row_in) != 0 & length(col_in) != 0){
+  
+  inds <- integer(0)
+  if(possible_overlap)
+    inds <- which(paste(rows, cols, sep = ",") %in% paste(rows_in, cols_in, sep = ","))
+  
+  if(length(inds) > 0){
     
-    if(data_count == 0 | n_elements == 0){
-      
-      rows <<- row_in
-      cols <<- col_in
-      t <<- t_in
-      v <<- v_in
-      f <<- f_in
-
-    }else{
-      
-      inds <- which(paste(rows, cols, sep = ",") %in% paste(row_in, col_in, sep = ","))
-      
-      if(length(inds) > 0){ ## writing over existing data 
-        
-        rows <<- c(rows[-inds], row_in)
-        cols <<- c(cols[-inds], col_in)
-        t <<- c(t[-inds], t_in)
-        v <<- c(v[-inds], v_in)
-        f <<- c(f[-inds], f_in)
-        
-        
-      }else{ ## no overlap
-        
-        rows <<- c(rows, row_in)
-        cols <<- c(cols, col_in)
-        t <<- c(t, t_in)
-        v <<- c(v, v_in)
-        f <<- c(f, f_in)
-        
-      }
-      
-      
-    } ## make sure writing some data
+    rows <<- c(rows[-inds], rows_in)
+    cols <<- c(cols[-inds], cols_in)
+    t <<- c(t[-inds], t_in)
+    v <<- c(v[-inds], v_in)
+    f <<- c(f[-inds], f_in)
+    
+  }else{
+    
+    rows <<- c(rows, rows_in)
+    cols <<- c(cols, cols_in)
+    t <<- c(t, t_in)
+    v <<- c(v, v_in)
+    f <<- c(f, f_in)
+    
   }
   
   n_elements <<- as.integer(length(rows))

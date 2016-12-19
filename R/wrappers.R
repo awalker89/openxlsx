@@ -1464,7 +1464,7 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
     stop("First argument must be a Workbook.")
   
 
-  wb$worksheets[[sheet]]$sheet_data$delete(row_in = rows, col_in = cols, grid_expand = gridExpand)
+  wb$worksheets[[sheet]]$sheet_data$delete(rows_in = rows, cols_in = cols, grid_expand = gridExpand)
 
   
   invisible(0)

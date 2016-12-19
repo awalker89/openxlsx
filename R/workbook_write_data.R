@@ -167,27 +167,27 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   rm(df)
   
   
-  ## create references
-  r <- .Call("openxlsx_convert_to_excel_ref_expand", startCol:(startCol+nCols-1L), LETTERS, as.character(startRow:(startRow+nRows-1L)))
-  
   ##Append hyperlinks, convert h to s in cell type
-  if("hyperlink" %in% colClasses){
+  hyperlink_cols <- which(sapply(colClasses, function(x) "hyperlink" %in% x, USE.NAMES = FALSE), useNames = FALSE)
+  if(length(hyperlink_cols) > 0){
     
-    hInds <- which(t == 9L)
+    hyperlink_inds <- which(t == 9L)
     
-    if(length(hInds) > 0){
-      t[hInds] <- 1L
+    if(length(hyperlink_inds) > 0){
+      t[hyperlink_inds] <- 1L ## "s"
+      
+      hyperlink_refs <- .Call("openxlsx_convert_to_excel_ref_expand", hyperlink_cols, LETTERS, as.character((startRow + colNames):(startRow+nRows - 1L)))
+      
       
       exHlinks <- worksheets[[sheet]]$hyperlinks
-      newHlinks <- r[hInds]
-      targets <- replaceIllegalCharacters(v[hInds])
+      targets <- replaceIllegalCharacters(v[hyperlink_inds])
       
-      if(!is.null(hlinkNames) & length(hlinkNames) == length(hInds))
-        v[hInds] <- hlinkNames ## this is text to display instead of hyperlink
+      if(!is.null(hlinkNames) & length(hlinkNames) == length(hyperlink_inds))
+        v[hyperlink_inds] <- hlinkNames ## this is text to display instead of hyperlink
       
       ## create hyperlink objects
-      newhl <- lapply(1:length(hInds), function(i){
-        Hyperlink$new(ref = newHlinks[i], target = targets[i], location = NULL, display = NULL, is_external = TRUE)
+      newhl <- lapply(1:length(hyperlink_inds), function(i){
+        Hyperlink$new(ref = hyperlink_refs[i], target = targets[i], location = NULL, display = NULL, is_external = TRUE)
       })
       
       worksheets[[sheet]]$hyperlinks <<- append(worksheets[[sheet]]$hyperlinks, newhl)
@@ -216,8 +216,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   }
   
   # ## Create cell list of lists
-  worksheets[[sheet]]$sheet_data$write( row_in = startRow:(startRow + nRows - 1L)
-                                        , col_in = startCol:(startCol + nCols - 1L)
+  worksheets[[sheet]]$sheet_data$write( rows_in = startRow:(startRow + nRows - 1L)
+                                        , cols_in = startCol:(startCol + nCols - 1L)
                                         , t_in = t
                                         , v_in = v
                                         , f_in = f_in)

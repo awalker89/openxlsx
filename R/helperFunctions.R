@@ -328,11 +328,11 @@ replaceIllegalCharacters <- function(v){
   if(any(flg))
     v[flg] <- iconv(v[flg], from = "", to = "UTF-8")
   
-  v <- gsub('&', "&amp;", v)
-  v <- gsub('"', "&quot;", v)
-  v <- gsub("'", "&apos;", v)
-  v <- gsub('<', "&lt;", v)
-  v <- gsub('>', "&gt;", v)
+  v <- gsub('&', "&amp;", v, fixed = TRUE)
+  v <- gsub('"', "&quot;", v, fixed = TRUE)
+  v <- gsub("'", "&apos;", v, fixed = TRUE)
+  v <- gsub('<', "&lt;", v, fixed = TRUE)
+  v <- gsub('>', "&gt;", v, fixed = TRUE)
   
   return(v)
 }
@@ -340,11 +340,11 @@ replaceIllegalCharacters <- function(v){
 
 replaceXMLEntities <- function(v){
   
-  v <- gsub("&amp;", "&", v)
-  v <- gsub("&quot;", '"', v)
-  v <- gsub("&apos;", "'", v)
-  v <- gsub("&lt;", "<", v)
-  v <- gsub("&gt;", ">", v)
+  v <- gsub("&amp;", "&", v, fixed = TRUE)
+  v <- gsub("&quot;", '"', v, fixed = TRUE)
+  v <- gsub("&apos;", "'", v, fixed = TRUE)
+  v <- gsub("&lt;", "<", v, fixed = TRUE)
+  v <- gsub("&gt;", ">", v, fixed = TRUE)
   
   return(v)
 }
