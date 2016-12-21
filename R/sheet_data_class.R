@@ -56,7 +56,7 @@ Sheet_Data$methods(delete = function(rows_in, cols_in, grid_expand){
 
 
 
-Sheet_Data$methods(write = function(rows_in, cols_in, t_in, v_in, f_in){
+Sheet_Data$methods(write = function(rows_in, cols_in, t_in, v_in, f_in, any_functions = TRUE){
   
   if(length(rows_in) == 0 | length(cols_in) == 0)
     return(invisible(0))
@@ -70,14 +70,16 @@ Sheet_Data$methods(write = function(rows_in, cols_in, t_in, v_in, f_in){
       (max(rows_in) >= min(rows))
   }
   
+  n <- length(cols_in)
+  cols_in <- rep.int(cols_in, times = length(rows_in))
+  rows_in <- rep(rows_in, each = n)
   
-  coords <- expand.grid(cols_in, rows_in)
-  cols_in <- coords[[1]]
-  rows_in <- coords[[2]]
-  
-  v_in[!is.na(f_in)] <- as.character(NA)
-  t_in[!is.na(f_in)] <- 3L ## "str"
-  
+  if(any_functions){
+    if(any(!is.na(f_in))){
+      v_in[!is.na(f_in)] <- as.character(NA)
+      t_in[!is.na(f_in)] <- 3L ## "str"
+    }
+  }
   
   inds <- integer(0)
   if(possible_overlap)

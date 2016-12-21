@@ -150,6 +150,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   ## Forumlas
   f_in <- rep.int(as.character(NA), length(t))
+  any_functions <- FALSE
   if("openxlsx_formula" %in% colClasses){
     
     ## alter the elements of t where we have a formula to be "str"
@@ -157,14 +158,16 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     formula_strs <- paste0("<f>", unlist(df[formula_cols], use.names = FALSE), "</f>")
     formula_inds <- unlist(lapply(formula_cols, function(i) i + (1:(nRows - colNames) - 1)*nCols + (colNames * nCols)), use.names = FALSE)
     f_in[formula_inds] <- formula_strs
+    any_functions <- TRUE
     
     rm(formula_cols)
     rm(formula_strs)
     rm(formula_inds)
+
     
   }
   
-  rm(df)
+  suppressWarnings(try(rm(df), silent = TRUE))
   
   
   ##Append hyperlinks, convert h to s in cell type
@@ -220,7 +223,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
                                         , cols_in = startCol:(startCol + nCols - 1L)
                                         , t_in = t
                                         , v_in = v
-                                        , f_in = f_in)
+                                        , f_in = f_in
+                                        , any_functions = any_functions)
   
   
   
