@@ -46,8 +46,6 @@ SEXP write_worksheet_xml(std::string prior
   CharacterVector unique_rows(sort_unique(cell_row));
 
     
-  // DEV END
-
   size_t n = cell_row.size();
   size_t k = unique_rows.size();
   std::string xml;
@@ -55,7 +53,7 @@ SEXP write_worksheet_xml(std::string prior
 
   // write sheet_data
   
-  // write xml prior to stringData and opening tag
+  // write xml prior to sheetData and opening tag
   xmlFile << "<sheetData>";
   size_t j = 0;
   String currentRow = unique_rows[0];
