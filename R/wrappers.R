@@ -838,9 +838,11 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
   
   ## rows and cols need to be the same length
   if(gridExpand){
-    combs <- expand.grid(cols, rows) 
-    cols <- combs[,1]
-    rows <- combs[,2]
+
+    n <- length(cols)
+    cols <- rep.int(cols, times = length(rows))
+    rows <- rep(rows, each = n)
+    
   }else if(length(rows) == 1 & length(cols) > 1){
     rows <- rep.int(rows, times = length(cols))
     

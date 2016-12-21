@@ -27,9 +27,9 @@ Sheet_Data$methods(delete = function(rows_in, cols_in, grid_expand){
   
   ## rows and cols need to be the same length
   if(grid_expand){
-    combs <- expand.grid(rows_in, cols_in) 
-    rows_in <- combs[,1]
-    cols_in <- combs[,2]
+    n <- length(rows_in)
+    rows_in <- rep.int(rows_in, times = length(cols_in))
+    cols_in <- rep(cols_in, each = n)
   }
   
   if(length(rows_in) != length(cols_in)){
