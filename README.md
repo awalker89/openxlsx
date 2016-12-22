@@ -52,6 +52,10 @@ install_github("awalker89/openxlsx")
 ```
 
 ## Bug/feature request
+Please let me know which version of openxlsx you are using when posting bug reports.
+```R
+packageVersion("openxlsx")
+```
 Thanks, [here](https://github.com/awalker89/openxlsx/issues). 
 
 ## News
