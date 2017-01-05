@@ -1,4 +1,26 @@
 
+openxlsx 4.0.0
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* Reduced RAM usage and improved performance
+
+* maintain vbaProject, slicers, pivotTables on load
+
+* Read and load from URL
+
+BUG FIXES
+
+* Fix date time conversion accuracy issues. 
+
+* Allow multibyte characters in names and comments.
+
+* Remove tolower() over style number formats to allow uppercase cell formatting
+
+* Stacking styles fixed.
+
+
 openxlsx 3.0.2
 ----------------------------------------------------------------
 
@@ -19,7 +41,6 @@ NEW FEATURES
 BUG FIXES
 
 * keepNA paramter added to write.xlsx. Passed to writeData/writeDataTable
-
 
 
 openxlsx 3.0.1
@@ -151,6 +172,7 @@ BUG FIXES
 * sharedStrings now exact matches true/false to determine logical values from workbooks.
 
 * fomulas in column caused openxlsx to crash. This has been fixed.
+
 
 openxlsx 2.0.15
 ----------------------------------------------------------------
