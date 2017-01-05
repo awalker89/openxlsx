@@ -8,11 +8,11 @@ createComment(comment, author = Sys.getenv("USERNAME"), style = NULL,
   visible = TRUE, width = 2, height = 4)
 }
 \arguments{
-\item{comment}{Comment text. Character vector of length 1}
+\item{comment}{Comment text. Character vector.}
 
 \item{author}{Author of comment. Character vector of length 1}
 
-\item{style}{A Style object. See \code{\link{createStyle}}.}
+\item{style}{A Style object or list of style objects the same length as comment vector. See \code{\link{createStyle}}.}
 
 \item{visible}{TRUE or FALSE. Is comment visible.}
 

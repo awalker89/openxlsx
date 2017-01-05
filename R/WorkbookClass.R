@@ -67,7 +67,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   
   worksheets <<- list()
   worksheets_rels <<- list()
-
+  
   
   
 })
@@ -196,7 +196,7 @@ Workbook$methods(addWorksheet = function(sheetName
   
   rowHeights[[newSheetIndex]] <<- list()
   colWidths[[newSheetIndex]] <<- list()
-
+  
   sheetOrder <<- c(sheetOrder, as.integer(newSheetIndex))
   sheet_names <<- c(sheet_names, sheetName)
   
@@ -247,7 +247,7 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
   
   vml_rels[[newSheetIndex]] <<- list()
   vml[[newSheetIndex]] <<- list()
-
+  
   sheetOrder <<- c(sheetOrder, newSheetIndex)
   
   invisible(newSheetIndex)
@@ -1227,14 +1227,14 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       ## reorder sheet data
       worksheets[[i]]$order_sheetdata()
       
-
+      
       prior <- ws$get_prior_sheet_data()
       post <- ws$get_post_sheet_data()
       
       worksheets[[i]]$sheet_data$style_id <<- as.character(worksheets[[i]]$sheet_data$style_id)
       
       if(length(rowHeights[[i]]) == 0){
-
+        
         .Call("openxlsx_write_worksheet_xml",
               prior,
               post,
@@ -1243,7 +1243,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
               PACKAGE = "openxlsx")
         
       }else{
-
+        
         ## row heights will always be in order and all row heights are given rows in preSaveCleanup  
         .Call("openxlsx_write_worksheet_xml_2",
               prior,
@@ -1429,7 +1429,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   
   ## Can remove highest sheet
   workbook.xml.rels <<- workbook.xml.rels[!grepl(sprintf("sheet%s.xml", nSheets), workbook.xml.rels)]
-
+  
   ## definedNames
   if(length(workbook$definedNames) > 0){
     belongTo <- getDefinedNamesSheet(workbook$definedNames)
@@ -1832,7 +1832,7 @@ Workbook$methods(preSaveCleanUp = function(){
     .self$addWorksheet("Sheet 1")
     nSheets <- 1L
   }
-
+  
   ## get index of each child element for ordering
   sheetInds <- which(grepl("(worksheets|chartsheets)/sheet[0-9]+\\.xml", workbook.xml.rels))
   stylesInd <- which(grepl("styles\\.xml", workbook.xml.rels))
@@ -1923,9 +1923,9 @@ Workbook$methods(preSaveCleanUp = function(){
   ## styles
   numFmtIds <- 50000L
   for(i in which(!isChartSheet))
-      worksheets[[i]]$sheet_data$style_id <<- rep.int(x = as.integer(NA), times = worksheets[[i]]$sheet_data$n_elements)
-    
-
+    worksheets[[i]]$sheet_data$style_id <<- rep.int(x = as.integer(NA), times = worksheets[[i]]$sheet_data$n_elements)
+  
+  
   for(x in styleObjects){
     if(length(x$rows) > 0 & length(x$cols) > 0){
       
@@ -1969,7 +1969,7 @@ Workbook$methods(preSaveCleanUp = function(){
     }
   }
   
-
+  
   ## Make sure all rowHeights have rows, if not append them!
   for(i in 1:length(worksheets)){
     
@@ -2869,26 +2869,29 @@ Workbook$methods(loadStyles = function(stylesXML){
       if("borderId" %in% names(s)){
         if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
           
-          thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
-          
-          if("borderLeft" %in% names(thisBorder)){
-            style$borderLeft    <- thisBorder$borderLeft
-            style$borderLeftColour <- thisBorder$borderLeftColour
-          }
-          
-          if("borderRight" %in% names(thisBorder)){
-            style$borderRight    <- thisBorder$borderRight
-            style$borderRightColour <- thisBorder$borderRightColour
-          }
-          
-          if("borderTop" %in% names(thisBorder)){
-            style$borderTop    <- thisBorder$borderTop
-            style$borderTopColour <- thisBorder$borderTopColour
-          }
-          
-          if("borderBottom" %in% names(thisBorder)){
-            style$borderBottom    <- thisBorder$borderBottom
-            style$borderBottomColour <- thisBorder$borderBottomColour
+          border_ind <- as.integer(s[["borderId"]]) + 1L
+          if(border_ind < length(borders)){
+            thisBorder <- borders[[border_ind]]
+            
+            if("borderLeft" %in% names(thisBorder)){
+              style$borderLeft    <- thisBorder$borderLeft
+              style$borderLeftColour <- thisBorder$borderLeftColour
+            }
+            
+            if("borderRight" %in% names(thisBorder)){
+              style$borderRight    <- thisBorder$borderRight
+              style$borderRightColour <- thisBorder$borderRightColour
+            }
+            
+            if("borderTop" %in% names(thisBorder)){
+              style$borderTop    <- thisBorder$borderTop
+              style$borderTopColour <- thisBorder$borderTopColour
+            }
+            
+            if("borderBottom" %in% names(thisBorder)){
+              style$borderBottom    <- thisBorder$borderBottom
+              style$borderBottomColour <- thisBorder$borderBottomColour
+            }
           }
         }
       }
