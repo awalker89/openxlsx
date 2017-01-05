@@ -2,7 +2,7 @@
 
 
 
-context("Reading from written workbook is identical to reading from file 1")
+context("Reading from wb object is identical to reading from file")
 
 
 

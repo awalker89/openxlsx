@@ -2130,7 +2130,34 @@ Workbook$methods(createNamedRegion = function(ref1, ref2, name, sheet, localShee
 })
 
 
-
+Workbook$methods(validate_table_name = function(tableName){
+  
+  tableName <- tolower(tableName) ## Excel forces named regions to lowercase
+  
+  if(nchar(tableName) > 255)
+    stop("tableName must be less than 255 characters.")
+  
+  if(grepl("$", tableName, fixed = TRUE))
+    stop("'$' character cannot exist in a tableName")
+  
+  if(grepl(" ", tableName, fixed = TRUE))
+    stop("spaces cannot exist in a table name")
+  
+  # if(!grepl("^[A-Za-z_]", tableName, perl = TRUE))
+  #   stop("tableName must begin with a letter or an underscore")
+  
+  if(grepl("R[0-9]+C[0-9]+", tableName, perl = TRUE, ignore.case = TRUE))
+    stop("tableName cannot be the same as a cell reference, such as R1C1")
+  
+  if(grepl('^[A-Z]{1,3}[0-9]+$', tableName, ignore.case = TRUE))
+    stop("tableName cannot be the same as a cell reference")
+  
+  if(tableName %in% attr(tables, "tableName"))
+    stop(sprintf("Table with name '%s' already exists!", tableName))
+  
+  return(tableName)
+  
+})
 
 
 

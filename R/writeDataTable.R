@@ -86,7 +86,7 @@ writeDataTable <- function(wb, sheet, x,
                            keepNA = FALSE,
                            sep = ", "){
   
-    
+  
   if(!is.null(xy)){
     if(length(xy) != 2)
       stop("xy parameter must have length 2")
@@ -105,14 +105,8 @@ writeDataTable <- function(wb, sheet, x,
   
   if(is.null(tableName)){
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
-  }else if(tableName %in% attr(wb$tables, "tableName")){
-    stop(sprintf("Table with name '%s' already exists!", tableName))
-  }else if(grepl("[^A-Z0-9_]", tableName[[1]], ignore.case = TRUE)){
-    stop("Invalid characters in tableName.")
-  }else if(grepl('^[A-Z]{1,3}[0-9]+$', tableName)){
-    stop("tableName cannot look like a cell reference.")
   }else{
-    tableName <- tableName
+    tableName <- wb$validate_table_name(tableName)
   }
   
   
@@ -156,7 +150,7 @@ writeDataTable <- function(wb, sheet, x,
     colNames <- colnames(x)
     if(any(duplicated(tolower(colNames))))
       stop("Column names of x must be case-insensitive unique.")
-      
+    
     ## zero char names are invalid
     char0 <- nchar(colNames) == 0
     if(any(char0)){
@@ -172,7 +166,7 @@ writeDataTable <- function(wb, sheet, x,
     x <- rbind(as.data.frame(x), matrix("", nrow = 1, ncol = ncol(x), dimnames = list(character(), colnames(x))))
     names(x) <- colNames
   }
-    
+  
   ref1 <- paste0(.Call('openxlsx_convert_to_excel_ref', startCol, LETTERS, PACKAGE="openxlsx"), startRow)
   ref2 <- paste0(.Call('openxlsx_convert_to_excel_ref', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow + nrow(x))
   ref <- paste(ref1, ref2, sep = ":")
@@ -183,9 +177,9 @@ writeDataTable <- function(wb, sheet, x,
     tableSheets <- attr(wb$tables, "sheet")
     sheetNo <- wb$validateSheet(sheet)
     if(sheetNo %in% tableSheets){ ## only look at tables on this sheet
-
+      
       exTable <- wb$tables[tableSheets %in% sheetNo]
-    
+      
       newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
       newCols <- c(startCol, startCol + ncol(x) - 1L)
       
@@ -194,12 +188,12 @@ writeDataTable <- function(wb, sheet, x,
       
       ## loop through existing tables checking if any over lap with new table
       for(i in 1:length(exTable)){
-
-       exCols <- cols[[i]]
-       exRows <- rows[[i]]
-       
-       if(exCols[1] < newCols[2] & exCols[2] > newCols[1] & exRows[1] < newRows[2] & exRows[2] > newRows[1]) 
-         stop("Cannot overwrite existing table.")
+        
+        exCols <- cols[[i]]
+        exRows <- rows[[i]]
+        
+        if(exCols[1] < newCols[2] & exCols[2] > newCols[1] & exRows[1] < newRows[2] & exRows[2] > newRows[1]) 
+          stop("Cannot overwrite existing table.")
         
       }
     } ## end if(sheet %in% tableSheets) 
