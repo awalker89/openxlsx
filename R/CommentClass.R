@@ -71,9 +71,9 @@ Comment$methods(show = function(){
 #' @name createComment
 #' @title create a Comment object
 #' @description Create a cell Comment object to pass to writeComment()
-#' @param comment Comment text. Character vector of length 1
+#' @param comment Comment text. Character vector.
 #' @param author Author of comment. Character vector of length 1
-#' @param style A Style object. See \code{\link{createStyle}}.
+#' @param style A Style object or list of style objects the same length as comment vector. See \code{\link{createStyle}}.
 #' @param visible TRUE or FALSE. Is comment visible.
 #' @param width Textbox integer width in number of cells
 #' @param height Textbox integer height in number of cells

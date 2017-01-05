@@ -283,29 +283,24 @@ writeCommentXML <- function(comment_list, file_name){
   
   
   authors <- unique(sapply(comment_list, "[[", "author"))
+  xml <- '<comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+  xml <- c(xml, paste0('<authors>', paste(sprintf('<author>%s</author>', authors), collapse = ""), '</authors><commentList>'))
   
-  write(x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">', file = file_name)
-  
-  write(x = paste0('<authors>', paste(sprintf('<author>%s</author>', authors), collapse = ""), '</authors><commentList>'), file = file_name, append = TRUE, sep = "")
-  
+
   for(i in 1:length(comment_list)){
     
     authorInd <- which(authors == comment_list[[i]]$author) - 1L
-    write(x = sprintf('<comment ref="%s" authorId="%s" shapeId="0"><text>', comment_list[[i]]$ref, authorInd),
-          file = file_name, append = TRUE, sep = "")
+    xml <- c(xml, sprintf('<comment ref="%s" authorId="%s" shapeId="0"><text>', comment_list[[i]]$ref, authorInd))
     
-    for(j in 1:length(comment_list[[i]]$comment)){
-      write(x = sprintf('<r>%s<t xml:space="preserve">%s</t></r>', comment_list[[i]]$style[[j]], comment_list[[i]]$comment[[j]]),
-            file = file_name, append = TRUE, sep = "")
-    }
+    for(j in 1:length(comment_list[[i]]$comment))
+      xml <- c(xml, sprintf('<r>%s<t xml:space="preserve">%s</t></r>', comment_list[[i]]$style[[j]], comment_list[[i]]$comment[[j]]))
     
-    write(x ='</text></comment>', file = file_name, append = TRUE, sep = "")
+    xml <- c(xml, '</text></comment>')
     
   }
   
-  write(x = paste0('</commentList></comments>'), file = file_name, append = TRUE, sep = "")
-  
+  .Call("openxlsx_writeFile", '', paste(xml, collapse = ""), '</commentList></comments>', file_name)
+
   NULL
   
 }
