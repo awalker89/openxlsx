@@ -352,7 +352,7 @@ read.xlsx.default <- function(xlsxFile,
   
   
   if(!is.null(startRowStr)){
-    stop("not implemented")
+    stop("startRowStr not implemented")
     ind <- which(grepl(startRowStr, v, ignore.case = TRUE))
     if(length(ind) > 0){
       startRow <- as.numeric(gsub("[A-Z]", "", r[ind[[1]]]))
