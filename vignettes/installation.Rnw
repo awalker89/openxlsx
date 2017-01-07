@@ -20,7 +20,6 @@ bottom=20mm,
 }
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 \title{Introduction}
 \author{Alexander Walker\\
 \texttt{Alexander.Walker1989@gmail.com}}
@@ -32,7 +31,7 @@ bottom=20mm,
 \subsection{With Rtools}
 
 \noindent
-The openxlsx package requires a zip application to be available to R. On windows the simplest way to set this up is to install Rtools:  \url{https://cran.r-project.org/bin/windows/Rtools/}  \\
+The openxlsx package requires a zip application to be available to R. On windows the simplest way to set this up is to install Rtools:  https://cran.r-project.org/bin/windows/Rtools/  \\
 
 During the installation of Rtools make sure to edit the system PATH.
 

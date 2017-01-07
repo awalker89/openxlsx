@@ -6,6 +6,8 @@ test_that("Writing then reading returns identical data.frame 1", {
 
   ## data
   genDf <- function(){
+    
+    set.seed(1)
     data.frame("Date" = Sys.Date()-0:4,
                "Logical" = c(TRUE, FALSE, TRUE, TRUE, FALSE),
                "Currency" = -2:2,
@@ -16,6 +18,7 @@ test_that("Writing then reading returns identical data.frame 1", {
   }
   
   df <- genDf()
+  df
   
   class(df$Currency) <- "currency"
   class(df$Accounting) <- "accounting"
