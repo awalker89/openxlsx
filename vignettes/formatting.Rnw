@@ -177,7 +177,8 @@ options("openxlsx.datetimeFormat" = "yyyy-mm-dd hh:mm:ss")
 ## d, dd, ddd, dddd, m, mm, mmm, mmmm, mmmmm, yy, yyyy, h, hh, m, mm, s, ss, AM/PM
 
 ## numFmt == "LONGDATE" will use the date format specified by the above
-addStyle(wb, 1, style = createStyle(numFmt = "LONGDATE"), rows = 2:11, cols = 1, gridExpand = TRUE) 
+long_date_style <- createStyle(numFmt = "LONGDATE")
+addStyle(wb, 1, style = long_date_style, rows = 2:11, cols = 1, gridExpand = TRUE) 
 
 ## some custom date format examples
 sty <- createStyle(numFmt = "yyyy/mm/dd hh:mm:ss AM/PM")
