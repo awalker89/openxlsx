@@ -6,6 +6,8 @@ context("Images and Tables.")
 
 test_that("Images and Tables - reordering and removing", {
 
+  if(FALSE){
+  
   options('stringsAsFactors' = FALSE)
   tempFile <- file.path(tempdir(), "break.xlsx")
 
@@ -120,20 +122,20 @@ test_that("Images and Tables - reordering and removing", {
   expect_equal(names(wb),  c("Sheet 1", "Sheet 3", "Sheet 2"))
 
 
-  # ## Introduce some images
-  # getPlot(1)
-  # insertPlot(wb = wb, sheet = "Sheet 1", startCol = 14, startRow = 3)
-  # 
-  # getPlot(2)
-  # insertPlot(wb = wb, sheet = "Sheet 2", startCol = 14, startRow = 3)
-  # 
-  # getPlot(3)
-  # insertPlot(wb = wb, sheet = "Sheet 3", startCol = 14, startRow = 3)
-  # 
-  # 
-  # expect_true(any(grepl("image1", wb$drawings_rels[[1]])))
-  # expect_true(any(grepl("image3", wb$drawings_rels[[2]])))
-  # expect_true(any(grepl("image2", wb$drawings_rels[[3]])))
+  ## Introduce some images
+  getPlot(1)
+  insertPlot(wb = wb, sheet = "Sheet 1", startCol = 14, startRow = 3)
+
+  getPlot(2)
+  insertPlot(wb = wb, sheet = "Sheet 2", startCol = 14, startRow = 3)
+
+  getPlot(3)
+  insertPlot(wb = wb, sheet = "Sheet 3", startCol = 14, startRow = 3)
+
+
+  expect_true(any(grepl("image1", wb$drawings_rels[[1]])))
+  expect_true(any(grepl("image3", wb$drawings_rels[[2]])))
+  expect_true(any(grepl("image2", wb$drawings_rels[[3]])))
 
 
 
@@ -144,10 +146,10 @@ test_that("Images and Tables - reordering and removing", {
   wb <- loadWorkbook(file = tempFile)
 
 
-  # ## drawings added in order
-  # expect_true(any(grepl("image1", wb$drawings_rels[[1]])))
-  # expect_true(any(grepl("image2", wb$drawings_rels[[2]])))
-  # expect_true(any(grepl("image3", wb$drawings_rels[[3]])))
+  ## drawings added in order
+  expect_true(any(grepl("image1", wb$drawings_rels[[1]])))
+  expect_true(any(grepl("image2", wb$drawings_rels[[2]])))
+  expect_true(any(grepl("image3", wb$drawings_rels[[3]])))
 
 
   ## Introduce some more images
@@ -194,6 +196,7 @@ test_that("Images and Tables - reordering and removing", {
   unlink(tempFile, recursive = TRUE, force = TRUE)
   rm(wb)
   
+  }
   
 })
 
