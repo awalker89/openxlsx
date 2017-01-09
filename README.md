@@ -37,7 +37,7 @@ The openxlsx package requires a zip application to be available to R,
  
 ### Stable version
 Current stable version is available on
-[CRAN](https://CRAN-R-project.org/) via
+[CRAN](https://CRAN.R-project.org/) via
 ```R
 install.packages("openxlsx", dependencies=TRUE)
 ```
