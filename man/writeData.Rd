@@ -138,7 +138,7 @@ writeData(wb, "Cars", x, colNames = TRUE, rowNames = TRUE,
 ## Hyperlinks
 ## - vectors/columns with class 'hyperlink' are written as hyperlinks'
 
-v <- rep("http://cran.r-project.org/", 4)
+v <- rep("https://CRAN.R-project.org/", 4)
 names(v) <- paste("Hyperlink", 1:4) # Optional: names will be used as display text
 class(v) <- 'hyperlink'
 writeData(wb, "Cars", x = v, xy = c("B", 32))

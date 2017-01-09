@@ -22,7 +22,7 @@
 #' writeData(wb, sheet = 3, x = iris)
 #' 
 #' ## External Hyperlink
-#' x <- c("http://www.google.com", "http://www.google.com.au")
+#' x <- c("https://www.google.com", "https://www.google.com.au")
 #' names(x) <- c("google", "google Aus")
 #' class(x) <- "hyperlink"
 #' 

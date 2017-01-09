@@ -35,7 +35,7 @@ If the command
 \begin{verbatim}
 shell("zip") 
 \end{verbatim}
-returns "zip is not recognised..." install Rtools from: http://cran.r-project.org/bin/windows/Rtools/ 
+returns "zip is not recognised..." install Rtools from: https://CRAN.R-project.org/bin/windows/Rtools/ 
 and add the R tools bin directory (defaults to c:\textbackslash Rtools\textbackslash bin on windows) to the system path.\\
 
 \noindent
@@ -80,7 +80,7 @@ options("openxlsx.numFmt" = NULL) ## For default style rounding of numeric colum
 df <- data.frame("Date" = Sys.Date()-0:19, "LogicalT" = TRUE,
                  "Time" = Sys.time()-0:19*60*60,
                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
-                 "hLink" = "http://cran.r-project.org/",
+                 "hLink" = "https://CRAN.R-project.org/",
                  "Percentage" = seq(0, 1, length.out=20),
                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
 
@@ -181,7 +181,7 @@ saveWorkbook(wb, "basics.xlsx", overwrite = TRUE) ## save to working directory
 \begin{verbatim}
 
 ## inspired by xtable gallery
-#http://cran.r-project.org/web/packages/xtable/vignettes/xtableGallery.pdf
+#https://CRAN.R-project.org/package=xtable/vignettes/xtableGallery.pdf
 
 ## Create a new workbook
 wb <- createWorkbook()

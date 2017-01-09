@@ -71,7 +71,7 @@ df <- data.frame("Date" = Sys.Date()-0:19,
                  "T" = TRUE, "F" = FALSE,
                  "Time" = Sys.time()-0:19*60*60,
                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
-                 "hLink" = "http://cran.r-project.org/", 
+                 "hLink" = "https://CRAN.R-project.org/", 
                  "Percentage" = seq(0, 1, length.out=20),
                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
 

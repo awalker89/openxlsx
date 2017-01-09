@@ -1,21 +1,21 @@
 openxlsx
 ========
-This [R](http://www.r-project.org/) package simplifies the
+This [R](https://www.R-project.org/) package simplifies the
 creation of `.xlsx` files by providing 
 a high level interface to writing, styling and editing
 worksheets. Through the use of
-[`Rcpp`](http://cran.r-project.org/web/packages/Rcpp/), 
+[`Rcpp`](https://CRAN.R-project.org/package=Rcpp), 
 read/write times are comparable to the
-[`xlsx`](http://cran.r-project.org/web/packages/xlsx/index.html)
+[`xlsx`](https://CRAN.R-project.org/package=xlsx)
 and
-[`XLConnect`](http://cran.r-project.org/web/packages/XLConnect)
+[`XLConnect`](https://CRAN.R-project.org/package=XLConnect)
 packages with the added benefit of removing the dependency on
 Java. 
 
 ## Installation
 
 The openxlsx package requires a zip application to be available to R,
- such as the one that comes with Rtools, available [here](http://cran.r-project.org/bin/windows/Rtools/). (Windows only)
+ such as the one that comes with Rtools, available [here](https://CRAN.R-project.org/bin/windows/Rtools/). (Windows only)
  
  If the command
  ```R

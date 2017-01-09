@@ -12,7 +12,7 @@ test_that("Writing then reading returns identical data.frame 1", {
                "Logical" = c(TRUE, FALSE, TRUE, TRUE, FALSE),
                "Currency" = -2:2,
                "Accounting" = -2:2,
-               "hLink" = "http://cran.r-project.org/", 
+               "hLink" = "https://CRAN.R-project.org/", 
                "Percentage" = seq(-1, 1, length.out=5),
                "TinyNumber" = runif(5) / 1E9, stringsAsFactors = FALSE)
   }
@@ -157,7 +157,7 @@ test_that("Writing then reading returns identical data.frame 3", {
                "Logical" = c(TRUE, FALSE, TRUE, TRUE, FALSE),
                "Currency" = -2:2,
                "Accounting" = -2:2,
-               "hLink" = "http://cran.r-project.org/", 
+               "hLink" = "https://CRAN.R-project.org/", 
                "Percentage" = seq(-1, 1, length.out=5),
                "TinyNumber" = runif(5) / 1E9, stringsAsFactors = FALSE)
   }

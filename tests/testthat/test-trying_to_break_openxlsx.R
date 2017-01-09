@@ -25,7 +25,7 @@ test_that("Images and Tables - reordering and removing", {
                    "Logical" = sample(c(TRUE, FALSE), 1, replace = TRUE),
                    "Currency" = as.numeric(-5:5)*100,
                    "Accounting" = as.numeric(-5:5),
-                   "hLink" = "http://cran.r-project.org/", 
+                   "hLink" = "https://CRAN.R-project.org/", 
                    "Percentage" = seq(-5, 5, length.out=11),
                    "TinyNumber" = runif(11) / 1E9, stringsAsFactors = FALSE)
     
@@ -171,7 +171,7 @@ test_that("Images and Tables - reordering and removing", {
   wb <- loadWorkbook(tempFile)
 
 
-  hl <- rep("http://google.com.au", 5)
+  hl <- rep("https://google.com.au", 5)
   names(hl) <- sprintf("Link to google %s", 1:5)
   class(hl) <- "hyperlink"  
   writeData(wb, "Sheet 1", hl)

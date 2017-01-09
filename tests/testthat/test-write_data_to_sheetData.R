@@ -111,7 +111,7 @@ test_that("Converting R types to Excel types", {
                    "Time" = as.POSIXct("2016-12-05 20:31:12 AEDT")-0:19*60*60,
                    "Cash" = paste("$",1:20),
                    "Cash2" = 31:50,
-                   "hLink" = "http://cran.r-project.org/", 
+                   "hLink" = "https://CRAN.R-project.org/", 
                    "Percentage" = seq(0, 1, length.out=20),
                    "TinyNumbers" = 1:20 / 1E9,  stringsAsFactors = FALSE)
   
