@@ -178,9 +178,8 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     if(length(hyperlink_inds) > 0){
       t[hyperlink_inds] <- 1L ## "s"
-      
-      hyperlink_refs <- .Call("openxlsx_convert_to_excel_ref_expand", hyperlink_cols, LETTERS, as.character((startRow + colNames):(startRow+nRows - 1L)))
-      
+ 
+      hyperlink_refs <- .Call("openxlsx_convert_to_excel_ref_expand", hyperlink_cols + startCol - 1, LETTERS, as.character((startRow + colNames):(startRow+nRows - 1L)))
       
       exHlinks <- worksheets[[sheet]]$hyperlinks
       targets <- replaceIllegalCharacters(v[hyperlink_inds])
