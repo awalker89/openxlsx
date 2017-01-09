@@ -173,14 +173,14 @@ file = system.file("loadExample.xlsx", package = "openxlsx")
 ## write jsuts a date
 wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")
-writeData(wb, 1, iris)
+writeData(wb, 1, as.Date('2014-01-01'))
 openXL(wb)
 
-wb <- loadWorkbook("c:/users/alex/desktop/pivot_test.xlsx")
+wb <- loadWorkbook(file.path(test_file_dir, "pivotTest.xlsx"))
 writeData(wb, 1, iris[,1:3]*100, colNames = FALSE, startRow = 2)
 openXL(wb)
 
-
+openXL(file.path(test_file_dir, "pivotTest.xlsx"))
 
 
 

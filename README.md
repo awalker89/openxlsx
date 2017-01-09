@@ -29,7 +29,7 @@ The openxlsx package requires a zip application to be available to R,
  
  or similar.  Then;
   
- * Install Rtools from: http://cran.r-project.org/bin/windows/Rtools/ and modify
+ * Install Rtools from: https://CRAN.R-project.org/bin/windows/Rtools/ and modify
  the system PATH during installation.
  
  * If Rtools is installed, add the Rtools bin directory paths (default installation paths are 
@@ -37,7 +37,7 @@ The openxlsx package requires a zip application to be available to R,
  
 ### Stable version
 Current stable version is available on
-[CRAN](http://cran.r-project.org/) via
+[CRAN](https://CRAN-R-project.org/) via
 ```R
 install.packages("openxlsx", dependencies=TRUE)
 ```
