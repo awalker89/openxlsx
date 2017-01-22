@@ -409,6 +409,7 @@ SEXP read_workbook(IntegerVector cols_in,
                    bool hasColNames,
                    bool skipEmptyRows,
                    bool skipEmptyCols,
+                   int nRows,
                    Function clean_names
 ){
   
@@ -441,20 +442,26 @@ SEXP read_workbook(IntegerVector cols_in,
   
   
   
-  
-  //  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
-  //    uni_cols = seq(1, max(uni_cols));
-  //  }
+  IntegerVector uni_cols = sort_unique(cols);
+  if(!skipEmptyCols){  // want to keep all columns - just create a sequence from 1:max(cols)
+    uni_cols = seq(1, max(uni_cols));
+    cols = cols - 1;
+  }else{
+    cols = match(cols, uni_cols) - 1;
+  }
   
   // scale columns from i:j to 1:(j-i+1)
-  IntegerVector uni_cols = sort_unique(cols);
-  cols = match(cols, uni_cols) - 1;
   int nCols = *std::max_element(cols.begin(), cols.end()) + 1;
   
   // scale rows from i:j to 1:(j-i+1)
   IntegerVector uni_rows = sort_unique(rows);
-  rows = match(rows, uni_rows) - 1;
-  int nRows = *std::max_element(rows.begin(), rows.end()) + 1;
+  
+  if(skipEmptyRows){
+    rows = match(rows, uni_rows) - 1;
+    //int nRows = *std::max_element(rows.begin(), rows.end()) + 1;
+  }else{
+    rows = rows - 1;
+  }
   
   // Check if first row are all strings
   //get first row number
@@ -570,6 +577,17 @@ SEXP read_workbook(IntegerVector cols_in,
   //Intialise return data.frame
   SEXP m; 
   
+  // for(int i = 0; i < rows.size(); i++)
+  //   Rcout << "rows[i]: " << rows[i] << endl;
+  // 
+  // Rcout << "nRows " << nRows << endl;
+  // Rcout << "nCols: " << nCols << endl;
+  // Rcout << "cols.size(): " << cols.size() << endl;
+  // Rcout << "rows.size(): " << rows.size() << endl;
+  // Rcout << "is_date.size(): " << is_date.size() << endl;
+  // Rcout << "v.size(): " << v.size() << endl;
+  // Rcout << "has_date: " << has_date << endl;
+
   if(allNumeric){
     
     m = buildMatrixNumeric(v, rows, cols, col_names, nRows, nCols);
@@ -586,17 +604,6 @@ SEXP read_workbook(IntegerVector cols_in,
       char_cols_unique = unique(columns_which_are_characters);
       
     }
-    
-    // for(int i = 0; i < char_cols_unique.size(); i++)
-    //   Rcout << "char_cols_unique[i]: " << char_cols_unique[i] << endl;
-    // 
-    // Rcout << "nRows " << nRows << endl;
-    // Rcout << "nCols: " << nCols << endl;
-    // Rcout << "cols.size(): " << cols.size() << endl;
-    // Rcout << "rows.size(): " << rows.size() << endl;
-    // Rcout << "is_date.size(): " << is_date.size() << endl;
-    // Rcout << "v.size(): " << v.size() << endl;
-    // Rcout << "has_date: " << has_date << endl;
     
     //date columns
     IntegerVector date_columns(1);

@@ -340,7 +340,6 @@ read.xlsx.default <- function(xlsxFile,
     nRows <- max(cell_rows) - min(cell_rows) + 1;
   }
   
-
   if(nRows == 0 | length(cell_rows) == 0){
     warning("No data found on worksheet.", call. = FALSE)
     return(NULL)
@@ -394,7 +393,7 @@ read.xlsx.default <- function(xlsxFile,
       dateIds <- numFmtsIds[!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)]
       
     }     
-    
+
     dateIds <- c(dateIds, 14)
     
     ## which styles are using these dateIds
@@ -413,14 +412,14 @@ read.xlsx.default <- function(xlsxFile,
     not_an_integer <- (not_an_integer %% 1L != 0) & !is.na(not_an_integer)
     isDate[not_an_integer] <- FALSE
     
-    
+
     ## perform int to date to character convertsion (way too slow)
     v[isDate] <- format(as.Date(as.integer(v[isDate]) - origin, origin = "1970-01-01"), "%Y-%m-%d")
     
   }else{
     isDate <- as.logical(NA)
   }
-  
+
   ## Build data.frame
   m <- .Call("openxlsx_read_workbook"
              , cell_cols
@@ -431,6 +430,7 @@ read.xlsx.default <- function(xlsxFile,
              , colNames
              , skipEmptyRows
              , skipEmptyCols
+             , nRows
              , clean_names
              , PACKAGE = "openxlsx")
   

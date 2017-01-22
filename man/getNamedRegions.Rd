@@ -27,7 +27,7 @@ createNamedRegion(wb = wb,
                   cols = 1:ncol(iris))
 
 
-## using writeData 'name' argument
+## using writeData 'name' argument to create a named region
 writeData(wb, sheet = 1, x = iris, name = "iris2", startCol = 10)
 
 out_file <- tempfile(fileext = ".xlsx")

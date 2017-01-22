@@ -305,6 +305,7 @@ read.xlsx.Workbook <- function(xlsxFile,
              , colNames
              , skipEmptyRows
              , skipEmptyCols
+             , nRows
              , clean_names
              , PACKAGE = "openxlsx")
   

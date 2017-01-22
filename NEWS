@@ -1,4 +1,19 @@
 
+openxlsx 4.0.1
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* getNamedRegions returns sheet name and cell references along with the named regions.
+
+
+BUG FIXES
+
+* skipEmptyRows & skipEmptyCols was being ignored by read.xlsx
+
+*
+
+
 openxlsx 4.0.0
 ----------------------------------------------------------------
 
