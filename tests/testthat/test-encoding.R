@@ -14,7 +14,7 @@ test_that("Write read encoding equality", {
     addWorksheet(wb, sprintf('Sheet %s', i))
   
   df <- data.frame("X" = c("测试", "一下"), stringsAsFactors = FALSE)
-  writeData(wb, sheet = 1, x = df)
+  writeDataTable(wb, sheet = 1, x = df)
   
   saveWorkbook(wb, tempFile, overwrite = TRUE)
   

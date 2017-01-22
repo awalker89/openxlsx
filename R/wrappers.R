@@ -2225,7 +2225,7 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
 #'                   cols = 1:ncol(iris))
 #' 
 #' 
-#' ## using writeData 'name' argument
+#' ## using writeData 'name' argument to create a named region
 #' writeData(wb, sheet = 1, x = iris, name = "iris2", startCol = 10)
 #' 
 #' out_file <- tempfile(fileext = ".xlsx")
@@ -2263,7 +2263,7 @@ getNamedRegions.default <- function(x){
   if(length(dn) == 0)
     return(NULL)
   
-  dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
+  dn_names <- get_named_regions_from_string(dn = dn)
   
   unlink(xmlDir, recursive = TRUE, force = TRUE)
   
@@ -2278,9 +2278,10 @@ getNamedRegions.Workbook <- function(x){
   if(length(dn) == 0)
     return(NULL)
   
-  dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
-  
+  dn_names <- get_named_regions_from_string(dn = dn)
+   
   return(dn_names)
+  
 }
 
 
