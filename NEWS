@@ -11,8 +11,9 @@ BUG FIXES
 
 * skipEmptyRows & skipEmptyCols was being ignored by read.xlsx
 
-*
+* date detection basic_string error
 
+* 
 
 openxlsx 4.0.0
 ----------------------------------------------------------------
