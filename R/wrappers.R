@@ -1324,7 +1324,7 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
   }else if(fileType == "png"){
     dev.copy(png, filename = fileName, width = width, height = height, units = units, res = dpi)
   }else if(fileType == "tiff"){
-    dev.copy(tiff, filename = fileName, width = width, height = height, units = units, compression = "none")
+    dev.copy(tiff, filename = fileName, width = width, height = height, units = units, compression = "none", res = dpi)
   }
   
   ## write image
