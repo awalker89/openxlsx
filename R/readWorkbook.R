@@ -401,14 +401,15 @@ read.xlsx.default <- function(xlsxFile,
     xf <- .Call("openxlsx_getChildlessNode", cellXfs, "<xf ", PACKAGE = "openxlsx")
     lookingFor <- paste(sprintf('numFmtId="%s"', dateIds), collapse = "|")
     dateStyleIds <- which(sapply(xf, function(x) grepl(lookingFor, x), USE.NAMES = FALSE)) - 1L
-    
+
     isDate <- (s %in% dateStyleIds)
     
     ## set to false if in string_refs
     isDate[1:length(s) %in% string_refs] <- FALSE
     
     # check numbers are also integers
-    not_an_integer <- suppressWarnings(as.numeric(v[isDate]))
+    not_an_integer <- numeric(length(v))
+    not_an_integer[isDate] <- suppressWarnings(as.numeric(v[isDate]))
     not_an_integer <- (not_an_integer %% 1L != 0) & !is.na(not_an_integer)
     isDate[not_an_integer] <- FALSE
     
