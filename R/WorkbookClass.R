@@ -1507,7 +1507,7 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
 
 
 
-Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type, values){
+Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type, values, params){
   
   sheet = validateSheet(sheet)
   sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
@@ -1586,28 +1586,47 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
     
     guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
     
+    showValue <- 1
+    if("showValue" %in% names(params))
+      showValue <- as.integer(params$showValue)
+    
+    gradient <- 1
+    if("gradient" %in% names(params))
+      gradient <- as.integer(params$gradient)
+
+    border <- 1
+    if("border" %in% names(params))
+      border <- as.integer(params$border)
+    
     if(is.null(values)){
       
-      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar>
+      
+      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar showValue="%s">
                           <cfvo type="min"/><cfvo type="max"/>
                           <color rgb="%s"/>
                           </dataBar>
-                          <extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
+                          <extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext>
+                        </extLst></cfRule>', showValue, posColour, guid)
       
     }else{
       
-      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar>
+      cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar showValue="%s">
                             <cfvo type="num" val="%s"/><cfvo type="num" val="%s"/>
                             <color rgb="%s"/>
                             </dataBar>
                             <extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
-                            <x14:id>{%s}</x14:id></ext></extLst></cfRule>', values[[1]], values[[2]], posColour, guid)
+                            <x14:id>{%s}</x14:id></ext></extLst></cfRule>', showValue, values[[1]], values[[2]], posColour, guid)
       
     }
     
-    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, genExtLst(guid, sqref, posColour, negColour, values = values))
-    
-    
+    worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, gen_databar_extlst(guid = guid,
+                                                                                    sqref = sqref,
+                                                                                    posColour = posColour,
+                                                                                    negColour = negColour,
+                                                                                    values = values, 
+                                                                                    border = border, 
+                                                                                    gradient = gradient))
+
   }else if(type == "expression"){
     
     cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)

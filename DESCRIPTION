@@ -28,8 +28,8 @@ VignetteBuilder: knitr
 Suggests:
     knitr,
     testthat
-RoxygenNote: 5.0.1
-Collate:
+RoxygenNote: 6.0.0
+Collate: 
     'CommentClass.R'
     'HyperlinkClass.R'
     'RcppExports.R'
@@ -39,6 +39,7 @@ Collate:
     'baseXML.R'
     'borderFunctions.R'
     'chartsheet_class.R'
+    'conditional_formatting.R'
     'helperFunctions.R'
     'loadWorkbook.R'
     'openXL.R'
