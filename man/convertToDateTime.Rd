@@ -25,4 +25,3 @@ x <- c(41821.8127314815, 41820.8127314815, NA, 41819, NaN)
 convertToDateTime(x)
 convertToDateTime(x, tx = "Australia/Perth")
 }
-

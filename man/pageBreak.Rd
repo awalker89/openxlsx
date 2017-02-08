@@ -33,4 +33,3 @@ saveWorkbook(wb, "pageBreakExample.xlsx", TRUE)
 \seealso{
 \code{\link{addWorksheet}}
 }
-

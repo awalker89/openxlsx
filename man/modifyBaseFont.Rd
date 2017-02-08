@@ -37,4 +37,3 @@ saveWorkbook(wb, "modifyBaseFontExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

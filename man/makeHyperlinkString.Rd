@@ -65,4 +65,3 @@ saveWorkbook(wb, "internalHyperlinks.xlsx")
 \seealso{
 \code{\link{writeFormula}}
 }
-

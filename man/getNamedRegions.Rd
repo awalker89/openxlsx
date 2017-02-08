@@ -47,4 +47,3 @@ head(df)
 \seealso{
 \code{\link{createNamedRegion}}
 }
-

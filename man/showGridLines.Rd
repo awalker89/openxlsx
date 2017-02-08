@@ -26,4 +26,3 @@ saveWorkbook(wb, "showGridLinesExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

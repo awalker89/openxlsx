@@ -22,4 +22,3 @@ getSheetNames(system.file("readTest.xlsx", package = "openxlsx"))
 \author{
 Alexander Walker
 }
-

@@ -49,10 +49,9 @@ setColWidths(wb, sheet = 2, cols = 1:5, widths = "auto")
 ## Save workbook
 saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{removeColWidths}}
 }
-
+\author{
+Alexander Walker
+}

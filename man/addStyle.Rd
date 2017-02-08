@@ -50,12 +50,11 @@ setColWidths(wb, 1, cols=1, widths = 21) ## set column width for row names colum
 
 saveWorkbook(wb, "addStyleExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{createStyle}}
 
 expand.grid
 }
-
+\author{
+Alexander Walker
+}

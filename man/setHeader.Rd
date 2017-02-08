@@ -38,4 +38,3 @@ saveWorkbook(wb, "headerHeaderExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

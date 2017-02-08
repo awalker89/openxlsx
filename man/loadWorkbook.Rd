@@ -29,10 +29,9 @@ addWorksheet(wb, "A new worksheet")
 ## Save workbook
 saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{removeWorksheet}}
 }
-
+\author{
+Alexander Walker
+}

@@ -19,10 +19,9 @@ removeCellMerge(wb, sheet, cols, rows)
 Unmerges any merged cells that intersect
 with the region specified by, min(cols):max(cols) X min(rows):max(rows)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{mergeCells}}
 }
-
+\author{
+Alexander Walker
+}

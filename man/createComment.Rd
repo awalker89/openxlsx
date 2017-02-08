@@ -43,4 +43,3 @@ saveWorkbook(wb, file = "createCommentExample.xlsx", overwrite = TRUE)
 \seealso{
 \code{\link{writeComment}}
 }
-

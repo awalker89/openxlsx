@@ -109,9 +109,6 @@ write.xlsx(l, "writeList2.xlsx", startCol = c(1,2,3), startRow = 2,
            asTable = c(TRUE, TRUE, FALSE), withFilter = c(TRUE, FALSE, FALSE))
 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{addWorksheet}}
 
@@ -119,4 +116,6 @@ Alexander Walker
 
 \code{\link{createStyle}} for style parameters
 }
-
+\author{
+Alexander Walker
+}

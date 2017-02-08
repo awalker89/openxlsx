@@ -34,4 +34,3 @@ The openxlsx package uses global options to simplfy formatting:
   } 
 for examples
 }
-

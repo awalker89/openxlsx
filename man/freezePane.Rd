@@ -45,4 +45,3 @@ saveWorkbook(wb, "freezePaneExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

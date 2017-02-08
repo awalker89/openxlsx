@@ -47,10 +47,9 @@ insertImage(wb, 3 , img, width = 15, height = 12, startRow = 3, startCol = "G", 
 ## Save workbook
 saveWorkbook(wb, "insertImageExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{insertPlot}}
 }
-
+\author{
+Alexander Walker
+}

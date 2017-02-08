@@ -24,10 +24,9 @@ wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 removeRowHeights(wb, 1, rows = 1:10)
 saveWorkbook(wb, "removeRowHeightsExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{setRowHeights}}
 }
-
+\author{
+Alexander Walker
+}

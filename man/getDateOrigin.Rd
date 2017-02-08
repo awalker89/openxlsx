@@ -30,10 +30,9 @@ do <- getDateOrigin(system.file("readTest.xlsx", package = "openxlsx"))
 convertToDate(m[[1]], do)
 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{convertToDate}}
 }
-
+\author{
+Alexander Walker
+}

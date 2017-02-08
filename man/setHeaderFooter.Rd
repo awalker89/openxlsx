@@ -78,10 +78,9 @@ setHeaderFooter(wb, sheet = 4,
 
 saveWorkbook(wb, "setHeaderFooterExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{addWorksheet}} to set headers and footers when adding a worksheet
 }
-
+\author{
+Alexander Walker
+}

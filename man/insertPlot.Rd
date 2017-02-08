@@ -59,10 +59,9 @@ insertPlot(wb, 1, xy = c("J", 2), width = 16, height = 10,  fileType = "png", un
 saveWorkbook(wb, "insertPlotExample.xlsx", overwrite = TRUE)
 }
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{insertImage}}
 }
-
+\author{
+Alexander Walker
+}

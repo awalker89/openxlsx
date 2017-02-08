@@ -35,4 +35,3 @@ removeFilter(wb, 3) ## Does not affect tables!
 
 saveWorkbook(wb, file = "removeFilterExample.xlsx", overwrite = TRUE)
 }
-

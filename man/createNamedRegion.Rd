@@ -54,10 +54,9 @@ head(df)
 df <- read.xlsx(out_file, namedRegion = "iris2")
 head(df)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{getNamedRegions}}
 }
-
+\author{
+Alexander Walker
+}

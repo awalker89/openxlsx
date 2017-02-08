@@ -44,4 +44,3 @@ saveWorkbook(wb, "renameWorksheetExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

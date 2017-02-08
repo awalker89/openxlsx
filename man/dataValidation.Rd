@@ -60,4 +60,3 @@ dataValidation(wb, 2, col = 2, rows = 2:12, type = "time",
 saveWorkbook(wb, "dataValidationExample.xlsx", overwrite = TRUE)
 
 }
-

@@ -76,10 +76,9 @@ writeFormula(wb, "Sheet1", x = '=HYPERLINK("#Sheet2!B3", "Text to Display - Link
 saveWorkbook(wb, "writeFormulaHyperlinkExample.xlsx", overwrite = TRUE)
 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{writeData}}
 }
-
+\author{
+Alexander Walker
+}

@@ -85,10 +85,9 @@ df3 <- read.xlsx(wb, sheet = 2, skipEmptyRows = FALSE,
 
 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{getNamedRegions}}
 }
-
+\author{
+Alexander Walker
+}

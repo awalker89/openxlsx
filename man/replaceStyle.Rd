@@ -34,10 +34,9 @@ replaceStyle(wb, 2, newStyle = newStyle)
 ## Save workbook
 saveWorkbook(wb, "replaceStyleExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{getStyles}}
 }
-
+\author{
+Alexander Walker
+}

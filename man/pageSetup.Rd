@@ -144,4 +144,3 @@ saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

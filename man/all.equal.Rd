@@ -17,4 +17,3 @@
 \description{
 Check equality of workbooks
 }
-

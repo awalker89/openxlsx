@@ -109,4 +109,3 @@ saveWorkbook(wb, "addWorksheetExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

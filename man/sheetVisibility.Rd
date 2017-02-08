@@ -36,4 +36,3 @@ sheetVisibility(wb)[3] <- "hidden" ## hide sheet 3
 sheetVisibility(wb)[3] <- "veryHidden" ## hide sheet 3 from UI
 
 }
-

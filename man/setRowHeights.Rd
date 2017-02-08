@@ -34,10 +34,9 @@ setRowHeights(wb, 1, rows = 1, heights = 40)
 ## Save workbook
 saveWorkbook(wb, "setRowHeightsExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{removeRowHeights}}
 }
-
+\author{
+Alexander Walker
+}

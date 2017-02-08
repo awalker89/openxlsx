@@ -22,12 +22,11 @@ wb <- createWorkbook()
 ## Save workbook to working directory
 saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{loadWorkbook}}
 
 \code{\link{saveWorkbook}}
 }
-
+\author{
+Alexander Walker
+}

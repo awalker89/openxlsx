@@ -32,10 +32,9 @@ DEPRECATED! USE \code{\link{conditionalFormatting}}
 Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.
 Default style given by: createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{createStyle}}
 }
-
+\author{
+Alexander Walker
+}

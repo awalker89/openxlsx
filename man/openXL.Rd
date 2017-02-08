@@ -42,4 +42,3 @@ writeData(wb, "Cars", x, startCol = 2, startRow = 3, rowNames = TRUE)
 \author{
 Luca Braglia
 }
-

@@ -27,4 +27,3 @@ getBaseFont(wb)
 \author{
 Alexander Walker
 }
-

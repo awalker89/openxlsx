@@ -45,4 +45,3 @@ saveWorkbook(wb, file = "addFilterExample.xlsx", overwrite = TRUE)
 
 \code{\link{addFilter}}
 }
-

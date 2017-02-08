@@ -15,4 +15,3 @@ Converts an integer to an Excel column label.
 \examples{
 int2col(1:10)
 }
-

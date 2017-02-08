@@ -20,4 +20,3 @@ getStyles(wb)[1:3]
 \seealso{
 \code{\link{replaceStyle}}
 }
-

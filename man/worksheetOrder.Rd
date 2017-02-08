@@ -44,4 +44,3 @@ saveWorkbook(wb, "worksheetOrderExample.xlsx",  overwrite = TRUE)
 worksheetOrder(wb) <- c(3,2,1)
 saveWorkbook(wb, "worksheetOrderExample2.xlsx",  overwrite = TRUE)
 }
-

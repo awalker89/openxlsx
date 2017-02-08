@@ -18,4 +18,3 @@ Return excel cell coordinates from (x,y) coordinates
 \author{
 Alexander Walker
 }
-

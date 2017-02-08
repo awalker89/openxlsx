@@ -24,9 +24,6 @@ addWorksheet(wb, sheetName = "My first worksheet")
 ## Save workbook to working directory
 saveWorkbook(wb, file = "saveWorkbookExample.xlsx", overwrite = TRUE) 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{createWorkbook}}
 
@@ -38,4 +35,6 @@ Alexander Walker
 
 \code{\link{writeDataTable}}
 }
-
+\author{
+Alexander Walker
+}

@@ -141,10 +141,9 @@ createStyle(border = "TopBottomRight", borderColour = "red")
 # supply all colours
 createStyle(border = "TopBottomLeft", borderColour = c("red","yellow", "green"))
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{addStyle}}
 }
-
+\author{
+Alexander Walker
+}

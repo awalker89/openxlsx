@@ -19,4 +19,3 @@ convertFromExcelRef("COW")
 ## numbers will be removed
 convertFromExcelRef("R22")
 }
-

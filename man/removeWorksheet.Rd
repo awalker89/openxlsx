@@ -29,4 +29,3 @@ saveWorkbook(wb, "removeWorksheetExample.xlsx", overwrite = TRUE)
 \author{
 Alexander Walker
 }
-

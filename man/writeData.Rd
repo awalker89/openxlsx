@@ -163,10 +163,9 @@ writeData(wb, sheet = "Formula", x = df)
 
 saveWorkbook(wb, "writeDataExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{writeDataTable}}
 }
-
+\author{
+Alexander Walker
+}

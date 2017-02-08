@@ -24,10 +24,9 @@ wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
 removeColWidths(wb, 1, cols = 1:20)
 saveWorkbook(wb, "removeColWidthsExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{setColWidths}}
 }
-
+\author{
+Alexander Walker
+}

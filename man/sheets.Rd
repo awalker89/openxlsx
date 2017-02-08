@@ -37,10 +37,9 @@ names(wb)
 # openXL(wb)
 
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{names}} to rename a worksheet in a Workbook
 }
-
+\author{
+Alexander Walker
+}

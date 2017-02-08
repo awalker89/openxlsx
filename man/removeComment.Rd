@@ -26,4 +26,3 @@ Remove a cell comment from a worksheet
 
 \code{\link{writeComment}}
 }
-

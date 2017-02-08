@@ -97,12 +97,11 @@ writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{addWorksheet}}
 
 \code{\link{writeData}}
 }
-
+\author{
+Alexander Walker
+}

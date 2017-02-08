@@ -27,4 +27,3 @@ convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 \seealso{
 \code{\link{writeData}}
 }
-

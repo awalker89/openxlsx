@@ -48,10 +48,9 @@ mergeCells(wb, 2, cols = 1, rows = 1:10) # Now this works
 ## Save workbook
 saveWorkbook(wb, "mergeCellsExample.xlsx", overwrite = TRUE)
 }
-\author{
-Alexander Walker
-}
 \seealso{
 \code{\link{removeCellMerge}}
 }
-
+\author{
+Alexander Walker
+}

@@ -37,4 +37,3 @@ sheetVisible(wb)[2] <- FALSE ## hide sheet 2
 \author{
 Alexander Walker
 }
-
