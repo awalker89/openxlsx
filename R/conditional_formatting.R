@@ -3,6 +3,7 @@
 
 
 #' @name conditionalFormatting
+#' @aliases databar
 #' @title Add conditional formatting to cells
 #' @description Add conditional formatting to cells
 #' @author Alexander Walker
@@ -34,8 +35,9 @@
 #'   \item{rule is a numeric vector sepcifiying the range of the databar colours. Must be equal length to style}
 #'   \item{...
 #'   \itemize{
-#'     \item{\bold{showvalue} If 0 the cell value is hidden}
-#'     
+#'     \item{\bold{showvalue} If FALSE the cell value is hidden. Default TRUE.}
+#'     \item{\bold{gradient} If FALSE colour gradient is removed. Default TRUE.}
+#'     \item{\bold{border} If FALSE the border around the database is hidden. Default TRUE.}
 #'      }
 #'    }
 #' }
@@ -139,6 +141,36 @@
 #'  rule = "OR($A1=1,$A1=3,$A1=5,$A1=7)")
 #' 
 #' saveWorkbook(wb, "conditionalFormattingExample.xlsx", TRUE)
+#' 
+#' 
+#' #########################################################################
+#' ## Databar Example
+#' 
+#' wb <- createWorkbook()
+#'addWorksheet(wb, "databar")
+#'
+#'## Databars
+#'writeData(wb, "databar", -5:5, startCol = 1)
+#'conditionalFormatting(wb, "databar", cols = 1, rows = 1:11, type = "databar") ## Defaults
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 3)
+#' conditionalFormatting(wb, "databar", cols = 3, rows = 1:11, type = "databar", border = FALSE)
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 5)
+#' conditionalFormatting(wb, "databar", cols = 5, rows = 1:11, type = "databar", style = c("#a6a6a6"), showValue = FALSE) 
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 7)
+#' conditionalFormatting(wb, "databar", cols = 7, rows = 1:11, type = "databar", style = c("#a6a6a6"), showValue = FALSE, gradient = FALSE) 
+#' 
+#' writeData(wb, "databar", -5:5, startCol = 9)
+#' conditionalFormatting(wb, "databar", cols = 9, rows = 1:11, type = "databar", style = c("#a6a6a6", "#a6a6a6"), showValue = FALSE, gradient = FALSE)
+#' 
+#' saveWorkbook(wb, file = "databarExample.xlsx", overwrite = TRUE)
+#' 
+#' openXL("databarExample.xlsx")
+#' 
+#' 
+#' 
 conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression", ...){
   
   type <- tolower(type)
