@@ -169,19 +169,19 @@ writeData(wb, "databar", -5:5, startCol = 3)
 conditionalFormatting(wb, "databar", cols = 3, rows = 1:11, type = "databar", border = FALSE)
 
 writeData(wb, "databar", -5:5, startCol = 5)
-conditionalFormatting(wb, "databar", cols = 5, rows = 1:11, type = "databar", style = c("#a6a6a6"), showValue = FALSE) 
+conditionalFormatting(wb, "databar", cols = 5, rows = 1:11, 
+  type = "databar", style = c("#a6a6a6"), showValue = FALSE) 
 
 writeData(wb, "databar", -5:5, startCol = 7)
-conditionalFormatting(wb, "databar", cols = 7, rows = 1:11, type = "databar", style = c("#a6a6a6"), showValue = FALSE, gradient = FALSE) 
+conditionalFormatting(wb, "databar", cols = 7, rows = 1:11, 
+  type = "databar", style = c("#a6a6a6"), showValue = FALSE, gradient = FALSE) 
 
 writeData(wb, "databar", -5:5, startCol = 9)
-conditionalFormatting(wb, "databar", cols = 9, rows = 1:11, type = "databar", style = c("#a6a6a6", "#a6a6a6"), showValue = FALSE, gradient = FALSE)
+conditionalFormatting(wb, "databar", cols = 9, rows = 1:11, 
+  type = "databar", style = c("#a6a6a6", "#a6a6a6"), showValue = FALSE, gradient = FALSE)
 
 saveWorkbook(wb, file = "databarExample.xlsx", overwrite = TRUE)
-
-openXL("databarExample.xlsx")
-
-
+ 
 
 }
 \seealso{
