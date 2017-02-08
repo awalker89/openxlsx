@@ -166,10 +166,7 @@
 #' conditionalFormatting(wb, "databar", cols = 9, rows = 1:11, type = "databar", style = c("#a6a6a6", "#a6a6a6"), showValue = FALSE, gradient = FALSE)
 #' 
 #' saveWorkbook(wb, file = "databarExample.xlsx", overwrite = TRUE)
-#' 
-#' openXL("databarExample.xlsx")
-#' 
-#' 
+#'  
 #' 
 conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression", ...){
   
