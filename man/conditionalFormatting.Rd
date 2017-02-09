@@ -46,7 +46,7 @@ If type == "colourScale"
 If type == "databar"
 \itemize{
   \item{style is a vector of colours with length 2 or 3}
-  \item{rule is a numeric vector sepcifiying the range of the databar colours. Must be equal length to style}
+  \item{rule is a numeric vector specifiying the range of the databar colours. Must be equal length to style}
   \item{...
   \itemize{
     \item{\bold{showvalue} If FALSE the cell value is hidden. Default TRUE.}

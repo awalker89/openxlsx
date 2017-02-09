@@ -603,12 +603,12 @@ createStyle <- function(fontName = NULL,
   if(numFmt == "date"){
     numFmt <- getOption("openxlsx.dateFormat", getOption("openxlsx.dateformat", "date"))
   }else if(numFmt == "longdate"){
-      numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
+    numFmt <- getOption("openxlsx.datetimeFormat", getOption("openxlsx.datetimeformat", getOption("openxlsx.dateTimeFormat", "longdate")))  
   }else if(!numFmt %in% validNumFmt){
     numFmt <- replaceIllegalCharacters(numFmt_original)
   }
   
-
+  
   
   
   numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
@@ -829,7 +829,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
   
   if(!is.logical(stack))
     stop("stack parameter must be a logical!")
-
+  
   if(length(cols) == 0 | length(rows) == 0)
     return(invisible(0))
   
@@ -838,7 +838,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
   
   ## rows and cols need to be the same length
   if(gridExpand){
-
+    
     n <- length(cols)
     cols <- rep.int(cols, times = length(rows))
     rows <- rep(rows, each = n)
@@ -922,7 +922,7 @@ freezePane <- function(wb, sheet, firstActiveRow = NULL, firstActiveCol = NULL, 
     stop("firstCol must be TRUE/FALSE")
   
   
-
+  
   
   if(firstRow & !firstCol){
     invisible(wb$freezePanes(sheet, firstRow = firstRow))
@@ -1465,9 +1465,9 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
-
+  
   wb$worksheets[[sheet]]$sheet_data$delete(rows_in = rows, cols_in = cols, grid_expand = gridExpand)
-
+  
   
   invisible(0)
 }
@@ -1808,7 +1808,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
   }
   
- ## validate sheet - get sheet index
+  ## validate sheet - get sheet index
   sheet <- wb$validateSheet(sheet)
   
   
@@ -1817,7 +1817,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
   vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
   
-
+  
   
   ##############################
   ## Update
@@ -1842,9 +1842,9 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet - 1L)
     
-  
+    
   }else if(!is.null(printTitleCols) & is.null(printTitleRows)){
-
+    
     if(!is.numeric(printTitleCols))
       stop("printTitleCols must be numeric.")
     
@@ -1855,9 +1855,9 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet - 1L)
     
-
+    
   }else if(!is.null(printTitleCols) & !is.null(printTitleRows)){
-  
+    
     if(!is.numeric(printTitleRows))
       stop("printTitleRows must be numeric.")
     
@@ -1874,7 +1874,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     sheet <- names(wb)[[sheet]]
     
     wb$workbook$definedNames <- c(wb$workbook$definedNames, 
-       sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
+                                  sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
     )
     
   }
@@ -2279,7 +2279,7 @@ getNamedRegions.Workbook <- function(x){
     return(NULL)
   
   dn_names <- get_named_regions_from_string(dn = dn)
-   
+  
   return(dn_names)
   
 }
@@ -2496,10 +2496,10 @@ setFooter <- function(wb, text, position = "center"){
 #' @param sheet A name or index of a worksheet
 #' @param cols Columns to apply conditional formatting to
 #' @param rows Rows to apply conditional formatting to
-#' @param type One of 'whole', 'decimal', 'date', 'time', 'textLength'
+#' @param type One of 'whole', 'decimal', 'date', 'time', 'textLength', 'list' (see examples)
 #' @param operator One of 'between', 'notBetween', 'equal',
 #'  'notEqual', 'greaterThan', 'lessThan', 'greaterThanOrEqual', 'lessThanOrEqual'
-#' @param value a vector of length 1 or 2 depending on operator
+#' @param value a vector of length 1 or 2 depending on operator (see examples)
 #' @param allowBlank logial
 #' @param showInputMsg logical
 #' @param showErrorMsg logical
@@ -2531,6 +2531,22 @@ setFooter <- function(wb, text, position = "center"){
 #' 
 #' saveWorkbook(wb, "dataValidationExample.xlsx", overwrite = TRUE)
 #' 
+#' 
+#' ######################################################################
+#' ## If type == 'list'
+#' # operator argument is ignored.
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "Sheet 1")
+#' addWorksheet(wb, "Sheet 2")
+#' 
+#' writeDataTable(wb, sheet = 1, x = iris[1:30,])
+#' writeData(wb, sheet = 2, x = sample(iris$Sepal.Length, 10))
+#' 
+#' dataValidation(wb, 1, col = 1, rows = 2:31, type = "list", value = "'Sheet 2'!A1:A9")
+#' 
+#' # openXL(wb)
+#' 
 dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBlank = TRUE, showInputMsg = TRUE, showErrorMsg = TRUE){
   
   ## rows and cols
@@ -2546,7 +2562,8 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
                    "decimal",
                    "date",
                    "time", ## need to conv
-                   "textLength"
+                   "textLength",
+                   "list"
   )
   
   if(!tolower(type) %in% tolower(valid_types))
@@ -2563,8 +2580,16 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
                        "greaterThanOrEqual",
                        "lessThanOrEqual")
   
-  if(!tolower(operator) %in% tolower(valid_operators))
-    stop("Invalid 'operator' argument!")
+  if(tolower(type) != "list"){
+    
+    if(!tolower(operator) %in% tolower(valid_operators))
+      stop("Invalid 'operator' argument!")
+    
+    operator <- valid_operators[tolower(valid_operators) %in% tolower(operator)][1]
+    
+  }else{
+    operator <- "between" ## ignored
+  }
   
   if(!is.logical(allowBlank))
     stop("Argument 'allowBlank' musts be logical!")
@@ -2576,7 +2601,7 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
     stop("Argument 'showErrorMsg' musts be logical!")
   
   ## All inputs validated
-  operator <- valid_operators[tolower(valid_operators) %in% tolower(operator)][1]
+  
   type <- valid_types[tolower(valid_types) %in% tolower(type)][1]
   
   ## check input combinations
@@ -2592,18 +2617,35 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
   showInputMsg <- as.integer(showInputMsg[1])
   showErrorMsg <- as.integer(showErrorMsg[1])
   
+  if(type == "list"){
+    
+    invisible(wb$dataValidation_list(sheet = sheet, 
+                                     startRow = min(rows),
+                                     endRow = max(rows),
+                                     startCol = min(cols),
+                                     endCol = max(cols),
+                                     value = value, 
+                                     allowBlank = allowBlank, 
+                                     showInputMsg = showInputMsg,
+                                     showErrorMsg = showErrorMsg))
+    
+  }else{
+    
+    invisible(wb$dataValidation(sheet = sheet, 
+                                startRow = min(rows),
+                                endRow = max(rows),
+                                startCol = min(cols),
+                                endCol = max(cols),
+                                type = type, 
+                                operator = operator, 
+                                value = value, 
+                                allowBlank = allowBlank, 
+                                showInputMsg = showInputMsg,
+                                showErrorMsg = showErrorMsg))
+    
+  }
   
-  invisible(wb$dataValidation(sheet = sheet, 
-                              startRow = min(rows),
-                              endRow = max(rows),
-                              startCol = min(cols),
-                              endCol = max(cols),
-                              type = type, 
-                              operator = operator, 
-                              value = value, 
-                              allowBlank = allowBlank, 
-                              showInputMsg = showInputMsg,
-                              showErrorMsg = showErrorMsg))
+  
   
   invisible(0)
   
@@ -2756,7 +2798,7 @@ sheetVisibility <- function(wb){
   value[value %in% "false"] <- "hidden"
   value[value %in% "veryhidden"] <- "veryHidden"
   
-
+  
   exState0 <- regmatches(wb$workbook$sheets, regexpr('(?<=state=")[^"]+', wb$workbook$sheets, perl = TRUE))
   exState <- tolower(exState0)
   exState[exState %in% "true"] <- "visible"
@@ -3062,7 +3104,7 @@ all.equal.Workbook <- function(target, current, ...){
     return(FALSE)
   } 
   
-
+  
   
   # flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets[[i]]$sheet_data, y$worksheets[[i]]$sheet_data)))
   # if(!all(flag)){
@@ -3482,5 +3524,5 @@ copyWorkbook <- function(wb){
   return(wb$copy())
   
 }
-  
+
 

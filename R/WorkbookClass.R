@@ -1507,6 +1507,33 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
 
 
 
+Workbook$methods(dataValidation_list = function(sheet, startRow, endRow, startCol, endCol, value, allowBlank, showInputMsg, showErrorMsg){
+  
+  sheet = validateSheet(sheet)
+  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  
+  header <- '<ext uri="{CCE6A557-97BC-4b89-ADB6-D9C93CAAB3DF}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
+			        <x14:dataValidations count="1" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">'
+  
+  data_val <- sprintf('<x14:dataValidation type="list" allowBlank="%s" showInputMessage="%s" showErrorMessage="%s">',
+                      allowBlank, showInputMsg, showErrorMsg, sqref)
+  
+  formula <- sprintf("<x14:formula1><xm:f>%s</xm:f></x14:formula1>", value)
+  sqref <- sprintf('<xm:sqref>%s</xm:sqref>', sqref)
+  
+  xml <- paste0(header, data_val, formula, sqref, '</x14:dataValidation></x14:dataValidations></ext>')
+
+  worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, xml)
+  
+  invisible(0)
+  
+})
+
+
+
+
+
+
 Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type, values, params){
   
   sheet = validateSheet(sheet)
@@ -1593,7 +1620,7 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
     gradient <- 1
     if("gradient" %in% names(params))
       gradient <- as.integer(params$gradient)
-
+    
     border <- 1
     if("border" %in% names(params))
       border <- as.integer(params$border)
@@ -1626,7 +1653,7 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
                                                                                     values = values, 
                                                                                     border = border, 
                                                                                     gradient = gradient))
-
+    
   }else if(type == "expression"){
     
     cfRule <- sprintf('<cfRule type="expression" dxfId="%s" priority="1"><formula>%s</formula></cfRule>', dxfId, formula)

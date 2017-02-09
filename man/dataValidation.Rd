@@ -16,12 +16,12 @@ dataValidation(wb, sheet, cols, rows, type, operator, value,
 
 \item{rows}{Rows to apply conditional formatting to}
 
-\item{type}{One of 'whole', 'decimal', 'date', 'time', 'textLength'}
+\item{type}{One of 'whole', 'decimal', 'date', 'time', 'textLength', 'list' (see examples)}
 
 \item{operator}{One of 'between', 'notBetween', 'equal',
 'notEqual', 'greaterThan', 'lessThan', 'greaterThanOrEqual', 'lessThanOrEqual'}
 
-\item{value}{a vector of length 1 or 2 depending on operator}
+\item{value}{a vector of length 1 or 2 depending on operator (see examples)}
 
 \item{allowBlank}{logial}
 
@@ -58,5 +58,21 @@ dataValidation(wb, 2, col = 2, rows = 2:12, type = "time",
    operator = "between", value = df$t[c(4, 8)]) 
 
 saveWorkbook(wb, "dataValidationExample.xlsx", overwrite = TRUE)
+
+
+######################################################################
+## If type == 'list'
+# operator argument is ignored.
+
+wb <- createWorkbook()
+addWorksheet(wb, "Sheet 1")
+addWorksheet(wb, "Sheet 2")
+
+writeDataTable(wb, sheet = 1, x = iris[1:30,])
+writeData(wb, sheet = 2, x = sample(iris$Sepal.Length, 10))
+
+dataValidation(wb, 1, col = 1, rows = 2:31, type = "list", value = "'Sheet 2'!A1:A9")
+
+# openXL(wb)
 
 }
