@@ -370,9 +370,9 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     if(length(startCol) != nSheets)
       startCol <- rep_len(startCol, length.out = nSheets)
     
-    if(length(headerStyle) != nSheets & !is.null(headerStyle))
-      headerStyle <- lapply(1:nSheets, function(x) headerStyle)
-    
+    if(!is.null(headerStyle))
+      headerStyle <- lapply(1:nSheets, function(x) return(headerStyle))
+
     if(length(borders) != nSheets & !is.null(borders))
       borders <- rep_len(borders, length.out = nSheets)
     
