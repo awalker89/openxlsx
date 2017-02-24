@@ -568,8 +568,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         tablesXML <- tablesXML[sprintf("table%s.xml", unlist(tables))]
         
         ## tables are now in correct order so we can read them in as they are
-        wb$tables <- sapply(tablesXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
-        
+        wb$tables <- sapply(tablesXML, function(x) removeHeadTag(paste(readLines(x, warn = FALSE), collapse = "")))
+
         ## pull out refs and attach names
         refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
         names(wb$tables) <- refs
