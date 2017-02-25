@@ -48,6 +48,7 @@ openXL <- function(file = NULL){
   
   ## execution should be in background in order to not block R
   ## interpreter
+  file <- normalizePath(file)
   userSystem <- Sys.info()["sysname"]
   
   
