@@ -2543,7 +2543,7 @@ setFooter <- function(wb, text, position = "center"){
 #' writeDataTable(wb, sheet = 1, x = iris[1:30,])
 #' writeData(wb, sheet = 2, x = sample(iris$Sepal.Length, 10))
 #' 
-#' dataValidation(wb, 1, col = 1, rows = 2:31, type = "list", value = "'Sheet 2'!A1:A9")
+#' dataValidation(wb, 1, col = 1, rows = 2:31, type = "list", value = "'Sheet 2'!$A$1:$A$10")
 #' 
 #' # openXL(wb)
 #' 
