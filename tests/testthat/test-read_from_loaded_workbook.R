@@ -100,10 +100,10 @@ test_that("Reading example workbook", {
   y <- read.xlsx(wb, sheet, colNames = FALSE, detectDates = FALSE, cols = 2:4)
   expect_equal(x, y)
   
+
   
-  
-  ## sheet 4
-  sheet <- 4
+  ## sheet 5
+  sheet <- 5
   x <- read.xlsx(xlsxFile, sheet)
   y <- read.xlsx(wb, sheet)
   expect_equal(x, y)
@@ -131,4 +131,124 @@ test_that("Reading example workbook", {
   
   
 })
+
+
+
+
+
+
+test_that("Load read - Skip Empty rows/cols", {
+  
+  xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
+  wb <- loadWorkbook(xlsxFile)
+  
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = FALSE)
+  expect_equal(nrow(x), 5L)
+  expect_equal(ncol(x), 4L)
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = TRUE)
+  expect_equal(nrow(x), 5L - 1L)
+  expect_equal(ncol(x), 4L)
+  
+  
+  ##############################################################
+  ## FALSE FALSE FALSE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = FALSE)
+  expect_equal(nrow(x), 6L)
+  expect_equal(ncol(x), 8L)
+  
+  ## NA columns
+  expect_true(all(is.na(x$X1)))
+  expect_true(all(is.na(x$X2)))
+  expect_true(all(is.na(x$X3)))
+  expect_true(all(is.na(x$X7)))
+  
+  ## NA rows
+  expect_true(all(is.na(x[3,])))
+  
+  
+  
+  ##############################################################
+  ## FALSE FALSE TRUE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = TRUE)
+  expect_equal(nrow(x), 6L - 1L)
+  expect_equal(ncol(x), 8L)
+  
+  
+  ## NA columns
+  expect_true(all(is.na(x$X1)))
+  expect_true(all(is.na(x$X2)))
+  expect_true(all(is.na(x$X3)))
+  expect_true(all(is.na(x$X7)))
+  
+  ## NA rows
+  expect_true(all(is.na(x[2,])))
+  
+  
+  
+  ##############################################################
+  ## FALSE TRUE FALSE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = FALSE)
+  expect_equal(nrow(x), 5L)
+  expect_equal(ncol(x), 8L)
+  
+  ## NA columns
+  expect_true(all(is.na(x$X1)))
+  expect_true(all(is.na(x$X2)))
+  expect_true(all(is.na(x$X3)))
+  expect_true(all(is.na(x$X7)))
+  
+  
+  
+  
+  ##############################################################
+  ## FALSE TRUE TRUE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = TRUE)
+  expect_equal(nrow(x), 5L - 1L)
+  expect_equal(ncol(x), 8L)
+  
+  
+  ## NA columns
+  expect_true(all(is.na(x$X1)))
+  expect_true(all(is.na(x$X2)))
+  expect_true(all(is.na(x$X3)))
+  expect_true(all(is.na(x$X7)))
+  
+  
+  
+  ##############################################################
+  ## TRUE FALSE FALSE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = FALSE)
+  expect_equal(nrow(x), 6L)
+  expect_equal(ncol(x), 4L)
+  
+  ## NA rows
+  expect_true(all(is.na(x[3,])))
+  
+  
+  
+  ##############################################################
+  ## TRUE FALSE TRUE
+  
+  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = TRUE)
+  expect_equal(nrow(x), 6L - 1L)
+  expect_equal(ncol(x), 4L)
+  
+  
+  ## NA rows
+  expect_true(all(is.na(x[2,])))
+  
+  
+  
+})
+
+
+
+
 

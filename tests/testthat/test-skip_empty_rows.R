@@ -130,12 +130,14 @@ test_that("skip empty cols", {
 
 test_that("Version 4 fixes", {
 
+  fl <- system.file("readTest.xlsx", package = "openxlsx")
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = FALSE)
+  
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = FALSE)
   expect_equal(nrow(x), 5L)
   expect_equal(ncol(x), 4L)
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = TRUE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = TRUE, skipEmptyRows = TRUE, colNames = TRUE)
   expect_equal(nrow(x), 5L - 1L)
   expect_equal(ncol(x), 4L)
   
@@ -143,7 +145,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## FALSE FALSE FALSE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = FALSE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = FALSE)
   expect_equal(nrow(x), 6L)
   expect_equal(ncol(x), 8L)
   
@@ -161,7 +163,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## FALSE FALSE TRUE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = TRUE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = FALSE, skipEmptyRows = FALSE, colNames = TRUE)
   expect_equal(nrow(x), 6L - 1L)
   expect_equal(ncol(x), 8L)
   
@@ -180,7 +182,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## FALSE TRUE FALSE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = FALSE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = FALSE)
   expect_equal(nrow(x), 5L)
   expect_equal(ncol(x), 8L)
   
@@ -196,7 +198,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## FALSE TRUE TRUE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = TRUE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = FALSE, skipEmptyRows = TRUE, colNames = TRUE)
   expect_equal(nrow(x), 5L - 1L)
   expect_equal(ncol(x), 8L)
   
@@ -212,7 +214,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## TRUE FALSE FALSE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = FALSE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = FALSE)
   expect_equal(nrow(x), 6L)
   expect_equal(ncol(x), 4L)
   
@@ -224,7 +226,7 @@ test_that("Version 4 fixes", {
   ##############################################################
   ## TRUE FALSE TRUE
   
-  x <- read.xlsx("c:/users/Alex/Downloads/openxlsxTest.xlsx", skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = TRUE)
+  x <- read.xlsx(xlsxFile = fl, sheet = 4, skipEmptyCols = TRUE, skipEmptyRows = FALSE, colNames = TRUE)
   expect_equal(nrow(x), 6L - 1L)
   expect_equal(ncol(x), 4L)
   
