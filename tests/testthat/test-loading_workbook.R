@@ -878,8 +878,8 @@ test_that("Loading readTest.xlsx Sheet 1", {
                                          "<si><t>a</t></si>", "<si><t>b</t></si>", "<si><t>c</t></si>", 
                                          "<si><t>e</t></si>", "<si><t>f</t></si>", "<si><t>h</t></si>", 
                                          "<si><t>i</t></si>", "<si><t>Var5</t></si>", "<si><t>Var6</t></si>", 
-                                         "<si><t>Var7</t></si>", "<si><t>col 1</t></si>", "<si><t>col 2</t></si>"
-  ), uniqueCount = 2112L)
+                                         "<si><t>Var7</t></si>", "<si><t>col 1</t></si>", "<si><t>col 2</t></si>", "<si><t>g</t></si>"
+  ), uniqueCount = 2113L)
   
   
   expect_equal(expected_shared_strings, wb$sharedStrings)

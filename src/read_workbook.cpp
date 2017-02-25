@@ -460,7 +460,7 @@ SEXP read_workbook(IntegerVector cols_in,
     rows = match(rows, uni_rows) - 1;
     //int nRows = *std::max_element(rows.begin(), rows.end()) + 1;
   }else{
-    rows = rows - 1;
+    rows = rows - rows[0];
   }
   
   // Check if first row are all strings
