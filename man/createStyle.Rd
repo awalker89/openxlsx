@@ -40,23 +40,22 @@ or one of colours(). If fontColour is NULL, the workbook base font colours is us
   \item{For numeric rouding use "0.00" with the preferred number of decimal places}
 }}
 
-\item{border}{Cell border 
-(Any combination of "Top", "Bottom", "Left", "Right" in any order).
+\item{border}{Cell border. A vector of "top", "bottom", "left", "right" or a single string).
 \itemize{
-   \item{\bold{Top}}{ Top border}
-   \item{\bold{Bottom}}{ Bottom border}
-   \item{\bold{Left}}{ Left border}
-   \item{\bold{Right}}{ Right border}
-   \item{\bold{TopBottom}}{ Top and bottom border}
-   \item{\bold{LeftRight}}{ Left and right border}
-   \item{\bold{TopLeftRight}}{ Top and Left border}
-   \item{\bold{TopBottomLeftRight}}{ All borders}
+   \item{\bold{"top"}}{ Top border}
+   \item{\bold{bottom}}{ Bottom border}
+   \item{\bold{left}}{ Left border}
+   \item{\bold{right}}{ Right border}
+   \item{\bold{TopBottom} or \bold{c("top", "bottom")}}{ Top and bottom border}
+   \item{\bold{LeftRight} or \bold{c("left", "right")}}{ Left and right border}
+   \item{\bold{TopLeftRight} or \bold{c("top", "left", "right")}}{ Top, Left and right border}
+   \item{\bold{TopBottomLeftRight} or \bold{c("top", "bottom", "left", "right")}}{ All borders}
   }}
 
-\item{borderColour}{Colour of cell border.
+\item{borderColour}{Colour of cell border vector the same length as the number of sides specified in "border" 
 A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
 
-\item{borderStyle}{Border line style
+\item{borderStyle}{Border line style vector the same length as the number of sides specified in "border"
 \itemize{
    \item{\bold{none}}{ No Border}
    \item{\bold{thin}}{ thin border}
