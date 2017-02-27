@@ -6,6 +6,12 @@ NEW FEATURES
 
 * getNamedRegions returns sheet name and cell references along with the named regions.
 
+* borderStyle and borderColour can be vector to specify differnet values for each side
+
+* dataValidation type "list"
+
+* dataBar showValue, gradient and border  can now be set through conditionalFormatting().
+
 
 BUG FIXES
 
@@ -13,7 +19,14 @@ BUG FIXES
 
 * date detection basic_string error
 
-* 
+* multiple spaces in table column names were not being maintained thus corrupting the xlsx file.
+
+* openXL fail silently on relative paths.
+
+* headerStyle failed when writing a list of length 1 using write.xlsx
+
+* detectDate for read.xlsx issues.
+
 
 openxlsx 4.0.0
 ----------------------------------------------------------------
