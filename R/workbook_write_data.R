@@ -43,7 +43,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
-    if(length(pInds) > 0){
+    if(length(pInds) > 0 & nRows > 0){
       t <- sapply(pInds,  function(i) format(df[[i]][[1]], "%z"))
       
       offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
