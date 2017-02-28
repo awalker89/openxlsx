@@ -104,9 +104,12 @@ read.xlsx.Workbook <- function(xlsxFile,
 
   ## read in sharedStrings
   sharedStrings <- paste(unlist(xlsxFile$sharedStrings), collapse = "\n")
-  if(length(sharedStrings) > 0)
+  if(length(sharedStrings) > 0){
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStrings, isFile = FALSE)
-  
+    if(!is.null(na.strings)){
+      sharedStrings[sharedStrings %in% na.strings] <- NA
+    }
+  }
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
   sheet_data <- xlsxFile$worksheets[[sheet]]$sheet_data
