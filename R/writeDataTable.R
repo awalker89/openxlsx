@@ -176,10 +176,13 @@ writeDataTable <- function(wb, sheet, x,
     
     tableSheets <- attr(wb$tables, "sheet")
     sheetNo <- wb$validateSheet(sheet)
-    if(sheetNo %in% tableSheets){ ## only look at tables on this sheet
+    
+    to_check <- which(tableSheets %in% sheetNo & !grepl("openxlsx_deleted", attr(wb$tables, "tableName"), fixed = TRUE))
+    
+    
+    if(length(to_check) > 0){ ## only look at tables on this sheet
       
-      exTable <- wb$tables[tableSheets %in% sheetNo]
-      
+      exTable <- wb$tables[to_check]
       newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
       newCols <- c(startCol, startCol + ncol(x) - 1L)
       

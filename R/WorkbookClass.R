@@ -636,7 +636,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   
   ## id will start at 3 and drawing will always be 1, printer Settings at 2 (printer settings has been removed)
   id <- as.character(length(tables) + 3L)
-  sheet = validateSheet(sheet)
+  sheet <- validateSheet(sheet)
   
   ## build table XML and save to tables field
   table <- sprintf('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="%s" name="%s" displayName="%s" ref="%s"', id, tableName, tableName, ref)
@@ -651,6 +651,9 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   attr(tables, "tableName") <<- c(tNames, tableName)
   
   worksheets[[sheet]]$tableParts <<- append(worksheets[[sheet]]$tableParts, sprintf('<tablePart r:id="rId%s"/>', id))
+  attr(worksheets[[sheet]]$tableParts, "tableName") <<- c(tNames[tSheets == sheet & !grepl("openxlsx_deleted", tNames, fixed = TRUE)], tableName)
+  
+
   
   ## update Content_Types
   Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', id))
