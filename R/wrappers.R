@@ -3587,7 +3587,7 @@ getTables <- function(wb, sheet){
 #' @description List Excel tables in a workbook
 #' @param wb A workbook object 
 #' @param sheet A name or index of a worksheet
-#' @param Name of table to remove. See \code{\link{getTables(wb, sheet = 1)}}
+#' @param table Name of table to remove. See \code{\link{getTables(wb, sheet = 1)}}
 #' @return character vector of table names on the specified sheet
 #' @examples
 #' 
