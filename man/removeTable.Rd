@@ -11,7 +11,7 @@ removeTable(wb, sheet, table)
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{Name}{of table to remove. See \code{\link{getTables(wb, sheet = 1)}}}
+\item{table}{Name of table to remove. See \code{\link{getTables}}}
 }
 \value{
 character vector of table names on the specified sheet

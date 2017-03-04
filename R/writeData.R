@@ -160,9 +160,9 @@ writeData <- function(wb,
   exDigits <- getOption("digits")
   options("digits" = 22)
   on.exit(options("digits" = exDigits), add = TRUE)
-
   
-    
+  
+  
   if(is.null(x))
     return(invisible(0))
   
@@ -191,7 +191,7 @@ writeData <- function(wb,
   ## borderColours validation
   borderColour <- validateColour(borderColour, "Invalid border colour")
   borderStyle <- validateBorderStyle(borderStyle)[[1]]
-    
+  
   ## special case - vector of hyperlinks
   hlinkNames <- NULL
   if("hyperlink" %in% class(x)){
@@ -205,7 +205,7 @@ writeData <- function(wb,
     class(x[[1]]) <- "formula"
     colNames = FALSE
   }
-
+  
   ## named region
   if(!is.null(name)){ ## validate name
     ex_names <- regmatches(wb$workbook$definedNames, regexpr('(?<=name=")[^"]+', wb$workbook$definedNames, perl = TRUE))
@@ -224,26 +224,37 @@ writeData <- function(wb,
     colNames <- FALSE ## this will go to coerce.default and rowNames will be ignored 
   
   ## Coerce to data.frame
-  x <- openxlsxCoerce(x, rowNames)
-    
+  x <- openxlsxCoerce(x = x, rowNames = rowNames)
+  
   nCol <- ncol(x)
   nRow <- nrow(x)
   
   ## If no rows and not writing column names return as nothing to write
   if(nRow == 0 & !colNames)
     return(invisible(0))
-    
+  
   colClasses <- lapply(x, function(x) tolower(class(x)))
   colClasss2 <- colClasses
   colClasss2[sapply(colClasses, function(x) "formula" %in% x) & sapply(colClasses, function(x) "hyperlink" %in% x)] <- "formula"
-    
+  
   
   sheetX <- wb$validateSheet(sheet)
   if(wb$isChartSheet[[sheetX]]){
     stop("Cannot write to chart sheet.")
     return(NULL)
   }
-
+  
+  
+  ## Check not overwriting existing table headers
+  wb$check_overwrite_tables(sheet = sheet
+                            , new_rows = c(startRow, startRow + nRow - 1L + colNames)
+                            , new_cols = c(startCol, startCol + nCol - 1L)
+                            , check_table_header_only = TRUE
+                            , error_msg = 
+                              "Cannot overwrite table headers. Avoid writing over the header row or see getTables() & removeTables() to remove the table object.")
+  
+  
+  
   ## write autoFilter, can only have a single filter per worksheet
   if(withFilter){
     
@@ -254,7 +265,7 @@ writeData <- function(wb,
     
     l <- .Call("openxlsx_convert_to_excel_ref", unlist(coords[,2]), LETTERS, PACKAGE="openxlsx")
     dfn <- sprintf("'%s'!%s", names(wb)[sheetX],  paste0("$", l, "$", coords[,1], collapse=":"))
-
+    
     dn <- sprintf('<definedName name="_xlnm._FilterDatabase" localSheetId="%s" hidden="1">%s</definedName>', sheetX - 1L, dfn)
     
     if(length(wb$workbook$definedNames) > 0){
@@ -267,9 +278,9 @@ writeData <- function(wb,
       wb$workbook$definedNames <- dn
     }
     
-      
-  }
     
+  }
+  
   ## write data.frame
   wb$writeData(df = x,
                colNames = colNames,
@@ -438,7 +449,7 @@ writeFormula <- function(wb,
                          startCol = 1,
                          startRow = 1, 
                          xy = NULL){
-
+  
   if(!"character" %in% class(x))
     stop("x must be a character vector.")
   
@@ -447,8 +458,8 @@ writeFormula <- function(wb,
   
   if(any(grepl("^(=|)HYPERLINK\\(", x, ignore.case = TRUE)))
     class(dfx$X) <- c("character", "formula", "hyperlink")
-    
-    
+  
+  
   
   writeData(wb = wb,
             sheet = sheet,

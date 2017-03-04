@@ -23,6 +23,8 @@
 #' hyperlinks, percentages respectively.
 #' @seealso \code{\link{addWorksheet}}
 #' @seealso \code{\link{writeData}}
+#' @seealso \code{\link{removeTable}}
+#' @seealso \code{\link{getTables}}
 #' @export
 #' @examples
 #' ## see package vignettes for further examples.
@@ -172,35 +174,39 @@ writeDataTable <- function(wb, sheet, x,
   ref <- paste(ref1, ref2, sep = ":")
   
   ## check not overwriting another table
-  if(length(wb$tables) > 0){
-    
-    tableSheets <- attr(wb$tables, "sheet")
-    sheetNo <- wb$validateSheet(sheet)
-    
-    to_check <- which(tableSheets %in% sheetNo & !grepl("openxlsx_deleted", attr(wb$tables, "tableName"), fixed = TRUE))
-    
-    
-    if(length(to_check) > 0){ ## only look at tables on this sheet
-      
-      exTable <- wb$tables[to_check]
-      newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
-      newCols <- c(startCol, startCol + ncol(x) - 1L)
-      
-      rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
-      cols <- lapply(names(exTable), function(rectCoords) convertFromExcelRef(unlist(regmatches(rectCoords, gregexpr("[A-Z]+", rectCoords)))))
-      
-      ## loop through existing tables checking if any over lap with new table
-      for(i in 1:length(exTable)){
-        
-        exCols <- cols[[i]]
-        exRows <- rows[[i]]
-        
-        if(exCols[1] < newCols[2] & exCols[2] > newCols[1] & exRows[1] < newRows[2] & exRows[2] > newRows[1]) 
-          stop("Cannot overwrite existing table.")
-        
-      }
-    } ## end if(sheet %in% tableSheets) 
-  } ## end (length(wb$tables) > 0)
+  wb$check_overwrite_tables(sheet = sheet
+                            , new_rows = c(startRow, startRow + nrow(x) - 1L + 1L) ## + header
+                            , new_cols = c(startCol, startCol + ncol(x) - 1L))
+  
+  # if(length(wb$tables) > 0){
+  #   
+  #   tableSheets <- attr(wb$tables, "sheet")
+  #   sheetNo <- wb$validateSheet(sheet)
+  #   
+  #   to_check <- which(tableSheets %in% sheetNo & !grepl("openxlsx_deleted", attr(wb$tables, "tableName"), fixed = TRUE))
+  #   
+  #   
+  #   if(length(to_check) > 0){ ## only look at tables on this sheet
+  #     
+  #     exTable <- wb$tables[to_check]
+  #     newRows <- c(startRow, startRow + nrow(x) - 1L + 1)
+  #     newCols <- c(startCol, startCol + ncol(x) - 1L)
+  #     
+  #     rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
+  #     cols <- lapply(names(exTable), function(rectCoords) convertFromExcelRef(unlist(regmatches(rectCoords, gregexpr("[A-Z]+", rectCoords)))))
+  #     
+  #     ## loop through existing tables checking if any over lap with new table
+  #     for(i in 1:length(exTable)){
+  #       
+  #       exCols <- cols[[i]]
+  #       exRows <- rows[[i]]
+  #       
+  #       if((min(newCols) <= max(exCols)) & (max(newCols) >= min(exCols)) & (min(newRows) <= max(exRows)) & (max(newRows) >= min(exRows)))
+  #         stop("Cannot overwrite existing table with another table.")
+  #       
+  #     }
+  #   } ## end if(sheet %in% tableSheets) 
+  # } ## end (length(wb$tables) > 0)
   
   ## column class styling
   colClasses <- lapply(x, function(x) tolower(class(x)))

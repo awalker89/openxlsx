@@ -1399,13 +1399,20 @@ Workbook$methods(deleteWorksheet = function(sheet){
   worksheets_rels[[sheet]] <<- NULL
   
   if(length(tables) > 0){
+    
     tableSheets <- attr(tables, "sheet")
-    inds <- tableSheets %in% sheet
+    tableNames <- attr(tables, "tableName")
+    
+    inds <- tableSheets %in% sheet & !grepl("openxlsx_deleted", attr(tables, "tableName"), fixed = TRUE)
+    tableSheets[tableSheets > sheet] <- tableSheets[tableSheets > sheet] - 1L
+    
+    ## Need to flag a table as deleted
     if(any(inds)){
-      tableNames <- attr(tables, "tableName")
+      tableSheets[inds] <- 0
       tableNames[inds] <- paste0(tableNames[inds], "_openxlsx_deleted")
-      attr(tables, "tableName") <<- tableNames
     }
+    attr(tables, "tableName") <<- tableNames
+    attr(tables, "sheet") <<- tableSheets
   }
   
   
@@ -2207,6 +2214,52 @@ Workbook$methods(validate_table_name = function(tableName){
   return(tableName)
   
 })
+
+
+Workbook$methods(check_overwrite_tables = function(sheet
+                                                   , new_rows
+                                                   , new_cols
+                                                   , error_msg = "Cannot overwrite existing table with another table."
+                                                   , check_table_header_only = FALSE){
+
+
+  
+  ## check not overwriting another table
+  if(length(tables) > 0){
+    
+    tableSheets <- attr(tables, "sheet")
+    sheetNo <- validateSheet(sheet)
+    
+    to_check <- which(tableSheets %in% sheetNo & !grepl("openxlsx_deleted", attr(tables, "tableName"), fixed = TRUE))
+
+    if(length(to_check) > 0){ ## only look at tables on this sheet
+      
+      exTable <- tables[to_check]
+
+      rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
+      cols <- lapply(names(exTable), function(rectCoords) convertFromExcelRef(unlist(regmatches(rectCoords, gregexpr("[A-Z]+", rectCoords)))))
+      
+      if(check_table_header_only)
+        rows <- lapply(rows, function(x) c(x[1], x[1]))
+      
+      
+      ## loop through existing tables checking if any over lap with new table
+      for(i in 1:length(exTable)){
+        
+        existing_cols <- cols[[i]]
+        existing_rows <- rows[[i]]
+        
+        if((min(new_cols) <= max(existing_cols)) & (max(new_cols) >= min(existing_cols)) & (min(new_rows) <= max(existing_rows)) & (max(new_rows) >= min(existing_rows)))
+          stop(error_msg)
+        
+      }
+    } ## end if(sheet %in% tableSheets) 
+  } ## end (length(tables) > 0)
+
+  invisible(0)  
+  
+})
+
 
 
 

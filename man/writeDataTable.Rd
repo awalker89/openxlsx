@@ -101,6 +101,10 @@ saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 \code{\link{addWorksheet}}
 
 \code{\link{writeData}}
+
+\code{\link{removeTable}}
+
+\code{\link{getTables}}
 }
 \author{
 Alexander Walker
