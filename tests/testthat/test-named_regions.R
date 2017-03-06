@@ -59,6 +59,58 @@ test_that("Maintaining Named Regions on Load", {
   
 })
 
+test_that("Correctly Loading Named Regions Created in Excel",{
+  
+  # Load an excel workbook (in the repo, it's located in the /inst folder;
+  # when installed on the user's system, it is located in the installation folder
+  # of the package)
+  filename <- system.file("", "namedRegions.xlsx", package = "openxlsx")
+  
+  # Load this workbook. We will test read.xlsx by passing both the object wb and
+  # the filename. Both should produce the same results.
+  wb <- loadWorkbook(filename)
+  
+  # NamedTable refers to Sheet1!$C$5:$D$8
+  table_f <- read.xlsx(filename,
+                       namedRegion = "NamedTable")
+  table_w <- read.xlsx(wb,
+                       namedRegion = "NamedTable")
+  expect_equal(object = table_f, expected = table_w)
+  expect_equal(object = class(table_f), expected = "data.frame")
+  expect_equal(object = ncol(table_f), expected = 2)
+  expect_equal(object = nrow(table_f), expected = 3)
+  
+  # NamedCell refers to Sheet1!$C$2
+  # This proeduced an error in an earlier version of the pacage when the object
+  # wb was passed, but worked correctly when the filename was passed to read.xlsx
+  cell_f <- read.xlsx(filename,
+                       namedRegion = "NamedCell",
+                       colNames = FALSE,
+                       rowNames = FALSE)
+  cell_w <- read.xlsx(wb,
+                       namedRegion = "NamedCell",
+                       colNames = FALSE,
+                       rowNames = FALSE)
+  expect_equal(object = cell_f, expected = cell_w)
+  expect_equal(object = class(cell_f), expected = "data.frame")
+  expect_equal(object = ncol(cell_f), expected = 1)
+  expect_equal(object = nrow(cell_f), expected = 1)
+  
+  # NamedCell2 refers to Sheet1!$C$2:$C$2
+  cell2_f <- read.xlsx(filename,
+                       namedRegion = "NamedCell2",
+                       colNames = FALSE,
+                       rowNames = FALSE)
+  cell2_w <- read.xlsx(wb,
+                       namedRegion = "NamedCell2",
+                       colNames = FALSE,
+                       rowNames = FALSE)
+  expect_equal(object = cell2_f, expected = cell2_w)
+  expect_equal(object = class(cell2_f), expected = "data.frame")
+  expect_equal(object = ncol(cell2_f), expected = 1)
+  expect_equal(object = nrow(cell2_f), expected = 1)
+  
+})
 
 
 
