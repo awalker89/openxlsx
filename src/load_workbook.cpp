@@ -50,6 +50,9 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       if(pos == string::npos){
         has_data = false;
         pos = xml.find("<sheetData/>");
+        if(pos == string::npos){
+          pos = xml.find("<sheetData />");
+        }
       }
       
       /* --- Everything before pos --- */
