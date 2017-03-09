@@ -1,6 +1,6 @@
 
 
-context("Reading from workbook is identical to reading from file 3")
+context("Reading from workbook is identical to reading from file")
 
 
 

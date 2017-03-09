@@ -24,7 +24,7 @@ test_that("Tables loaded correctly", {
   expect_equal(unname(getTables(wb, 1)), "Table2", check.attributes = FALSE)
   expect_equal(unname(getTables(wb, 3)), "Table3", check.attributes = FALSE)
   
-  
+  removeTable(wb, sheet = 1, table = "Table2")
   
   expect_equal(getTables(wb, sheet = 1), character(0), check.attributes = FALSE)
   expect_equal(length(wb$worksheets[[1]]$tableParts), 0)
