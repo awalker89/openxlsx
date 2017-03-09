@@ -36,4 +36,13 @@
 #' } 
 #'  See the Formatting vignette for examples. 
 #' 
+#' 
+#' 
+#' 
+#' Additional options
+#' 
+#' \itemize{
+#' \item{\code{options("openxlsx.zipFlags" = "-9")}} ## set max zip compression level default is "-1"
+#' } 
+#' 
 NULL

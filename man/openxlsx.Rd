@@ -21,7 +21,16 @@ The openxlsx package uses global options to simplfy formatting:
    \item{\code{options("openxlsx.paperSize" = 9)}} ## A4
    \item{\code{options("openxlsx.orientation" = "portrait")}} ## page orientation
 } 
- See the Formatting vignette for examples.
+ See the Formatting vignette for examples. 
+
+
+
+
+Additional options
+
+\itemize{
+\item{\code{options("openxlsx.zipFlags" = "-9")}} ## set max zip compression level default is "-1"
+}
 }
 \seealso{
 \itemize{

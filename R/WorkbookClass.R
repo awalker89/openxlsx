@@ -77,8 +77,8 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 
 Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
-  zip_flags <- getOption(x = "openxlsx.zip_flags", default = NULL)
-  if(!is.null(zip_flags)){
+  zip_flags <- ifelse(!is.null(getOption("openxlsx.zipFlags")), getOption("openxlsx.zipFlags"), getOption("openxlsx.zipflags", NA))
+  if(!is.na(zip_flags)){
     if(zip_flags != "")
       flags <- zip_flags
   }
