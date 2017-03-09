@@ -323,11 +323,10 @@ IntegerVector matrixRowInds(IntegerVector indices) {
 
 
 // [[Rcpp::export]]
-CharacterVector build_table_xml(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle, bool withFilter){
+CharacterVector build_table_xml(std::string table, std::string tableStyleXML, std::string ref, std::vector<std::string> colNames, bool showColNames, bool withFilter){
   
   int n = colNames.size();
   std::string tableCols;
-  std::string tableStyleXML = "<tableStyleInfo name=\"" + tableStyle + "\" showFirstColumn=\"0\" showLastColumn=\"0\" showRowStripes=\"1\" showColumnStripes=\"0\"/>";
   table += " totalsRowShown=\"0\">";
   
   if(withFilter)

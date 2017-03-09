@@ -7,10 +7,12 @@
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
   tableName = NULL, headerStyle = NULL, withFilter = TRUE,
-  keepNA = FALSE, sep = ", ")
+  keepNA = FALSE, sep = ", ", firstColumn = FALSE, lastColumn = FALSE,
+  bandedRows = TRUE, bandedCols = FALSE)
 }
 \arguments{
-\item{wb}{A Workbook object containing a worksheet.}
+\item{wb}{A Workbook object containing a 
+worksheet.}
 
 \item{sheet}{The worksheet to write to. Can be the worksheet index or name.}
 
@@ -33,11 +35,24 @@ A vector of the form c(startCol, startRow)}
 
 \item{headerStyle}{Custom style to apply to column names.}
 
-\item{withFilter}{If \code{TRUE}, columns with have withFilters in the first row.}
+\item{withFilter}{If \code{TRUE}, columns with have filters in the first row.}
 
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 
-\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
+\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
+\cr\cr
+\cr\bold{The below options correspond to Excel table options:}
+\cr
+\if{html}{\figure{tableoptions.png}{options: width="40\%" alt="Figure: table_options.png"}}
+\if{latex}{\figure{tableoptions.pdf}{options: width=7cm}}}
+
+\item{firstColumn}{logical. If TRUE, the first column is bold}
+
+\item{lastColumn}{logical. If TRUE, the last column is bold}
+
+\item{bandedRows}{logical. If TRUE, rows are colour banded}
+
+\item{bandedCols}{logical. If TRUE, the columns are colour banded}
 }
 \description{
 Write to a worksheet and format as an Excel table

@@ -25,7 +25,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   if(!is.null(xlsxFile))
     file <- xlsxFile
-
+  
   file <- getFile(file)
   
   file <- getFile(file)
@@ -221,7 +221,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## xl\pivotTables & xl\pivotCache
   if(length(pivotTableXML) > 0){
-
+    
     # pivotTable cacheId links to workbook.xml which links to workbook.xml.rels via rId
     # we don't modify the cacheId, only the rId
     nPivotTables <- length(pivotTableXML)
@@ -236,7 +236,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     pivotDefRelsXML   <- pivotDefRelsXML[order(nchar(pivotDefRelsXML), pivotDefRelsXML)]
     pivotCacheRecords <- pivotCacheRecords[order(nchar(pivotCacheRecords), pivotCacheRecords)]
     
-
+    
     wb$pivotDefinitionsRels <- character(nPivotTables)
     
     pivot_content_type <- NULL
@@ -248,15 +248,15 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     # ## Check what caches are used
     cache_keep <- unlist(regmatches(wb$pivotTables.xml.rels, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9](?=\\.xml)",
                                                                       wb$pivotTables.xml.rels, perl = TRUE, ignore.case = TRUE)))
-
+    
     ## pivot cache records
     tmp <- unlist(regmatches(pivotCacheRecords, gregexpr("(?<=pivotCache/pivotCacheRecords)[0-9](?=\\.xml)", pivotCacheRecords, perl = TRUE, ignore.case = TRUE)))
     pivotCacheRecords <- pivotCacheRecords[tmp %in% cache_keep]
-
+    
     ## pivot cache definitions rels
     tmp <- unlist(regmatches(pivotDefRelsXML, gregexpr("(?<=_rels/pivotCacheDefinition)[0-9](?=\\.xml)", pivotDefRelsXML, perl = TRUE, ignore.case = TRUE)))
     pivotDefRelsXML <- pivotDefRelsXML[tmp %in% cache_keep]
-
+    
     ## pivot cache definitions
     tmp <- unlist(regmatches(pivotDefXML, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9](?=\\.xml)", pivotDefXML, perl = TRUE, ignore.case = TRUE)))
     pivotDefXML <- pivotDefXML[tmp %in% cache_keep]
@@ -569,7 +569,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         
         ## tables are now in correct order so we can read them in as they are
         wb$tables <- sapply(tablesXML, function(x) removeHeadTag(paste(readLines(x, warn = FALSE), collapse = "")))
-
+        
         ## pull out refs and attach names
         refs <- regmatches(wb$tables, regexpr('(?<=ref=")[0-9A-Z:]+', wb$tables, perl = TRUE))
         names(wb$tables) <- refs
@@ -589,6 +589,10 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         attr(wb$tables, "sheet") <- tableSheets
         attr(wb$tables, "tableName") <- displayNames
         
+        for(i in 1:length(tableSheets)){
+          table_sheet_i <- tableSheets[i]
+          attr(wb$worksheets[[table_sheet_i]]$tableParts, "tableName") <- c(attr(wb$worksheets[[table_sheet_i]]$tableParts, "tableName"), displayNames[i])
+        }
       }
     } ## if(length(tablesXML) > 0)
     
@@ -677,6 +681,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     }
     
     
+    
     ############################################################################################
     ############################################################################################
     ## VML drawings
@@ -696,18 +701,23 @@ loadWorkbook <- function(file, xlsxFile = NULL){
             
             target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
             target <- basename(gsub('"$', "", target))
+            ind <- grepl(target, vmlDrawingXML)
             
-            txt <- paste(readLines(vmlDrawingXML[grepl(target, vmlDrawingXML)], warn = FALSE), collapse = "\n")
-            txt <- removeHeadTag(txt)
-            
-            i1 <- regexpr("<v:shapetype", txt, fixed = TRUE)
-            i2 <- regexpr("</xml>", txt, fixed = TRUE)
-            
-            wb$vml[[i]] <- substring(text = txt, first = i1, last = (i2 - 1L))
-            
-            relsInd <- grepl(target, vmlDrawingRelsXML)
-            if(any(relsInd))
-              wb$vml_rels[i] <- vmlDrawingRelsXML[relsInd]
+            if(any(ind)){
+              
+              txt <- paste(readLines(vmlDrawingXML[ind], warn = FALSE), collapse = "\n")
+              txt <- removeHeadTag(txt)
+              
+              i1 <- regexpr("<v:shapetype", txt, fixed = TRUE)
+              i2 <- regexpr("</xml>", txt, fixed = TRUE)
+              
+              wb$vml[[i]] <- substring(text = txt, first = i1, last = (i2 - 1L))
+              
+              relsInd <- grepl(target, vmlDrawingRelsXML)
+              if(any(relsInd))
+                wb$vml_rels[i] <- vmlDrawingRelsXML[relsInd]
+              
+            }
             
           }
         }
@@ -735,51 +745,55 @@ loadWorkbook <- function(file, xlsxFile = NULL){
           
           target <- unlist(lapply(drawXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
           target <- basename(gsub('"$', "", target))
+          ind <- grepl(target, vmlDrawingXML)
           
-          txt <- paste(readLines(vmlDrawingXML[grepl(target, vmlDrawingXML)], warn = FALSE), collapse = "\n")
-          txt <- removeHeadTag(txt)
-          
-          cd <- .Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx")
-          cd <- cd[grepl('ObjectType="Note"', cd)]
-          cd <- paste0(cd, ">")
-          
-          
-          target <- unlist(lapply(commentXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
-          target <- basename(gsub('"$', "", target))
-          
-          txt <- paste(readLines(commentsXML[grepl(target, commentsXML)], warn = FALSE), collapse = "\n")
-          txt <- removeHeadTag(txt)
-          
-          authors <- .Call("openxlsx_getNodes", txt, "<author>", PACKAGE = "openxlsx")
-          authors <- gsub("<author>|</author>", "", authors)
-          
-          comments <- .Call("openxlsx_getNodes", txt, "<commentList>", PACKAGE = "openxlsx")
-          comments <- gsub( "<commentList>", "", comments)
-          comments <- .Call("openxlsx_getNodes", comments, "<comment", PACKAGE = "openxlsx")
-          
-          refs <- regmatches(comments, regexpr('(?<=ref=").*?[^"]+', comments, perl = TRUE))
-          
-          authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
-          authors <- authors[authorsInds]
-          
-          style <- lapply(comments, function(txt) .Call("openxlsx_getNodes", txt, "<rPr>", PACKAGE = "openxlsx"))
-          
-          comments <- regmatches(comments, gregexpr('(?<=<t( |>)).*?[^/]+', comments, perl = TRUE))
-          comments <- lapply(comments, function(x) gsub("<", "", x))
-          comments <- lapply(comments, function(x) gsub(".*?>", "", x, perl = TRUE))
-          
-          
-          wb$comments[[i]] <- lapply(1:length(comments), function(j){
+          if(any(ind)){
+
+            txt <- paste(readLines(vmlDrawingXML[ind], warn = FALSE), collapse = "\n")
+            txt <- removeHeadTag(txt)
             
-            comment_list <- list("ref" = refs[j],
-                                 "author" = authors[j],
-                                 "comment" = comments[[j]],
-                                 "style"  = style[[j]],
-                                 "clientData" = cd[[j]])    
+            cd <- unique(.Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx"))
+            cd <- cd[grepl('ObjectType="Note"', cd)]
+            cd <- paste0(cd, ">")
             
-          })
-          
-          
+            ## now loada comment
+            target <- unlist(lapply(commentXMLrelationship[[i]], function(x) regmatches(x, gregexpr('(?<=Target=").*?"', x, perl = TRUE))[[1]]))
+            target <- basename(gsub('"$', "", target))
+            
+            txt <- paste(readLines(commentsXML[grepl(target, commentsXML)], warn = FALSE), collapse = "\n")
+            txt <- removeHeadTag(txt)
+            
+            authors <- .Call("openxlsx_getNodes", txt, "<author>", PACKAGE = "openxlsx")
+            authors <- gsub("<author>|</author>", "", authors)
+            
+            comments <- .Call("openxlsx_getNodes", txt, "<commentList>", PACKAGE = "openxlsx")
+            comments <- gsub( "<commentList>", "", comments)
+            comments <- .Call("openxlsx_getNodes", comments, "<comment", PACKAGE = "openxlsx")
+            
+            refs <- regmatches(comments, regexpr('(?<=ref=").*?[^"]+', comments, perl = TRUE))
+            
+            authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
+            authors <- authors[authorsInds]
+            
+            style <- lapply(comments, function(txt) .Call("openxlsx_getNodes", txt, "<rPr>", PACKAGE = "openxlsx"))
+            
+            comments <- regmatches(comments, gregexpr('(?<=<t( |>)).*?[^/]+', comments, perl = TRUE))
+            comments <- lapply(comments, function(x) gsub("<", "", x))
+            comments <- lapply(comments, function(x) gsub(".*?>", "", x, perl = TRUE))
+            
+            
+            wb$comments[[i]] <- lapply(1:length(comments), function(j){
+              
+              comment_list <- list("ref" = refs[j],
+                                   "author" = authors[j],
+                                   "comment" = comments[[j]],
+                                   "style"  = style[[j]],
+                                   "clientData" = cd[[j]])    
+              
+            })
+            
+            
+          }
           
         }
       }
@@ -834,7 +848,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## pivot tables
     if(length(pivotTableXML) > 0){
-
+      
       pivotTableJ <- lapply(xml, function(x) as.integer(regmatches(x, regexpr("(?<=pivotTable)[0-9]+(?=\\.xml)", x, perl = TRUE))))
       sheetWithPivot <- which(sapply(pivotTableJ, length) > 0)
       
@@ -862,7 +876,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", inds), collapse = "|")    
         fileNo <- which(grepl(toRemove, wb$pivotTables.xml.rels))
         toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")
-
+        
         ## remove reference to file from workbook.xml.res
         wb$workbook.xml.rels <- wb$workbook.xml.rels[!grepl(toRemove, wb$workbook.xml.rels)]
       }

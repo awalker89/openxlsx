@@ -129,8 +129,8 @@ matrixRowInds <- function(indices) {
     .Call('openxlsx_matrixRowInds', PACKAGE = 'openxlsx', indices)
 }
 
-build_table_xml <- function(table, ref, colNames, showColNames, tableStyle, withFilter) {
-    .Call('openxlsx_build_table_xml', PACKAGE = 'openxlsx', table, ref, colNames, showColNames, tableStyle, withFilter)
+build_table_xml <- function(table, tableStyleXML, ref, colNames, showColNames, withFilter) {
+    .Call('openxlsx_build_table_xml', PACKAGE = 'openxlsx', table, tableStyleXML, ref, colNames, showColNames, withFilter)
 }
 
 write_worksheet_xml_2 <- function(prior, post, sheet_data, row_heights, R_fileName) {

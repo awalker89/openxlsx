@@ -64,7 +64,7 @@ test_that("Correctly Loading Named Regions Created in Excel",{
   # Load an excel workbook (in the repo, it's located in the /inst folder;
   # when installed on the user's system, it is located in the installation folder
   # of the package)
-  filename <- system.file("", "namedRegions.xlsx", package = "openxlsx")
+  filename <- system.file("namedRegions.xlsx", package = "openxlsx")
   
   # Load this workbook. We will test read.xlsx by passing both the object wb and
   # the filename. Both should produce the same results.
@@ -75,6 +75,7 @@ test_that("Correctly Loading Named Regions Created in Excel",{
                        namedRegion = "NamedTable")
   table_w <- read.xlsx(wb,
                        namedRegion = "NamedTable")
+  
   expect_equal(object = table_f, expected = table_w)
   expect_equal(object = class(table_f), expected = "data.frame")
   expect_equal(object = ncol(table_f), expected = 2)
@@ -87,10 +88,12 @@ test_that("Correctly Loading Named Regions Created in Excel",{
                        namedRegion = "NamedCell",
                        colNames = FALSE,
                        rowNames = FALSE)
+  
   cell_w <- read.xlsx(wb,
                        namedRegion = "NamedCell",
                        colNames = FALSE,
                        rowNames = FALSE)
+  
   expect_equal(object = cell_f, expected = cell_w)
   expect_equal(object = class(cell_f), expected = "data.frame")
   expect_equal(object = ncol(cell_f), expected = 1)
@@ -101,10 +104,12 @@ test_that("Correctly Loading Named Regions Created in Excel",{
                        namedRegion = "NamedCell2",
                        colNames = FALSE,
                        rowNames = FALSE)
+  
   cell2_w <- read.xlsx(wb,
                        namedRegion = "NamedCell2",
                        colNames = FALSE,
                        rowNames = FALSE)
+  
   expect_equal(object = cell2_f, expected = cell2_w)
   expect_equal(object = class(cell2_f), expected = "data.frame")
   expect_equal(object = ncol(cell2_f), expected = 1)

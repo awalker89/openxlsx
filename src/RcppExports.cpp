@@ -413,18 +413,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // build_table_xml
-CharacterVector build_table_xml(std::string table, std::string ref, std::vector<std::string> colNames, bool showColNames, std::string tableStyle, bool withFilter);
-RcppExport SEXP openxlsx_build_table_xml(SEXP tableSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP tableStyleSEXP, SEXP withFilterSEXP) {
+CharacterVector build_table_xml(std::string table, std::string tableStyleXML, std::string ref, std::vector<std::string> colNames, bool showColNames, bool withFilter);
+RcppExport SEXP openxlsx_build_table_xml(SEXP tableSEXP, SEXP tableStyleXMLSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP withFilterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type table(tableSEXP);
+    Rcpp::traits::input_parameter< std::string >::type tableStyleXML(tableStyleXMLSEXP);
     Rcpp::traits::input_parameter< std::string >::type ref(refSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type colNames(colNamesSEXP);
     Rcpp::traits::input_parameter< bool >::type showColNames(showColNamesSEXP);
-    Rcpp::traits::input_parameter< std::string >::type tableStyle(tableStyleSEXP);
     Rcpp::traits::input_parameter< bool >::type withFilter(withFilterSEXP);
-    rcpp_result_gen = Rcpp::wrap(build_table_xml(table, ref, colNames, showColNames, tableStyle, withFilter));
+    rcpp_result_gen = Rcpp::wrap(build_table_xml(table, tableStyleXML, ref, colNames, showColNames, withFilter));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -77,13 +77,15 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 
 Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
   
-  ## set time on files to a point in time so files can
-  sapply(list.files(no.. = FALSE, recursive = TRUE, full.names = FALSE, include.dirs = TRUE), Sys.setFileTime, time = "2015-01-01")
-  Sys.setFileTime(path = "_rels/.rels", time = "2015-01-01")
+  zip_flags <- getOption(x = "openxlsx.zip_flags", default = NULL)
+  if(!is.null(zip_flags)){
+    if(zip_flags != "")
+      flags <- zip_flags
+  }
   
   ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
-  
+
   if(quiet){
     
     res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
@@ -632,20 +634,34 @@ Workbook$methods(getSheetName = function(sheetIndex){
 
 
 
-Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle, tableName, withFilter){
+Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, tableStyle, tableName, withFilter
+                                       , totalsRowCount = 0
+                                       , showFirstColumn = 0
+                                       , showLastColumn = 0
+                                       , showRowStripes = 1
+                                       , showColumnStripes = 0){
   
   ## id will start at 3 and drawing will always be 1, printer Settings at 2 (printer settings has been removed)
   id <- as.character(length(tables) + 3L)
   sheet <- validateSheet(sheet)
   
   ## build table XML and save to tables field
-  table <- sprintf('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="%s" name="%s" displayName="%s" ref="%s"', id, tableName, tableName, ref)
+  table <- sprintf('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="%s" name="%s" displayName="%s" ref="%s" totalsRowCount="%s"',
+                   id,
+                   tableName,
+                   tableName,
+                   ref,
+                   as.integer(totalsRowCount))
   
   nms <- names(tables)
   tSheets <- attr(tables, "sheet")
   tNames <- attr(tables, "tableName") 
   
-  tables <<- c(tables, .Call("openxlsx_build_table_xml", table, ref, colNames, showColNames, tableStyle, withFilter, PACKAGE = "openxlsx"))
+  tableStyleXML <- sprintf('<tableStyleInfo name="%s" showFirstColumn="%s" showLastColumn="%s" showRowStripes="%s" showColumnStripes="%s"/>', 
+                           tableStyle, as.integer(showFirstColumn), as.integer(showLastColumn), as.integer(showRowStripes), as.integer(showColumnStripes))
+  
+  
+  tables <<- c(tables, .Call("openxlsx_build_table_xml", table, tableStyleXML, ref, colNames, showColNames, withFilter, PACKAGE = "openxlsx"))
   names(tables) <<- c(nms, ref)
   attr(tables, "sheet") <<- c(tSheets, sheet)
   attr(tables, "tableName") <<- c(tNames, tableName)
