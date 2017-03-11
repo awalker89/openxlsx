@@ -99,7 +99,7 @@ SEXP write_worksheet_xml_2( std::string prior
         }
         
         
-      }else if(CharacterVector::is_na(cell_fn[j-1])){
+      }else if(!CharacterVector::is_na(cell_fn[j-1])){
         cell_xml += "\">" + cell_fn[j-1] + "</c>";
       }else{
         cell_xml += "\"/>";

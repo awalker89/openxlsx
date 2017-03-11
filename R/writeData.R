@@ -297,7 +297,7 @@ writeData <- function(wb,
     addStyle(wb = wb, sheet = sheet, style=headerStyle,
              rows = startRow,
              cols = 0:(nCol-1) + startCol,
-             gridExpand = TRUE)
+             gridExpand = TRUE, stack = TRUE)
   
   ## If we don't have any rows to write return
   if(nRow == 0)
@@ -316,7 +316,7 @@ writeData <- function(wb,
   ## hyperlink style, if no borders
   if(borders == "none"){
     
-    invisible(classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = colNames, nRow = nrow(x), colClasses = colClasses))
+    invisible(classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = colNames, nRow = nrow(x), colClasses = colClasses, stack = TRUE))
     
   }else if(borders == "surrounding"){
     

@@ -84,7 +84,7 @@ getId <- function(x){
 
 ## creates style object based on column classes
 ## Used in writeData for styling when no borders and writeData table for all column-class based styling
-classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasses){
+classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasses, stack = TRUE){
   
   sheet = wb$validateSheet(sheet)
   allColClasses <- unlist(colClasses, use.names = FALSE)
@@ -172,7 +172,7 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
                           "sheet" =  wb$sheet_names[sheet],
                           "rows" = rep.int(rowInds, times = length(inds)),
                           "cols" = rep(inds + startCol, each = length(rowInds)))
-    
+
     newStylesElements <- append(newStylesElements, list(styleElements))
   }
   
@@ -213,8 +213,24 @@ classStyles <- function(wb, sheet, startRow, startCol, colNames, nRow, colClasse
   }
   
   
-  if(!is.null(newStylesElements))
-    wb$styleObjects <- append(wb$styleObjects, newStylesElements)
+  if(!is.null(newStylesElements)){
+    
+    if(stack){
+      
+      for(i in 1:length(newStylesElements)){
+        wb$addStyle(sheet = sheet
+                    , style = newStylesElements[[i]]$style
+                    , rows = newStylesElements[[i]]$rows
+                    , cols = newStylesElements[[i]]$cols, stack = TRUE)
+      }
+      
+      
+    }else{
+      wb$styleObjects <- append(wb$styleObjects, newStylesElements)
+    }
+    
+  }
+    
   
   
   invisible(1)
@@ -548,7 +564,7 @@ buildBorder <- function(x){
     if(length(tmp) == 1)
       sideBorder[[i]] <- tmp
   }
-  
+
   sideBorder <- sideBorder[sideBorder != ""]
   x <- x[sideBorder != ""]
   if(length(sideBorder) == 0)
@@ -556,7 +572,7 @@ buildBorder <- function(x){
   
   
   ## style
-  weight <- gsub('style=|"', "", regmatches(x, regexpr('style="[a-z]+"', x, perl = TRUE)))
+  weight <- gsub('style=|"', "", regmatches(x, regexpr('style="[a-z]+"', x, perl = TRUE, ignore.case = TRUE)))
   
   
   ## Colours

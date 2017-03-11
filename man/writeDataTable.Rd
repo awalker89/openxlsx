@@ -7,8 +7,8 @@
 writeDataTable(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL,
   colNames = TRUE, rowNames = FALSE, tableStyle = "TableStyleLight9",
   tableName = NULL, headerStyle = NULL, withFilter = TRUE,
-  keepNA = FALSE, sep = ", ", firstColumn = FALSE, lastColumn = FALSE,
-  bandedRows = TRUE, bandedCols = FALSE)
+  keepNA = FALSE, sep = ", ", stack = FALSE, firstColumn = FALSE,
+  lastColumn = FALSE, bandedRows = TRUE, bandedCols = FALSE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a 
@@ -91,11 +91,11 @@ df <- data.frame("Date" = Sys.Date()-0:19,
                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
 
 ## openxlsx will apply default Excel styling for these classes
-class(df$Cash) <- "currency"
-class(df$Cash2) <- "accounting"
+class(df$Cash) <- c(class(df$Cash), "currency")
+class(df$Cash2) <- c(class(df$Cash2), "accounting")
 class(df$hLink) <- "hyperlink"
-class(df$Percentage) <- "percentage"
-class(df$TinyNumbers) <- "scientific"
+class(df$Percentage) <- c(class(df$Percentage), "percentage")
+class(df$TinyNumbers) <- c(class(df$TinyNumbers), "scientific")
 
 writeDataTable(wb, "S3", x = df, startRow = 4, rowNames = TRUE, tableStyle = "TableStyleMedium9")
 

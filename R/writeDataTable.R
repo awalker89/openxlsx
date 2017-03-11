@@ -66,11 +66,11 @@
 #'                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
 #' 
 #' ## openxlsx will apply default Excel styling for these classes
-#' class(df$Cash) <- "currency"
-#' class(df$Cash2) <- "accounting"
+#' class(df$Cash) <- c(class(df$Cash), "currency")
+#' class(df$Cash2) <- c(class(df$Cash2), "accounting")
 #' class(df$hLink) <- "hyperlink"
-#' class(df$Percentage) <- "percentage"
-#' class(df$TinyNumbers) <- "scientific"
+#' class(df$Percentage) <- c(class(df$Percentage), "percentage")
+#' class(df$TinyNumbers) <- c(class(df$TinyNumbers), "scientific")
 #' 
 #' writeDataTable(wb, "S3", x = df, startRow = 4, rowNames = TRUE, tableStyle = "TableStyleMedium9")
 #' 
@@ -98,6 +98,7 @@ writeDataTable <- function(wb, sheet, x,
                            withFilter = TRUE,
                            keepNA = FALSE,
                            sep = ", ",
+                           stack = FALSE,
                            firstColumn = FALSE,
                            lastColumn = FALSE,
                            bandedRows = TRUE,
@@ -201,7 +202,7 @@ writeDataTable <- function(wb, sheet, x,
   
   ## column class styling
   colClasses <- lapply(x, function(x) tolower(class(x)))
-  classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = TRUE, nRow = nrow(x), colClasses = colClasses)
+  classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = TRUE, nRow = nrow(x), colClasses = colClasses, stack = stack)
   
   ## write data to worksheet
   wb$writeData(df = x,

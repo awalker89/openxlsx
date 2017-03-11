@@ -2988,7 +2988,7 @@ Workbook$methods(loadStyles = function(stylesXML){
         if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
           
           border_ind <- as.integer(s[["borderId"]]) + 1L
-          if(border_ind < length(borders)){
+          if(border_ind <= length(borders)){
             thisBorder <- borders[[border_ind]]
             
             if("borderLeft" %in% names(thisBorder)){

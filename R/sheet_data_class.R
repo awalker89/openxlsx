@@ -64,10 +64,10 @@ Sheet_Data$methods(write = function(rows_in, cols_in, t_in, v_in, f_in, any_func
   
   possible_overlap <- FALSE
   if(n_elements > 0){
-    possible_overlap <- (min(cols_in) <= max(cols)) &
-      (max(cols_in) >= min(cols)) & 
-      (min(rows_in) <= max(rows)) & 
-      (max(rows_in) >= min(rows))
+    possible_overlap <- (min(cols_in, na.rm = TRUE) <= max(cols, na.rm = TRUE)) &
+      (max(cols_in, na.rm = TRUE) >= min(cols, na.rm = TRUE)) & 
+      (min(rows_in, na.rm = TRUE) <= max(rows, na.rm = TRUE)) & 
+      (max(rows_in, na.rm = TRUE) >= min(rows, na.rm = TRUE))
   }
   
   n <- length(cols_in)
