@@ -152,21 +152,8 @@ openXL(wb)
 ################################################################################################################
 ## package Example File
 wb <- loadWorkbook(file = system.file("loadExample.xlsx", package = "openxlsx"))
-# writeData(wb, sheet = 1, x = rep(0, 150), startRow = 2)
-
-saveWorkbook(wb, file = fl)
-
-wb$workbook.xml.rels
-
 openXL(wb)
 
-
-
-openXL(system.file("loadExample.xlsx", package = "openxlsx"))
-
-
-
-file = system.file("loadExample.xlsx", package = "openxlsx")
 
 
 

@@ -789,8 +789,8 @@ createStyle <- function(fontName = NULL,
 #' @param rows Rows to apply style to.
 #' @param cols columns to apply style to.
 #' @param gridExpand If \code{TRUE}, style will be applied to all combinations of rows and cols.
-#' @param stack If \code{TRUE}, style is merged with existing cell styles, 
-#' else any existing style is complete replaced by the new style.
+#' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+#' existing style is replaced by the new style.
 #' @seealso \code{\link{createStyle}}
 #' @seealso expand.grid
 #' @export

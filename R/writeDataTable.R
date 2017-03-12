@@ -28,6 +28,8 @@
 #' @param firstColumn logical. If TRUE, the first column is bold
 #' @param lastColumn logical. If TRUE, the last column is bold
 #' @param bandedRows logical. If TRUE, rows are colour banded
+#' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+#' existing style is replaced by the new style.
 #' @param bandedCols logical. If TRUE, the columns are colour banded
 #' @details columns of x with class Date/POSIXt, currency, accounting, 
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,

@@ -46,6 +46,9 @@ A vector of the form c(startCol, startRow)}
 \if{html}{\figure{tableoptions.png}{options: width="40\%" alt="Figure: table_options.png"}}
 \if{latex}{\figure{tableoptions.pdf}{options: width=7cm}}}
 
+\item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+existing style is replaced by the new style.}
+
 \item{firstColumn}{logical. If TRUE, the first column is bold}
 
 \item{lastColumn}{logical. If TRUE, the last column is bold}

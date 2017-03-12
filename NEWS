@@ -1,5 +1,5 @@
 
-openxlsx 4.0.1
+openxlsx 4.0.14
 ----------------------------------------------------------------
 
 NEW FEATURES
@@ -10,7 +10,11 @@ NEW FEATURES
 
 * dataValidation type "list"
 
-* dataBar showValue, gradient and border  can now be set through conditionalFormatting().
+* dataBar showValue, gradient and border can now be set through conditionalFormatting()
+
+* options("openxlsx.zipflags") to pass additional flags to zip application e.g. compression level
+
+* getTables() and removeTable() to show and remove Excel table objects 
 
 
 BUG FIXES
@@ -21,11 +25,15 @@ BUG FIXES
 
 * multiple spaces in table column names were not being maintained thus corrupting the xlsx file.
 
-* openXL fail silently on relative paths.
+* openXL fail silently on relative paths
 
 * headerStyle failed when writing a list of length 1 using write.xlsx
 
-* detectDate for read.xlsx issues.
+* detectDate for read.xlsx issues
+
+* some Excel column types causing existing styling to be removed
+
+* na.strings no longer ignored for read.xlsx.Workbook
 
 
 openxlsx 4.0.0
