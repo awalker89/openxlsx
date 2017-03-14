@@ -5,7 +5,7 @@
 #' 
 #' @name openxlsx
 #' @docType package
-#' @useDynLib openxlsx
+#' @useDynLib openxlsx, .registration=TRUE
 #' @import grDevices
 #' @import stats
 #' @import utils

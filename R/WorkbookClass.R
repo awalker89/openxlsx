@@ -397,7 +397,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
       file.copy(from = pivotDefinitionsRels[i], to =  file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)), overwrite = TRUE, copy.date = TRUE)
     
     for(i in 1:length(pivotTables.xml.rels))
-      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))   
+      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)), PACKAGE = "openxlsx")   
     
     
     
@@ -420,7 +420,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     
     for(i in 1:length(slicerCaches))
-      .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
+      .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)), PACKAGE = "openxlsx")
     
     
   }
@@ -434,34 +434,34 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
          <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
          <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>',
         '</Relationships>',
-        file.path(relsDir, ".rels"))
+        file.path(relsDir, ".rels"), PACKAGE = "openxlsx")
   
   
   ## write app.xml
   .Call("openxlsx_writeFile", '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">',
         '<Application>Microsoft Excel</Application>',
         '</Properties>',
-        file.path(docPropsDir, "app.xml"))
+        file.path(docPropsDir, "app.xml"), PACKAGE = "openxlsx")
   
   ## write core.xml
   .Call("openxlsx_writeFile", '<coreProperties xmlns="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
         pxml(core),
         '</coreProperties>',
-        file.path(docPropsDir, "core.xml"))
+        file.path(docPropsDir, "core.xml"), PACKAGE = "openxlsx")
   
   ## write workbook.xml.rels
   .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
         pxml(workbook.xml.rels),
         '</Relationships>',
-        file.path(xlrelsDir, "workbook.xml.rels"))
+        file.path(xlrelsDir, "workbook.xml.rels"), PACKAGE = "openxlsx")
   
   ## write tables
   if(length(unlist(tables, use.names = FALSE)) > 0){
     for(i in 1:length(unlist(tables, use.names = FALSE))){
-      .Call("openxlsx_writeFile", '', pxml(unlist(tables, use.names = FALSE)[[i]]), '', file.path(xlTablesDir, sprintf("table%s.xml", i+2)))
+      .Call("openxlsx_writeFile", '', pxml(unlist(tables, use.names = FALSE)[[i]]), '', file.path(xlTablesDir, sprintf("table%s.xml", i+2)), PACKAGE = "openxlsx")
       
       if(tables.xml.rels[[i]] != "")
-        .Call("openxlsx_writeFile", '', tables.xml.rels[[i]], '', file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))
+        .Call("openxlsx_writeFile", '', tables.xml.rels[[i]], '', file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)), PACKAGE = "openxlsx")
     }
   }
   
@@ -472,12 +472,12 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = xlqueryTablesDir, recursive = TRUE)
     
     for(i in 1:length(queryTables))
-      .Call("openxlsx_writeFile", '', queryTables[[i]], '', file.path(xlqueryTablesDir, sprintf("queryTable%s.xml", i)))
+      .Call("openxlsx_writeFile", '', queryTables[[i]], '', file.path(xlqueryTablesDir, sprintf("queryTable%s.xml", i)), PACKAGE = "openxlsx")
   }
   
   ## connections
   if(length(connections) > 0)
-    .Call("openxlsx_writeFile", '', connections, '', file.path(xlDir,"connections.xml"))
+    .Call("openxlsx_writeFile", '', connections, '', file.path(xlDir,"connections.xml"), PACKAGE = "openxlsx")
   
   ## externalLinks
   if(length(externalLinks)){
@@ -485,7 +485,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = externalLinksDir, recursive = TRUE)
     
     for(i in 1:length(externalLinks))
-      .Call("openxlsx_writeFile", '', externalLinks[[i]], '', file.path(externalLinksDir, sprintf("externalLink%s.xml", i)))
+      .Call("openxlsx_writeFile", '', externalLinks[[i]], '', file.path(externalLinksDir, sprintf("externalLink%s.xml", i)), PACKAGE = "openxlsx")
   }
   
   ## externalLinks rels
@@ -494,7 +494,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = externalLinksRelsDir, recursive = TRUE)
     
     for(i in 1:length(externalLinksRels))
-      .Call("openxlsx_writeFile", '', externalLinksRels[[i]], '', file.path(externalLinksRelsDir, sprintf("externalLink%s.xml.rels", i)))
+      .Call("openxlsx_writeFile", '', externalLinksRels[[i]], '', file.path(externalLinksRelsDir, sprintf("externalLink%s.xml.rels", i)), PACKAGE = "openxlsx")
   } 
   
   # printerSettings
@@ -521,7 +521,8 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
           sprintf('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="%s" uniqueCount="%s">',   length(sharedStrings),   attr(sharedStrings, "uniqueCount")),
           paste(sharedStrings, collapse = ""),
           "</sst>",
-          file.path(xlDir,"sharedStrings.xml"))
+          file.path(xlDir,"sharedStrings.xml")
+          , PACKAGE = "openxlsx")
   }else{
     
     ## Remove relationship to sharedStrings
@@ -535,7 +536,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   .Call("openxlsx_writeFile", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
         pxml(ct),
         '</Types>', 
-        file.path(tmpDir, "[Content_Types].xml"))
+        file.path(tmpDir, "[Content_Types].xml"), PACKAGE = "openxlsx")
   
   
   styleXML <- styles
@@ -552,7 +553,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   .Call("openxlsx_writeFile", '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">',
         pxml(styleXML),
         '</styleSheet>',
-        file.path(xlDir,"styles.xml"))
+        file.path(xlDir,"styles.xml"), PACKAGE = "openxlsx")
   
   
   ## write workbook.xml
@@ -564,7 +565,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   .Call("openxlsx_writeFile", '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
         pxml(workbookXML),
         '</workbook>',   
-        file.path(xlDir,"workbook.xml"))
+        file.path(xlDir,"workbook.xml"), PACKAGE = "openxlsx")
   
   workbook$sheets <<- workbook$sheets[order(sheetOrder)] ## Need to reset sheet order to allow multiple savings
   
@@ -1752,8 +1753,8 @@ Workbook$methods(removeCellMerge = function(sheet, startRow, endRow, startCol, e
   if(!is.null(exMerges)){
     
     comps <- lapply(exMerges, function(x) unlist(strsplit(x, split = ":")))  
-    exMergedCells <- .Call("openxlsx_build_cell_merges", comps)
-    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref)))
+    exMergedCells <- .Call("openxlsx_build_cell_merges", comps, PACKAGE = "openxlsx")
+    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref), PACKAGE = "openxlsx"))
     
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))

@@ -120,7 +120,7 @@ Workbook$methods(setColWidths = function(sheet){
       }
       
       ## Now that we have the max character width for the largest font on the page calculate the column widths
-      calculatedWidths <- .Call("openxlsx_calc_column_widths",
+      calculatedWidths <- .Call("openxlsx_calc_column_widths", PACKAGE = "openxlsx",
                                 sd,
                                 unlist(sharedStrings, use.names = FALSE),
                                 as.integer(autoCols),

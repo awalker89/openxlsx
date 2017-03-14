@@ -315,7 +315,7 @@ writeCommentXML <- function(comment_list, file_name){
     
   }
   
-  .Call("openxlsx_writeFile", '', paste(xml, collapse = ""), '</commentList></comments>', file_name)
+  .Call("openxlsx_writeFile", '', paste(xml, collapse = ""), '</commentList></comments>', file_name, PACKAGE = "openxlsx")
 
   NULL
   
@@ -772,7 +772,7 @@ mergeCell2mapping <- function(x){
   ## for each we grid.expand
   refs <- do.call("rbind", lapply(1:length(rows), function(i){
     tmp <- expand.grid("cols" = cols[[i]], "rows" = rows[[i]])
-    tmp$ref <- paste0(.Call("openxlsx_convert_to_excel_ref", tmp$cols, LETTERS), tmp$rows)
+    tmp$ref <- paste0(.Call("openxlsx_convert_to_excel_ref", tmp$cols, LETTERS, PACKAGE = "openxlsx"), tmp$rows)
     tmp$anchor_cell <- tmp$ref[1]
     return(tmp[, c("anchor_cell", "ref", "rows")])
   }))

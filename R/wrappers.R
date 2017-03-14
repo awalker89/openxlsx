@@ -867,7 +867,7 @@ addStyle <- function(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = F
 #' @param cellCoords A data.frame with two columns coordinate pairs. 
 #' @return Excel alphanumeric cell reference
 getCellRefs <- function(cellCoords){
-  l <- .Call("openxlsx_convert_to_excel_ref", unlist(cellCoords[,2]), LETTERS, PACKAGE="openxlsx")
+  l <- convert_to_excel_ref(cols = unlist(cellCoords[,2]), LETTERS = LETTERS)
   paste0(l, cellCoords[,1])
 }
 
@@ -2194,8 +2194,8 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   startRow <- min(rows)
   endRow <- max(rows)
   
-  ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS), "$", startRow)
-  ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", endCol, LETTERS), "$", endRow)
+  ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS, PACKAGE = "openxlsx"), "$", startRow)
+  ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", endCol, LETTERS, PACKAGE = "openxlsx"), "$", endRow)
   
   invisible(
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])

@@ -244,9 +244,9 @@ WorkSheet$methods(order_sheetdata = function(){
     sheet_data$style_id <<- sheet_data$style_id[ord]
     
     sheet_data$data_count <<- 1L
-    
-    dm1 <- paste0(.Call("openxlsx_int_2_cell_ref", sheet_data$cols[1], LETTERS), sheet_data$rows[1])
-    dm2 <- paste0(.Call("openxlsx_int_2_cell_ref", sheet_data$cols[sheet_data$n_elements], LETTERS), sheet_data$rows[sheet_data$n_elements])
+
+    dm1 <- paste0(.Call("openxlsx_int_2_cell_ref", cols = sheet_data$cols[1], PACKAGE = "openxlsx"), sheet_data$rows[1])
+    dm2 <- paste0(.Call("openxlsx_int_2_cell_ref", cols = sheet_data$cols[sheet_data$n_elements], PACKAGE = "openxlsx"), sheet_data$rows[sheet_data$n_elements])
     
     if(length(dm1) == 1 & length(dm2) != 1){
       if(!is.na(dm1) & !is.na(dm2) & dm1 != "NA" & dm2 != "NA")

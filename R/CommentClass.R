@@ -201,7 +201,7 @@ writeComment <- function(wb, sheet, col, row, comment, xy = NULL){
   if(!is.numeric(col))
     col <- convertFromExcelRef(col)
   
-  ref <- paste0(.Call("openxlsx_convert_to_excel_ref", col, LETTERS), row)
+  ref <- paste0(convert_to_excel_ref(cols = col, LETTERS = LETTERS), row)
   
   comment_list <- list("ref" = ref,
                        "author" = comment$author,
@@ -253,7 +253,7 @@ removeComment <- function(wb, sheet, cols, rows, gridExpand = TRUE){
     stop("Length of rows and cols must be equal.")
   }
   
-  comb <- paste0(.Call('openxlsx_convert_to_excel_ref', cols, LETTERS, PACKAGE="openxlsx"), rows)
+  comb <- paste0(.Call('openxlsx_convert_to_excel_ref', cols, LETTERS, PACKAGE = "openxlsx"), rows)
   toKeep <- !sapply(wb$comments[[sheet]], "[[", "ref") %in% comb
   
   wb$comments[[sheet]] <- wb$comments[[sheet]][toKeep]
