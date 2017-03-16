@@ -21,24 +21,31 @@
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
-loadWorkbook <- function(file, xlsxFile = NULL){
+loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
   
-  if(!is.null(xlsxFile))
-    file <- xlsxFile
-  
-  file <- getFile(file)
-  
-  file <- getFile(file)
-  if(!file.exists(file))
-    stop("File does not exist.")
+  ## If this is a unzipped workbook, skip the temp dir stuff
+  if(isUnzipped){
+    xmlDir = file
+    xmlFiles <- list.files(path = xmlDir, full.names = T, recursive = T, all.files = T)
+  } else {
+    
+    if(!is.null(xlsxFile))
+      file <- xlsxFile
+    
+    file <- getFile(file)
+    
+    file <- getFile(file)
+    if(!file.exists(file))
+      stop("File does not exist.")
+    
+    ## create temp dir
+    xmlDir <- file.path(tempdir(),  paste0(tempfile(tmpdir = ""), "_openxlsx_loadWorkbook"))
+    
+    ## Unzip files to temp directory
+    xmlFiles <- unzip(file, exdir = xmlDir)
+  }
   
   wb <- createWorkbook()
-  
-  ## create temp dir
-  xmlDir <- file.path(tempdir(),  paste0(tempfile(tmpdir = ""), "_openxlsx_loadWorkbook"))
-  
-  ## Unzip files to temp directory
-  xmlFiles <- unzip(file, exdir = xmlDir)
   
   ## Not used
   # .relsXML           <- xmlFiles[grepl("_rels/.rels$", xmlFiles, perl = TRUE)]
@@ -87,7 +94,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   vbaProject         <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
   ## remove all EXCEPT media and charts
-  on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment|embeddings|pivot|slicer|vbaProject", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  if(!isUnzipped){
+    on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment|embeddings|pivot|slicer|vbaProject", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  }
   
   nSheets <- length(worksheetsXML) + length(chartSheetsXML)
   
