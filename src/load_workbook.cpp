@@ -98,11 +98,12 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         
         NumericVector widths;
         IntegerVector columns;
-        
+        CharacterVector column_hidden;  
         
         for(size_t ci = 0; ci < cols.size(); ci++){
           
-          double tmp = 0;
+          double tmp_width = 0;
+          std::string tmp_hidden;
           int min_c = 0;
           int max_c = 0;
           buf = cols[ci];
@@ -118,18 +119,24 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
             
             tmp_pos = buf.find("width=\"", 0);
             endPos = buf.find(tagEnd, tmp_pos + 7);
-            tmp = atof(buf.substr(tmp_pos + 7, endPos - tmp_pos - 7).c_str()) - 0.71;
+            tmp_width = atof(buf.substr(tmp_pos + 7, endPos - tmp_pos - 7).c_str()) - 0.71;
             
-            if(min_c != max_c){
-              while(min_c <= max_c){
-                widths.push_back(tmp);
-                columns.push_back(min_c);
-                min_c++;
-              }
+            tmp_pos = buf.find("hidden=\"", 0);
+            if(tmp_pos != string::npos){
+              endPos = buf.find(tagEnd, tmp_pos + 8);
+              tmp_hidden = buf.substr(tmp_pos + 8, endPos - tmp_pos - 8);
             }else{
-              widths.push_back(tmp);
-              columns.push_back(min_c);
+              tmp_hidden = "0";
             }
+            
+
+            while(min_c <= max_c){
+              widths.push_back(tmp_width);
+              columns.push_back(min_c);
+              column_hidden.push_back(tmp_hidden);
+              min_c++;
+            }
+
           }
           
         }
@@ -137,6 +144,7 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
         if(widths.size() > 0){
           CharacterVector tmp_widths(widths);
           tmp_widths.attr("names") = columns;
+          tmp_widths.attr("hidden") = column_hidden;
           colWidths[i] = tmp_widths;
         }
         

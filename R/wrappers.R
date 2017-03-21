@@ -1098,8 +1098,9 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param cols Indices of cols to set width
-#' @param widths widths to set rows to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
+#' @param widths widths to set cols to specified in Excel column width units or "auto" for automatic sizing. The widths argument is
 #' recycled to the length of cols.
+#' @param hidden Logical vector. If TRUE the column is hidden.
 #' @param ignoreMergedCells Ignore any cells that have been merged with other cells in the calculation of "auto" column widths.
 #' @details The global min and max column width for "auto" columns is set by (default values show):
 #' \itemize{
@@ -1129,7 +1130,7 @@ setRowHeights <- function(wb, sheet, rows, heights){
 #'   
 #' ## Save workbook
 #' saveWorkbook(wb, "setColWidthsExample.xlsx", overwrite = TRUE)
-setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
+setColWidths <- function(wb, sheet, cols, widths = 8.43, hidden = rep(FALSE, length(cols)), ignoreMergedCells = FALSE){
   
   sheet <- wb$validateSheet(sheet)
   
@@ -1143,29 +1144,61 @@ setColWidths <- function(wb, sheet, cols, widths, ignoreMergedCells = FALSE){
   if(length(widths) > length(cols))
     stop("More widths than columns supplied.")
   
+  if(length(hidden) > length(cols))
+    stop("hidden argument is longer than cols.")
+  
   if(length(widths) < length(cols))
     widths <- rep(widths, length.out = length(cols))
   
-  ## check for existing custom widths
-  flag <- names(wb$colWidths[[sheet]]) %in% cols
-  if(any(flag))
-    wb$colWidths[[sheet]] <- wb$colWidths[[sheet]][!flag]
-  
-  cols <- convertFromExcelRef(cols)
+  if(length(hidden) < length(cols))
+    hidden <- rep(hidden, length.out = length(cols))
   
   ## Remove duplicates
   widths <- widths[!duplicated(cols)]
+  hidden <- hidden[!duplicated(cols)]
   cols <- cols[!duplicated(cols)]
+  cols <- convertFromExcelRef(cols)
   
-  names(widths) <- cols
-  exNames <- names(wb$colWidths[[sheet]])
+  if(length(wb$colWidths[[sheet]]) > 0){
+    
+    existing_cols <- names(wb$colWidths[[sheet]])
+    existing_widths <- unname(wb$colWidths[[sheet]])
+    existing_hidden <- attr(wb$colWidths[[sheet]], "hidden")
+    
+    ## check for existing custom widths
+    flag <- existing_cols %in% cols
+    if(any(flag)){
+      existing_cols <- existing_cols[!flag]
+      existing_widths <- existing_widths[!flag]
+      existing_hidden <- existing_hidden[!flag]
+    }
+
+    all_names <- c(existing_cols, cols)
+    all_widths <- c(existing_widths, widths)
+    all_hidden <- c(existing_hidden, as.character(as.integer(hidden)))
+    
+    ord <- order(as.integer(all_names))
+    all_names <- all_names[ord]
+    all_widths <- all_widths[ord]
+    all_hidden <- all_hidden[ord]
+    
+    
+    names(all_widths) <- all_names
+    wb$colWidths[[sheet]] <- all_widths
+    attr(wb$colWidths[[sheet]], "hidden") <- all_hidden
+    
+    
+    
+  }else{
+    
+    names(widths) <- cols
+    wb$colWidths[[sheet]] <- widths
+    attr(wb$colWidths[[sheet]], "hidden") <- as.character(as.integer(hidden))
+    
+  }
   
-  allWidths <- unlist(c(wb$colWidths[[sheet]], widths))
-  names(allWidths) <- c(exNames, cols)
   
-  allWidths <- allWidths[order(as.integer(names(allWidths)))]
-  
-  wb$colWidths[[sheet]] <- allWidths
+  invisible(0)
 }
 
 

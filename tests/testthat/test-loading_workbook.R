@@ -76,6 +76,7 @@ test_that("Loading readTest.xlsx Sheet 1", {
   expected_col_widths <- structure(c("41.430625", "11.29", "11.0009375", "8.71578125")
                                    , .Names = c("3", "4", "5", "6"))
   
+  attr(expected_col_widths, "hidden") <- rep("0", 4)
   
   expect_equal(wb$colWidths[[3]], expected_col_widths)
   
@@ -168,6 +169,7 @@ test_that("Loading readTest.xlsx Sheet 1", {
   
   ## Column Widths
   expected_col_widths <- structure("10.8603125", .Names = "6")
+  attr(expected_col_widths, "hidden") <- "0"
   expect_equal(wb$colWidths[[1]], expected_col_widths)
   
   

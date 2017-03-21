@@ -7,6 +7,10 @@ Workbook$methods(setColWidths = function(sheet){
   sheet <- validateSheet(sheet)
   
   widths <- colWidths[[sheet]]
+  hidden <- attr(colWidths[[sheet]], "hidden", exact = TRUE)
+  if(length(hidden) != length(widths))
+    hidden <- rep("0", length(widths))
+  
   cols <- names(colWidths[[sheet]])
   
   autoColsInds <- widths %in% c("auto", "auto2")
@@ -139,7 +143,7 @@ Workbook$methods(setColWidths = function(sheet){
   }
   
   ## Calculate width of auto
-  colNodes <- sprintf('<col min="%s" max="%s" width="%s" customWidth="1"/>', cols, cols, widths)
+  colNodes <- sprintf('<col min="%s" max="%s" width="%s" hidden = "%s" customWidth="1"/>', cols, cols, widths, hidden)
   
   ## Append new col widths XML to worksheets[[sheet]]$cols
   worksheets[[sheet]]$cols <<- append(worksheets[[sheet]]$cols, colNodes)
