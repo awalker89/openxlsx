@@ -761,7 +761,7 @@ Workbook$methods(updateStyles = function(style){
      !is.null(style$fontScheme)){
     
     fontNode <- .self$createFontNode(style)
-    fontId <- which(styles$font == fontNode) - 1L
+    fontId <- which(styles$fonts == fontNode) - 1L
     
     if(length(fontId) == 0){
       
@@ -797,7 +797,7 @@ Workbook$methods(updateStyles = function(style){
   if(!is.null(style$fill)){
     fillNode <- .self$createFillNode(style)
     if(!is.null(fillNode)){
-      fillId <- which(styles$fill == fillNode) - 1L
+      fillId <- which(styles$fills == fillNode) - 1L
       
       if(length(fillId) == 0){      
         fillId <- length(styles$fills)
@@ -939,7 +939,7 @@ Workbook$methods(updateCellStyles = function(){
     if(!is.null(style$fill)){
       fillNode <- .self$createFillNode(style)
       if(!is.null(fillNode)){
-        fillId <- which(styles$fill == fillNode) - 1L
+        fillId <- which(styles$fills == fillNode) - 1L
         
         if(length(fillId) == 0){      
           fillId <- length(styles$fills)
