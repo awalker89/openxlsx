@@ -15,7 +15,7 @@
 #' 
 #' ## Save workbook to working directory
 #' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
-createWorkbook <- function(creator = Sys.getenv("USERNAME")){
+createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.getenv("USERNAME"), Sys.getenv("USER"))){
   
   if(class(creator) != "character")
     creator <- ""
