@@ -218,6 +218,7 @@ read.xlsx.default <- function(xlsxFile,
   
   ## get the correct sheets
   if("character" %in% class(sheet)){
+    sheetNames <- replaceXMLEntities(sheetNames)
     sheetInd <- which(sheetNames == sheet)
     if(length(sheetInd) == 0)
       stop(sprintf('Cannot find sheet named "%s"', sheet))

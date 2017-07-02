@@ -238,3 +238,25 @@ test_that("Writing then reading returns identical data.frame 4", {
 
 
 
+test_that("Special characters in sheet names", {
+  
+  tf <- tempfile(fileext = ".xlsx")
+  
+  ## data
+  sheet_name <- "A & B < D > D"
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, sheetName = sheet_name)
+  addWorksheet(wb, sheetName = "test")
+  writeData(wb, sheet = 1, x = 1:10)
+  saveWorkbook(wb = wb, file = tf, overwrite = TRUE)
+  
+  expect_equal(getSheetNames(tf)[1], sheet_name)
+  expect_equal(getSheetNames(tf)[2], "test")
+  
+  expect_equal(read.xlsx(tf, colNames = FALSE)[[1]], 1:10)
+  
+  unlink(tf, recursive = TRUE, force = TRUE)
+  
+})
+
