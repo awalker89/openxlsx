@@ -1820,6 +1820,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
+  sheet <- wb$validateSheet(sheet)
   xml <- wb$worksheets[[sheet]]$pageSetup
   
   if(!is.null(orientation)){
@@ -1841,16 +1842,12 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   }else{
     paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
   }
-  
-  ## validate sheet - get sheet index
-  sheet <- wb$validateSheet(sheet)
-  
+
   
   ##############################
   ## Keep defaults on orientation, hdpi, vdpi, paperSize
   hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
   vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
-  
   
   
   ##############################
