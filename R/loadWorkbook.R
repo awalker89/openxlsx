@@ -212,8 +212,15 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     ## read in and get <si> nodes
     vals <- .Call("openxlsx_getNodes", sharedStrings, "<si>", PACKAGE = "openxlsx")
-    Encoding(vals) <- "UTF-8"
-    attr(vals, "uniqueCount") <- uniqueCount
+    
+    if("<si><t/></si>" %in% vals){
+      vals[vals == "<si><t/></si>"] <- "<si><t>NA</t></si>"
+      Encoding(vals) <- "UTF-8"
+      attr(vals, "uniqueCount") <- uniqueCount - 1L      
+    }else{
+      Encoding(vals) <- "UTF-8"
+      attr(vals, "uniqueCount") <- uniqueCount
+    }
     
     wb$sharedStrings <- vals
     

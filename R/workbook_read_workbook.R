@@ -227,8 +227,6 @@ read.xlsx.Workbook <- function(xlsxFile,
     
   }
   
-  
-  
   ## Now safe to convert v to numeric
   vn <- as.numeric(v)
   
@@ -240,10 +238,15 @@ read.xlsx.Workbook <- function(xlsxFile,
     ## set encoding of sharedStrings &  replace values in v with string values
     Encoding(sharedStrings) <- "UTF-8"
     v[string_refs] <- sharedStrings[vn[string_refs] + 1L]
+
+    ## any NA sharedStrings - remove
+    v_na <- which(is.na(v))
+    if(length(v_na) > 0)
+      string_refs <- setdiff(string_refs, v_na)
     
   }
   
-  
+
   ## date detection
   origin <- 25569L
   isDate <- as.logical(NA)
@@ -303,6 +306,7 @@ read.xlsx.Workbook <- function(xlsxFile,
       
     }
   } ## end of detectDates
+  
 
   ## Build data.frame
   m <- .Call("openxlsx_read_workbook"
@@ -318,6 +322,16 @@ read.xlsx.Workbook <- function(xlsxFile,
              , clean_names
              , PACKAGE = "openxlsx")
   
+  
+  ## all NA columns
+  all_na <- unname(unlist(lapply(m, function(x) all(is.na(x)))))
+  if(all_na[ncol(m)]){
+    m[[ncol(m)]] <- NULL
+    all_na <- all_na[-length(all_na)]
+  }
+  
+  if(skipEmptyCols & any(all_na))
+    m <- m[, -which(all_na)]
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
