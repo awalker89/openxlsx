@@ -140,6 +140,10 @@ writeDataTable <- function(wb, sheet, x,
   options("scipen" = 10000)
   on.exit(options("scipen" = exSciPen), add = TRUE)
   
+  exDigits <- getOption("digits")
+  options("digits" = 22)
+  on.exit(options("digits" = exDigits), add = TRUE)
+  
   ## convert startRow and startCol
   if(!is.numeric(startCol))
     startCol <- convertFromExcelRef(startCol)
