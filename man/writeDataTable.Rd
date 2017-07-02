@@ -39,15 +39,15 @@ A vector of the form c(startCol, startRow)}
 
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 
-\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
+\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
+
+\item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+existing style is replaced by the new style.
 \cr\cr
 \cr\bold{The below options correspond to Excel table options:}
 \cr
 \if{html}{\figure{tableoptions.png}{options: width="40\%" alt="Figure: table_options.png"}}
 \if{latex}{\figure{tableoptions.pdf}{options: width=7cm}}}
-
-\item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
-existing style is replaced by the new style.}
 
 \item{firstColumn}{logical. If TRUE, the first column is bold}
 
