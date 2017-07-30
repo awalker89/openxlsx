@@ -165,10 +165,15 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   sheetName <- "Sheet 1"
   if("sheetName" %in% names(params)){
     
-    if(nchar(params$sheetName) > 31)
+    if(any(nchar(params$sheetName) > 31))
       stop("sheetName too long! Max length is 31 characters.")
     
     sheetName <- as.character(params$sheetName)
+    
+    if("list" %in% class(x) & length(sheetName) == length(x))
+      names(x) <- sheetName
+      
+    
   }
   
   tabColour <- NULL
@@ -178,7 +183,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   zoom <- 100
   if("zoom" %in% names(params)){
     if(is.numeric(params$zoom)){
-      zoom <- params$zoom[1]
+      zoom <- params$zoom
     }else{
       stop("zoom must be numeric")
     }
@@ -355,6 +360,17 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
     
     ## make all inputs as long as the list
+    if(!is.null(tabColour)){
+      if(length(tabColour) != nSheets)
+        tabColour <- rep_len(tabColour, length.out = nSheets)
+    }
+    
+    if(length(zoom) != nSheets)
+      zoom <- rep_len(zoom, length.out = nSheets)
+    
+    if(length(gridLines) != nSheets)
+      gridLines <- rep_len(gridLines, length.out = nSheets)
+    
     if(length(withFilter) != nSheets)
       withFilter <- rep_len(withFilter, length.out = nSheets)
     
@@ -396,7 +412,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
     for(i in 1:nSheets){
       
-      wb$addWorksheet(nms[[i]], showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
+      wb$addWorksheet(nms[[i]], showGridLines = gridLines[i], tabColour = tabColour[i], zoom = zoom[i])
       
       if(asTable[i]){
         
