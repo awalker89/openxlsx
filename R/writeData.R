@@ -306,8 +306,8 @@ writeData <- function(wb,
   ## named region
   if(!is.null(name)){
     
-    ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS, PACKAGE = "openxlsx"), "$", startRow)
-    ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol + nCol - 1L, LETTERS, PACKAGE = "openxlsx"), "$", startRow + nRow - 1L + colNames)
+    ref1 <- paste0("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
+    ref2 <- paste0("$", convert_to_excel_ref(cols = startCol + nCol - 1L, LETTERS = LETTERS), "$", startRow + nRow - 1L + colNames)
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
     
   }
