@@ -24,8 +24,8 @@ test_that("skip empty rows", {
   
   
   v <- c("A1", "B1", "A2", "B2", "A5", "B5")
-  expect_equal(.Call('openxlsx_calc_number_rows', PACKAGE = 'openxlsx', x = v, skipEmptyRows = TRUE), 3)
-  expect_equal(.Call('openxlsx_calc_number_rows', PACKAGE = 'openxlsx', x = v, skipEmptyRows = FALSE), 5)
+  expect_equal(calc_number_rows(x = v, skipEmptyRows = TRUE), 3)
+  expect_equal(calc_number_rows(x = v, skipEmptyRows = FALSE), 5)
   
   
   
