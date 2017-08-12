@@ -577,7 +577,7 @@ buildBorder <- function(x){
   
   ## Colours
   cols <- replicate(n = length(sideBorder), list(rgb = "FF000000"))
-  colNodes <- unlist(sapply(x, getChildlessNode, tag = "<color"), USE.NAMES = FALSE)
+  colNodes <- unlist(sapply(x, getChildlessNode, tag = "<color", USE.NAMES = FALSE))
   
   if(length(colNodes) > 0){
     attrs <- regmatches(colNodes, regexpr('(theme|indexed|rgb|auto)=".+"', colNodes))

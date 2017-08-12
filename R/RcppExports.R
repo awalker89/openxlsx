@@ -2,138 +2,138 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 calc_column_widths <- function(sheet_data, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW) {
-    .Call('openxlsx_calc_column_widths', PACKAGE = 'openxlsx', sheet_data, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW)
+    .Call(`_openxlsx_calc_column_widths`, sheet_data, sharedStrings, autoColumns, widths, baseFontCharWidth, minW, maxW)
 }
 
 convert_to_excel_ref <- function(cols, LETTERS) {
-    .Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', cols, LETTERS)
+    .Call(`_openxlsx_convert_to_excel_ref`, cols, LETTERS)
 }
 
 convert_from_excel_ref <- function(x) {
-    .Call('openxlsx_convert_from_excel_ref', PACKAGE = 'openxlsx', x)
+    .Call(`_openxlsx_convert_from_excel_ref`, x)
 }
 
 convert_to_excel_ref_expand <- function(cols, LETTERS, rows) {
-    .Call('openxlsx_convert_to_excel_ref_expand', PACKAGE = 'openxlsx', cols, LETTERS, rows)
+    .Call(`_openxlsx_convert_to_excel_ref_expand`, cols, LETTERS, rows)
 }
 
 isInternalHyperlink <- function(x) {
-    .Call('openxlsx_isInternalHyperlink', PACKAGE = 'openxlsx', x)
+    .Call(`_openxlsx_isInternalHyperlink`, x)
 }
 
-writeFile <- function(parent, xmlText, parentEnd, R_fileName) {
-    .Call('openxlsx_writeFile', PACKAGE = 'openxlsx', parent, xmlText, parentEnd, R_fileName)
+write_file <- function(head = "", body = "", tail = "", fl = "") {
+    .Call(`_openxlsx_write_file`, head, body, tail, fl)
 }
 
 cppReadFile <- function(xmlFile) {
-    .Call('openxlsx_cppReadFile', PACKAGE = 'openxlsx', xmlFile)
+    .Call(`_openxlsx_cppReadFile`, xmlFile)
 }
 
 read_file_newline <- function(xmlFile) {
-    .Call('openxlsx_read_file_newline', PACKAGE = 'openxlsx', xmlFile)
+    .Call(`_openxlsx_read_file_newline`, xmlFile)
 }
 
 get_letters <- function() {
-    .Call('openxlsx_get_letters', PACKAGE = 'openxlsx')
+    .Call(`_openxlsx_get_letters`)
 }
 
 loadworksheets <- function(wb, styleObjects, xmlFiles, is_chart_sheet) {
-    .Call('openxlsx_loadworksheets', PACKAGE = 'openxlsx', wb, styleObjects, xmlFiles, is_chart_sheet)
+    .Call(`_openxlsx_loadworksheets`, wb, styleObjects, xmlFiles, is_chart_sheet)
 }
 
 getNodes <- function(xml, tagIn) {
-    .Call('openxlsx_getNodes', PACKAGE = 'openxlsx', xml, tagIn)
+    .Call(`_openxlsx_getNodes`, xml, tagIn)
 }
 
 getOpenClosedNode <- function(xml, open_tag, close_tag) {
-    .Call('openxlsx_getOpenClosedNode', PACKAGE = 'openxlsx', xml, open_tag, close_tag)
+    .Call(`_openxlsx_getOpenClosedNode`, xml, open_tag, close_tag)
 }
 
 getAttr <- function(x, tag) {
-    .Call('openxlsx_getAttr', PACKAGE = 'openxlsx', x, tag)
+    .Call(`_openxlsx_getAttr`, x, tag)
 }
 
 getChildlessNode_ss <- function(xml, tag) {
-    .Call('openxlsx_getChildlessNode_ss', PACKAGE = 'openxlsx', xml, tag)
+    .Call(`_openxlsx_getChildlessNode_ss`, xml, tag)
 }
 
 getChildlessNode <- function(xml, tag) {
-    .Call('openxlsx_getChildlessNode', PACKAGE = 'openxlsx', xml, tag)
+    .Call(`_openxlsx_getChildlessNode`, xml, tag)
 }
 
 get_extLst_Major <- function(xml) {
-    .Call('openxlsx_get_extLst_Major', PACKAGE = 'openxlsx', xml)
+    .Call(`_openxlsx_get_extLst_Major`, xml)
 }
 
 cell_ref_to_col <- function(x) {
-    .Call('openxlsx_cell_ref_to_col', PACKAGE = 'openxlsx', x)
+    .Call(`_openxlsx_cell_ref_to_col`, x)
 }
 
 int_2_cell_ref <- function(cols) {
-    .Call('openxlsx_int_2_cell_ref', PACKAGE = 'openxlsx', cols)
+    .Call(`_openxlsx_int_2_cell_ref`, cols)
 }
 
 get_shared_strings <- function(xmlFile, isFile) {
-    .Call('openxlsx_get_shared_strings', PACKAGE = 'openxlsx', xmlFile, isFile)
+    .Call(`_openxlsx_get_shared_strings`, xmlFile, isFile)
 }
 
 getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates) {
-    .Call('openxlsx_getCellInfo', PACKAGE = 'openxlsx', xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
+    .Call(`_openxlsx_getCellInfo`, xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
 }
 
 read_workbook <- function(cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names) {
-    .Call('openxlsx_read_workbook', PACKAGE = 'openxlsx', cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names)
+    .Call(`_openxlsx_read_workbook`, cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names)
 }
 
 calc_number_rows <- function(x, skipEmptyRows) {
-    .Call('openxlsx_calc_number_rows', PACKAGE = 'openxlsx', x, skipEmptyRows)
+    .Call(`_openxlsx_calc_number_rows`, x, skipEmptyRows)
 }
 
 map_cell_types_to_integer <- function(t) {
-    .Call('openxlsx_map_cell_types_to_integer', PACKAGE = 'openxlsx', t)
+    .Call(`_openxlsx_map_cell_types_to_integer`, t)
 }
 
 map_cell_types_to_char <- function(t) {
-    .Call('openxlsx_map_cell_types_to_char', PACKAGE = 'openxlsx', t)
+    .Call(`_openxlsx_map_cell_types_to_char`, t)
 }
 
 build_cell_types_integer <- function(classes, n_rows) {
-    .Call('openxlsx_build_cell_types_integer', PACKAGE = 'openxlsx', classes, n_rows)
+    .Call(`_openxlsx_build_cell_types_integer`, classes, n_rows)
 }
 
 buildCellTypes <- function(classes, nRows) {
-    .Call('openxlsx_buildCellTypes', PACKAGE = 'openxlsx', classes, nRows)
+    .Call(`_openxlsx_buildCellTypes`, classes, nRows)
 }
 
 build_cell_merges <- function(comps) {
-    .Call('openxlsx_build_cell_merges', PACKAGE = 'openxlsx', comps)
+    .Call(`_openxlsx_build_cell_merges`, comps)
 }
 
 buildCellList <- function(r, t, v) {
-    .Call('openxlsx_buildCellList', PACKAGE = 'openxlsx', r, t, v)
+    .Call(`_openxlsx_buildCellList`, r, t, v)
 }
 
 write_worksheet_xml <- function(prior, post, sheet_data, R_fileName) {
-    .Call('openxlsx_write_worksheet_xml', PACKAGE = 'openxlsx', prior, post, sheet_data, R_fileName)
+    .Call(`_openxlsx_write_worksheet_xml`, prior, post, sheet_data, R_fileName)
 }
 
 buildMatrixNumeric <- function(v, rowInd, colInd, colNames, nRows, nCols) {
-    .Call('openxlsx_buildMatrixNumeric', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols)
+    .Call(`_openxlsx_buildMatrixNumeric`, v, rowInd, colInd, colNames, nRows, nCols)
 }
 
 buildMatrixMixed <- function(v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols) {
-    .Call('openxlsx_buildMatrixMixed', PACKAGE = 'openxlsx', v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols)
+    .Call(`_openxlsx_buildMatrixMixed`, v, rowInd, colInd, colNames, nRows, nCols, charCols, dateCols)
 }
 
 matrixRowInds <- function(indices) {
-    .Call('openxlsx_matrixRowInds', PACKAGE = 'openxlsx', indices)
+    .Call(`_openxlsx_matrixRowInds`, indices)
 }
 
 build_table_xml <- function(table, tableStyleXML, ref, colNames, showColNames, withFilter) {
-    .Call('openxlsx_build_table_xml', PACKAGE = 'openxlsx', table, tableStyleXML, ref, colNames, showColNames, withFilter)
+    .Call(`_openxlsx_build_table_xml`, table, tableStyleXML, ref, colNames, showColNames, withFilter)
 }
 
 write_worksheet_xml_2 <- function(prior, post, sheet_data, row_heights, R_fileName) {
-    .Call('openxlsx_write_worksheet_xml_2', PACKAGE = 'openxlsx', prior, post, sheet_data, row_heights, R_fileName)
+    .Call(`_openxlsx_write_worksheet_xml_2`, prior, post, sheet_data, row_heights, R_fileName)
 }
 
