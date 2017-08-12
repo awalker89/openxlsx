@@ -315,8 +315,8 @@ writeCommentXML <- function(comment_list, file_name){
     
   }
   
-  .Call("openxlsx_writeFile", '', paste(xml, collapse = ""), '</commentList></comments>', file_name, PACKAGE = "openxlsx")
-
+  write_file(body = paste(xml, collapse = ""), tail = '</commentList></comments>', fl = file_name)
+  
   NULL
   
 }
@@ -394,7 +394,7 @@ validateBorderStyle <- function(borderStyle){
 getAttrsFont <- function(xml, tag){
   
   
-  x <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, tag, PACKAGE = "openxlsx"))
+  x <- lapply(xml, getChildlessNode, tag = tag)
   x[sapply(x, length) == 0] <- ""
   x <- unlist(x)
   a <- lapply(x, function(x) unlist(regmatches(x, gregexpr('[a-zA-Z]+=".*?"', x))))
@@ -410,7 +410,7 @@ getAttrsFont <- function(xml, tag){
 
 getAttrs <- function(xml, tag){
   
-  x <- lapply(xml, function(x) .Call("openxlsx_getChildlessNode", x, tag, PACKAGE = "openxlsx"))
+  x <- lapply(xml, getChildlessNode, tag = tag)
   x[sapply(x, length) == 0] <- ""
   a <- lapply(x, function(x) regmatches(x, regexpr('[a-zA-Z]+=".*?"', x)))
   
@@ -432,9 +432,9 @@ buildFontList <- function(fonts){
   family <- getAttrs(fonts, "<family ")
   scheme <- getAttrs(fonts, "<scheme ")
   
-  italic <- lapply(fonts, function(x) .Call("openxlsx_getChildlessNode", x, "<i", PACKAGE = "openxlsx"))
-  bold <- lapply(fonts, function(x) .Call("openxlsx_getChildlessNode", x, "<b", PACKAGE = "openxlsx"))
-  underline <- lapply(fonts, function(x) .Call("openxlsx_getChildlessNode", x, "<u", PACKAGE = "openxlsx"))
+  italic <- lapply(fonts, getChildlessNode, tag = "<i")
+  bold <- lapply(fonts, getChildlessNode, tag = "<b")
+  underline <- lapply(fonts, getChildlessNode, tag = "<u")
   
   ## Build font objects
   ft <- replicate(list(), n=length(fonts))
@@ -552,7 +552,7 @@ nodeAttributes <- function(x){
 buildBorder <- function(x){
   
   ## gets all borders that have children
-  x <- unlist(lapply(c("<left", "<right", "<top", "<bottom"), function(tag) .Call("openxlsx_getNodes", x, tag, PACKAGE = "openxlsx")))
+  x <- unlist(lapply(c("<left", "<right", "<top", "<bottom"), function(tag) getNodes(xml = x, tagIn = tag)))
   if(length(x) == 0)
     return(NULL)
   
@@ -577,7 +577,7 @@ buildBorder <- function(x){
   
   ## Colours
   cols <- replicate(n = length(sideBorder), list(rgb = "FF000000"))
-  colNodes <- unlist(sapply(x, function(xml) .Call("openxlsx_getChildlessNode", xml, "<color", PACKAGE = "openxlsx"), USE.NAMES = FALSE))
+  colNodes <- unlist(sapply(x, getChildlessNode, tag = "<color"), USE.NAMES = FALSE)
   
   if(length(colNodes) > 0){
     attrs <- regmatches(colNodes, regexpr('(theme|indexed|rgb|auto)=".+"', colNodes))
@@ -706,7 +706,7 @@ buildFillList <- function(fills){
   
   ## gradientFill
   inds <- grepl("gradientFill", fills)
-  fillAttrs[inds] <- fills[inds] #lapply(fills[inds], function(x) .Call("openxlsx_getNodes", x, "<gradientFill>", PACKAGE = "openxlsx"))
+  fillAttrs[inds] <- fills[inds]
   
   return(fillAttrs)
   
@@ -730,7 +730,7 @@ getDefinedNamesSheet <- function(x){
 getSharedStringsFromFile <- function(sharedStringsFile, isFile){
   
   ## read in, get si tags, get t tag value and  pull out all string nodes
-  sharedStrings = .Call("openxlsx_get_shared_strings", sharedStringsFile, isFile, PACKAGE = 'openxlsx') ## read from file
+  sharedStrings = get_shared_strings(xmlFile = sharedStringsFile, isFile = isFile) ## read from file
   
   
   Encoding(sharedStrings) <- "UTF-8"
@@ -772,7 +772,7 @@ mergeCell2mapping <- function(x){
   ## for each we grid.expand
   refs <- do.call("rbind", lapply(1:length(rows), function(i){
     tmp <- expand.grid("cols" = cols[[i]], "rows" = rows[[i]])
-    tmp$ref <- paste0(.Call("openxlsx_convert_to_excel_ref", tmp$cols, LETTERS, PACKAGE = "openxlsx"), tmp$rows)
+    tmp$ref <- paste0(convert_to_excel_ref(cols = tmp$cols, LETTERS = LETTERS), tmp$rows)
     tmp$anchor_cell <- tmp$ref[1]
     return(tmp[, c("anchor_cell", "ref", "rows")])
   }))
