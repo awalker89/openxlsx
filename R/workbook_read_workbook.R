@@ -62,7 +62,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     if (grepl(":", region, fixed = TRUE)) {
       cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
       rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
-    
+      
       cols <- seq(from = cols[1], to = cols[2], by = 1)
       rows <- seq(from = rows[1], to = rows[2], by = 1)
       
@@ -107,7 +107,7 @@ read.xlsx.Workbook <- function(xlsxFile,
       stop(sprintf("sheet %s does not exist.", sheet))
   }
   
-
+  
   ## read in sharedStrings
   sharedStrings <- paste(unlist(xlsxFile$sharedStrings), collapse = "\n")
   if(length(sharedStrings) > 0){
@@ -135,10 +135,10 @@ read.xlsx.Workbook <- function(xlsxFile,
   
   if(startRow > 1)
     keep <- keep & (sheet_data$rows >= startRow)
-
+  
   ## error cells  
   keep <- keep & (sheet_data$t != 4 & !is.na(sheet_data$t) & !is.na(sheet_data$v)) ## "e" or missing
-
+  
   ## End what data to read
   ######################################################
   
@@ -180,7 +180,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     bool_refs <- -1L
   
   if(bool_refs[1] != -1L){
-
+    
     false_ind <- which(sharedStrings == "FALSE") - 1L
     if(length(false_ind) == 0){
       false_ind <- length(sharedStrings) 
@@ -207,7 +207,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   ## If any t="str" exist, add v to sharedStrings and replace v with newSharedStringsInd
   str_inds <- which(t == 3) ## "str"
   if(length(str_inds) > 0){
-
+    
     unique_strs <- unique(v[str_inds])
     unique_strs[unique_strs == "#N/A"] <- NA
     
@@ -238,7 +238,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     ## set encoding of sharedStrings &  replace values in v with string values
     Encoding(sharedStrings) <- "UTF-8"
     v[string_refs] <- sharedStrings[vn[string_refs] + 1L]
-
+    
     ## any NA sharedStrings - remove
     v_na <- which(is.na(v))
     if(length(v_na) > 0)
@@ -246,13 +246,13 @@ read.xlsx.Workbook <- function(xlsxFile,
     
   }
   
-
+  
   ## date detection
   origin <- 25569L
   isDate <- as.logical(NA)
   
   if(detectDates){
-
+    
     ## get date origin
     if(length(xlsxFile$workbook$workbookPr) > 0){
       if(grepl('date1904="1"|date1904="true"', xlsxFile$workbook$workbookPr, ignore.case = TRUE))
@@ -307,21 +307,19 @@ read.xlsx.Workbook <- function(xlsxFile,
     }
   } ## end of detectDates
   
-
-  ## Build data.frame
-  m <- .Call("openxlsx_read_workbook"
-             , cols
-             , rows
-             , v
-             , string_refs
-             , isDate
-             , colNames
-             , skipEmptyRows
-             , skipEmptyCols
-             , nRows
-             , clean_names
-             , PACKAGE = "openxlsx")
   
+  ## Build data.frame
+  m <- read_workbook(cols_in = cols
+                     , rows_in = rows
+                     , v = v
+                     , string_inds = string_refs
+                     , is_date = isDate
+                     , hasColNames = colNames
+                     , skipEmptyRows = skipEmptyRows
+                     , skipEmptyCols = skipEmptyCols
+                     , nRows = nRows
+                     , clean_names = clean_names)
+
   
   ## all NA columns
   all_na <- unname(unlist(lapply(m, function(x) all(is.na(x)))))
