@@ -236,7 +236,7 @@ read.xlsx.default <- function(xlsxFile,
   if(length(sharedStringsFile) > 0){
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
     if(!is.null(na.strings)){
-      sharedStrings[sharedStrings %in% na.strings] <- "openxlsx_na_vlu"
+      sharedStrings[is.na(sharedStrings) | sharedStrings %in% na.strings] <- "openxlsx_na_vlu"
     }
   }else{
     sharedStrings <- ""
@@ -314,8 +314,9 @@ read.xlsx.default <- function(xlsxFile,
   ######################################################################
   ## subsetting
   
-  keep <- !is.na(cell_info$v)
+  ## Remove cells where cell is NA (na.strings or empty sharedString '<si><t/></si>')
   
+  keep <- !is.na(cell_info$v)
   if(!is.null(cols))
     keep <- keep & (cell_cols %in% cols)
   
