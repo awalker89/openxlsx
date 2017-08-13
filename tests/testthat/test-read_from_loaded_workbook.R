@@ -5,7 +5,7 @@ context("Reading from workbook is identical to reading from file readTest.xlsx")
 
 
 
-test_that("Reading example workbook", {
+test_that("Reading example workbook readTest.xlsx", {
   
   xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(xlsxFile)
@@ -305,4 +305,21 @@ test_that("Load read - Skip Empty rows/cols", {
 
 
 
+context("Reading from workbook is identical to reading from file read_failure_test.xlsx")
+
+test_that("Reading example workbook read_failure_test.xlsx", {
+  
+  fl <- system.file("read_failure_test.xlsx", package = "openxlsx")
+  wb <- loadWorkbook(fl)
+  
+  x <- read.xlsx(fl, sheet = 1, skipEmptyCols = TRUE)
+  y <- read.xlsx(wb, sheet = 1, skipEmptyCols = TRUE)
+  expect_true(all.equal(x, y))
+  
+  x <- read.xlsx(fl, sheet = 1, skipEmptyCols = FALSE)
+  y <- read.xlsx(wb, sheet = 1, skipEmptyCols = FALSE)
+  expect_true(all.equal(x, y))
+
+
+})
 
