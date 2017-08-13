@@ -2,7 +2,7 @@
 
 
 
-context("Skip Empty Rows/Cols")
+context("Skip Empty Rows")
 
 
 
