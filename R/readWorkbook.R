@@ -165,6 +165,7 @@ read.xlsx.default <- function(xlsxFile,
   
   
   ## Named region logic
+  reading_named_region <- FALSE
   if(!is.null(namedRegion)){
     
     dn <- getNodes(xml = workbook, tagIn = "<definedNames>")
@@ -202,7 +203,7 @@ read.xlsx.default <- function(xlsxFile,
     }
     
     startRow <- 1
-    
+    reading_named_region <- TRUE
   }
   
   
@@ -336,6 +337,8 @@ read.xlsx.default <- function(xlsxFile,
   
   if(skipEmptyRows){
     nRows <- length(unique(cell_rows))
+  }else if(reading_named_region){ ## keep region the correct size
+    nRows <- max(rows) - min(rows) + 1;
   }else{
     nRows <- max(cell_rows) - min(cell_rows) + 1;
   }
@@ -432,7 +435,7 @@ read.xlsx.default <- function(xlsxFile,
                      skipEmptyCols = skipEmptyCols,
                      nRows = nRows,
                      clean_names = clean_names)
-
+  
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)

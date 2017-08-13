@@ -39,6 +39,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     stop("sheet must be of length 1.")
   
   ## Named region logic
+  reading_named_region <- FALSE
   if(!is.null(namedRegion)){
     
     dn <- xlsxFile$workbook$definedNames
@@ -71,6 +72,8 @@ read.xlsx.Workbook <- function(xlsxFile,
       rows <- as.integer(gsub("[A-Z]", "", region, perl = TRUE))
     }
     startRow <- 1
+    reading_named_region <- TRUE
+    named_region_rows <- rows
     
   }
   
@@ -164,6 +167,8 @@ read.xlsx.Workbook <- function(xlsxFile,
     
     if(skipEmptyRows){
       nRows <- length(unique(rows))
+    }else if(reading_named_region){
+      nRows <- max(named_region_rows) - min(named_region_rows) + 1;
     }else{
       nRows <- max(rows) - min(rows) + 1;
     }
