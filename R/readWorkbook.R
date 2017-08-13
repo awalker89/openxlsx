@@ -213,7 +213,7 @@ read.xlsx.default <- function(xlsxFile,
   ## get the file_name for each sheetrId
   file_name <- sapply(sheetrId, function(rId){
     txt <- workbookRelsXML[grepl(sprintf('Id="%s"', rId), workbookRelsXML, fixed = TRUE)]
-    regmatches(txt, regexpr('(?<=Target=").+xml', txt, perl = TRUE))
+    regmatches(txt, regexpr('(?<=Target=").+(?=xml")', txt, perl = TRUE))
   })
   
   
@@ -229,6 +229,9 @@ read.xlsx.default <- function(xlsxFile,
       stop(sprintf("sheet %s does not exist.", sheet))
     sheet <- file_name[sheet]
   }
+  
+  if(length(sheet) == 0)
+    stop("Length of sheet is 0 - something has gone terribly wrong")
   
   ## get file
   worksheet <- xmlFiles[grepl(sheet, xmlFiles, ignore.case = TRUE)]
@@ -316,6 +319,10 @@ read.xlsx.default <- function(xlsxFile,
   ## subsetting
   
   ## Remove cells where cell is NA (na.strings or empty sharedString '<si><t/></si>')
+  if(length(cell_info$v) == 0){
+    warning("No data found on worksheet.", call. = FALSE)
+    return(NULL)
+  }
   
   keep <- !is.na(cell_info$v)
   if(!is.null(cols))
