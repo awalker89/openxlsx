@@ -46,6 +46,7 @@
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to Excel to evaluate the formula when the file is opened in Excel.
 #' @rdname writeData
+#' @return invisible(0)
 #' @examples
 #' 
 #' ## See formatting vignette for further examples. 
@@ -231,6 +232,10 @@ writeData <- function(wb,
   
   ## If no rows and not writing column names return as nothing to write
   if(nRow == 0 & !colNames)
+    return(invisible(0))
+  
+  ## If no columns and not writing row names return as nothing to write
+  if(nCol == 0 & !rowNames)
     return(invisible(0))
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
