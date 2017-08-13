@@ -147,7 +147,7 @@ int2col <- function(x){
   if(!is.numeric(x))
     stop("x must be numeric.")
   
-  .Call('openxlsx_convert_to_excel_ref', PACKAGE = 'openxlsx', x, LETTERS)
+  convert_to_excel_ref(cols = x, LETTERS = LETTERS)
 }
 
 
@@ -1879,7 +1879,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     if(!is.numeric(printTitleCols))
       stop("printTitleCols must be numeric.")
     
-    cols <- .Call('openxlsx_convert_to_excel_ref', range(printTitleCols), LETTERS, PACKAGE="openxlsx")
+    cols <- LETTERS(cols = range(printTitleCols), LETTERS = LETTERS)
     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
                          ref2 = paste0("$", cols[2]),
                          name = "_xlnm.Print_Titles",
@@ -1896,7 +1896,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
       stop("printTitleCols must be numeric.")
     
     
-    cols <- .Call("openxlsx_convert_to_excel_ref", range(printTitleCols), LETTERS)
+    cols <- convert_to_excel_ref(cols = range(printTitleCols), LETTERS = LETTERS)
     rows <- range(printTitleRows)
     
     cols <- paste(paste0("$", cols[1]), paste0("$", cols[2]), sep = ":")
@@ -2224,8 +2224,8 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   startRow <- min(rows)
   endRow <- max(rows)
   
-  ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS, PACKAGE = "openxlsx"), "$", startRow)
-  ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", endCol, LETTERS, PACKAGE = "openxlsx"), "$", endRow)
+  ref1 <- paste0("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
+  ref2 <- paste0("$", convert_to_excel_ref(cols = endCol, LETTERS = LETTERS), "$", endRow)
   
   invisible(
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
@@ -2290,7 +2290,7 @@ getNamedRegions.default <- function(x){
   workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
   
-  dn <- .Call("openxlsx_getChildlessNode", removeHeadTag(workbook), "<definedName ", PACKAGE = "openxlsx")
+  dn <- getChildlessNode(xml =  removeHeadTag(workbook), tag = "<definedName ")
   if(length(dn) == 0)
     return(NULL)
   

@@ -149,7 +149,7 @@ read.xlsx.default <- function(xlsxFile,
   
   ## get workbook names
   workbookRelsXML <- paste(readLines(workbookRelsXML, warn = FALSE, encoding = "UTF-8"), collapse = "")
-  workbookRelsXML <- .Call("openxlsx_getChildlessNode", workbookRelsXML, "<Relationship ", PACKAGE="openxlsx")
+  workbookRelsXML <- getChildlessNode(xml = workbookRelsXML, tag = "<Relationship ")
   
   workbook <- unlist(readLines(workbook, warn = FALSE, encoding = "UTF-8"))
   workbook <- removeHeadTag(workbook)
@@ -167,7 +167,7 @@ read.xlsx.default <- function(xlsxFile,
   ## Named region logic
   if(!is.null(namedRegion)){
     
-    dn <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
+    dn <- getNodes(xml = workbook, tagIn = "<definedNames>")
     dn <- unlist(regmatches(dn, gregexpr("<definedName [^<]*", dn, perl = TRUE)))
     
     if(length(dn) == 0){
@@ -236,7 +236,7 @@ read.xlsx.default <- function(xlsxFile,
   if(length(sharedStringsFile) > 0){
     sharedStrings <- getSharedStringsFromFile(sharedStringsFile = sharedStringsFile, isFile = TRUE)
     if(!is.null(na.strings)){
-      sharedStrings[sharedStrings %in% na.strings] <- "openxlsx_na_vlu"
+      sharedStrings[is.na(sharedStrings) | sharedStrings %in% na.strings] <- "openxlsx_na_vlu"
     }
   }else{
     sharedStrings <- ""
@@ -251,15 +251,13 @@ read.xlsx.default <- function(xlsxFile,
   }
   
   ## single function get all r, s (if detect dates is TRUE), t, v
-  cell_info <- .Call("openxlsx_getCellInfo",
-                     xmlFile = worksheet,
-                     sharedStrings = sharedStrings,
-                     skipEmptyRows = skipEmptyRows,
-                     startRow = startRow,
-                     rows = rows,
-                     getDates = detectDates,
-                     PACKAGE = "openxlsx")
-
+  cell_info <- getCellInfo(xmlFile = worksheet,
+                           sharedStrings = sharedStrings,
+                           skipEmptyRows = skipEmptyRows,
+                           startRow = startRow,
+                           rows = rows,
+                           getDates = detectDates)
+  
   if(fillMergedCells & length(cell_info$cellMerge) > 0){
     
     stop("Not implemented")
@@ -303,21 +301,22 @@ read.xlsx.default <- function(xlsxFile,
       cell_info$s <- cell_info$s[ord]
     }
     
-    cell_info$nRows <- .Call("openxlsx_calc_number_rows", cell_info$r, skipEmptyRows, PACKAGE = "openxlsx")
+    cell_info$nRows <- calc_number_rows(x =  cell_info$r, skipEmptyRows = skipEmptyRows)
     
   }
   
   
-
+  
   cell_rows <- as.integer(gsub("[A-Z]", "", cell_info$r, perl = TRUE))
-  cell_cols <- .Call('openxlsx_convert_from_excel_ref', PACKAGE = 'openxlsx', cell_info$r)
-
-
+  cell_cols <- convert_from_excel_ref(x = cell_info$r)
+  
+  
   ######################################################################
   ## subsetting
   
-  keep <- !is.na(cell_info$v)
+  ## Remove cells where cell is NA (na.strings or empty sharedString '<si><t/></si>')
   
+  keep <- !is.na(cell_info$v)
   if(!is.null(cols))
     keep <- keep & (cell_cols %in% cols)
   
@@ -362,7 +361,7 @@ read.xlsx.default <- function(xlsxFile,
         string_refs <- string_refs[!string_refs %in% r[toRemove]]
         v <- v[-toRemove]
         r <- r[-toRemove]
-        nRows <- .Call("openxlsx_calc_number_rows", r, skipEmptyRows, PACKAGE = "openxlsx")
+        nRows <- calc_number_rows(x =  r, skipEmptyRows = skipEmptyRows)
       }
     }
   }
@@ -381,28 +380,28 @@ read.xlsx.default <- function(xlsxFile,
     styles <- removeHeadTag(styles)
     
     ## Number formats
-    numFmts <- .Call("openxlsx_getChildlessNode", styles, "<numFmt ", PACKAGE = "openxlsx")
+    numFmts <- getChildlessNode(xml = styles, tag = "<numFmt ")
     
     dateIds <- NULL
     if(length(numFmts) > 0){
       
-      numFmtsIds <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'numFmtId="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
-      formatCodes <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'formatCode="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+      numFmtsIds <- sapply(numFmts, getAttr, tag = 'numFmtId="', USE.NAMES = FALSE)
+      formatCodes <- sapply(numFmts, getAttr, tag = 'formatCode="', USE.NAMES = FALSE)
       formatCodes <- gsub(".*(?<=\\])|@", "", formatCodes, perl = TRUE)
       
       ## this regex defines what "looks" like a date
       dateIds <- numFmtsIds[!grepl("[^mdyhsapAMP[:punct:] ]", formatCodes) & nchar(formatCodes > 3)]
       
     }     
-
+    
     dateIds <- c(dateIds, 14)
     
     ## which styles are using these dateIds
-    cellXfs <- .Call("openxlsx_getNodes", styles, "<cellXfs", PACKAGE = "openxlsx") 
-    xf <- .Call("openxlsx_getChildlessNode", cellXfs, "<xf ", PACKAGE = "openxlsx")
+    cellXfs <- getNodes(xml = styles, tagIn = "<cellXfs") 
+    xf <- getChildlessNode(xml = cellXfs, tag = "<xf ")
     lookingFor <- paste(sprintf('numFmtId="%s"', dateIds), collapse = "|")
     dateStyleIds <- which(sapply(xf, function(x) grepl(lookingFor, x), USE.NAMES = FALSE)) - 1L
-
+    
     isDate <- (s %in% dateStyleIds)
     
     ## set to false if in string_refs
@@ -414,28 +413,26 @@ read.xlsx.default <- function(xlsxFile,
     not_an_integer <- (not_an_integer %% 1L != 0) & !is.na(not_an_integer)
     isDate[not_an_integer] <- FALSE
     
-
+    
     ## perform int to date to character convertsion (way too slow)
     v[isDate] <- format(as.Date(as.integer(v[isDate]) - origin, origin = "1970-01-01"), "%Y-%m-%d")
     
   }else{
     isDate <- as.logical(NA)
   }
-
-  ## Build data.frame
-  m <- .Call("openxlsx_read_workbook"
-             , cell_cols
-             , cell_rows
-             , v
-             , string_refs
-             , isDate
-             , colNames
-             , skipEmptyRows
-             , skipEmptyCols
-             , nRows
-             , clean_names
-             , PACKAGE = "openxlsx")
   
+  ## Build data.frame
+  m <- read_workbook(cols_in = cell_cols,
+                     rows_in = cell_rows,
+                     v = v,
+                     string_inds = string_refs,
+                     is_date = isDate,
+                     hasColNames = colNames,
+                     skipEmptyRows = skipEmptyRows,
+                     skipEmptyCols = skipEmptyCols,
+                     nRows = nRows,
+                     clean_names = clean_names)
+
   
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)

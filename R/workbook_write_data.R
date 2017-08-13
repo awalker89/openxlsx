@@ -110,7 +110,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   
   ## cell types
-  t <- .Call("openxlsx_build_cell_types_integer", colClasses, nRows, PACKAGE = "openxlsx")
+  t <- build_cell_types_integer(classes = colClasses, n_rows = nRows)
   
   for(i in which(sapply(colClasses, function(x) !"character" %in% x & !"numeric" %in% x)))
     df[[i]] <- as.character(df[[i]])
@@ -179,7 +179,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     if(length(hyperlink_inds) > 0){
       t[hyperlink_inds] <- 1L ## "s"
  
-      hyperlink_refs <- .Call("openxlsx_convert_to_excel_ref_expand", hyperlink_cols + startCol - 1, LETTERS, as.character((startRow + colNames):(startRow+nRows - 1L)))
+      hyperlink_refs <- convert_to_excel_ref_expand(cols = hyperlink_cols + startCol - 1, LETTERS = LETTERS, rows = as.character((startRow + colNames):(startRow+nRows - 1L)) )
       
       exHlinks <- worksheets[[sheet]]$hyperlinks
       targets <- replaceIllegalCharacters(v[hyperlink_inds])

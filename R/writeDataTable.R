@@ -196,8 +196,8 @@ writeDataTable <- function(wb, sheet, x,
     names(x) <- colNames
   }
   
-  ref1 <- paste0(.Call('openxlsx_convert_to_excel_ref', startCol, LETTERS, PACKAGE="openxlsx"), startRow)
-  ref2 <- paste0(.Call('openxlsx_convert_to_excel_ref', startCol+ncol(x)-1, LETTERS, PACKAGE="openxlsx"), startRow + nrow(x))
+  ref1 <- paste0(convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), startRow)
+  ref2 <- paste0(convert_to_excel_ref(cols = startCol+ncol(x)-1, LETTERS = LETTERS), startRow + nrow(x))
   ref <- paste(ref1, ref2, sep = ":")
   
   ## check not overwriting another table

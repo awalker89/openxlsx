@@ -96,7 +96,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   workbookRelsXML <- xmlFiles[grepl("workbook.xml.rels$", xmlFiles, perl = TRUE)]
   if(length(workbookRelsXML) > 0){
     workbookRelsXML <- paste(readLines(con = workbookRelsXML, encoding="UTF-8", warn = FALSE), collapse = "")
-    workbookRelsXML <- .Call("openxlsx_getChildlessNode", workbookRelsXML, "<Relationship ", PACKAGE="openxlsx")
+    workbookRelsXML <- getChildlessNode(xml = workbookRelsXML, tag = "<Relationship ")
     worksheet_rId_mapping <- workbookRelsXML[grepl("worksheets/sheet", workbookRelsXML, fixed = TRUE)]
   }
   
@@ -157,7 +157,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         if(length(zoom) == 0)
           zoom <- 100
         
-        tabColour <- .Call("openxlsx_getChildlessNode", txt, "<tabColor ", PACKAGE = "openxlsx")
+        tabColour <- getChildlessNode(xml = txt, tag = "<tabColor ")
         if(length(tabColour) == 0)
           tabColour <- NULL
         
@@ -177,21 +177,21 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     
     
     ## additional workbook attributes
-    calcPr <- .Call("openxlsx_getChildlessNode", workbook, "<calcPr ", PACKAGE = "openxlsx")
+    calcPr <- getChildlessNode(xml = workbook, tag = "<calcPr ")
     if(length(calcPr) > 0)
       wb$workbook$calcPr <- calcPr
     
     
-    workbookPr <- .Call("openxlsx_getChildlessNode", workbook, "<workbookPr ", PACKAGE = "openxlsx")
+    workbookPr <- getChildlessNode(xml = workbook, tag = "<workbookPr ")
     if(length(calcPr) > 0)
       wb$workbook$workbookPr <- workbookPr
     
     
     ## defined Names
-    dNames <- .Call("openxlsx_getNodes", workbook, "<definedNames>", PACKAGE = "openxlsx")
+    dNames <- getNodes(xml = workbook, tagIn = "<definedNames>")
     if(length(dNames) > 0){
       dNames <- gsub("^<definedNames>|</definedNames>$", "", dNames)
-      wb$workbook$definedNames <- paste0(.Call("openxlsx_getNodes", dNames, "<definedName", PACKAGE = "openxlsx"), ">")
+      wb$workbook$definedNames <- paste0(getNodes(xml = dNames, tagIn = "<definedName"), ">")
     }
     
     
@@ -211,7 +211,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     uniqueCount <- as.integer(regmatches(sharedStrings, regexpr('(?<=uniqueCount=")[0-9]+', sharedStrings, perl = TRUE)))
     
     ## read in and get <si> nodes
-    vals <- .Call("openxlsx_getNodes", sharedStrings, "<si>", PACKAGE = "openxlsx")
+    vals <- getNodes(xml = sharedStrings, tagIn = "<si>")
     
     if("<si><t/></si>" %in% vals){
       vals[vals == "<si><t/></si>"] <- "<si><t>NA</t></si>"
@@ -249,7 +249,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     pivot_content_type <- NULL
     
     if(length(pivotTableRelsXML) > 0)
-      wb$pivotTables.xml.rels <- unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+      wb$pivotTables.xml.rels <- unlist(lapply(pivotTableRelsXML, function(x) removeHeadTag(cppReadFile(x))))
     
     
     # ## Check what caches are used
@@ -305,8 +305,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
                               sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:length(pivotDefXML))
     )
     
-    caches <- .Call("openxlsx_getNodes", workbook, "<pivotCaches>", PACKAGE = "openxlsx")
-    caches <- .Call("openxlsx_getChildlessNode", caches, "<pivotCache ", PACKAGE = "openxlsx")
+    
+    caches <- getNodes(xml = workbook, tagIn = "<pivotCaches>")
+    caches <- getChildlessNode(xml = caches, tag = "<pivotCache ")
     for(i in 1:length(caches))
       caches[i] <- gsub('"rId[0-9]+"', sprintf('"rId%s"', rIds[i]), caches[i])
     
@@ -383,7 +384,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## externalLinks
   if(length(extLinksXML) > 0){
-    wb$externalLinks <- lapply(sort(extLinksXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+    wb$externalLinks <- lapply(sort(extLinksXML), function(x) removeHeadTag(cppReadFile(x)))
     
     wb$Content_Types <-c(wb$Content_Types, 
                          sprintf('<Override PartName="/xl/externalLinks/externalLink%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.externalLink+xml"/>', 1:length(extLinksXML)))
@@ -394,7 +395,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## externalLinksRels
   if(length(extLinksRelsXML) > 0)
-    wb$externalLinksRels <- lapply(sort(extLinksRelsXML), function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+    wb$externalLinksRels <- lapply(sort(extLinksRelsXML), function(x) removeHeadTag(cppReadFile(x)))
   
   
   
@@ -412,8 +413,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   file_names <- file_names[match(sheetrId, file_rIds)]
   
   worksheetsXML <- file.path(dirname(worksheetsXML), file_names)
-  wb <- .Call("openxlsx_loadworksheets", wb, styleObjects, worksheetsXML, is_chart_sheet, PACKAGE = 'openxlsx')
-  
+  wb <- loadworksheets(wb = wb, styleObjects = styleObjects, xmlFiles = worksheetsXML, is_chart_sheet = is_chart_sheet)
+   
   ## Fix styleobject encoding
   if(length(wb$styleObjects) > 0){
     style_names <- sapply(wb$styleObjects, "[[", "sheet")
@@ -476,7 +477,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
         xml <- removeHeadTag(xml)
         xml <- gsub("<Relationships .*?>", "", xml)
         xml <- gsub("</Relationships>", "", xml)
-        xml <- .Call("openxlsx_getChildlessNode", xml, "<Relationship ", PACKAGE ="openxlsx")
+        xml <- getChildlessNode(xml = xml, tag = "<Relationship ")
         
       }else{
         xml <- "<Relationship >"
@@ -539,7 +540,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
       ## ---- slicerCaches
       inds <- 1:length(slicerCachesXML)
       wb$Content_Types <- c(wb$Content_Types, sprintf('<Override PartName="/xl/slicerCaches/slicerCache%s.xml" ContentType="application/vnd.ms-excel.slicerCache+xml"/>', inds))
-      wb$slicerCaches <- sapply(slicerCachesXML[order(nchar(slicerCachesXML), slicerCachesXML)], function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx")))
+      wb$slicerCaches <- sapply(slicerCachesXML[order(nchar(slicerCachesXML), slicerCachesXML)], function(x) removeHeadTag(cppReadFile(x)))
       wb$workbook.xml.rels <- c(wb$workbook.xml.rels, sprintf('<Relationship Id="rId%s" Type="http://schemas.microsoft.com/office/2007/relationships/slicerCache" Target="slicerCaches/slicerCache%s.xml"/>', 1E5 + inds, inds))
       wb$workbook$extLst <- c(wb$workbook$extLst,  genSlicerCachesExtLst(1E5 + inds))
       
@@ -759,7 +760,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
             txt <- paste(readLines(vmlDrawingXML[ind], warn = FALSE), collapse = "\n")
             txt <- removeHeadTag(txt)
             
-            cd <- unique(.Call("openxlsx_getNodes", txt, "<x:ClientData", PACKAGE = "openxlsx"))
+            cd <- unique(getNodes(xml = txt, tagIn = "<x:ClientData"))
             cd <- cd[grepl('ObjectType="Note"', cd)]
             cd <- paste0(cd, ">")
             
@@ -770,19 +771,19 @@ loadWorkbook <- function(file, xlsxFile = NULL){
             txt <- paste(readLines(commentsXML[grepl(target, commentsXML)], warn = FALSE), collapse = "\n")
             txt <- removeHeadTag(txt)
             
-            authors <- .Call("openxlsx_getNodes", txt, "<author>", PACKAGE = "openxlsx")
+            authors <- getNodes(xml = txt, tagIn = "<author>")
             authors <- gsub("<author>|</author>", "", authors)
             
-            comments <- .Call("openxlsx_getNodes", txt, "<commentList>", PACKAGE = "openxlsx")
+            comments <- getNodes(xml = txt, tagIn = "<commentList>")
             comments <- gsub( "<commentList>", "", comments)
-            comments <- .Call("openxlsx_getNodes", comments, "<comment", PACKAGE = "openxlsx")
+            comments <- getNodes(xml = comments, tagIn = "<comment")
             
             refs <- regmatches(comments, regexpr('(?<=ref=").*?[^"]+', comments, perl = TRUE))
             
             authorsInds <- as.integer(regmatches(comments, regexpr('(?<=authorId=").*?[^"]+', comments, perl = TRUE))) + 1
             authors <- authors[authorsInds]
             
-            style <- lapply(comments, function(txt) .Call("openxlsx_getNodes", txt, "<rPr>", PACKAGE = "openxlsx"))
+            style <- lapply(comments, getNodes, tagIn = "<rPr>")
             
             comments <- regmatches(comments, gregexpr('(?<=<t( |>)).*?[^/]+', comments, perl = TRUE))
             comments <- lapply(comments, function(x) gsub("<", "", x))
@@ -901,7 +902,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   if(length(queryTablesXML) > 0){
     
     ids <- as.numeric(regmatches(queryTablesXML, regexpr("[0-9]+(?=\\.xml)", queryTablesXML, perl = TRUE)))
-    wb$queryTables <- unlist(lapply(queryTablesXML[order(ids)], function(x) removeHeadTag(.Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"))))
+    wb$queryTables <- unlist(lapply(queryTablesXML[order(ids)], function(x) removeHeadTag(cppReadFile(xmlFile = x))))
     wb$Content_Types <- c(wb$Content_Types, 
                           sprintf('<Override PartName="/xl/queryTables/queryTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.queryTable+xml"/>', 1:length(queryTablesXML)))   
   }
@@ -909,7 +910,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## connections
   if(length(connectionsXML) > 0){
-    wb$connections <- removeHeadTag(.Call("openxlsx_cppReadFile", connectionsXML, PACKAGE = "openxlsx"))
+    wb$connections <- removeHeadTag(cppReadFile(xmlFile = connectionsXML))
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels, '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/connections" Target="connections.xml"/>')
     wb$Content_Types <- c(wb$Content_Types, '<Override PartName="/xl/connections.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.connections+xml"/>')
   }
@@ -933,7 +934,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
     wb$tables.xml.rels <- character(length=length(tablesXML))
     
     ## which sheet does it belong to
-    xml <- sapply(tableRelsXML, function(x) .Call("openxlsx_cppReadFile", x, PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+    xml <- sapply(tableRelsXML, cppReadFile, USE.NAMES = FALSE)
     xml <- sapply(xml, removeHeadTag, USE.NAMES = FALSE)
     
     wb$tables.xml.rels[hasRels] <- xml
