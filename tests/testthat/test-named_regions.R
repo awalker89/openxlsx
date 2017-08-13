@@ -120,6 +120,149 @@ test_that("Correctly Loading Named Regions Created in Excel",{
 
 
 
+test_that("Missing rows in named regions", {
+
+  temp_file <- tempfile(fileext = ".xlsx")
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, "Sheet 1")
+  
+  ## create region
+  writeData(wb, sheet = 1, x = iris[1:11,], startCol = 1, startRow = 1)
+  deleteData(wb, sheet = 1, col = 1:2, rows = c(6, 6))
+  
+  createNamedRegion(wb = wb,
+                    sheet = 1,
+                    name = "iris",
+                    rows = 1:(5+1),
+                    cols = 1:2)
+  createNamedRegion(wb = wb,
+                    sheet = 1,
+                    name = "iris2",
+                    rows = 1:(5+2),
+                    cols = 1:2)
+  
+  ## iris region is rows 1:6 & cols 1:2
+  ## iris2 region is rows 1:7 & cols 1:2
+  
+  ## row 6 columns 1 & 2 are blank
+  expect_equal(getNamedRegions(wb)[1:2], c("iris", "iris2"), ignore.attributes = TRUE)
+  expect_equal(attr(getNamedRegions(wb), "sheet"), c("Sheet 1", "Sheet 1"))
+  expect_equal(attr(getNamedRegions(wb), "position"), c("A1:B6", "A1:B7"))
+  
+  ######################################################################## from Workbook
+  
+  ## Skip empty rows
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris", colNames = TRUE, skipEmptyRows = TRUE)
+  expect_equal(dim(x), c(4, 2))
+  
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris2", colNames = TRUE, skipEmptyRows = TRUE)
+  expect_equal(dim(x), c(5, 2))
+  
+  
+  ## Keep empty rows
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris", colNames = TRUE, skipEmptyRows = FALSE)
+  expect_equal(dim(x), c(5, 2))
+  
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris2", colNames = TRUE, skipEmptyRows = FALSE)
+  expect_equal(dim(x), c(6, 2))
+  
+  
+  
+  ######################################################################## from file
+  saveWorkbook(wb, file = temp_file, overwrite = TRUE)
+  
+  ## Skip empty rows
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris", colNames = TRUE, skipEmptyRows = TRUE)
+  expect_equal(dim(x), c(4, 2))
+  
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris2", colNames = TRUE, skipEmptyRows = TRUE)
+  expect_equal(dim(x), c(5, 2))
+  
+  
+  ## Keep empty rows
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris", colNames = TRUE, skipEmptyRows = FALSE)
+  expect_equal(dim(x), c(5, 2))
+  
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris2", colNames = TRUE, skipEmptyRows = FALSE)
+  expect_equal(dim(x), c(6, 2))
+  
+  unlink(temp_file)
+  
+})
 
 
 
+
+
+test_that("Missing columns in named regions", {
+  
+  temp_file <- tempfile(fileext = ".xlsx")
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, "Sheet 1")
+  
+  ## create region
+  writeData(wb, sheet = 1, x = iris[1:11,], startCol = 1, startRow = 1)
+  deleteData(wb, sheet = 1, col = 2, rows = 1:12, gridExpand = TRUE)
+
+  createNamedRegion(wb = wb,
+                    sheet = 1,
+                    name = "iris",
+                    rows = 1:5,
+                    cols = 1:2)
+  
+  createNamedRegion(wb = wb,
+                    sheet = 1,
+                    name = "iris2",
+                    rows = 1:5,
+                    cols = 1:3)
+  
+  ## iris region is rows 1:5 & cols 1:2
+  ## iris2 region is rows 1:5 & cols 1:3
+  
+  ## row 6 columns 1 & 2 are blank
+  expect_equal(getNamedRegions(wb)[1:2], c("iris", "iris2"), ignore.attributes = TRUE)
+  expect_equal(attr(getNamedRegions(wb), "sheet"), c("Sheet 1", "Sheet 1"))
+  expect_equal(attr(getNamedRegions(wb), "position"), c("A1:B5", "A1:C5"))
+  
+  ######################################################################## from Workbook
+  
+  ## Skip empty cols
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris", colNames = TRUE, skipEmptyCols = TRUE)
+  expect_equal(dim(x), c(4, 1))
+  
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris2", colNames = TRUE, skipEmptyCols = TRUE)
+  expect_equal(dim(x), c(4, 2))
+  
+  
+  ## Keep empty cols
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris", colNames = TRUE, skipEmptyCols = FALSE)
+  expect_equal(dim(x), c(4, 1))
+  
+  x <- read.xlsx(xlsxFile = wb, namedRegion = "iris2", colNames = TRUE, skipEmptyCols = FALSE)
+  expect_equal(dim(x), c(4, 3))
+  
+  
+  
+  ######################################################################## from file
+  saveWorkbook(wb, file = temp_file, overwrite = TRUE)
+  
+  ## Skip empty cols
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris", colNames = TRUE, skipEmptyCols = TRUE)
+  expect_equal(dim(x), c(4, 1))
+  
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris2", colNames = TRUE, skipEmptyCols = TRUE)
+  expect_equal(dim(x), c(4, 2))
+  
+  
+  ## Keep empty cols
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris", colNames = TRUE, skipEmptyCols = FALSE)
+  expect_equal(dim(x), c(4, 1))
+  
+  x <- read.xlsx(xlsxFile = temp_file, namedRegion = "iris2", colNames = TRUE, skipEmptyCols = FALSE)
+  expect_equal(dim(x), c(4, 3))
+  
+  unlink(temp_file)
+  
+})
