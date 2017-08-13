@@ -138,6 +138,8 @@ read.xlsx.Workbook <- function(xlsxFile,
   
   ## error cells  
   keep <- keep & (sheet_data$t != 4 & !is.na(sheet_data$t) & !is.na(sheet_data$v)) ## "e" or missing
+  if(any(is.na(sharedStrings)))
+    keep[(sheet_data$t %in% 1 & (sheet_data$v %in% as.character(which(is.na(sharedStrings)) - 1L)))] <- FALSE
   
   ## End what data to read
   ######################################################
@@ -320,20 +322,9 @@ read.xlsx.Workbook <- function(xlsxFile,
                      , nRows = nRows
                      , clean_names = clean_names)
 
-  
-  ## all NA columns
-  all_na <- unname(unlist(lapply(m, function(x) all(is.na(x)))))
-  if(all_na[ncol(m)]){
-    m[[ncol(m)]] <- NULL
-    all_na <- all_na[-length(all_na)]
-  }
-  
-  if(skipEmptyCols & any(all_na))
-    m <- m[, -which(all_na)]
-  
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
-  
+
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL
