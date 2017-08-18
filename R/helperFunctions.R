@@ -338,6 +338,12 @@ replaceIllegalCharacters <- function(v){
   v <- gsub('<', "&lt;", v, fixed = TRUE)
   v <- gsub('>', "&gt;", v, fixed = TRUE)
   
+  ## Escape sequences
+  v <- gsub("\a", "", v, fixed = TRUE)
+  v <- gsub("\b", "", v, fixed = TRUE)
+  v <- gsub("\v", "", v, fixed = TRUE)
+  v <- gsub("\f", "", v, fixed = TRUE)
+
   return(v)
 }
 
