@@ -458,12 +458,13 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## write tables
   if(length(unlist(tables, use.names = FALSE)) > 0){
     for(i in 1:length(unlist(tables, use.names = FALSE))){
-      write_file(body = pxml(unlist(tables, use.names = FALSE)[[i]]), fl = file.path(xlTablesDir, sprintf("table%s.xml", i+2)))
       
+      if(!grepl("openxlsx_deleted", attr(tables, "tableName")[i], fixed = TRUE)){
+        write_file(body = pxml(unlist(tables, use.names = FALSE)[[i]]), fl = file.path(xlTablesDir, sprintf("table%s.xml", i+2)))
+        if(tables.xml.rels[[i]] != "")
+          write_file(body = tables.xml.rels[[i]], fl = file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))    
+      }
       
-      
-      if(tables.xml.rels[[i]] != "")
-        write_file(body = tables.xml.rels[[i]], fl = file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))
     }
   }
   
@@ -1268,13 +1269,28 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(length(worksheets_rels[[i]]) > 0 ){
         
         ws_rels <- worksheets_rels[[i]]
-        
         if(hasHL){
           h_inds <- paste0(1:length(worksheets[[i]]$hyperlinks), "h")
           ws_rels <- c(ws_rels, unlist(lapply(1:length(h_inds), function(j) worksheets[[i]]$hyperlinks[[j]]$to_target_xml(h_inds[j]))))
         }
         
+        ## Check if any tables were deleted - remove these from rels
+        if(length(tables) > 0){
+          table_inds <- which(grepl("tables/table[0-9].xml", ws_rels))
+          
+          if(length(table_inds) > 0){
+            
+            ids <- regmatches(ws_rels[table_inds], regexpr('(?<=Relationship Id=")[0-9A-Za-z]+', ws_rels[table_inds], perl = TRUE))
+            inds <- as.integer(gsub("[^0-9]", "", ids, perl = TRUE)) - 2L
+            table_nms <- attr(tables, "tableName")[inds]
+            is_deleted <- grepl("openxlsx_deleted", table_nms, fixed = TRUE)
+            if(any(is_deleted))
+              ws_rels <- ws_rels[-table_inds[is_deleted]]
+            
+          }
+        }
         
+       
         
         write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
                    body = pxml(ws_rels),
