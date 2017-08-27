@@ -231,10 +231,13 @@ read.xlsx.default <- function(xlsxFile,
   }
   
   if(length(sheet) == 0)
-    stop("Length of sheet is 0 - something has gone terribly wrong")
+    stop("Length of sheet is 0 - something has gone terribly wrong! Please report this bug on github (https://github.com/awalker89/openxlsx/issues) with an example xlsx file.")
   
   ## get file
   worksheet <- xmlFiles[grepl(sheet, xmlFiles, ignore.case = TRUE)]
+  if(length(worksheet) == 0)
+    stop("Length of worksheet is 0 - something has gone terribly wrong! Please report this bug on github (https://github.com/awalker89/openxlsx/issues) with an example xlsx file.")
+  
   
   ## read in sharedStrings
   if(length(sharedStringsFile) > 0){

@@ -1,5 +1,32 @@
 
-openxlsx 4.0.14
+openxlsx 4.0.26
+----------------------------------------------------------------
+
+NEW FEATURES
+
+* deleteNamedRegions to delete named region and optionally the worksheet data
+
+*
+
+
+BUG FIXES
+
+* pageSetup fails when passing in sheet by name
+
+* matching sheet names with special characters now works 
+
+* skipEmptyCols being ignored by read.xlsx.Workbook
+
+* zero column data.frames would throw an error.
+
+* read.xlsx on files created using apache poi failed to match sheet name to xml file. 
+
+* deleted table re-appearing after save & load.
+
+
+
+
+openxlsx 4.0.17
 ----------------------------------------------------------------
 
 NEW FEATURES
