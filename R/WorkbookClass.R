@@ -1710,7 +1710,7 @@ Workbook$methods(mergeCells = function(sheet, startRow, endRow, startCol, endCol
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
     if(any(mergeIntersections))
-      stop(sprintf("Merge intersects with exisiting merged cells: \n\t\t%s.\nRemove exiting merge first.", paste(exMerges[mergeIntersections], collapse = "\n\t\t")))
+      stop(sprintf("Merge intersects with existing merged cells: \n\t\t%s.\nRemove existing merge first.", paste(exMerges[mergeIntersections], collapse = "\n\t\t")))
     
   }
   
