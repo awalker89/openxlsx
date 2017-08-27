@@ -7,6 +7,7 @@ context("Reading from workbook is identical to reading from file readTest.xlsx")
 
 test_that("Reading example workbook readTest.xlsx", {
   
+  curr_wd <- getwd()
   xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(xlsxFile)
   
@@ -183,6 +184,7 @@ test_that("Reading example workbook readTest.xlsx", {
   expect_equal(dim(y), c(272, 3))
   expect_equal(x, y)
   
+  expect_equal(object = getwd(), curr_wd)
   
 })
 
@@ -193,6 +195,7 @@ test_that("Reading example workbook readTest.xlsx", {
 
 test_that("Load read - Skip Empty rows/cols", {
   
+  curr_wd <- getwd()
   xlsxFile <- system.file("readTest.xlsx", package = "openxlsx")
   wb <- loadWorkbook(xlsxFile)
   
@@ -298,7 +301,7 @@ test_that("Load read - Skip Empty rows/cols", {
   ## NA rows
   expect_true(all(is.na(x[2,])))
   
-  
+  expect_equal(object = getwd(), curr_wd)
   
 })
 
@@ -309,6 +312,7 @@ context("Reading from workbook is identical to reading from file read_failure_te
 
 test_that("Reading example workbook read_failure_test.xlsx", {
   
+  curr_wd <- getwd()
   fl <- system.file("read_failure_test.xlsx", package = "openxlsx")
   wb <- loadWorkbook(fl)
   
@@ -320,6 +324,7 @@ test_that("Reading example workbook read_failure_test.xlsx", {
   y <- read.xlsx(wb, sheet = 1, skipEmptyCols = FALSE)
   expect_true(all.equal(x, y))
 
+  expect_equal(object = getwd(), curr_wd)
 
 })
 

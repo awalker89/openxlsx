@@ -52,33 +52,25 @@ createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.
 #' saveWorkbook(wb, file = "saveWorkbookExample.xlsx", overwrite = TRUE) 
 saveWorkbook <- function(wb, file, overwrite = FALSE){
   
-  wd <- getwd()
-  on.exit(setwd(wd), add = TRUE)
-  
   ## increase scipen to avoid writing in scientific 
-  exSciPen <- getOption("scipen")
+  sci_pen <- getOption("scipen")
   options("scipen" = 10000)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
+  on.exit(options("scipen" = sci_pen), add = TRUE)
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-  
-  #   if(!grepl("\\.xlsx", file))
-  #     file <- paste0(file, ".xlsx")
-  
+
   if(!is.logical(overwrite))
     overwrite = FALSE
   
   if(file.exists(file) & !overwrite)
     stop("File already exists!")
   
-  tmp <- wb$saveWorkbook(quiet = TRUE)
-  setwd(wd)
-  
-  file.copy(file.path(tmp$tmpDir, tmp$tmpFile), file, overwrite = overwrite)
+  xlsx_file <- wb$saveWorkbook()
+  file.copy(from = xlsx_file, to = file, overwrite = overwrite)
   
   ## delete temporary dir
-  unlink(tmp$tmpDir, force = TRUE, recursive = TRUE)
+  unlink(dirname(xlsx_file), force = TRUE, recursive = TRUE)
   
   invisible(1)
 }
@@ -2232,6 +2224,10 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   )
   
 }
+
+
+
+
 
 
 

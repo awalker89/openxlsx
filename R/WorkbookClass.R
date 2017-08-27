@@ -75,46 +75,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 
 
 
-Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
-  
-  zip_flags <- ifelse(!is.null(getOption("openxlsx.zipFlags")), getOption("openxlsx.zipFlags"), getOption("openxlsx.zipflags", NA))
-  if(!is.na(zip_flags)){
-    if(zip_flags != "")
-      flags <- zip_flags
-  }
-  
-  ## code from utils::zip function (modified to not print)
-  args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
 
-  if(quiet){
-    
-    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
-    
-  }else{
-    if (.Platform$OS.type == "windows"){
-      res <- invisible(suppressWarnings(system2(zip, args, invisible = TRUE)))
-    }else{
-      res <- invisible(suppressWarnings(system2(zip, args)))
-    }
-  }
-  
-  if(res != 0){
-    
-    ## try zipping using *
-    args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
-    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
-  }
-  
-  
-  if(res != 0){
-    
-    stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
-         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
-         or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
-  }
-  
-  invisible(res)
-})
 
 
 Workbook$methods(addWorksheet = function(sheetName
@@ -258,10 +219,10 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
 
 
 
-Workbook$methods(saveWorkbook = function(quiet = TRUE){
+Workbook$methods(saveWorkbook = function(){
   
   ## temp directory to save XML files prior to compressing
-  tmpDir <- file.path(tempfile(pattern="workbookTemp_"))
+  tmpDir <- file.path(tempfile(pattern = "workbookTemp_"))
   
   if(file.exists(tmpDir))
     unlink(tmpDir, recursive = TRUE, force = TRUE)
@@ -570,18 +531,22 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   workbook$sheets <<- workbook$sheets[order(sheetOrder)] ## Need to reset sheet order to allow multiple savings
   
   ## compress to xlsx
-  setwd(tmpDir)
-  tmpFile <- tempfile(tmpdir = tmpDir, fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm"))
-  tmpFile <- basename(tmpFile)
+  wd <- getwd()
+  tmpFile <- basename(tempfile(fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm")))
+  on.exit(expr = setwd(wd))
   
-  zipWorkbook(tmpFile, list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
+  ## zip it
+  setwd(dir = tmpDir)
+  cl <- ifelse(!is.null(getOption("openxlsx.compresssionLevel")), getOption("openxlsx.compresssionLevel"), getOption("openxlsx.compresssionevel", 6))
+  zip::zip(zipfile = tmpFile, files = list.files(tmpDir, full.names = FALSE, recursive = TRUE, include.dirs = FALSE, all.files=TRUE), compression_level = cl)  
   
   ## reset styles - maintain any changes to base font
   baseFont <- styles$fonts[[1]]
   styles <<- genBaseStyleSheet(styles$dxfs, tableStyles = styles$tableStyles, extLst = styles$extLst)
   styles$fonts[[1]] <<- baseFont
   
-  invisible(list("tmpDir" = tmpDir, "tmpFile" = tmpFile))
+  
+  return(file.path(tmpDir, tmpFile))
   
 })
 
@@ -1290,7 +1255,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
           }
         }
         
-       
+        
         
         write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
                    body = pxml(ws_rels),

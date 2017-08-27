@@ -35,8 +35,6 @@ zip_xlsx <- function(d){
   flags = "-r1"
   extras = ""
   zip = Sys.getenv("R_ZIPCMD", "zip")
-  
-  ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
   res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
   setwd(wd)
