@@ -10,7 +10,8 @@
 #' @import stats
 #' @importFrom Rcpp sourceCpp 
 #' @importFrom zip zip
-#' 
+#' @importFrom base LETTERS
+#' @importFrom utils download.file head menu unzip
 #' @seealso
 #' \itemize{
 #'    \item{\code{vignette("Introduction", package = "openxlsx")}}

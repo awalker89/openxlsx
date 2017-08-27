@@ -23,6 +23,7 @@ Imports:
     Rcpp,
     grDevices,
     stats,
+    utils
     zip
 VignetteBuilder: knitr
 Suggests:
