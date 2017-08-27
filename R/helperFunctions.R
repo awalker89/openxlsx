@@ -557,13 +557,20 @@ nodeAttributes <- function(x){
 
 buildBorder <- function(x){
   
+  style <- list()
+  if(grepl('diagonalup="1"', tolower(x), fixed = TRUE))
+    style$borderDiagonalUp <- TRUE
+  
+  if(grepl('diagonaldown="1"', tolower(x), fixed = TRUE))
+    style$borderDiagonalDown <- TRUE
+  
   ## gets all borders that have children
-  x <- unlist(lapply(c("<left", "<right", "<top", "<bottom"), function(tag) getNodes(xml = x, tagIn = tag)))
+  x <- unlist(lapply(c("<left", "<right", "<top", "<bottom", "<diagonal"), function(tag) getNodes(xml = x, tagIn = tag)))
   if(length(x) == 0)
     return(NULL)
   
-  sides <- c("TOP", "BOTTOM", "LEFT", "RIGHT")
-  sideBorder <- character(length=length(x))
+  sides <- c("TOP", "BOTTOM", "LEFT", "RIGHT", "DIAGONAL")
+  sideBorder <- character(length = length(x))
   for(i in 1:length(x)){
     tmp <- sides[sapply(sides, function(s) grepl(s, x[[i]], ignore.case = TRUE))]
     if(length(tmp) > 1) tmp <- tmp[[1]]
@@ -613,8 +620,6 @@ buildBorder <- function(x){
   })
   
   ## sideBorder & cols
-  style <- list()
-  
   if("LEFT" %in% sideBorder){
     style$borderLeft <- weight[which(sideBorder == "LEFT")]
     style$borderLeftColour <- cols[which(sideBorder == "LEFT")]
@@ -633,6 +638,11 @@ buildBorder <- function(x){
   if("BOTTOM" %in% sideBorder){
     style$borderBottom <- weight[which(sideBorder == "BOTTOM")]
     style$borderBottomColour <- cols[which(sideBorder == "BOTTOM")]
+  }
+  
+  if("DIAGONAL" %in% sideBorder){
+    style$borderDiagonal <- weight[which(sideBorder == "DIAGONAL")]
+    style$borderDiagonalColour <- cols[which(sideBorder == "DIAGONAL")]
   }
   
   return(style)

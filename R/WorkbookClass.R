@@ -774,7 +774,7 @@ Workbook$methods(updateStyles = function(style){
   }
   
   ## Border
-  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal)))){
     
     borderNode <- .self$createBorderNode(style)
     borderId <- which(styles$borders == borderNode) - 1L
@@ -916,7 +916,7 @@ Workbook$methods(updateCellStyles = function(){
     }
     
     ## Border
-    if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+    if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal)))){
       
       borderNode <- .self$createBorderNode(style)
       borderId <- which(styles$borders == borderNode) - 1L
@@ -1045,8 +1045,16 @@ Workbook$methods(createFontNode = function(style){
 
 Workbook$methods(createBorderNode = function(style){
   
-  borderNode <- "<border>"
+  borderNode <- "<border"
   
+  if(style$borderDiagonalUp)
+    borderNode <- paste(borderNode, 'diagonalUp="1"', sep = " ")
+  
+  if(style$borderDiagonalDown)
+    borderNode <- paste(borderNode, 'diagonalDown="1"', sep = " ")
+  
+  borderNode <- paste0(borderNode, ">")
+    
   if(!is.null(style$borderLeft))
     borderNode <- paste0(borderNode, sprintf('<left style="%s">', style$borderLeft), sprintf('<color %s="%s"/>', names(style$borderLeftColour), style$borderLeftColour), '</left>')
   
@@ -1058,6 +1066,9 @@ Workbook$methods(createBorderNode = function(style){
   
   if(!is.null(style$borderBottom))
     borderNode <- paste0(borderNode, sprintf('<bottom style="%s">', style$borderBottom), sprintf('<color %s="%s"/>', names(style$borderBottomColour), style$borderBottomColour), '</bottom>')
+  
+  if(!is.null(style$borderDiagonal))
+    borderNode <- paste0(borderNode, sprintf('<diagonal style="%s">', style$borderDiagonal), sprintf('<color %s="%s"/>', names(style$borderDiagonalColour), style$borderDiagonalColour), '</diagonal>')
   
   paste0(borderNode, "</border>")
   
@@ -1444,7 +1455,7 @@ Workbook$methods(addDXFS = function(style){
   if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg))
     dxf <- paste0(dxf, createFillNode(style))
   
-  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom))))
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal))))
     dxf <- paste0(dxf, createBorderNode(style))
   
   dxf <- paste(dxf, "</dxf>")
@@ -2884,10 +2895,12 @@ Workbook$methods(loadStyles = function(stylesXML){
   fills <- getNodes(xml = stylesTxt, tagIn = "<fill>")
   fills <- buildFillList(fills)
   
-  borders <- getNodes(xml = stylesTxt, tagIn = "<border>")
+  borders <- getOpenClosedNode(stylesTxt, "<borders ", "</borders>")
+  borders <- substr(borders, start =  regexpr("<border>", borders)[1], stop = regexpr("</borders>", borders) - 1L)
+  borders <- getNodes(xml = borders, tagIn = "<border")
   borders <- sapply(borders, buildBorder, USE.NAMES = FALSE)
   
-  
+
   ## ------------------------------ build styleObjects ------------------------------ ##
   
   cellXfs <- getNodes(xml = stylesTxt, tagIn = "<cellXfs")
@@ -2978,6 +2991,19 @@ Workbook$methods(loadStyles = function(stylesXML){
               style$borderBottom    <- thisBorder$borderBottom
               style$borderBottomColour <- thisBorder$borderBottomColour
             }
+            
+            if("borderDiagonal" %in% names(thisBorder)){
+              style$borderDiagonal    <- thisBorder$borderDiagonal
+              style$borderDiagonalColour <- thisBorder$borderDiagonalColour
+            }
+            
+            if("borderDiagonalUp" %in% names(thisBorder))
+              style$borderDiagonalUp    <- thisBorder$borderDiagonalUp
+            
+            if("borderDiagonalDown" %in% names(thisBorder))
+              style$borderDiagonalDown    <- thisBorder$borderDiagonalDown
+            
+            
           }
         }
       }
