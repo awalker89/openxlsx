@@ -67,7 +67,7 @@
 #' addWorksheet(wb, "cellIs")
 #' addWorksheet(wb, "Moving Row")
 #' addWorksheet(wb, "Moving Col")
-#' addWorksheet(wb, "Dependent on 1")
+#' addWorksheet(wb, "Dependent on")
 #' addWorksheet(wb, "Duplicates")
 #' addWorksheet(wb, "containsText")
 #' addWorksheet(wb, "colourScale", zoom = 30)
@@ -97,10 +97,16 @@
 #' conditionalFormatting(wb, "Moving Col", cols=1:2, rows=1:11, rule="A$1>0", style = posStyle)
 #' 
 #' ## highlight entire range cols X rows dependent only on cell A1
-#' writeData(wb, "Dependent on 1", -5:5)
-#' writeData(wb, "Dependent on 1", LETTERS[1:11], startCol=2)
-#' conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
-#' conditionalFormatting(wb, "Dependent on 1", cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+#' writeData(wb, "Dependent on", -5:5)
+#' writeData(wb, "Dependent on", LETTERS[1:11], startCol=2)
+#' conditionalFormatting(wb, "Dependent on", cols=1:2, rows=1:11, rule="$A$1<0", style = negStyle)
+#' conditionalFormatting(wb, "Dependent on", cols=1:2, rows=1:11, rule="$A$1>0", style = posStyle)
+#' 
+#' ## highlight cells in column 1 based on value in column 2
+#' writeData(wb, "Dependent on", data.frame(x = 1:10, y = runif(10)), startRow = 15)
+#' conditionalFormatting(wb, "Dependent on", cols=1, rows=16:25, rule="B16<0.5", style = negStyle)
+#' conditionalFormatting(wb, "Dependent on", cols=1, rows=16:25, rule="B16>=0.5", style = posStyle)
+#' 
 #' 
 #' ## highlight duplicates using default style
 #' writeData(wb, "Duplicates", sample(LETTERS[1:15], size = 10, replace = TRUE))
