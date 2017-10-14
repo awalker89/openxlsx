@@ -93,7 +93,9 @@ Workbook$methods(addWorksheet = function(sheetName
                                          , orientation = 'portrait'
                                          , hdpi = 300
                                          , vdpi = 300){
-  
+  if (!missing(sheetName)) {
+    if (grepl(pattern=":", x=sheetName)) stop("colon not allowed in sheet names in Excel")
+  }	
   newSheetIndex = length(worksheets) + 1L
   
   if(newSheetIndex > 1){
