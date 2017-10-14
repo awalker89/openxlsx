@@ -302,7 +302,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   borders <- NULL
   if("borders" %in% names(params)){
     borders <- tolower(params$borders)
-    if(!all(borders %in% c("surrounding", "rows", "columns")))
+    if(!all(borders %in% c("surrounding", "rows", "columns", "all")))
       stop("Invalid borders argument")
   }
   
