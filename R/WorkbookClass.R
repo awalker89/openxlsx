@@ -535,7 +535,7 @@ Workbook$methods(saveWorkbook = function(){
   ## compress to xlsx
   wd <- getwd()
   tmpFile <- basename(tempfile(fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm")))
-  on.exit(expr = setwd(wd))
+  on.exit(expr = setwd(wd), add = TRUE)
   
   ## zip it
   setwd(dir = tmpDir)

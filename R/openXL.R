@@ -34,6 +34,10 @@
 #' 
 openXL <- function(file = NULL){
   
+  od <- getOption("OutDec")
+  options("OutDec" = ".")
+  on.exit(expr = options("OutDec" = od), add = TRUE)
+  
   if (is.null(file)) stop("A file has to be specified.")
   
   ## workbook handling

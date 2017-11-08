@@ -55,6 +55,11 @@
 #' saveWorkbook(wb, "internalHyperlinks.xlsx")
 makeHyperlinkString <- function(sheet, row = 1, col = 1, text = NULL, file = NULL){
   
+  od <- getOption("OutDec")
+  options("OutDec" = ".")
+  on.exit(expr = options("OutDec" = od), add = TRUE)
+  
+  
   cell <- paste0(int2col(col), row)
   if(!is.null(file)){
     dest <- sprintf("[%s]'%s'!%s", file, sheet, cell)

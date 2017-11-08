@@ -154,12 +154,15 @@ writeData <- function(wb,
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- getOption("scipen")
-  options("scipen" = 200)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
-  
-  
+  od <- getOption("OutDec")
   exDigits <- getOption("digits")
+  
+  options("scipen" = 200)
+  options("OutDec" = ".")
   options("digits" = 22)
+  
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  on.exit(expr = options("OutDec" = od), add = TRUE)
   on.exit(options("digits" = exDigits), add = TRUE)
   
   

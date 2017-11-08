@@ -137,11 +137,15 @@ writeDataTable <- function(wb, sheet, x,
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- getOption("scipen")
-  options("scipen" = 10000)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
-  
+  od <- getOption("OutDec")
   exDigits <- getOption("digits")
+  
+  options("scipen" = 200)
+  options("OutDec" = ".")
   options("digits" = 22)
+  
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  on.exit(expr = options("OutDec" = od), add = TRUE)
   on.exit(options("digits" = exDigits), add = TRUE)
   
   ## convert startRow and startCol

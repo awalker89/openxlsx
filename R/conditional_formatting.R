@@ -179,6 +179,10 @@
 #' 
 conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, type = "expression", ...){
   
+  od <- getOption("OutDec")
+  options("OutDec" = ".")
+  on.exit(expr = options("OutDec" = od), add = TRUE)
+
   type <- tolower(type)
   params <- list(...)
   
