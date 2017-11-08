@@ -45,7 +45,7 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   # appXML             <- xmlFiles[grepl("app.xml$", xmlFiles, perl = TRUE)]
   
   drawingsXML        <- xmlFiles[grepl("drawings/drawing[0-9]+.xml$", xmlFiles, perl = TRUE)]
-  worksheetsXML      <- xmlFiles[grepl("/worksheets/sheet[0-9]", xmlFiles, perl = TRUE)]
+  worksheetsXML      <- xmlFiles[grepl("/worksheets/sheet[0-9]+", xmlFiles, perl = TRUE)]
   
   coreXML            <- xmlFiles[grepl("core.xml$", xmlFiles, perl = TRUE)]
   workbookXML        <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
@@ -257,15 +257,15 @@ loadWorkbook <- function(file, xlsxFile = NULL){
                                                                       wb$pivotTables.xml.rels, perl = TRUE, ignore.case = TRUE)))
     
     ## pivot cache records
-    tmp <- unlist(regmatches(pivotCacheRecords, gregexpr("(?<=pivotCache/pivotCacheRecords)[0-9](?=\\.xml)", pivotCacheRecords, perl = TRUE, ignore.case = TRUE)))
+    tmp <- unlist(regmatches(pivotCacheRecords, gregexpr("(?<=pivotCache/pivotCacheRecords)[0-9]+(?=\\.xml)", pivotCacheRecords, perl = TRUE, ignore.case = TRUE)))
     pivotCacheRecords <- pivotCacheRecords[tmp %in% cache_keep]
     
     ## pivot cache definitions rels
-    tmp <- unlist(regmatches(pivotDefRelsXML, gregexpr("(?<=_rels/pivotCacheDefinition)[0-9](?=\\.xml)", pivotDefRelsXML, perl = TRUE, ignore.case = TRUE)))
+    tmp <- unlist(regmatches(pivotDefRelsXML, gregexpr("(?<=_rels/pivotCacheDefinition)[0-9]+(?=\\.xml)", pivotDefRelsXML, perl = TRUE, ignore.case = TRUE)))
     pivotDefRelsXML <- pivotDefRelsXML[tmp %in% cache_keep]
     
     ## pivot cache definitions
-    tmp <- unlist(regmatches(pivotDefXML, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9](?=\\.xml)", pivotDefXML, perl = TRUE, ignore.case = TRUE)))
+    tmp <- unlist(regmatches(pivotDefXML, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9]+(?=\\.xml)", pivotDefXML, perl = TRUE, ignore.case = TRUE)))
     pivotDefXML <- pivotDefXML[tmp %in% cache_keep]
     
     
@@ -332,8 +332,8 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   
   ## xl\media
   if(length(media) > 0){
-    mediaNames <- regmatches(media, regexpr("image[0-9]\\.[a-z]+$", media))
-    fileTypes <- unique(gsub("image[0-9]\\.", "", mediaNames))
+    mediaNames <- regmatches(media, regexpr("image[0-9]+\\.[a-z]+$", media))
+    fileTypes <- unique(gsub("image[0-9]+\\.", "", mediaNames))
     
     contentNodes <- sprintf('<Default Extension="%s" ContentType="image/%s"/>', fileTypes, fileTypes)
     contentNodes[fileTypes == "emf"] <- '<Default Extension="emf" ContentType="image/x-emf"/>'
