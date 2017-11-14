@@ -214,12 +214,13 @@ WorkSheet$methods(get_post_sheet_data = function(){
   }
   
   
-  if(length(extLst) > 0)
-    xml <- paste0(xml, sprintf('<extLst>%s</extLst>', paste(extLst, collapse = "")), collapse = "")
+  if(length(extLst) > 0) 
+    xml <- paste0(xml
+                  , sprintf('<extLst><ext uri="{CCE6A557-97BC-4b89-ADB6-D9C93CAAB3DF}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:dataValidations count="%s" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">'
+                  , length(extLst))
+                  , paste0(pxml(extLst), '</x14:dataValidations></ext></extLst>'), collapse = "") 
   
-  
-  
-  xml <- paste0(xml, "</worksheet>")
+  xml <- paste0(xml, "</worksheet>") 
   
   return(xml)
   
