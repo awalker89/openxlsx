@@ -629,7 +629,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
                            tableStyle, as.integer(showFirstColumn), as.integer(showLastColumn), as.integer(showRowStripes), as.integer(showColumnStripes))
   
   
-  tables <<- c(tables, build_table_xml(table = table, tableStyleXML = tableStyleXML, ref = ref, colNames = colNames, showColNames = showColNames, withFilter = withFilter))
+  tables <<- c(tables, build_table_xml(table = table, tableStyleXML = tableStyleXML, ref = ref, colNames = gsub("\n|\r", "_x000a_", colNames), showColNames = showColNames, withFilter = withFilter))
   names(tables) <<- c(nms, ref)
   attr(tables, "sheet") <<- c(tSheets, sheet)
   attr(tables, "tableName") <<- c(tNames, tableName)
