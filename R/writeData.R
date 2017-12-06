@@ -316,7 +316,7 @@ writeData <- function(wb,
     
     ref1 <- paste0("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
     ref2 <- paste0("$", convert_to_excel_ref(cols = startCol + nCol - 1L, LETTERS = LETTERS), "$", startRow + nRow - 1L + colNames)
-    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
+    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[wb$validateSheet(sheet)])
     
   }
   

@@ -57,6 +57,8 @@ read.xlsx.Workbook <- function(xlsxFile,
     dn <- dn[ind] 
     region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
     sheet <- names(xlsxFile)[sapply(names(xlsxFile), function(x) grepl(x, dn))]
+    if(length(sheet) > 1)
+      sheet <- sheet[which.max(nchar(sheet))]
     
     region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
     

@@ -7,8 +7,8 @@ context("Named Regions")
 
 
 test_that("Maintaining Named Regions on Load", {
- 
-
+  
+  
   ## create named regions
   wb <- createWorkbook()
   addWorksheet(wb, "Sheet 1")
@@ -26,10 +26,10 @@ test_that("Maintaining Named Regions on Load", {
   ## using writeData 'name' argument
   writeData(wb, sheet = 1, x = iris, name = "iris2", startCol = 10)
   
-
+  
   ## Named region size 1
   writeData(wb, sheet = 2, x = 99, name = "region1", startCol = 3, startRow = 3)
-
+  
   ## save file for testing
   out_file <- tempfile(fileext = ".xlsx")
   saveWorkbook(wb, out_file, overwrite = TRUE)
@@ -85,14 +85,14 @@ test_that("Correctly Loading Named Regions Created in Excel",{
   # This proeduced an error in an earlier version of the pacage when the object
   # wb was passed, but worked correctly when the filename was passed to read.xlsx
   cell_f <- read.xlsx(filename,
-                       namedRegion = "NamedCell",
-                       colNames = FALSE,
-                       rowNames = FALSE)
+                      namedRegion = "NamedCell",
+                      colNames = FALSE,
+                      rowNames = FALSE)
   
   cell_w <- read.xlsx(wb,
-                       namedRegion = "NamedCell",
-                       colNames = FALSE,
-                       rowNames = FALSE)
+                      namedRegion = "NamedCell",
+                      colNames = FALSE,
+                      rowNames = FALSE)
   
   expect_equal(object = cell_f, expected = cell_w)
   expect_equal(object = class(cell_f), expected = "data.frame")
@@ -121,7 +121,7 @@ test_that("Correctly Loading Named Regions Created in Excel",{
 
 
 test_that("Missing rows in named regions", {
-
+  
   temp_file <- tempfile(fileext = ".xlsx")
   
   wb <- createWorkbook()
@@ -205,7 +205,7 @@ test_that("Missing columns in named regions", {
   ## create region
   writeData(wb, sheet = 1, x = iris[1:11,], startCol = 1, startRow = 1)
   deleteData(wb, sheet = 1, col = 2, rows = 1:12, gridExpand = TRUE)
-
+  
   createNamedRegion(wb = wb,
                     sheet = 1,
                     name = "iris",
@@ -264,5 +264,59 @@ test_that("Missing columns in named regions", {
   expect_equal(dim(x), c(4, 3))
   
   unlink(temp_file)
+  
+})
+
+
+
+
+
+test_that("Matching Substrings breaks reading named regions", {
+  
+  temp_file <- tempfile(fileext = ".xlsx")
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, "table")
+  addWorksheet(wb, "table2")
+  
+  t1 <- head(iris)
+  t1$Species <- as.character(t1$Species)
+  t2 <- head(mtcars)
+  
+  writeData(wb, sheet = "table", x = t1, name = "t", startCol = 3, startRow = 12)
+  writeData(wb, sheet = "table2", x = t2, name = "t2", startCol = 5, startRow = 24, rowNames = TRUE)
+  
+  writeData(wb, sheet = "table", x = head(t1, 3), name = "t1", startCol = 9, startRow = 3)
+  writeData(wb, sheet = "table2", x = head(t2, 3), name = "t22", startCol = 15, startRow = 12, rowNames = TRUE)
+  
+  saveWorkbook(wb, file = temp_file, overwrite = TRUE)
+  
+  r1 <- getNamedRegions(wb)
+  expect_equal(attr(r1, "sheet"), c("table", "table2", "table", "table2"))
+  expect_equal(attr(r1, "position"), c("C12:G18", "E24:P30", "I3:M6", "O12:Z15"))
+  expect_equal(r1, c("t", "t2", "t1", "t22"), check.attributes = FALSE)
+  
+  r2 <- getNamedRegions(temp_file)
+  expect_equal(attr(r2, "sheet"), c("table", "table2", "table", "table2"))
+  expect_equal(attr(r1, "position"), c("C12:G18", "E24:P30", "I3:M6", "O12:Z15"))
+  expect_equal(r2, c("t", "t2", "t1", "t22"), check.attributes = FALSE)
+  
+  
+  ## read file named region
+  expect_equal(t1, read.xlsx(xlsxFile = temp_file, namedRegion = "t"))
+  expect_equal(t2, read.xlsx(xlsxFile = temp_file, namedRegion = "t2", rowNames = TRUE))
+  expect_equal(head(t1, 3), read.xlsx(xlsxFile = temp_file, namedRegion = "t1"))
+  expect_equal(head(t2, 3), read.xlsx(xlsxFile = temp_file, namedRegion = "t22", rowNames = TRUE))
+  
+  ## read Workbook named region
+  expect_equal(t1, read.xlsx(xlsxFile = wb, namedRegion = "t"))
+  expect_equal(t2, read.xlsx(xlsxFile = wb, namedRegion = "t2", rowNames = TRUE))
+  expect_equal(head(t1, 3), read.xlsx(xlsxFile = wb, namedRegion = "t1"))
+  expect_equal(head(t2, 3), read.xlsx(xlsxFile = wb, namedRegion = "t22", rowNames = TRUE))
+  
+  
+  
+  unlink(temp_file)
+  
   
 })
