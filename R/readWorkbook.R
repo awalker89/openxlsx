@@ -214,7 +214,7 @@ read.xlsx.default <- function(xlsxFile,
   ## get the file_name for each sheetrId
   file_name <- sapply(sheetrId, function(rId){
     txt <- workbookRelsXML[grepl(sprintf('Id="%s"', rId), workbookRelsXML, fixed = TRUE)]
-    regmatches(txt, regexpr('(?<=Target=").+(?=xml")', txt, perl = TRUE))
+    regmatches(txt, regexpr('(?<=Target=").+xml(?=")', txt, perl = TRUE))
   })
   
   
@@ -235,7 +235,7 @@ read.xlsx.default <- function(xlsxFile,
     stop("Length of sheet is 0 - something has gone terribly wrong! Please report this bug on github (https://github.com/awalker89/openxlsx/issues) with an example xlsx file.")
   
   ## get file
-  worksheet <- xmlFiles[grepl(sheet, xmlFiles, ignore.case = TRUE)]
+  worksheet <- xmlFiles[grepl(pattern = tolower(sheet), x = tolower(xmlFiles), fixed = TRUE)]
   if(length(worksheet) == 0)
     stop("Length of worksheet is 0 - something has gone terribly wrong! Please report this bug on github (https://github.com/awalker89/openxlsx/issues) with an example xlsx file.")
   

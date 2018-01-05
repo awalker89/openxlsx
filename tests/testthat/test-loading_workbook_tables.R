@@ -1,6 +1,6 @@
 
 
-context("Load Workbook Object")
+context("Load Workbook Object Tables")
 
 
 test_that("Tables loaded correctly", {
