@@ -849,9 +849,9 @@ CharacterVector get_extLst_Major(std::string xml){
     endPos = xml.find(tagEnd, pos + 8);
     
     node = xml.substr(pos + 8, endPos - pos - 8);
-    pos = xml.find("conditionalFormattings", pos + 1);  
-    if(pos == std::string::npos)
-      break;
+    //pos = xml.find("conditionalFormattings", pos + 1);  
+    //if(pos == std::string::npos)
+    //  break;
     
     r.push_back(node.c_str());
     
