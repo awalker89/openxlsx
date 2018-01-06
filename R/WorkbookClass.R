@@ -1,12 +1,7 @@
 
 #' @include class_definitions.R
 
-Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
-  
-  if(length(creator) == 0)
-    creator <- ""
-  
-  
+Workbook$methods(initialize = function(creator = "", title = NULL, subject = NULL, category = NULL){
   
   charts <<- list()
   isChartSheet <<- logical(0)
@@ -14,7 +9,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   colWidths <<- list()
   connections <<- NULL
   Content_Types <<- genBaseContent_Type()
-  core <<- genBaseCore(creator)
+  core <<- genBaseCore(creator = creator, title = title, subject = subject, category = category)
   comments <<- list()
   
   
@@ -407,10 +402,7 @@ Workbook$methods(saveWorkbook = function(){
              fl = file.path(docPropsDir, "app.xml"))
   
   ## write core.xml
-  write_file(head = '<coreProperties xmlns="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
-             body = pxml(core),
-             tail = '</coreProperties>',
-             fl = file.path(docPropsDir, "core.xml"))
+  write_file(head = "", body = pxml(core), tail = "", fl = file.path(docPropsDir, "core.xml"))
   
   ## write workbook.xml.rels
   write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',

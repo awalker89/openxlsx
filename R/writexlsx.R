@@ -158,9 +158,11 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   if(!is.logical(asTable))
     stop("asTable must be a logical.")
   
-  creator <- ""
-  if(creator %in% names(params))
-    creator <- params$creator
+  creator <- ifelse("creator" %in% names(params), params$creator, "")
+  title <- params$title ### will return NULL of not exist
+  subject <- params$subject ### will return NULL of not exist
+  category <- params$category ### will return NULL of not exist
+  
   
   sheetName <- "Sheet 1"
   if("sheetName" %in% names(params)){
@@ -337,7 +339,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
     
   ## create new Workbook object
-  wb <- Workbook$new(creator)
+  wb <- createWorkbook(creator = creator, title = title, subject = subject, category = category)
+  
   
   ## If a list is supplied write to individual worksheets using names if available
   nSheets <- 1

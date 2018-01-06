@@ -89,6 +89,12 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   ## remove all EXCEPT media and charts
   on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment|embeddings|pivot|slicer|vbaProject", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
   
+  ## core
+  if(length(coreXML) == 1){
+    coreXML <- paste(readLines(con = coreXML, encoding="UTF-8", warn = FALSE), collapse = "")
+    wb$core <- removeHeadTag(x = coreXML)
+  }
+  
   nSheets <- length(worksheetsXML) + length(chartSheetsXML)
   
   ## get Rid of chartsheets, these do not have a worksheet/sheeti.xml

@@ -1,12 +1,12 @@
 
-openxlsx 4.0.26
+openxlsx 4.0.33
 ----------------------------------------------------------------
 
 NEW FEATURES
 
 * deleteNamedRegions to delete named region and optionally the worksheet data
 
-*
+* set Workbook properties 'title', 'subject', 'category' 
 
 
 BUG FIXES

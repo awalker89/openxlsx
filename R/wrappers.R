@@ -3,6 +3,9 @@
 #' @title Create a new Workbook object
 #' @description Create a new Workbook object
 #' @param creator Creator of the workbook (your name). Defaults to login username
+#' @param title Workbook properties title
+#' @param subject Workbook properties subject
+#' @param category Workbook properties category
 #' @author Alexander Walker
 #' @return Workbook object
 #' @export
@@ -15,22 +18,40 @@
 #' 
 #' ## Save workbook to working directory
 #' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
-createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.getenv("USERNAME"), Sys.getenv("USER"))){
+createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.getenv("USERNAME"), Sys.getenv("USER"))
+                           , title = NULL
+                           , subject = NULL
+                           , category = NULL){
   
   od <- getOption("OutDec")
   options("OutDec" = ".")
   on.exit(expr = options("OutDec" = od), add = TRUE)
   
-  if(class(creator) != "character")
-    creator <- ""
+  ## check all inputs are valid
+  if(length(creator) > 1) creator <- creator[[1]]
+  if(length(creator) == 0) creator <- ""
+  if(!"character" %in% class(creator)) creator <- ""
   
-  if(length(creator) > 1)
-    creator <- creator[[1]]
+  if(length(title) > 1) title <- title[[1]]
+  if(length(subject) > 1) subject <- subject[[1]]
+  if(length(category) > 1) category <- category[[1]]
   
-  ## remove any illegal XML characters
-  creator <- replaceIllegalCharacters(creator)
+  if(!is.null(title)){
+    if(!"character" %in% class(title))
+      stop("title must be a string")
+  }
+    
+  if(!is.null(subject)){
+    if(!"character" %in% class(subject))
+      stop("subject must be a string")
+  }
   
-  invisible(Workbook$new(creator))
+  if(!is.null(category)){
+    if(!"character" %in% class(category))
+      stop("category must be a string")
+  }
+  
+  invisible(Workbook$new(creator = creator, title = title, subject = subject, category = category))
 }
 
 
