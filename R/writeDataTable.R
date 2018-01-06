@@ -2,7 +2,6 @@
 #' @name writeDataTable
 #' @title Write to a worksheet as an Excel table
 #' @description Write to a worksheet and format as an Excel table
-#' @author Alexander Walker
 #' @param wb A Workbook object containing a 
 #' worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
@@ -88,6 +87,34 @@
 #' ## Open in excel without saving file: openXL(wb)
 #' 
 #' saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
+#' 
+#' 
+#' 
+#' 
+#' 
+#' ##################################################################################### 
+#' ## Pre-defined table styles gallery
+#' 
+#' wb <- createWorkbook(paste0("tableStylesGallery.xlsx"))
+#' addWorksheet(wb, "Style Samples")
+#' for(i in 1:21) {
+#'   style <- paste0("TableStyleLight", i)
+#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 1, startCol = i*3-2)
+#' }
+#' 
+#' for(i in 1:28) {
+#'   style <- paste0("TableStyleMedium", i)
+#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 4, startCol = i*3-2)
+#' }
+#' 
+#' for(i in 1:11) {
+#'   style <- paste0("TableStyleDark", i)
+#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 7, startCol = i*3-2)
+#' } 
+#' 
+#' ## openXL(wb)
+#' saveWorkbook(wb, file = "tableStylesGallery.xlsx", overwrite = TRUE)
+#' 
 writeDataTable <- function(wb, sheet, x,
                            startCol = 1,
                            startRow = 1, 
