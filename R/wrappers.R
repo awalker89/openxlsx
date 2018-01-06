@@ -2146,28 +2146,29 @@ convertToDate <- function(x, origin = "1900-01-01", ...){
 #' convertToDateTime(x, tx = "Australia/Perth")
 convertToDateTime <- function(x, origin = "1900-01-01", ...){
   
-  ## increase scipen to avoid writing in scientific 
-  exSciPen <- options("scipen")
+  sci_pen <- getOption("scipen")
   options("scipen" = 10000)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
+  on.exit(options("scipen" = sci_pen), add = TRUE)
   
   x <- as.numeric(x)
-  rem <- x %% 1
   date <- convertToDate(x, origin)
-  fraction <- 24*rem
-  hrs <- floor(fraction)
-  minFrac <- (fraction-hrs)*60
-  mins <- floor(minFrac)
-  secs <- (minFrac - mins)*60
-  y <- paste(hrs, mins, secs, sep = ":")
-  y <- format(strptime(y, "%H:%M:%S"), "%H:%M:%S") 
   
+  x <- x * 86400
+  rem <- x %% 86400
+  
+  hours <- floor(rem / 3600)
+  minutes_fraction <- rem %% 3600
+  minutes_whole <- floor(minutes_fraction / 60)
+  secs <- minutes_fraction %% 60
+
+  y <- sprintf("%02d:%02d:%06.3f", hours, minutes_whole, secs)
   notNA <- !is.na(x)
-  dateTime = rep(NA, length(x))
-  dateTime[notNA] <- as.POSIXct(paste(date[notNA], y[notNA]), ...)
-  dateTime = .POSIXct(dateTime)
+  date_time = rep(NA, length(x))
+  date_time[notNA] <- as.POSIXct(paste(date[notNA], y[notNA]),...)
   
-  return(dateTime)
+  date_time = .POSIXct(date_time)
+  
+  return(date_time)
 }
 
 
