@@ -18,6 +18,10 @@
 #' 
 #' ## Save workbook to working directory
 #' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
+#' 
+#' ## Set Workbook properties
+#' wb <- createWorkbook(creator = "Me", title = "title here", subject = "this & that", category = "something")
+#' 
 createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.getenv("USERNAME"), Sys.getenv("USER"))
                            , title = NULL
                            , subject = NULL
