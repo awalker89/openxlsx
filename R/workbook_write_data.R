@@ -44,7 +44,14 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     pInds <- which(sapply(colClasses, function(x) any(c("posixct", "posixt", "posixlt") %in% x)))
     if(length(pInds) > 0 & nRows > 0){
-      t <- sapply(pInds,  function(i) format(df[[i]][[1]], "%z"))
+      t <- sapply(pInds,  function(i) {
+        tzi <- format(df[[i]][[1]], "%z")
+        if(is.na(tzi)){
+          tz_tmp <- na.omit(df[[i]])
+          tzi <- ifelse(length(tz_tmp) > 0, format(tz_tmp[1], "%z"), NA)
+        }
+        return(tzi)
+      })
       
       offSet <- suppressWarnings(ifelse(substr(t,1,1) == "+", 1L, -1L) * (as.integer(substr(t,2,3)) + as.integer(substr(t,4,5)) / 60) / 24)
       
@@ -163,7 +170,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     rm(formula_cols)
     rm(formula_strs)
     rm(formula_inds)
-
+    
     
   }
   
@@ -178,7 +185,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     if(length(hyperlink_inds) > 0){
       t[hyperlink_inds] <- 1L ## "s"
- 
+      
       hyperlink_refs <- convert_to_excel_ref_expand(cols = hyperlink_cols + startCol - 1, LETTERS = LETTERS, rows = as.character((startRow + colNames):(startRow+nRows - 1L)) )
       
       exHlinks <- worksheets[[sheet]]$hyperlinks
