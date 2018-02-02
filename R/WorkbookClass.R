@@ -166,6 +166,70 @@ Workbook$methods(addWorksheet = function(sheetName
 })
 
 
+Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
+  clonedSheet = validateSheet(clonedSheet)
+  if (!missing(sheetName)) {
+    if (grepl(pattern=":", x=sheetName)) stop("colon not allowed in sheet names in Excel")
+  }	
+  newSheetIndex = length(worksheets) + 1L
+  if(newSheetIndex > 1){
+    sheetId <- max(as.integer(regmatches(workbook$sheets, regexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE)))) + 1L
+  }else{
+    sheetId <- 1
+  }
+  
+  
+  ## fix visible value
+  ## TODO: copy visibility from cloned sheet!
+  visible <- "visible"
+
+  ##  Add sheet to workbook.xml
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state="%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
+  
+  ## append to worksheets list
+  worksheets <<- append(worksheets, worksheets[[clonedSheet]]$copy())
+  
+  
+  ## update content_tyes
+  ## add a drawing.xml for the worksheet
+  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex),
+                      sprintf('<Override PartName="/xl/drawings/drawing%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>', newSheetIndex))
+  
+  ## Update xl/rels
+  workbook.xml.rels <<- c(workbook.xml.rels,
+                          sprintf('<Relationship Id="rId0" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet%s.xml"/>', newSheetIndex)
+  )
+  
+  
+  ## create sheet.rels to simplify id assignment
+  worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex) # TODO: Is there any way (or even need) to copy from cloned sheet?
+  drawings_rels[[newSheetIndex]] <<- drawings_rels[[clonedSheet]]
+  drawings[[newSheetIndex]] <<- drawings[[clonedSheet]]
+  
+  vml_rels[[newSheetIndex]] <<- vml_rels[[clonedSheet]]
+  vml[[newSheetIndex]] <<- vml[[clonedSheet]]
+  
+  isChartSheet[[newSheetIndex]] <<- isChartSheet[[clonedSheet]]
+  comments[[newSheetIndex]] <<- comments[[clonedSheet]]
+  
+  rowHeights[[newSheetIndex]] <<- rowHeights[[clonedSheet]]
+  colWidths[[newSheetIndex]] <<- colWidths[[clonedSheet]]
+  
+  sheetOrder <<- c(sheetOrder, as.integer(newSheetIndex))
+  sheet_names <<- c(sheet_names, sheetName)
+  
+  ## Style objects are stored in a global list, so we need to get all styles 
+  ## assigned to the cloned sheet and duplicate them
+  sheetStyles = Filter(function(s) {s$sheet == sheet_names[[clonedSheet]]}, styleObjects)
+  styleObjects <<- c(styleObjects, 
+                     Map(function(s) {s$sheet = sheetName; s}, sheetStyles)
+                     )
+  
+  invisible(newSheetIndex)
+  
+})
+
+
 Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 100){
   
   newSheetIndex <- length(worksheets) + 1L

@@ -430,6 +430,44 @@ addWorksheet <- function(wb, sheetName,
                             hdpi = hdpi))
 } 
 
+#' @name cloneWorksheet
+#' @title Clone a worksheet to a workbook
+#' @description Clone a worksheet to a Workbook object
+#' @author Reinhold Kainhofer
+#' @param wb A Workbook object to attach the new worksheet
+#' @param sheetName A name for the new worksheet
+#' @param clonedSheet The name of the existing worksheet to be cloned.
+#' @return XML tree
+#' @export
+#' @examples
+#' ## Create a new workbook
+#' wb <- createWorkbook("Fred")
+#' 
+#' ## Add 3 worksheets
+#' addWorksheet(wb, "Sheet 1")
+#' cloneWorksheet(wb, "Sheet 2", clonedSheet = "Sheet 1")
+#' 
+#' ## Save workbook
+#' saveWorkbook(wb, "cloneWorksheetExample.xlsx", overwrite = TRUE)
+cloneWorksheet <- function(wb, sheetName, clonedSheet){
+  if(!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(tolower(sheetName) %in% tolower(wb$sheet_names))
+    stop("A worksheet by that name already exists! Sheet names must be unique case-insensitive.")
+  
+  if(nchar(sheetName) > 31)
+    stop("sheetName too long! Max length is 31 characters.")
+  
+  if(!is.character(sheetName))
+    sheetName <- as.character(sheetName)
+  
+  ## Invalid XML characters
+  sheetName <- replaceIllegalCharacters(sheetName)
+  
+  invisible(wb$cloneWorksheet(sheetName = sheetName, clonedSheet = clonedSheet))
+} 
+
 
 #' @name renameWorksheet
 #' @title Rename a worksheet
