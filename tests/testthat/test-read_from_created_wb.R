@@ -8,6 +8,8 @@ context("Reading from wb object is identical to reading from file")
 
 test_that("Reading from new workbook", {
   
+  curr_wd <- getwd() 
+  
   wb <- createWorkbook()
   for(i in 1:4)
     addWorksheet(wb, sprintf('Sheet %s', i))
@@ -37,6 +39,7 @@ test_that("Reading from new workbook", {
   x <- read.xlsx(wb, sheet = 4, colNames = FALSE, rowNames = FALSE)  
   expect_equal(object = mtcars, expected = x, check.attributes = FALSE)
   
+  expect_equal(object = getwd(), curr_wd)
   rm(wb)
   
 })
@@ -53,6 +56,7 @@ test_that("Reading from new workbook", {
 
 test_that("Empty workbook", {
   
+  curr_wd <- getwd()
   wb <- createWorkbook()
   addWorksheet(wb, "Sheet 1")
   
@@ -165,6 +169,7 @@ test_that("Empty workbook", {
   expect_equal(NULL, x)
   
 
+  expect_equal(object = getwd(), curr_wd)
   
   
 })

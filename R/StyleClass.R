@@ -21,7 +21,11 @@ Style$methods(initialize = function(){
   borderLeftColour <<- NULL
   borderRightColour <<- NULL
   borderBottomColour <<- NULL
-  
+  borderDiagonal <<- NULL
+  borderDiagonalColour <<- NULL
+  borderDiagonalUp <<- FALSE
+  borderDiagonalDown <<- FALSE
+    
   halign <<- NULL
   valign <<- NULL
   indent <<- NULL
@@ -79,6 +83,13 @@ mergeStyle = function(oldStyle, newStyle){
   if(!is.null(newStyle$borderBottom))
     oldStyle$borderBottom <- newStyle$borderBottom
   
+  if(!is.null(newStyle$borderDiagonal))
+    oldStyle$borderDiagonal <- newStyle$borderDiagonal
+  
+  oldStyle$borderDiagonalUp <- newStyle$borderDiagonalUp
+  oldStyle$borderDiagonalDown <- newStyle$borderDiagonalDown
+  
+  
   if(!is.null(newStyle$borderTopColour))
     oldStyle$borderTopColour <- newStyle$borderTopColour
   
@@ -90,6 +101,8 @@ mergeStyle = function(oldStyle, newStyle){
   
   if(!is.null(newStyle$borderBottomColour))
     oldStyle$borderBottomColour <- newStyle$borderBottomColour
+  
+  
   
   ## other
   if(!is.null(newStyle$halign))

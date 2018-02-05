@@ -3,7 +3,9 @@
 context("Writing and reading returns similar objects")
 
 test_that("Writing then reading returns identical data.frame 1", {
-
+  
+  curr_wd <- getwd()
+  
   ## data
   genDf <- function(){
     
@@ -35,18 +37,24 @@ test_that("Writing then reading returns identical data.frame 1", {
   expect_equal(object = x, expected = genDf(), check.attributes = FALSE)
   
   unlink(fileName, recursive = TRUE, force = TRUE)
-
-  })
+  
+  expect_equal(object = getwd(), curr_wd)
+  
+  
+  
+})
 
 
 
 
 test_that("Writing then reading returns identical data.frame 2", {
   
+  curr_wd <- getwd()
+  
   ## data.frame of dates
   dates <- data.frame("d1" = Sys.Date() - 0:500)
   for(i in 1:3) dates <- cbind(dates, dates)
-    names(dates) <- paste0("d", 1:8)
+  names(dates) <- paste0("d", 1:8)
   
   ## Date Formatting
   wb <- createWorkbook()
@@ -55,7 +63,7 @@ test_that("Writing then reading returns identical data.frame 2", {
   
   ## set default date format
   options("openxlsx.dateFormat" = "yyyy/mm/dd")
-
+  
   ## numFmt == "DATE" will use the date format specified by the above
   addStyle(wb, 1, style = createStyle(numFmt = "DATE"), rows = 2:11, cols = 1, gridExpand = TRUE) 
   
@@ -82,7 +90,7 @@ test_that("Writing then reading returns identical data.frame 2", {
   addStyle(wb, 1, style = sty, rows = 2:11, cols = 8, gridExpand = TRUE)
   
   setColWidths(wb, 1, cols = 1:10, widths = 23)
-    
+  
   
   fileName <- file.path(tempdir(), "DateFormatting.xlsx")
   write.xlsx(dates, file = fileName, overwrite = TRUE)
@@ -101,8 +109,10 @@ test_that("Writing then reading returns identical data.frame 2", {
     xNoDateDetection[[i]] <- convertToDate(xNoDateDetection[[i]], origin = dateOrigin)
   
   expect_equal(object = xNoDateDetection, expected = dates, check.attributes = FALSE)
-      
+  
+  expect_equal(object = getwd(), curr_wd)
   unlink(fileName, recursive = TRUE, force = TRUE)
+  
   
 })
 
@@ -115,12 +125,13 @@ test_that("Writing then reading returns identical data.frame 2", {
 test_that("Writing then reading rowNames, colNames combinations", {
   
   fileName <- file.path(tempdir(), "tmp.xlsx")
+  curr_wd <- getwd()
   
   ## rowNames = colNames = TRUE
   write.xlsx(mtcars, file = fileName, overwrite = TRUE, row.names = TRUE)
   x <- read.xlsx(fileName, sheet = 1, rowNames = TRUE)
   expect_equal(object = x, expected = mtcars, check.attributes = TRUE)
-      
+  
   
   ## rowNames = TRUE, colNames = FALSE
   write.xlsx(mtcars, file = fileName, overwrite = TRUE, rowNames = TRUE, colNames = FALSE)
@@ -128,7 +139,7 @@ test_that("Writing then reading rowNames, colNames combinations", {
   expect_equal(object = x, expected = mtcars, check.attributes = FALSE)
   expect_equal(object = rownames(x), expected = rownames(mtcars))
   
-
+  
   ## rowNames = FALSE, colNames = TRUE
   write.xlsx(mtcars, file = fileName, overwrite = TRUE, rowNames = FALSE, colNames = TRUE)
   x <- read.xlsx(fileName, sheet = 1, rowNames = FALSE, colNames = TRUE)
@@ -139,7 +150,9 @@ test_that("Writing then reading rowNames, colNames combinations", {
   x <- read.xlsx(fileName, sheet = 1, rowNames = FALSE, colNames = FALSE)
   expect_equal(object = x, expected = mtcars, check.attributes = FALSE)
   
+  expect_equal(object = getwd(), curr_wd)
   unlink(fileName, recursive = TRUE, force = TRUE)
+
   
 })
 
@@ -237,4 +250,26 @@ test_that("Writing then reading returns identical data.frame 4", {
 
 
 
+
+test_that("Special characters in sheet names", {
+  
+  tf <- tempfile(fileext = ".xlsx")
+  
+  ## data
+  sheet_name <- "A & B < D > D"
+  
+  wb <- createWorkbook()
+  addWorksheet(wb, sheetName = sheet_name)
+  addWorksheet(wb, sheetName = "test")
+  writeData(wb, sheet = 1, x = 1:10)
+  saveWorkbook(wb = wb, file = tf, overwrite = TRUE)
+  
+  expect_equal(getSheetNames(tf)[1], sheet_name)
+  expect_equal(getSheetNames(tf)[2], "test")
+  
+  expect_equal(read.xlsx(tf, colNames = FALSE)[[1]], 1:10)
+  
+  unlink(tf, recursive = TRUE, force = TRUE)
+  
+})
 

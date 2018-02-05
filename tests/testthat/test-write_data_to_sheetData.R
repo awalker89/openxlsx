@@ -18,7 +18,7 @@ test_that("Converting R types to Excel types", {
   n_values <- prod(dim(iris)) + ncol(iris)
   
   sheet_data <- wb$worksheets[[1]]$sheet_data
-
+  
   sheet_v <- sheet_data$v
   sheet_t <- sheet_data$t
   sheet_f <- sheet_data$f
@@ -32,7 +32,7 @@ test_that("Converting R types to Excel types", {
   expect_length(sheet_t, n_values)
   expect_length(sheet_v, n_values)
   expect_length(sheet_f, n_values)
-
+  
   
   ## rows/cols
   expect_equal(sheet_row, rep(1:151, each = 5))
@@ -141,7 +141,7 @@ test_that("Converting R types to Excel types", {
   
   expect_length(sheet_row, n_values)
   expect_length(sheet_t, n_values)
-
+  
   ## rows/cols
   expect_equal(sheet_row, rep(4:24, each = ncol(df)+1L) )
   expect_equal(sheet_col, rep(1:10, times = nrow(df) + 1L) )
@@ -178,6 +178,52 @@ test_that("Converting R types to Excel types", {
   
   # expect_equal(sheet_v[(ncol(df)+2):n_values], expected_v)
   
-
+  
   
 })
+
+
+
+
+test_that("Write zero rows & columns", {
+  
+  tempFile <- file.path(tempdir(), "temp.xlsx")
+  wb <- createWorkbook()
+  addWorksheet(wb, "s1")
+  addWorksheet(wb, "s2")
+  
+  ## ZERO ROWS
+  
+  ## headers only
+  writeData(wb, sheet = 1, x = mtcars[0,],  colNames = TRUE, rowNames = FALSE)
+  
+  ## no headers
+  writeData(wb, sheet = 1, x = mtcars[0,], colNames = FALSE, rowNames = FALSE, startRow = 5)
+  
+  ## row names
+  writeData(wb, sheet = 1, x = mtcars[0,], colNames = TRUE, rowNames = TRUE, startRow = 10)
+  
+  ## row names only
+  writeData(wb, sheet = 1, x = mtcars[0,], colNames = FALSE, rowNames = TRUE, startRow = 15)
+  
+  
+  ## ZERO COLS
+  ## headers only
+  writeData(wb, sheet = 2, x = mtcars[,0], colNames = TRUE, rowNames = FALSE)
+  
+  ## no headers
+  writeData(wb, sheet = 2, x = mtcars[,0], colNames = FALSE, rowNames = FALSE, startRow = 5)
+  
+  ## row names
+  writeData(wb, sheet = 2, x = mtcars[,0], colNames = TRUE, rowNames = TRUE, startRow = 10)
+  
+  ## row names only
+  writeData(wb, sheet = 2, x = mtcars[,0], colNames = FALSE, rowNames = TRUE, startRow = 15)
+  
+  saveWorkbook(wb, tempFile, overwrite = TRUE)
+  unlink(tempFile)
+  
+  
+  
+})
+

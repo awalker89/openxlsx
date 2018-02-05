@@ -76,6 +76,7 @@ test_that("Loading readTest.xlsx Sheet 1", {
   expected_col_widths <- structure(c("41.430625", "11.29", "11.0009375", "8.71578125")
                                    , .Names = c("3", "4", "5", "6"))
   
+  attr(expected_col_widths, "hidden") <- rep("0", 4)
   
   expect_equal(wb$colWidths[[3]], expected_col_widths)
   
@@ -168,6 +169,7 @@ test_that("Loading readTest.xlsx Sheet 1", {
   
   ## Column Widths
   expected_col_widths <- structure("10.8603125", .Names = "6")
+  attr(expected_col_widths, "hidden") <- "0"
   expect_equal(wb$colWidths[[1]], expected_col_widths)
   
   
@@ -878,8 +880,8 @@ test_that("Loading readTest.xlsx Sheet 1", {
                                          "<si><t>a</t></si>", "<si><t>b</t></si>", "<si><t>c</t></si>", 
                                          "<si><t>e</t></si>", "<si><t>f</t></si>", "<si><t>h</t></si>", 
                                          "<si><t>i</t></si>", "<si><t>Var5</t></si>", "<si><t>Var6</t></si>", 
-                                         "<si><t>Var7</t></si>", "<si><t>col 1</t></si>", "<si><t>col 2</t></si>", "<si><t>g</t></si>"
-  ), uniqueCount = 2113L)
+                                         "<si><t>Var7</t></si>", "<si><t>col 1</t></si>", "<si><t>col 2</t></si>", "<si><t>g</t></si>", "<si><t>x</t></si>"
+  ), uniqueCount = 2114L)
   
   
   expect_equal(expected_shared_strings, wb$sharedStrings)

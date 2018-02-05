@@ -8,8 +8,9 @@
 #' @useDynLib openxlsx, .registration=TRUE
 #' @import grDevices
 #' @import stats
-#' @import utils
 #' @importFrom Rcpp sourceCpp 
+#' @importFrom zip zip
+#' @importFrom utils download.file head menu unzip
 #' 
 #' @seealso
 #' \itemize{
@@ -42,7 +43,7 @@
 #' Additional options
 #' 
 #' \itemize{
-#' \item{\code{options("openxlsx.zipFlags" = "-9")}} ## set max zip compression level default is "-1"
+#' \item{\code{options("openxlsx.compressionLevel" = "9")}} ## set zip compression level, default is "1".
 #' } 
 #' 
 NULL

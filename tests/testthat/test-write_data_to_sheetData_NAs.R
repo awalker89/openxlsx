@@ -55,7 +55,7 @@ test_that("Writing to sheet_data with keepNA = FALSE", {
                     "n", "n", "n", "n", "n", "s", "n", "n", "n", "n", "n", "n", "n", 
                     "s", NA, NA, NA, NA)
   
-  expected_t <- .Call("openxlsx_map_cell_types_to_integer", expected_t, PACKAGE = "openxlsx")
+  expected_t <- map_cell_types_to_integer(t = expected_t)
   expect_equal(sheet_t[6:n_values], expected_t)
   
   expect_equal(sheet_v[1:5], 0:4)

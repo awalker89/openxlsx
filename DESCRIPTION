@@ -1,8 +1,8 @@
 Package: openxlsx
 Type: Package
 Title: Read, Write and Edit XLSX Files
-Version: 4.0.15
-Date: 2017-03-09
+Version: 4.0.33
+Date: 2018-01-05
 Authors@R: c(
     person("Alexander", "Walker",
     email = "Alexander.Walker1989@gmail.com", role = c("aut", "cre")),
@@ -23,7 +23,8 @@ Imports:
     Rcpp,
     grDevices,
     stats,
-    utils
+    utils,
+    zip
 VignetteBuilder: knitr
 Suggests:
     knitr,

@@ -39,6 +39,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     stop("sheet must be of length 1.")
   
   ## Named region logic
+  reading_named_region <- FALSE
   if(!is.null(namedRegion)){
     
     dn <- xlsxFile$workbook$definedNames
@@ -56,13 +57,15 @@ read.xlsx.Workbook <- function(xlsxFile,
     dn <- dn[ind] 
     region <- regmatches(dn, regexpr('(?<=>)[^\\<]+', dn, perl = TRUE))
     sheet <- names(xlsxFile)[sapply(names(xlsxFile), function(x) grepl(x, dn))]
+    if(length(sheet) > 1)
+      sheet <- sheet[which.max(nchar(sheet))]
     
     region <- gsub("[^A-Z0-9:]", "", gsub(sheet, "", region, fixed = TRUE))
     
     if (grepl(":", region, fixed = TRUE)) {
       cols <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), convertFromExcelRef))
       rows <- unlist(lapply(strsplit(region, split = ":", fixed = TRUE), function(x) as.integer(gsub("[A-Z]", "", x))))
-    
+      
       cols <- seq(from = cols[1], to = cols[2], by = 1)
       rows <- seq(from = rows[1], to = rows[2], by = 1)
       
@@ -71,6 +74,8 @@ read.xlsx.Workbook <- function(xlsxFile,
       rows <- as.integer(gsub("[A-Z]", "", region, perl = TRUE))
     }
     startRow <- 1
+    reading_named_region <- TRUE
+    named_region_rows <- rows
     
   }
   
@@ -98,6 +103,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   sheetNames <- xlsxFile$sheet_names
   
   if("character" %in% class(sheet)){
+    sheetNames <- replaceXMLEntities(sheetNames)
     if(!sheet %in% sheetNames)
       stop(sprintf('Cannot find sheet named "%s"', sheet))
     sheet <- which(sheetNames == sheet)
@@ -107,7 +113,7 @@ read.xlsx.Workbook <- function(xlsxFile,
       stop(sprintf("sheet %s does not exist.", sheet))
   }
   
-
+  
   ## read in sharedStrings
   sharedStrings <- paste(unlist(xlsxFile$sharedStrings), collapse = "\n")
   if(length(sharedStrings) > 0){
@@ -135,10 +141,12 @@ read.xlsx.Workbook <- function(xlsxFile,
   
   if(startRow > 1)
     keep <- keep & (sheet_data$rows >= startRow)
-
+  
   ## error cells  
   keep <- keep & (sheet_data$t != 4 & !is.na(sheet_data$t) & !is.na(sheet_data$v)) ## "e" or missing
-
+  if(any(is.na(sharedStrings)))
+    keep[(sheet_data$t %in% 1 & (sheet_data$v %in% as.character(which(is.na(sharedStrings)) - 1L)))] <- FALSE
+  
   ## End what data to read
   ######################################################
   
@@ -162,6 +170,8 @@ read.xlsx.Workbook <- function(xlsxFile,
     
     if(skipEmptyRows){
       nRows <- length(unique(rows))
+    }else if(reading_named_region){
+      nRows <- max(named_region_rows) - min(named_region_rows) + 1;
     }else{
       nRows <- max(rows) - min(rows) + 1;
     }
@@ -180,7 +190,7 @@ read.xlsx.Workbook <- function(xlsxFile,
     bool_refs <- -1L
   
   if(bool_refs[1] != -1L){
-
+    
     false_ind <- which(sharedStrings == "FALSE") - 1L
     if(length(false_ind) == 0){
       false_ind <- length(sharedStrings) 
@@ -207,7 +217,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   ## If any t="str" exist, add v to sharedStrings and replace v with newSharedStringsInd
   str_inds <- which(t == 3) ## "str"
   if(length(str_inds) > 0){
-
+    
     unique_strs <- unique(v[str_inds])
     unique_strs[unique_strs == "#N/A"] <- NA
     
@@ -227,8 +237,6 @@ read.xlsx.Workbook <- function(xlsxFile,
     
   }
   
-  
-  
   ## Now safe to convert v to numeric
   vn <- as.numeric(v)
   
@@ -241,6 +249,11 @@ read.xlsx.Workbook <- function(xlsxFile,
     Encoding(sharedStrings) <- "UTF-8"
     v[string_refs] <- sharedStrings[vn[string_refs] + 1L]
     
+    ## any NA sharedStrings - remove
+    v_na <- which(is.na(v))
+    if(length(v_na) > 0)
+      string_refs <- setdiff(string_refs, v_na)
+    
   }
   
   
@@ -249,7 +262,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   isDate <- as.logical(NA)
   
   if(detectDates){
-
+    
     ## get date origin
     if(length(xlsxFile$workbook$workbookPr) > 0){
       if(grepl('date1904="1"|date1904="true"', xlsxFile$workbook$workbookPr, ignore.case = TRUE))
@@ -303,25 +316,23 @@ read.xlsx.Workbook <- function(xlsxFile,
       
     }
   } ## end of detectDates
-
+  
+  
   ## Build data.frame
-  m <- .Call("openxlsx_read_workbook"
-             , cols
-             , rows
-             , v
-             , string_refs
-             , isDate
-             , colNames
-             , skipEmptyRows
-             , skipEmptyCols
-             , nRows
-             , clean_names
-             , PACKAGE = "openxlsx")
-  
-  
+  m <- read_workbook(cols_in = cols
+                     , rows_in = rows
+                     , v = v
+                     , string_inds = string_refs
+                     , is_date = isDate
+                     , hasColNames = colNames
+                     , skipEmptyRows = skipEmptyRows
+                     , skipEmptyCols = skipEmptyCols
+                     , nRows = nRows
+                     , clean_names = clean_names)
+
   if(colNames && check.names)
     colnames(m) <- make.names(colnames(m), unique = TRUE)
-  
+
   if(rowNames){
     rownames(m) <- m[[1]]
     m[[1]] <- NULL

@@ -29,7 +29,7 @@ The openxlsx package uses global options to simplfy formatting:
 Additional options
 
 \itemize{
-\item{\code{options("openxlsx.zipFlags" = "-9")}} ## set max zip compression level default is "-1"
+\item{\code{options("openxlsx.compressionLevel" = "9")}} ## set zip compression level, default is "1".
 }
 }
 \seealso{

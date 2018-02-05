@@ -1,13 +1,26 @@
 
+I have added calls to R_registerRoutines & R_useDynamicSymbols 
+which resolved the NOTE for arch i386 but not x64 when running on local WIndows
+
+This NOTE is not triggered on win-builder devel.
+
+
 ## Test environments
-* local Windows 7, R 3.3.3
+* local Windows 7, R 3.3.3 & R devel
 * local ubuntu 16.10, R 3.3.2
 * win-builder (devel and release)
 
 ## R CMD check results
 On Windows there were no ERRORs, WARNINGs.
 
-A NOTE on windows
+NOTE on local Windows (did not appear on win-builder devel)
+
+checking compiled code ... NOTE
+File 'openxlsx/libs/x64/openxlsx.dll':
+  Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
+
+Note on win-builder devel
+
 Possibly mis-spelled words in DESCRIPTION:
   XLSX (3:29)
   xlsx (13:48)

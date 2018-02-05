@@ -80,6 +80,6 @@ LogicalVector isInternalHyperlink(CharacterVector x);
 
 // helper functions
 string itos(int i);
-SEXP writeFile(std::string parent, std::string xmlText, std::string parentEnd, std::string R_fileName);
+SEXP write_file(std::string parent, std::string xmlText, std::string parentEnd, std::string R_fileName);
   
   

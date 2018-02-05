@@ -216,16 +216,16 @@ string itos(int i){
 
 
 // [[Rcpp::export]]
-SEXP writeFile(std::string parent, std::string xmlText, std::string parentEnd, std::string R_fileName) {
+SEXP write_file(std::string head = "", std::string body = "", std::string tail = "", std::string fl = "") {
   
-  const char * s = R_fileName.c_str();
+  const char * s = fl.c_str();
   
   std::ofstream xmlFile;
   xmlFile.open (s);
   xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
-  xmlFile << parent;
-  xmlFile << xmlText;
-  xmlFile << parentEnd;
+  xmlFile << head;
+  xmlFile << body;
+  xmlFile << tail;
   xmlFile.close();
   
   return 0;

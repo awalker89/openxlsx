@@ -7,6 +7,10 @@ Workbook$methods(setColWidths = function(sheet){
   sheet <- validateSheet(sheet)
   
   widths <- colWidths[[sheet]]
+  hidden <- attr(colWidths[[sheet]], "hidden", exact = TRUE)
+  if(length(hidden) != length(widths))
+    hidden <- rep("0", length(widths))
+  
   cols <- names(colWidths[[sheet]])
   
   autoColsInds <- widths %in% c("auto", "auto2")
@@ -94,7 +98,7 @@ Workbook$methods(setColWidths = function(sheet){
         if(length(merge_cols) > 0){
           
           all_merged_cells <- lapply(1:length(merge_cols), function(i) expand.grid("rows" =  min(merge_rows[[i]]):max(merge_rows[[i]]),
-                                                                    "cols" =  min(merge_cols[[i]]):max(merge_cols[[i]]) ) )
+                                                                                   "cols" =  min(merge_cols[[i]]):max(merge_cols[[i]]) ) )
           
           all_merged_cells <- do.call("rbind", all_merged_cells)
           
@@ -109,7 +113,7 @@ Workbook$methods(setColWidths = function(sheet){
           sd$v <- worksheets[[sheet]]$sheet_data$v[keep]
           sd$n_elements <- length(sd$cols)
           allCharWidths <- allCharWidths[keep]
-
+          
         }else{
           sd <- worksheets[[sheet]]$sheet_data 
         }
@@ -120,14 +124,13 @@ Workbook$methods(setColWidths = function(sheet){
       }
       
       ## Now that we have the max character width for the largest font on the page calculate the column widths
-      calculatedWidths <- .Call("openxlsx_calc_column_widths", PACKAGE = "openxlsx",
-                                sd,
-                                unlist(sharedStrings, use.names = FALSE),
-                                as.integer(autoCols),
-                                allCharWidths,
-                                baseFontCharWidth,
-                                getOption("openxlsx.minWidth", 3),
-                                getOption("openxlsx.maxWidth", 250))
+      calculatedWidths <- calc_column_widths(sheet_data = sd,
+                                             sharedStrings = unlist(sharedStrings, use.names = FALSE),
+                                             autoColumns = as.integer(autoCols),
+                                             widths = allCharWidths,
+                                             baseFontCharWidth = baseFontCharWidth,
+                                             minW = getOption("openxlsx.minWidth", 3),
+                                             maxW = getOption("openxlsx.maxWidth", 250))
       
       missingAuto <- autoCols[!autoCols %in% names(calculatedWidths)]
       widths[names(calculatedWidths)] <- calculatedWidths + 0.71
@@ -139,7 +142,7 @@ Workbook$methods(setColWidths = function(sheet){
   }
   
   ## Calculate width of auto
-  colNodes <- sprintf('<col min="%s" max="%s" width="%s" customWidth="1"/>', cols, cols, widths)
+  colNodes <- sprintf('<col min="%s" max="%s" width="%s" hidden = "%s" customWidth="1"/>', cols, cols, widths, hidden)
   
   ## Append new col widths XML to worksheets[[sheet]]$cols
   worksheets[[sheet]]$cols <<- append(worksheets[[sheet]]$cols, colNodes)

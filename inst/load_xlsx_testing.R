@@ -35,8 +35,6 @@ zip_xlsx <- function(d){
   flags = "-r1"
   extras = ""
   zip = Sys.getenv("R_ZIPCMD", "zip")
-  
-  ## code from utils::zip function (modified to not print)
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
   res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
   setwd(wd)
@@ -86,6 +84,7 @@ openXL(wb)
 ## Excel Diet Template
 wb <- loadWorkbook(file.path(test_file_dir, "Diet.xlsx"))
 openXL(wb)
+openXL(file.path(test_file_dir, "Diet.xlsx"))
 
 ################################################################################################################
 ## Empty Workbook
@@ -112,7 +111,7 @@ openXL(wb)
 ## Load Example Workbook
 wb <- loadWorkbook(system.file("loadExample.xlsx", package = "openxlsx"))
 openXL(wb)
-
+openXL(system.file("loadExample.xlsx", package = "openxlsx"))
 
 ################################################################################################################
 ## Loading Pivot Tables

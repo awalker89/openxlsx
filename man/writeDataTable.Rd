@@ -39,15 +39,15 @@ A vector of the form c(startCol, startRow)}
 
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 
-\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
+\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
+
+\item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+existing style is replaced by the new style.
 \cr\cr
 \cr\bold{The below options correspond to Excel table options:}
 \cr
 \if{html}{\figure{tableoptions.png}{options: width="40\%" alt="Figure: table_options.png"}}
 \if{latex}{\figure{tableoptions.pdf}{options: width=7cm}}}
-
-\item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
-existing style is replaced by the new style.}
 
 \item{firstColumn}{logical. If TRUE, the first column is bold}
 
@@ -114,6 +114,34 @@ writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(
 ## Open in excel without saving file: openXL(wb)
 
 saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
+
+
+
+
+
+##################################################################################### 
+## Pre-defined table styles gallery
+
+wb <- createWorkbook(paste0("tableStylesGallery.xlsx"))
+addWorksheet(wb, "Style Samples")
+for(i in 1:21) {
+  style <- paste0("TableStyleLight", i)
+  writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 1, startCol = i*3-2)
+}
+
+for(i in 1:28) {
+  style <- paste0("TableStyleMedium", i)
+  writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 4, startCol = i*3-2)
+}
+
+for(i in 1:11) {
+  style <- paste0("TableStyleDark", i)
+  writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 7, startCol = i*3-2)
+} 
+
+## openXL(wb)
+saveWorkbook(wb, file = "tableStylesGallery.xlsx", overwrite = TRUE)
+
 }
 \seealso{
 \code{\link{addWorksheet}}
@@ -123,7 +151,4 @@ saveWorkbook(wb, "writeDataTableExample.xlsx", overwrite = TRUE)
 \code{\link{removeTable}}
 
 \code{\link{getTables}}
-}
-\author{
-Alexander Walker
 }

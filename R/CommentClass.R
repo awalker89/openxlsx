@@ -253,13 +253,12 @@ removeComment <- function(wb, sheet, cols, rows, gridExpand = TRUE){
     stop("Length of rows and cols must be equal.")
   }
   
-  comb <- paste0(.Call('openxlsx_convert_to_excel_ref', cols, LETTERS, PACKAGE = "openxlsx"), rows)
+  comb <- paste0(convert_to_excel_ref(cols = cols, LETTERS = LETTERS), rows)
   toKeep <- !sapply(wb$comments[[sheet]], "[[", "ref") %in% comb
   
   wb$comments[[sheet]] <- wb$comments[[sheet]][toKeep]
   
 }
-
 
 
 

@@ -7,6 +7,7 @@ context("Readind and Writing Logicals")
 
 test_that("TRUE, FALSE, NA", {
   
+  curr_wd <- getwd()
   fileName <- file.path(tempdir(), "T_F_NA.xlsx")
   
   x <- iris
@@ -42,7 +43,7 @@ test_that("TRUE, FALSE, NA", {
   expect_equal(is.na(x$f_na), is.na(y$f_na))
   expect_equal(is.na(x$tf_na), is.na(y$tf_na))
   
-  
+  expect_equal(object = getwd(), curr_wd)
   unlink(fileName, recursive = TRUE, force = TRUE)
   
 })

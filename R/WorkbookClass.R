@@ -1,12 +1,7 @@
 
 #' @include class_definitions.R
 
-Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
-  
-  if(length(creator) == 0)
-    creator <- ""
-  
-  
+Workbook$methods(initialize = function(creator = "", title = NULL, subject = NULL, category = NULL){
   
   charts <<- list()
   isChartSheet <<- logical(0)
@@ -14,7 +9,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
   colWidths <<- list()
   connections <<- NULL
   Content_Types <<- genBaseContent_Type()
-  core <<- genBaseCore(creator)
+  core <<- genBaseCore(creator = creator, title = title, subject = subject, category = category)
   comments <<- list()
   
   
@@ -75,46 +70,7 @@ Workbook$methods(initialize = function(creator = Sys.info()[["login"]]){
 
 
 
-Workbook$methods(zipWorkbook = function(zipfile, files, flags = "-r1", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"), quiet = TRUE){ 
-  
-  zip_flags <- ifelse(!is.null(getOption("openxlsx.zipFlags")), getOption("openxlsx.zipFlags"), getOption("openxlsx.zipflags", NA))
-  if(!is.na(zip_flags)){
-    if(zip_flags != "")
-      flags <- zip_flags
-  }
-  
-  ## code from utils::zip function (modified to not print)
-  args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
 
-  if(quiet){
-    
-    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
-    
-  }else{
-    if (.Platform$OS.type == "windows"){
-      res <- invisible(suppressWarnings(system2(zip, args, invisible = TRUE)))
-    }else{
-      res <- invisible(suppressWarnings(system2(zip, args)))
-    }
-  }
-  
-  if(res != 0){
-    
-    ## try zipping using *
-    args <- c(flags, shQuote(path.expand(zipfile)), " * ", extras)
-    res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
-  }
-  
-  
-  if(res != 0){
-    
-    stop('zipping up workbook failed. Please make sure Rtools is installed or a zip application is available to R.
-         Try installr::install.rtools() on Windows. If the "Rtools\\bin" directory does not appear in Sys.getenv("PATH") please add it to the system PATH 
-         or set this within the R session with Sys.setenv("R_ZIPCMD" = "path/to/zip.exe")', call. = FALSE)
-  }
-  
-  invisible(res)
-})
 
 
 Workbook$methods(addWorksheet = function(sheetName
@@ -132,7 +88,9 @@ Workbook$methods(addWorksheet = function(sheetName
                                          , orientation = 'portrait'
                                          , hdpi = 300
                                          , vdpi = 300){
-  
+  if (!missing(sheetName)) {
+    if (grepl(pattern=":", x=sheetName)) stop("colon not allowed in sheet names in Excel")
+  }	
   newSheetIndex = length(worksheets) + 1L
   
   if(newSheetIndex > 1){
@@ -258,10 +216,10 @@ Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 10
 
 
 
-Workbook$methods(saveWorkbook = function(quiet = TRUE){
+Workbook$methods(saveWorkbook = function(){
   
   ## temp directory to save XML files prior to compressing
-  tmpDir <- file.path(tempfile(pattern="workbookTemp_"))
+  tmpDir <- file.path(tempfile(pattern = "workbookTemp_"))
   
   if(file.exists(tmpDir))
     unlink(tmpDir, recursive = TRUE, force = TRUE)
@@ -397,7 +355,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
       file.copy(from = pivotDefinitionsRels[i], to =  file.path(pivotCacheRelsDir, sprintf("pivotCacheDefinition%s.xml.rels", i)), overwrite = TRUE, copy.date = TRUE)
     
     for(i in 1:length(pivotTables.xml.rels))
-      .Call("openxlsx_writeFile", "", pivotTables.xml.rels[[i]], "", file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)), PACKAGE = "openxlsx")   
+      write_file(body = pivotTables.xml.rels[[i]], fl = file.path(pivotTablesRelsDir, sprintf("pivotTable%s.xml.rels", i)))
     
     
     
@@ -420,7 +378,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     
     
     for(i in 1:length(slicerCaches))
-      .Call("openxlsx_writeFile", "", slicerCaches[[i]], "", file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)), PACKAGE = "openxlsx")
+      write_file(body = slicerCaches[[i]], fl = file.path(slicerCachesDir, sprintf("slicerCache%s.xml", i)))
     
     
   }
@@ -429,39 +387,39 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## Write content
   
   ## write .rels
-  .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-         <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
-         <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>',
-        '</Relationships>',
-        file.path(relsDir, ".rels"), PACKAGE = "openxlsx")
+  write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+             body = '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+                    <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+                    <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>',
+             tail = '</Relationships>',
+             fl = file.path(relsDir, ".rels"))
   
   
   ## write app.xml
-  .Call("openxlsx_writeFile", '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">',
-        '<Application>Microsoft Excel</Application>',
-        '</Properties>',
-        file.path(docPropsDir, "app.xml"), PACKAGE = "openxlsx")
+  write_file(head = '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">',
+             body = '<Application>Microsoft Excel</Application>',
+             tail = '</Properties>',
+             fl = file.path(docPropsDir, "app.xml"))
   
   ## write core.xml
-  .Call("openxlsx_writeFile", '<coreProperties xmlns="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
-        pxml(core),
-        '</coreProperties>',
-        file.path(docPropsDir, "core.xml"), PACKAGE = "openxlsx")
+  write_file(head = "", body = pxml(core), tail = "", fl = file.path(docPropsDir, "core.xml"))
   
   ## write workbook.xml.rels
-  .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-        pxml(workbook.xml.rels),
-        '</Relationships>',
-        file.path(xlrelsDir, "workbook.xml.rels"), PACKAGE = "openxlsx")
+  write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+             body = pxml(workbook.xml.rels),
+             tail = '</Relationships>',
+             fl = file.path(xlrelsDir, "workbook.xml.rels"))
   
   ## write tables
   if(length(unlist(tables, use.names = FALSE)) > 0){
     for(i in 1:length(unlist(tables, use.names = FALSE))){
-      .Call("openxlsx_writeFile", '', pxml(unlist(tables, use.names = FALSE)[[i]]), '', file.path(xlTablesDir, sprintf("table%s.xml", i+2)), PACKAGE = "openxlsx")
       
-      if(tables.xml.rels[[i]] != "")
-        .Call("openxlsx_writeFile", '', tables.xml.rels[[i]], '', file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)), PACKAGE = "openxlsx")
+      if(!grepl("openxlsx_deleted", attr(tables, "tableName")[i], fixed = TRUE)){
+        write_file(body = pxml(unlist(tables, use.names = FALSE)[[i]]), fl = file.path(xlTablesDir, sprintf("table%s.xml", i+2)))
+        if(tables.xml.rels[[i]] != "")
+          write_file(body = tables.xml.rels[[i]], fl = file.path(xlTablesRelsDir, sprintf("table%s.xml.rels", i+2)))    
+      }
+      
     }
   }
   
@@ -472,12 +430,12 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = xlqueryTablesDir, recursive = TRUE)
     
     for(i in 1:length(queryTables))
-      .Call("openxlsx_writeFile", '', queryTables[[i]], '', file.path(xlqueryTablesDir, sprintf("queryTable%s.xml", i)), PACKAGE = "openxlsx")
+      write_file(body = queryTables[[i]], fl = file.path(xlqueryTablesDir, sprintf("queryTable%s.xml", i)))
   }
   
   ## connections
   if(length(connections) > 0)
-    .Call("openxlsx_writeFile", '', connections, '', file.path(xlDir,"connections.xml"), PACKAGE = "openxlsx")
+    write_file(body = connections, fl = file.path(xlDir,"connections.xml"))
   
   ## externalLinks
   if(length(externalLinks)){
@@ -485,7 +443,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = externalLinksDir, recursive = TRUE)
     
     for(i in 1:length(externalLinks))
-      .Call("openxlsx_writeFile", '', externalLinks[[i]], '', file.path(externalLinksDir, sprintf("externalLink%s.xml", i)), PACKAGE = "openxlsx")
+      write_file(body = externalLinks[[i]], fl = file.path(externalLinksDir, sprintf("externalLink%s.xml", i)))
   }
   
   ## externalLinks rels
@@ -494,7 +452,7 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     dir.create(path = externalLinksRelsDir, recursive = TRUE)
     
     for(i in 1:length(externalLinksRels))
-      .Call("openxlsx_writeFile", '', externalLinksRels[[i]], '', file.path(externalLinksRelsDir, sprintf("externalLink%s.xml.rels", i)), PACKAGE = "openxlsx")
+      write_file(body = externalLinksRels[[i]], fl = file.path(externalLinksRelsDir, sprintf("externalLink%s.xml.rels", i)))
   } 
   
   # printerSettings
@@ -517,12 +475,10 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   ## write sharedStrings.xml
   ct <- Content_Types
   if(length(sharedStrings) > 0){
-    .Call("openxlsx_writeFile",
-          sprintf('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="%s" uniqueCount="%s">',   length(sharedStrings),   attr(sharedStrings, "uniqueCount")),
-          paste(sharedStrings, collapse = ""),
-          "</sst>",
-          file.path(xlDir,"sharedStrings.xml")
-          , PACKAGE = "openxlsx")
+    write_file(head = sprintf('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="%s" uniqueCount="%s">',   length(sharedStrings),   attr(sharedStrings, "uniqueCount")),
+               body = paste(sharedStrings, collapse = ""),
+               tail = "</sst>",
+               fl = file.path(xlDir,"sharedStrings.xml"))
   }else{
     
     ## Remove relationship to sharedStrings
@@ -533,10 +489,10 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
     ct <- c(ct, '<Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>')
   
   ## write [Content_type]       
-  .Call("openxlsx_writeFile", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
-        pxml(ct),
-        '</Types>', 
-        file.path(tmpDir, "[Content_Types].xml"), PACKAGE = "openxlsx")
+  write_file(head = '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
+             body = pxml(ct),
+             tail = '</Types>',
+             fl = file.path(tmpDir, "[Content_Types].xml"))
   
   
   styleXML <- styles
@@ -550,11 +506,10 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   styleXML$dxfs <- ifelse(length(styles$dxfs) == 0, '<dxfs count="0"/>', paste0(sprintf('<dxfs count="%s">', length(styles$dxfs)), paste(unlist(styles$dxfs), collapse = ""), '</dxfs>'))
   
   ## write styles.xml
-  .Call("openxlsx_writeFile", '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">',
-        pxml(styleXML),
-        '</styleSheet>',
-        file.path(xlDir,"styles.xml"), PACKAGE = "openxlsx")
-  
+  write_file(head = '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">',
+             body = pxml(styleXML),
+             tail = '</styleSheet>',
+             fl = file.path(xlDir,"styles.xml"))
   
   ## write workbook.xml
   workbookXML <- workbook
@@ -562,26 +517,30 @@ Workbook$methods(saveWorkbook = function(quiet = TRUE){
   if(length(workbookXML$definedNames) > 0)
     workbookXML$definedNames <- paste0("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
   
-  .Call("openxlsx_writeFile", '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
-        pxml(workbookXML),
-        '</workbook>',   
-        file.path(xlDir,"workbook.xml"), PACKAGE = "openxlsx")
   
+  write_file(head = '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+             body = pxml(workbookXML),
+             tail = '</workbook>',
+             fl = file.path(xlDir,"workbook.xml"))
   workbook$sheets <<- workbook$sheets[order(sheetOrder)] ## Need to reset sheet order to allow multiple savings
   
   ## compress to xlsx
-  setwd(tmpDir)
-  tmpFile <- tempfile(tmpdir = tmpDir, fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm"))
-  tmpFile <- basename(tmpFile)
+  wd <- getwd()
+  tmpFile <- basename(tempfile(fileext = ifelse(is.null(vbaProject), ".xlsx", ".xlsm")))
+  on.exit(expr = setwd(wd), add = TRUE)
   
-  zipWorkbook(tmpFile, list.files(tmpDir, recursive = TRUE, include.dirs = TRUE, all.files=TRUE), quiet = quiet)
+  ## zip it
+  setwd(dir = tmpDir)
+  cl <- ifelse(!is.null(getOption("openxlsx.compresssionLevel")), getOption("openxlsx.compresssionLevel"), getOption("openxlsx.compresssionevel", 6))
+  zip::zip(zipfile = tmpFile, files = list.files(tmpDir, full.names = FALSE, recursive = TRUE, include.dirs = FALSE, all.files=TRUE), compression_level = cl)  
   
   ## reset styles - maintain any changes to base font
   baseFont <- styles$fonts[[1]]
   styles <<- genBaseStyleSheet(styles$dxfs, tableStyles = styles$tableStyles, extLst = styles$extLst)
   styles$fonts[[1]] <<- baseFont
   
-  invisible(list("tmpDir" = tmpDir, "tmpFile" = tmpFile))
+  
+  return(file.path(tmpDir, tmpFile))
   
 })
 
@@ -662,7 +621,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
                            tableStyle, as.integer(showFirstColumn), as.integer(showLastColumn), as.integer(showRowStripes), as.integer(showColumnStripes))
   
   
-  tables <<- c(tables, .Call("openxlsx_build_table_xml", table, tableStyleXML, ref, colNames, showColNames, withFilter, PACKAGE = "openxlsx"))
+  tables <<- c(tables, build_table_xml(table = table, tableStyleXML = tableStyleXML, ref = ref, colNames = gsub("\n|\r", "_x000a_", colNames), showColNames = showColNames, withFilter = withFilter))
   names(tables) <<- c(nms, ref)
   attr(tables, "sheet") <<- c(tSheets, sheet)
   attr(tables, "tableName") <<- c(tNames, tableName)
@@ -670,7 +629,7 @@ Workbook$methods(buildTable = function(sheet, colNames, ref, showColNames, table
   worksheets[[sheet]]$tableParts <<- append(worksheets[[sheet]]$tableParts, sprintf('<tablePart r:id="rId%s"/>', id))
   attr(worksheets[[sheet]]$tableParts, "tableName") <<- c(tNames[tSheets == sheet & !grepl("openxlsx_deleted", tNames, fixed = TRUE)], tableName)
   
-
+  
   
   ## update Content_Types
   Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', id))
@@ -761,7 +720,7 @@ Workbook$methods(updateStyles = function(style){
      !is.null(style$fontScheme)){
     
     fontNode <- .self$createFontNode(style)
-    fontId <- which(styles$font == fontNode) - 1L
+    fontId <- which(styles$fonts == fontNode) - 1L
     
     if(length(fontId) == 0){
       
@@ -797,7 +756,7 @@ Workbook$methods(updateStyles = function(style){
   if(!is.null(style$fill)){
     fillNode <- .self$createFillNode(style)
     if(!is.null(fillNode)){
-      fillId <- which(styles$fill == fillNode) - 1L
+      fillId <- which(styles$fills == fillNode) - 1L
       
       if(length(fillId) == 0){      
         fillId <- length(styles$fills)
@@ -809,7 +768,7 @@ Workbook$methods(updateStyles = function(style){
   }
   
   ## Border
-  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal)))){
     
     borderNode <- .self$createBorderNode(style)
     borderId <- which(styles$borders == borderNode) - 1L
@@ -939,7 +898,7 @@ Workbook$methods(updateCellStyles = function(){
     if(!is.null(style$fill)){
       fillNode <- .self$createFillNode(style)
       if(!is.null(fillNode)){
-        fillId <- which(styles$fill == fillNode) - 1L
+        fillId <- which(styles$fills == fillNode) - 1L
         
         if(length(fillId) == 0){      
           fillId <- length(styles$fills)
@@ -951,7 +910,7 @@ Workbook$methods(updateCellStyles = function(){
     }
     
     ## Border
-    if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom)))){
+    if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal)))){
       
       borderNode <- .self$createBorderNode(style)
       borderId <- which(styles$borders == borderNode) - 1L
@@ -1080,8 +1039,16 @@ Workbook$methods(createFontNode = function(style){
 
 Workbook$methods(createBorderNode = function(style){
   
-  borderNode <- "<border>"
+  borderNode <- "<border"
   
+  if(style$borderDiagonalUp)
+    borderNode <- paste(borderNode, 'diagonalUp="1"', sep = " ")
+  
+  if(style$borderDiagonalDown)
+    borderNode <- paste(borderNode, 'diagonalDown="1"', sep = " ")
+  
+  borderNode <- paste0(borderNode, ">")
+    
   if(!is.null(style$borderLeft))
     borderNode <- paste0(borderNode, sprintf('<left style="%s">', style$borderLeft), sprintf('<color %s="%s"/>', names(style$borderLeftColour), style$borderLeftColour), '</left>')
   
@@ -1093,6 +1060,9 @@ Workbook$methods(createBorderNode = function(style){
   
   if(!is.null(style$borderBottom))
     borderNode <- paste0(borderNode, sprintf('<bottom style="%s">', style$borderBottom), sprintf('<color %s="%s"/>', names(style$borderBottomColour), style$borderBottomColour), '</bottom>')
+  
+  if(!is.null(style$borderDiagonal))
+    borderNode <- paste0(borderNode, sprintf('<diagonal style="%s">', style$borderDiagonal), sprintf('<color %s="%s"/>', names(style$borderDiagonalColour), style$borderDiagonalColour), '</diagonal>')
   
   paste0(borderNode, "</border>")
   
@@ -1192,17 +1162,15 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
     
     ## Write drawing i (will always exist) skip those that are empty
     if(any(drawings[[i]] != "")){
-      .Call("openxlsx_writeFile", 
-            '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
-            pxml(drawings[[i]]),
-            '</xdr:wsDr>',
-            file.path(xldrawingsDir, paste0("drawing", i,".xml")))
+      write_file(head = '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+                 body = pxml(drawings[[i]]),
+                 tail = '</xdr:wsDr>',
+                 fl =  file.path(xldrawingsDir, paste0("drawing", i,".xml")))
       
-      .Call("openxlsx_writeFile", 
-            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-            pxml(drawings_rels[[i]]),
-            '</Relationships>',
-            file.path(xldrawingsRelsDir, paste0("drawing", i,".xml.rels")))
+      write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+                 body = pxml(drawings_rels[[i]]),
+                 tail = '</Relationships>',
+                 fl =  file.path(xldrawingsRelsDir, paste0("drawing", i,".xml.rels")))
     }else{
       worksheets[[i]]$drawing <<- character(0)
     }
@@ -1223,19 +1191,12 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         dir.create(chartSheetRelsDir, recursive = TRUE)
       }
       
-      .Call("openxlsx_writeFile", 
-            "",
-            worksheets[[i]]$get_prior_sheet_data(),
-            "",
-            file.path(chartSheetDir, paste0("sheet", i,".xml")))
+      write_file(body = worksheets[[i]]$get_prior_sheet_data(), fl = file.path(chartSheetDir, paste0("sheet", i,".xml")))
       
-      
-      .Call("openxlsx_writeFile",
-            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
-            pxml(worksheets_rels[[i]]),
-            '</Relationships>',
-            file.path(chartSheetRelsDir, sprintf("sheet%s.xml.rels", i)))
-      
+      write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
+                 body = pxml(worksheets_rels[[i]]),
+                 tail = '</Relationships>',
+                 fl = file.path(chartSheetRelsDir, sprintf("sheet%s.xml.rels", i)))
       
     }else{
       
@@ -1255,23 +1216,19 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       
       if(length(rowHeights[[i]]) == 0){
         
-        .Call("openxlsx_write_worksheet_xml",
-              prior,
-              post,
-              ws$sheet_data,
-              file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
-              PACKAGE = "openxlsx")
+        write_worksheet_xml(prior = prior,
+                            post = post,
+                            sheet_data = ws$sheet_data,
+                            R_fileName = file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)))
         
       }else{
         
         ## row heights will always be in order and all row heights are given rows in preSaveCleanup  
-        .Call("openxlsx_write_worksheet_xml_2",
-              prior,
-              post,
-              ws$sheet_data,
-              unlist(rowHeights[[i]]),
-              file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)),
-              PACKAGE = "openxlsx")
+        write_worksheet_xml_2(prior = prior,
+                              post = post,
+                              sheet_data = ws$sheet_data,
+                              row_heights =  unlist(rowHeights[[i]]),
+                              R_fileName = file.path(xlworksheetsDir, sprintf("sheet%s.xml", i)))
         
       }
       
@@ -1282,18 +1239,33 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       if(length(worksheets_rels[[i]]) > 0 ){
         
         ws_rels <- worksheets_rels[[i]]
-        
         if(hasHL){
           h_inds <- paste0(1:length(worksheets[[i]]$hyperlinks), "h")
           ws_rels <- c(ws_rels, unlist(lapply(1:length(h_inds), function(j) worksheets[[i]]$hyperlinks[[j]]$to_target_xml(h_inds[j]))))
         }
         
+        ## Check if any tables were deleted - remove these from rels
+        if(length(tables) > 0){
+          table_inds <- which(grepl("tables/table[0-9].xml", ws_rels))
+          
+          if(length(table_inds) > 0){
+            
+            ids <- regmatches(ws_rels[table_inds], regexpr('(?<=Relationship Id=")[0-9A-Za-z]+', ws_rels[table_inds], perl = TRUE))
+            inds <- as.integer(gsub("[^0-9]", "", ids, perl = TRUE)) - 2L
+            table_nms <- attr(tables, "tableName")[inds]
+            is_deleted <- grepl("openxlsx_deleted", table_nms, fixed = TRUE)
+            if(any(is_deleted))
+              ws_rels <- ws_rels[-table_inds[is_deleted]]
+            
+          }
+        }
         
         
-        .Call("openxlsx_writeFile", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
-              pxml(ws_rels),
-              '</Relationships>',
-              file.path(xlworksheetsRelsDir, sprintf("sheet%s.xml.rels", i))
+        
+        write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
+                   body = pxml(ws_rels),
+                   tail = '</Relationships>',
+                   fl = file.path(xlworksheetsRelsDir, sprintf("sheet%s.xml.rels", i))
         )
         
       }
@@ -1477,7 +1449,7 @@ Workbook$methods(addDXFS = function(style){
   if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg))
     dxf <- paste0(dxf, createFillNode(style))
   
-  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom))))
+  if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal))))
     dxf <- paste0(dxf, createBorderNode(style))
   
   dxf <- paste(dxf, "</dxf>")
@@ -1549,7 +1521,7 @@ Workbook$methods(dataValidation_list = function(sheet, startRow, endRow, startCo
   sqref <- sprintf('<xm:sqref>%s</xm:sqref>', sqref)
   
   xml <- paste0(header, data_val, formula, sqref, '</x14:dataValidation></x14:dataValidations></ext>')
-
+  
   worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, xml)
   
   invisible(0)
@@ -1726,13 +1698,13 @@ Workbook$methods(mergeCells = function(sheet, startRow, endRow, startCol, endCol
   if(!is.null(exMerges)){
     
     comps <- lapply(exMerges, function(rectCoords) unlist(strsplit(rectCoords, split = ":")))  
-    exMergedCells <- .Call("openxlsx_build_cell_merges", comps, PACKAGE = "openxlsx")
-    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref), PACKAGE = "openxlsx"))
+    exMergedCells <- build_cell_merges(comps = comps)
+    newMerge <- unlist(build_cell_merges(comps = list(sqref)))
     
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
     if(any(mergeIntersections))
-      stop(sprintf("Merge intersects with exisiting merged cells: \n\t\t%s.\nRemove exiting merge first.", paste(exMerges[mergeIntersections], collapse = "\n\t\t")))
+      stop(sprintf("Merge intersects with existing merged cells: \n\t\t%s.\nRemove existing merge first.", paste(exMerges[mergeIntersections], collapse = "\n\t\t")))
     
   }
   
@@ -1753,8 +1725,8 @@ Workbook$methods(removeCellMerge = function(sheet, startRow, endRow, startCol, e
   if(!is.null(exMerges)){
     
     comps <- lapply(exMerges, function(x) unlist(strsplit(x, split = ":")))  
-    exMergedCells <- .Call("openxlsx_build_cell_merges", comps, PACKAGE = "openxlsx")
-    newMerge <- unlist(.Call("openxlsx_build_cell_merges", list(sqref), PACKAGE = "openxlsx"))
+    exMergedCells <- build_cell_merges(comps = comps)
+    newMerge <- unlist(build_cell_merges(comps = list(sqref)))
     
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
@@ -2238,8 +2210,8 @@ Workbook$methods(check_overwrite_tables = function(sheet
                                                    , new_cols
                                                    , error_msg = "Cannot overwrite existing table with another table."
                                                    , check_table_header_only = FALSE){
-
-
+  
+  
   
   ## check not overwriting another table
   if(length(tables) > 0){
@@ -2248,11 +2220,11 @@ Workbook$methods(check_overwrite_tables = function(sheet
     sheetNo <- validateSheet(sheet)
     
     to_check <- which(tableSheets %in% sheetNo & !grepl("openxlsx_deleted", attr(tables, "tableName"), fixed = TRUE))
-
+    
     if(length(to_check) > 0){ ## only look at tables on this sheet
       
       exTable <- tables[to_check]
-
+      
       rows <- lapply(names(exTable), function(rectCoords) as.numeric(unlist(regmatches(rectCoords, gregexpr("[0-9]+", rectCoords)))))
       cols <- lapply(names(exTable), function(rectCoords) convertFromExcelRef(unlist(regmatches(rectCoords, gregexpr("[A-Z]+", rectCoords)))))
       
@@ -2272,7 +2244,7 @@ Workbook$methods(check_overwrite_tables = function(sheet
       }
     } ## end if(sheet %in% tableSheets) 
   } ## end (length(tables) > 0)
-
+  
   invisible(0)  
   
 })
@@ -2876,56 +2848,58 @@ Workbook$methods(loadStyles = function(stylesXML){
   stylesTxt <- removeHeadTag(stylesTxt)
   
   ## Indexed colours
-  vals <- .Call("openxlsx_getNodes", stylesTxt, "<indexedColors>", PACKAGE = "openxlsx")
+  vals <- getNodes(xml = stylesTxt, tagIn = "<indexedColors>")
   if(length(vals) > 0)
     styles$indexedColors <<- paste0("<colors>", vals, "</colors>")
   
   ## dxf (don't need these, I don't think)
-  dxf <- .Call("openxlsx_getNodes", stylesTxt, "<dxfs", PACKAGE = "openxlsx")
+  dxf <- getNodes(xml = stylesTxt, tagIn = "<dxfs")
   if(length(dxf) > 0){
-    dxf <- .Call("openxlsx_getNodes", dxf[[1]], "<dxf>", PACKAGE = "openxlsx")
+    dxf <- getNodes(xml = dxf[[1]], tagIn = "<dxf>")
     if(length(dxf) > 0)
       styles$dxfs <<- dxf
   }
   
-  tableStyles <- .Call("openxlsx_getNodes", stylesTxt, "<tableStyles", PACKAGE = "openxlsx")
+  tableStyles <- getNodes(xml = stylesTxt, tagIn = "<tableStyles")
   if(length(tableStyles) > 0)
     styles$tableStyles <<- paste0(tableStyles, ">")
   
-  extLst <- .Call("openxlsx_getNodes", stylesTxt, "<extLst>", PACKAGE = "openxlsx")
+  extLst <- getNodes(xml = stylesTxt, tagIn = "<extLst>")
   if(length(extLst) > 0)
     styles$extLst <<- extLst
   
   
   ## Number formats
-  numFmts <- .Call("openxlsx_getChildlessNode", stylesTxt, "<numFmt ", PACKAGE = "openxlsx")
+  numFmts <- getChildlessNode(xml = stylesTxt, tag = "<numFmt ")
   numFmtFlag <- FALSE
   if(length(numFmts) > 0){
     
-    numFmtsIds <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'numFmtId="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
-    formatCodes <- sapply(numFmts, function(x) .Call("openxlsx_getAttr", x, 'formatCode="', PACKAGE = "openxlsx"), USE.NAMES = FALSE)
+    numFmtsIds <- sapply(numFmts, getAttr, tag = 'numFmtId="', USE.NAMES = FALSE)
+    formatCodes <- sapply(numFmts, getAttr, tag = 'formatCode="', USE.NAMES = FALSE)
     numFmts <-lapply(1:length(numFmts), function(i) list("numFmtId"= numFmtsIds[[i]], "formatCode"=formatCodes[[i]]))
     numFmtFlag <- TRUE
     
   }
   
   ## fonts will maintain, sz, color, name, family scheme
-  fonts <- .Call("openxlsx_getNodes", stylesTxt, "<font>", PACKAGE = "openxlsx")
+  fonts <- getNodes(xml = stylesTxt, tagIn = "<font>")
   styles$fonts[[1]] <<- fonts[[1]]
   fonts <- buildFontList(fonts)       
   
-  fills <- .Call("openxlsx_getNodes", stylesTxt, "<fill>", PACKAGE = "openxlsx")
+  fills <- getNodes(xml = stylesTxt, tagIn = "<fill>")
   fills <- buildFillList(fills)
   
-  borders <- .Call("openxlsx_getNodes", stylesTxt, "<border>", PACKAGE = "openxlsx")     
+  borders <- getOpenClosedNode(stylesTxt, "<borders ", "</borders>")
+  borders <- substr(borders, start =  regexpr("<border>", borders)[1], stop = regexpr("</borders>", borders) - 1L)
+  borders <- getNodes(xml = borders, tagIn = "<border")
   borders <- sapply(borders, buildBorder, USE.NAMES = FALSE)
   
-  
+
   ## ------------------------------ build styleObjects ------------------------------ ##
   
-  cellXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellXfs", PACKAGE = "openxlsx") 
+  cellXfs <- getNodes(xml = stylesTxt, tagIn = "<cellXfs")
   
-  xf <- .Call("openxlsx_getChildlessNode", cellXfs, "<xf ", PACKAGE = "openxlsx")
+  xf <- getChildlessNode(xml = cellXfs, tag = "<xf ")
   xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
   xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
   xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
@@ -3011,6 +2985,19 @@ Workbook$methods(loadStyles = function(stylesXML){
               style$borderBottom    <- thisBorder$borderBottom
               style$borderBottomColour <- thisBorder$borderBottomColour
             }
+            
+            if("borderDiagonal" %in% names(thisBorder)){
+              style$borderDiagonal    <- thisBorder$borderDiagonal
+              style$borderDiagonalColour <- thisBorder$borderDiagonalColour
+            }
+            
+            if("borderDiagonalUp" %in% names(thisBorder))
+              style$borderDiagonalUp    <- thisBorder$borderDiagonalUp
+            
+            if("borderDiagonalDown" %in% names(thisBorder))
+              style$borderDiagonalDown    <- thisBorder$borderDiagonalDown
+            
+            
           }
         }
       }
@@ -3077,149 +3064,6 @@ Workbook$methods(loadStyles = function(stylesXML){
   
   
   ## ------------------------------ build styleObjects Complete ------------------------------ ##
-  
-  
-  ## ------------------------------ build cellStyleObjects ------------------------------ ##
-  
-  
-  
-  #   cellStyleXfs <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyleXfs", PACKAGE = "openxlsx") 
-  #   xf <- .Call("openxlsx_getChildlessNode", cellStyleXfs, "<xf ", PACKAGE = "openxlsx")
-  #   if(length(xf) > 0){
-  #     
-  #     xfAttrs <- regmatches(xf, gregexpr('[a-zA-Z]+=".*?"', xf))
-  #     xfNames <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('[a-zA-Z]+(?=\\=".*?")', xfAttrs, perl = TRUE)))
-  #     xfVals <- lapply(xfAttrs, function(xfAttrs) regmatches(xfAttrs, regexpr('(?<=").*?(?=")', xfAttrs, perl = TRUE)))
-  #     
-  #     for(i in 1:length(xf))
-  #       names(xfVals[[i]]) <- xfNames[[i]]
-  #     
-  #     cellStyleObjects_tmp <- list()
-  #     flag <- FALSE
-  #     for(s in xfVals){
-  #       
-  #       style <- createStyle()
-  #       if(any(s != "0")){
-  #         
-  #         
-  #         if("numFmtId" %in% names(s)){
-  #           if(s[["numFmtId"]] != "0"){
-  #             if(as.integer(s[["numFmtId"]]) < 164){
-  #               style$numFmt <- list(numFmtId = s[["numFmtId"]])
-  #             }else if(numFmtFlag){
-  #               style$numFmt <- numFmts[[which(s[["numFmtId"]] == numFmtsIds)[1]]]
-  #             }
-  #           }
-  #         }
-  #         
-  #         if("fontId" %in% names(s)){
-  #           if(s[["fontId"]] != "0"){
-  #             thisFont <- fonts[[(as.integer(s[["fontId"]])+1)]]
-  #             
-  #             if("sz" %in% names(thisFont))
-  #               style$fontSize <- thisFont$sz
-  #             
-  #             if("name" %in% names(thisFont))
-  #               style$fontName <- thisFont$name
-  #             
-  #             if("family" %in% names(thisFont))
-  #               style$fontFamily <- thisFont$family
-  #             
-  #             if("color" %in% names(thisFont))
-  #               style$fontColour <- thisFont$color
-  #             
-  #             if("scheme" %in% names(thisFont))
-  #               style$fontScheme <- thisFont$scheme
-  #             
-  #             flags <- c("bold", "italic", "underline") %in% names(thisFont)
-  #             if(any(flags)){
-  #               style$fontDecoration <- NULL
-  #               if(flags[[1]])
-  #                 style$fontDecoration <- append(style$fontDecoration, "BOLD")
-  #               
-  #               if(flags[[2]])
-  #                 style$fontDecoration <- append(style$fontDecoration, "ITALIC")
-  #               
-  #               if(flags[[3]])
-  #                 style$fontDecoration <- append(style$fontDecoration, "UNDERLINE")
-  #             }
-  #           }
-  #         }
-  #         
-  #   
-  #         ## Border
-  #         if("borderId" %in% names(s)){
-  #           if(s[["borderId"]] != "0"){# & "applyBorder" %in% names(s)){
-  #             
-  #             thisBorder <- borders[[as.integer(s[["borderId"]]) + 1L]]
-  #             
-  #             if("borderLeft" %in% names(thisBorder)){
-  #               style$borderLeft    <- thisBorder$borderLeft
-  #               style$borderLeftColour <- thisBorder$borderLeftColour
-  #             }
-  #             
-  #             if("borderRight" %in% names(thisBorder)){
-  #               style$borderRight    <- thisBorder$borderRight
-  #               style$borderRightColour <- thisBorder$borderRightColour
-  #             }
-  #             
-  #             if("borderTop" %in% names(thisBorder)){
-  #               style$borderTop    <- thisBorder$borderTop
-  #               style$borderTopColour <- thisBorder$borderTopColour
-  #             }
-  #             
-  #             if("borderBottom" %in% names(thisBorder)){
-  #               style$borderBottom    <- thisBorder$borderBottom
-  #               style$borderBottomColour <- thisBorder$borderBottomColour
-  #             }
-  #           }
-  #         }
-  #         
-  #       
-  #         if("fillId" %in% names(s)){
-  #           if(s[["fillId"]] != "0"){
-  #             
-  #             fillId <- as.integer(s[["fillId"]]) + 1L
-  #             
-  #             if("fgColor" %in% names(fills[[fillId]])){
-  #               
-  #               tmpFg <- fills[[fillId]]$fgColor
-  #               tmpBg <- fills[[fillId]]$bgColor
-  #               
-  #               if(!is.null(tmpFg))
-  #                 style$fill$fillFg <- tmpFg
-  #               
-  #               if(!is.null(tmpFg))
-  #                 style$fill$fillBg <- tmpBg
-  #             }else{
-  #               style$fill <- fills[[fillId]]
-  #             }
-  #             
-  #           }
-  #         }
-  #         
-  #         
-  #         
-  #   
-  #       } ## end if !all(s == "0")
-  #       
-  #       cellStyleObjects_tmp <- append(cellStyleObjects_tmp , list(style))
-  #       
-  #     }  ## end of for loop through styles s in ...
-  #    
-  #     cellStyleObjects <<- cellStyleObjects_tmp
-  #      
-  #   }
-  #     
-  #   
-  #   cellStyles <- .Call("openxlsx_getNodes", stylesTxt, "<cellStyles", PACKAGE = "openxlsx") 
-  #   cellStyles <- .Call("openxlsx_getChildlessNode", cellStyles, "<cellStyle ", PACKAGE = "openxlsx") 
-  #   if(length(cellStyles) > 0)
-  #     styles$cellStyles <<- cellStyles
-  
-  
-  
-  ## ------------------------------ build cellStyleObjects Complete------------------------------ ##
   
   
   return(styleObjects_tmp)

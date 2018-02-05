@@ -67,6 +67,9 @@ each column. If "\code{all}" all cell borders are drawn.}
 
 \item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
 }
+\value{
+invisible(0)
+}
 \description{
 Write an object to worksheet with optional styling.
 }

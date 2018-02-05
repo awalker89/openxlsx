@@ -46,6 +46,7 @@
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
 #' This is because only the formula is written and left to Excel to evaluate the formula when the file is opened in Excel.
 #' @rdname writeData
+#' @return invisible(0)
 #' @examples
 #' 
 #' ## See formatting vignette for further examples. 
@@ -153,12 +154,15 @@ writeData <- function(wb,
   
   ## increase scipen to avoid writing in scientific 
   exSciPen <- getOption("scipen")
-  options("scipen" = 200)
-  on.exit(options("scipen" = exSciPen), add = TRUE)
-  
-  
+  od <- getOption("OutDec")
   exDigits <- getOption("digits")
+  
+  options("scipen" = 200)
+  options("OutDec" = ".")
   options("digits" = 22)
+  
+  on.exit(options("scipen" = exSciPen), add = TRUE)
+  on.exit(expr = options("OutDec" = od), add = TRUE)
   on.exit(options("digits" = exDigits), add = TRUE)
   
   
@@ -231,6 +235,10 @@ writeData <- function(wb,
   
   ## If no rows and not writing column names return as nothing to write
   if(nRow == 0 & !colNames)
+    return(invisible(0))
+  
+  ## If no columns and not writing row names return as nothing to write
+  if(nCol == 0 & !rowNames)
     return(invisible(0))
   
   colClasses <- lapply(x, function(x) tolower(class(x)))
@@ -306,9 +314,9 @@ writeData <- function(wb,
   ## named region
   if(!is.null(name)){
     
-    ref1 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol, LETTERS, PACKAGE = "openxlsx"), "$", startRow)
-    ref2 <- paste0("$", .Call("openxlsx_convert_to_excel_ref", startCol + nCol - 1L, LETTERS, PACKAGE = "openxlsx"), "$", startRow + nRow - 1L + colNames)
-    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
+    ref1 <- paste0("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
+    ref2 <- paste0("$", convert_to_excel_ref(cols = startCol + nCol - 1L, LETTERS = LETTERS), "$", startRow + nRow - 1L + colNames)
+    wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[wb$validateSheet(sheet)])
     
   }
   

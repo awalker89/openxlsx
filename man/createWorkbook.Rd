@@ -4,10 +4,18 @@
 \alias{createWorkbook}
 \title{Create a new Workbook object}
 \usage{
-createWorkbook(creator = Sys.getenv("USERNAME"))
+createWorkbook(creator = ifelse(.Platform$OS.type == "windows",
+  Sys.getenv("USERNAME"), Sys.getenv("USER")), title = NULL, subject = NULL,
+  category = NULL)
 }
 \arguments{
 \item{creator}{Creator of the workbook (your name). Defaults to login username}
+
+\item{title}{Workbook properties title}
+
+\item{subject}{Workbook properties subject}
+
+\item{category}{Workbook properties category}
 }
 \value{
 Workbook object
@@ -21,6 +29,10 @@ wb <- createWorkbook()
 
 ## Save workbook to working directory
 saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
+
+## Set Workbook properties
+wb <- createWorkbook(creator = "Me", title = "title here", subject = "this & that", category = "something")
+
 }
 \seealso{
 \code{\link{loadWorkbook}}

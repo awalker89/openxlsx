@@ -158,17 +158,24 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   if(!is.logical(asTable))
     stop("asTable must be a logical.")
   
-  creator <- ""
-  if(creator %in% names(params))
-    creator <- params$creator
+  creator <- ifelse("creator" %in% names(params), params$creator, "")
+  title <- params$title ### will return NULL of not exist
+  subject <- params$subject ### will return NULL of not exist
+  category <- params$category ### will return NULL of not exist
+  
   
   sheetName <- "Sheet 1"
   if("sheetName" %in% names(params)){
     
-    if(nchar(params$sheetName) > 31)
+    if(any(nchar(params$sheetName) > 31))
       stop("sheetName too long! Max length is 31 characters.")
     
     sheetName <- as.character(params$sheetName)
+    
+    if("list" %in% class(x) & length(sheetName) == length(x))
+      names(x) <- sheetName
+      
+    
   }
   
   tabColour <- NULL
@@ -178,7 +185,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   zoom <- 100
   if("zoom" %in% names(params)){
     if(is.numeric(params$zoom)){
-      zoom <- params$zoom[1]
+      zoom <- params$zoom
     }else{
       stop("zoom must be numeric")
     }
@@ -297,7 +304,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   borders <- NULL
   if("borders" %in% names(params)){
     borders <- tolower(params$borders)
-    if(!all(borders %in% c("surrounding", "rows", "columns")))
+    if(!all(borders %in% c("surrounding", "rows", "columns", "all")))
       stop("Invalid borders argument")
   }
   
@@ -332,7 +339,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
     
   ## create new Workbook object
-  wb <- Workbook$new(creator)
+  wb <- createWorkbook(creator = creator, title = title, subject = subject, category = category)
+  
   
   ## If a list is supplied write to individual worksheets using names if available
   nSheets <- 1
@@ -355,6 +363,17 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     }
     
     ## make all inputs as long as the list
+    if(!is.null(tabColour)){
+      if(length(tabColour) != nSheets)
+        tabColour <- rep_len(tabColour, length.out = nSheets)
+    }
+    
+    if(length(zoom) != nSheets)
+      zoom <- rep_len(zoom, length.out = nSheets)
+    
+    if(length(gridLines) != nSheets)
+      gridLines <- rep_len(gridLines, length.out = nSheets)
+    
     if(length(withFilter) != nSheets)
       withFilter <- rep_len(withFilter, length.out = nSheets)
     
@@ -396,7 +415,7 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
     
     for(i in 1:nSheets){
       
-      wb$addWorksheet(nms[[i]], showGridLines = gridLines, tabColour = tabColour, zoom = zoom)
+      wb$addWorksheet(nms[[i]], showGridLines = gridLines[i], tabColour = tabColour[i], zoom = zoom[i])
       
       if(asTable[i]){
         

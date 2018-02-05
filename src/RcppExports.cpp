@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // calc_column_widths
 SEXP calc_column_widths(Reference sheet_data, std::vector<std::string> sharedStrings, IntegerVector autoColumns, NumericVector widths, float baseFontCharWidth, float minW, float maxW);
-RcppExport SEXP openxlsx_calc_column_widths(SEXP sheet_dataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthsSEXP, SEXP baseFontCharWidthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
+RcppExport SEXP _openxlsx_calc_column_widths(SEXP sheet_dataSEXP, SEXP sharedStringsSEXP, SEXP autoColumnsSEXP, SEXP widthsSEXP, SEXP baseFontCharWidthSEXP, SEXP minWSEXP, SEXP maxWSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,7 +24,7 @@ END_RCPP
 }
 // convert_to_excel_ref
 SEXP convert_to_excel_ref(IntegerVector cols, std::vector<std::string> LETTERS);
-RcppExport SEXP openxlsx_convert_to_excel_ref(SEXP colsSEXP, SEXP LETTERSSEXP) {
+RcppExport SEXP _openxlsx_convert_to_excel_ref(SEXP colsSEXP, SEXP LETTERSSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,7 +36,7 @@ END_RCPP
 }
 // convert_from_excel_ref
 IntegerVector convert_from_excel_ref(CharacterVector x);
-RcppExport SEXP openxlsx_convert_from_excel_ref(SEXP xSEXP) {
+RcppExport SEXP _openxlsx_convert_from_excel_ref(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,7 +47,7 @@ END_RCPP
 }
 // convert_to_excel_ref_expand
 SEXP convert_to_excel_ref_expand(const std::vector<int>& cols, const std::vector<std::string>& LETTERS, const std::vector<std::string>& rows);
-RcppExport SEXP openxlsx_convert_to_excel_ref_expand(SEXP colsSEXP, SEXP LETTERSSEXP, SEXP rowsSEXP) {
+RcppExport SEXP _openxlsx_convert_to_excel_ref_expand(SEXP colsSEXP, SEXP LETTERSSEXP, SEXP rowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,7 +60,7 @@ END_RCPP
 }
 // isInternalHyperlink
 LogicalVector isInternalHyperlink(CharacterVector x);
-RcppExport SEXP openxlsx_isInternalHyperlink(SEXP xSEXP) {
+RcppExport SEXP _openxlsx_isInternalHyperlink(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,23 +69,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// writeFile
-SEXP writeFile(std::string parent, std::string xmlText, std::string parentEnd, std::string R_fileName);
-RcppExport SEXP openxlsx_writeFile(SEXP parentSEXP, SEXP xmlTextSEXP, SEXP parentEndSEXP, SEXP R_fileNameSEXP) {
+// write_file
+SEXP write_file(std::string head, std::string body, std::string tail, std::string fl);
+RcppExport SEXP _openxlsx_write_file(SEXP headSEXP, SEXP bodySEXP, SEXP tailSEXP, SEXP flSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type parent(parentSEXP);
-    Rcpp::traits::input_parameter< std::string >::type xmlText(xmlTextSEXP);
-    Rcpp::traits::input_parameter< std::string >::type parentEnd(parentEndSEXP);
-    Rcpp::traits::input_parameter< std::string >::type R_fileName(R_fileNameSEXP);
-    rcpp_result_gen = Rcpp::wrap(writeFile(parent, xmlText, parentEnd, R_fileName));
+    Rcpp::traits::input_parameter< std::string >::type head(headSEXP);
+    Rcpp::traits::input_parameter< std::string >::type body(bodySEXP);
+    Rcpp::traits::input_parameter< std::string >::type tail(tailSEXP);
+    Rcpp::traits::input_parameter< std::string >::type fl(flSEXP);
+    rcpp_result_gen = Rcpp::wrap(write_file(head, body, tail, fl));
     return rcpp_result_gen;
 END_RCPP
 }
 // cppReadFile
 std::string cppReadFile(std::string xmlFile);
-RcppExport SEXP openxlsx_cppReadFile(SEXP xmlFileSEXP) {
+RcppExport SEXP _openxlsx_cppReadFile(SEXP xmlFileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -96,7 +96,7 @@ END_RCPP
 }
 // read_file_newline
 std::string read_file_newline(std::string xmlFile);
-RcppExport SEXP openxlsx_read_file_newline(SEXP xmlFileSEXP) {
+RcppExport SEXP _openxlsx_read_file_newline(SEXP xmlFileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -107,7 +107,7 @@ END_RCPP
 }
 // get_letters
 std::vector<std::string> get_letters();
-RcppExport SEXP openxlsx_get_letters() {
+RcppExport SEXP _openxlsx_get_letters() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -117,7 +117,7 @@ END_RCPP
 }
 // loadworksheets
 SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xmlFiles, LogicalVector is_chart_sheet);
-RcppExport SEXP openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP, SEXP is_chart_sheetSEXP) {
+RcppExport SEXP _openxlsx_loadworksheets(SEXP wbSEXP, SEXP styleObjectsSEXP, SEXP xmlFilesSEXP, SEXP is_chart_sheetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -131,7 +131,7 @@ END_RCPP
 }
 // getNodes
 SEXP getNodes(std::string xml, std::string tagIn);
-RcppExport SEXP openxlsx_getNodes(SEXP xmlSEXP, SEXP tagInSEXP) {
+RcppExport SEXP _openxlsx_getNodes(SEXP xmlSEXP, SEXP tagInSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -143,7 +143,7 @@ END_RCPP
 }
 // getOpenClosedNode
 SEXP getOpenClosedNode(std::string xml, std::string open_tag, std::string close_tag);
-RcppExport SEXP openxlsx_getOpenClosedNode(SEXP xmlSEXP, SEXP open_tagSEXP, SEXP close_tagSEXP) {
+RcppExport SEXP _openxlsx_getOpenClosedNode(SEXP xmlSEXP, SEXP open_tagSEXP, SEXP close_tagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -156,7 +156,7 @@ END_RCPP
 }
 // getAttr
 SEXP getAttr(CharacterVector x, std::string tag);
-RcppExport SEXP openxlsx_getAttr(SEXP xSEXP, SEXP tagSEXP) {
+RcppExport SEXP _openxlsx_getAttr(SEXP xSEXP, SEXP tagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -168,7 +168,7 @@ END_RCPP
 }
 // getChildlessNode_ss
 std::vector<std::string> getChildlessNode_ss(std::string xml, std::string tag);
-RcppExport SEXP openxlsx_getChildlessNode_ss(SEXP xmlSEXP, SEXP tagSEXP) {
+RcppExport SEXP _openxlsx_getChildlessNode_ss(SEXP xmlSEXP, SEXP tagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -180,7 +180,7 @@ END_RCPP
 }
 // getChildlessNode
 CharacterVector getChildlessNode(std::string xml, std::string tag);
-RcppExport SEXP openxlsx_getChildlessNode(SEXP xmlSEXP, SEXP tagSEXP) {
+RcppExport SEXP _openxlsx_getChildlessNode(SEXP xmlSEXP, SEXP tagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -192,7 +192,7 @@ END_RCPP
 }
 // get_extLst_Major
 CharacterVector get_extLst_Major(std::string xml);
-RcppExport SEXP openxlsx_get_extLst_Major(SEXP xmlSEXP) {
+RcppExport SEXP _openxlsx_get_extLst_Major(SEXP xmlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -203,7 +203,7 @@ END_RCPP
 }
 // cell_ref_to_col
 int cell_ref_to_col(std::string x);
-RcppExport SEXP openxlsx_cell_ref_to_col(SEXP xSEXP) {
+RcppExport SEXP _openxlsx_cell_ref_to_col(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -214,7 +214,7 @@ END_RCPP
 }
 // int_2_cell_ref
 CharacterVector int_2_cell_ref(IntegerVector cols);
-RcppExport SEXP openxlsx_int_2_cell_ref(SEXP colsSEXP) {
+RcppExport SEXP _openxlsx_int_2_cell_ref(SEXP colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -225,7 +225,7 @@ END_RCPP
 }
 // get_shared_strings
 CharacterVector get_shared_strings(std::string xmlFile, bool isFile);
-RcppExport SEXP openxlsx_get_shared_strings(SEXP xmlFileSEXP, SEXP isFileSEXP) {
+RcppExport SEXP _openxlsx_get_shared_strings(SEXP xmlFileSEXP, SEXP isFileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -237,7 +237,7 @@ END_RCPP
 }
 // getCellInfo
 List getCellInfo(std::string xmlFile, CharacterVector sharedStrings, bool skipEmptyRows, int startRow, IntegerVector rows, bool getDates);
-RcppExport SEXP openxlsx_getCellInfo(SEXP xmlFileSEXP, SEXP sharedStringsSEXP, SEXP skipEmptyRowsSEXP, SEXP startRowSEXP, SEXP rowsSEXP, SEXP getDatesSEXP) {
+RcppExport SEXP _openxlsx_getCellInfo(SEXP xmlFileSEXP, SEXP sharedStringsSEXP, SEXP skipEmptyRowsSEXP, SEXP startRowSEXP, SEXP rowsSEXP, SEXP getDatesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -253,7 +253,7 @@ END_RCPP
 }
 // read_workbook
 SEXP read_workbook(IntegerVector cols_in, IntegerVector rows_in, CharacterVector v, IntegerVector string_inds, LogicalVector is_date, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, int nRows, Function clean_names);
-RcppExport SEXP openxlsx_read_workbook(SEXP cols_inSEXP, SEXP rows_inSEXP, SEXP vSEXP, SEXP string_indsSEXP, SEXP is_dateSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP nRowsSEXP, SEXP clean_namesSEXP) {
+RcppExport SEXP _openxlsx_read_workbook(SEXP cols_inSEXP, SEXP rows_inSEXP, SEXP vSEXP, SEXP string_indsSEXP, SEXP is_dateSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP nRowsSEXP, SEXP clean_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -273,7 +273,7 @@ END_RCPP
 }
 // calc_number_rows
 int calc_number_rows(CharacterVector x, bool skipEmptyRows);
-RcppExport SEXP openxlsx_calc_number_rows(SEXP xSEXP, SEXP skipEmptyRowsSEXP) {
+RcppExport SEXP _openxlsx_calc_number_rows(SEXP xSEXP, SEXP skipEmptyRowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -285,7 +285,7 @@ END_RCPP
 }
 // map_cell_types_to_integer
 IntegerVector map_cell_types_to_integer(CharacterVector t);
-RcppExport SEXP openxlsx_map_cell_types_to_integer(SEXP tSEXP) {
+RcppExport SEXP _openxlsx_map_cell_types_to_integer(SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -296,7 +296,7 @@ END_RCPP
 }
 // map_cell_types_to_char
 CharacterVector map_cell_types_to_char(IntegerVector t);
-RcppExport SEXP openxlsx_map_cell_types_to_char(SEXP tSEXP) {
+RcppExport SEXP _openxlsx_map_cell_types_to_char(SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -307,7 +307,7 @@ END_RCPP
 }
 // build_cell_types_integer
 IntegerVector build_cell_types_integer(CharacterVector classes, int n_rows);
-RcppExport SEXP openxlsx_build_cell_types_integer(SEXP classesSEXP, SEXP n_rowsSEXP) {
+RcppExport SEXP _openxlsx_build_cell_types_integer(SEXP classesSEXP, SEXP n_rowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -319,7 +319,7 @@ END_RCPP
 }
 // buildCellTypes
 CharacterVector buildCellTypes(CharacterVector classes, int nRows);
-RcppExport SEXP openxlsx_buildCellTypes(SEXP classesSEXP, SEXP nRowsSEXP) {
+RcppExport SEXP _openxlsx_buildCellTypes(SEXP classesSEXP, SEXP nRowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -331,7 +331,7 @@ END_RCPP
 }
 // build_cell_merges
 List build_cell_merges(List comps);
-RcppExport SEXP openxlsx_build_cell_merges(SEXP compsSEXP) {
+RcppExport SEXP _openxlsx_build_cell_merges(SEXP compsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -342,7 +342,7 @@ END_RCPP
 }
 // buildCellList
 List buildCellList(CharacterVector r, CharacterVector t, CharacterVector v);
-RcppExport SEXP openxlsx_buildCellList(SEXP rSEXP, SEXP tSEXP, SEXP vSEXP) {
+RcppExport SEXP _openxlsx_buildCellList(SEXP rSEXP, SEXP tSEXP, SEXP vSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -355,7 +355,7 @@ END_RCPP
 }
 // write_worksheet_xml
 SEXP write_worksheet_xml(std::string prior, std::string post, Reference sheet_data, std::string R_fileName);
-RcppExport SEXP openxlsx_write_worksheet_xml(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP R_fileNameSEXP) {
+RcppExport SEXP _openxlsx_write_worksheet_xml(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP R_fileNameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -369,7 +369,7 @@ END_RCPP
 }
 // buildMatrixNumeric
 SEXP buildMatrixNumeric(CharacterVector v, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols);
-RcppExport SEXP openxlsx_buildMatrixNumeric(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP) {
+RcppExport SEXP _openxlsx_buildMatrixNumeric(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -385,7 +385,7 @@ END_RCPP
 }
 // buildMatrixMixed
 SEXP buildMatrixMixed(CharacterVector v, IntegerVector rowInd, IntegerVector colInd, CharacterVector colNames, int nRows, int nCols, IntegerVector charCols, IntegerVector dateCols);
-RcppExport SEXP openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP, SEXP dateColsSEXP) {
+RcppExport SEXP _openxlsx_buildMatrixMixed(SEXP vSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP colNamesSEXP, SEXP nRowsSEXP, SEXP nColsSEXP, SEXP charColsSEXP, SEXP dateColsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -403,7 +403,7 @@ END_RCPP
 }
 // matrixRowInds
 IntegerVector matrixRowInds(IntegerVector indices);
-RcppExport SEXP openxlsx_matrixRowInds(SEXP indicesSEXP) {
+RcppExport SEXP _openxlsx_matrixRowInds(SEXP indicesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -414,7 +414,7 @@ END_RCPP
 }
 // build_table_xml
 CharacterVector build_table_xml(std::string table, std::string tableStyleXML, std::string ref, std::vector<std::string> colNames, bool showColNames, bool withFilter);
-RcppExport SEXP openxlsx_build_table_xml(SEXP tableSEXP, SEXP tableStyleXMLSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP withFilterSEXP) {
+RcppExport SEXP _openxlsx_build_table_xml(SEXP tableSEXP, SEXP tableStyleXMLSEXP, SEXP refSEXP, SEXP colNamesSEXP, SEXP showColNamesSEXP, SEXP withFilterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -430,7 +430,7 @@ END_RCPP
 }
 // write_worksheet_xml_2
 SEXP write_worksheet_xml_2(std::string prior, std::string post, Reference sheet_data, CharacterVector row_heights, std::string R_fileName);
-RcppExport SEXP openxlsx_write_worksheet_xml_2(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP row_heightsSEXP, SEXP R_fileNameSEXP) {
+RcppExport SEXP _openxlsx_write_worksheet_xml_2(SEXP priorSEXP, SEXP postSEXP, SEXP sheet_dataSEXP, SEXP row_heightsSEXP, SEXP R_fileNameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -442,4 +442,47 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(write_worksheet_xml_2(prior, post, sheet_data, row_heights, R_fileName));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_openxlsx_calc_column_widths", (DL_FUNC) &_openxlsx_calc_column_widths, 7},
+    {"_openxlsx_convert_to_excel_ref", (DL_FUNC) &_openxlsx_convert_to_excel_ref, 2},
+    {"_openxlsx_convert_from_excel_ref", (DL_FUNC) &_openxlsx_convert_from_excel_ref, 1},
+    {"_openxlsx_convert_to_excel_ref_expand", (DL_FUNC) &_openxlsx_convert_to_excel_ref_expand, 3},
+    {"_openxlsx_isInternalHyperlink", (DL_FUNC) &_openxlsx_isInternalHyperlink, 1},
+    {"_openxlsx_write_file", (DL_FUNC) &_openxlsx_write_file, 4},
+    {"_openxlsx_cppReadFile", (DL_FUNC) &_openxlsx_cppReadFile, 1},
+    {"_openxlsx_read_file_newline", (DL_FUNC) &_openxlsx_read_file_newline, 1},
+    {"_openxlsx_get_letters", (DL_FUNC) &_openxlsx_get_letters, 0},
+    {"_openxlsx_loadworksheets", (DL_FUNC) &_openxlsx_loadworksheets, 4},
+    {"_openxlsx_getNodes", (DL_FUNC) &_openxlsx_getNodes, 2},
+    {"_openxlsx_getOpenClosedNode", (DL_FUNC) &_openxlsx_getOpenClosedNode, 3},
+    {"_openxlsx_getAttr", (DL_FUNC) &_openxlsx_getAttr, 2},
+    {"_openxlsx_getChildlessNode_ss", (DL_FUNC) &_openxlsx_getChildlessNode_ss, 2},
+    {"_openxlsx_getChildlessNode", (DL_FUNC) &_openxlsx_getChildlessNode, 2},
+    {"_openxlsx_get_extLst_Major", (DL_FUNC) &_openxlsx_get_extLst_Major, 1},
+    {"_openxlsx_cell_ref_to_col", (DL_FUNC) &_openxlsx_cell_ref_to_col, 1},
+    {"_openxlsx_int_2_cell_ref", (DL_FUNC) &_openxlsx_int_2_cell_ref, 1},
+    {"_openxlsx_get_shared_strings", (DL_FUNC) &_openxlsx_get_shared_strings, 2},
+    {"_openxlsx_getCellInfo", (DL_FUNC) &_openxlsx_getCellInfo, 6},
+    {"_openxlsx_read_workbook", (DL_FUNC) &_openxlsx_read_workbook, 10},
+    {"_openxlsx_calc_number_rows", (DL_FUNC) &_openxlsx_calc_number_rows, 2},
+    {"_openxlsx_map_cell_types_to_integer", (DL_FUNC) &_openxlsx_map_cell_types_to_integer, 1},
+    {"_openxlsx_map_cell_types_to_char", (DL_FUNC) &_openxlsx_map_cell_types_to_char, 1},
+    {"_openxlsx_build_cell_types_integer", (DL_FUNC) &_openxlsx_build_cell_types_integer, 2},
+    {"_openxlsx_buildCellTypes", (DL_FUNC) &_openxlsx_buildCellTypes, 2},
+    {"_openxlsx_build_cell_merges", (DL_FUNC) &_openxlsx_build_cell_merges, 1},
+    {"_openxlsx_buildCellList", (DL_FUNC) &_openxlsx_buildCellList, 3},
+    {"_openxlsx_write_worksheet_xml", (DL_FUNC) &_openxlsx_write_worksheet_xml, 4},
+    {"_openxlsx_buildMatrixNumeric", (DL_FUNC) &_openxlsx_buildMatrixNumeric, 6},
+    {"_openxlsx_buildMatrixMixed", (DL_FUNC) &_openxlsx_buildMatrixMixed, 8},
+    {"_openxlsx_matrixRowInds", (DL_FUNC) &_openxlsx_matrixRowInds, 1},
+    {"_openxlsx_build_table_xml", (DL_FUNC) &_openxlsx_build_table_xml, 6},
+    {"_openxlsx_write_worksheet_xml_2", (DL_FUNC) &_openxlsx_write_worksheet_xml_2, 5},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_openxlsx(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
