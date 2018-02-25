@@ -14,7 +14,7 @@ Description: Simplifies the creation of Excel .xlsx files by providing a high
     level interface to writing, styling and editing worksheets. Through the use of
     'Rcpp', read/write times are comparable to the 'xlsx' and 'XLConnect' packages
     with the added benefit of removing the dependency on Java.
-License: GPL-3
+License: License: MIT + file
 LinkingTo: Rcpp
 Depends:
     R (>= 3.3.0)
