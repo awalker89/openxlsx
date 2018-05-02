@@ -163,7 +163,6 @@ mergeCells <- function(wb, sheet, cols, rows){
 }
 
 
-
 #' @name int2col
 #' @title Convert integer to Excel column
 #' @description Converts an integer to an Excel column label. 
@@ -253,7 +252,6 @@ sheets <- function(wb){
   
   return(nms)
 }
-
 
 
 #' @name addWorksheet
@@ -404,9 +402,7 @@ addWorksheet <- function(wb, sheetName,
   hdpi <- as.integer(hdpi)
   if(is.na(hdpi))
     stop("hdpi must be numeric")
-  
-  
-  
+
   ## Invalid XML characters
   sheetName <- replaceIllegalCharacters(sheetName)
   
@@ -505,7 +501,6 @@ convertFromExcelRef <- function(col){
   
   return(as.integer(col))
 }
-
 
 
 #' @name createStyle 
@@ -662,9 +657,6 @@ createStyle <- function(fontName = NULL,
     numFmt <- replaceIllegalCharacters(numFmt_original)
   }
   
-  
-  
-  
   numFmtMapping <- list(list("numFmtId" = 0),  # GENERAL
                         list("numFmtId" = 2),  # NUMBER
                         list("numFmtId" = 164, formatCode = "&quot;$&quot;#,##0.00"), ## CURRENCY
@@ -720,7 +712,6 @@ createStyle <- function(fontName = NULL,
   if(!is.null(fontSize))
     if(fontSize < 1) stop("Font size must be greater than 0!")
   
-  
   ######################### error checking complete #############################
   style <- Style$new()
   
@@ -750,7 +741,6 @@ createStyle <- function(fontName = NULL,
     fgFill <- validateColour(fgFill, "Invalid fgFill colour")
     style$fill <- append(style$fill, list(fillFg = list(rgb = fgFill)))
   }
-  
   
   ## border
   if(!is.null(border)){
@@ -831,7 +821,6 @@ createStyle <- function(fontName = NULL,
   
   return(style)
 } 
-
 
 
 #' @name addStyle 
@@ -936,15 +925,6 @@ getCellRefs <- function(cellCoords){
 }
 
 
-
-
-
-
-
-
-
-
-
 #' @name freezePane
 #' @title Freeze a worksheet pane
 #' @description Freeze a worksheet pane 
@@ -1032,8 +1012,6 @@ convert2EMU <- function(d, units){
 }
 
 
-
-
 #' @name insertImage
 #' @title Insert an image into a worksheet 
 #' @description Insert an image into a worksheet
@@ -1119,52 +1097,71 @@ pixels2ExcelColWidth <- function(pixels){
 #' @title Set worksheet row heights
 #' @description Set worksheet row heights
 #' @author Alexander Walker
-#' @param wb A workbook object
-#' @param sheet A name or index of a worksheet
-#' @param rows Indices of rows to set height
-#' @param heights Heights to set rows to specified in Excel column height units.
+#' @param wb workbook object
+#' @param sheet name or index of a worksheet
+#' @param rows indices of rows to set height
+#' @param heights heights to set rows to specified in Excel column height units
+#' @param fontsize font size, optional (get base font size by default)
+#' @param factor factor to manually adjust font width, e.g., for bold fonts,
+#' optional
+#' @param base_height basic row height, optional
+#' @param extra_height additional row height per new line of text, optional
+#' @param wrap wrap text of entries which exceed the column width, optional
 #' @seealso \code{\link{removeRowHeights}}
 #' @export
 #' @examples
 #' ## Create a new workbook
 #' wb <- createWorkbook()
-#' 
-#' ## Add a worksheet
-#' addWorksheet(wb, "Sheet 1") 
+#' addWorksheet(wb, "Sheet") 
+#' sheet <- 1
 #'
-#' ## set row heights
-#' setRowHeights(wb, 1, rows = c(1,4,22,2,19), heights = c(24,28,32,42,33))
+#' ## Write dummy data
+#' writeData(wb, sheet, "fixed w/fixed h", startCol = 1, startRow = 1)
+#' writeData(wb, sheet, "fixed w/auto h ABC ABC ABC ABC ABC ABC ABC ABC ABC ABC ABC", startCol = 2, startRow = 2)
+#' writeData(wb, sheet, "variable w/fixed h", startCol = 3, startRow = 3)
 #' 
-#' ## overwrite row 1 height
-#' setRowHeights(wb, 1, rows = 1, heights = 40)
+#' ## Set column widths and row heights
+#' setColWidths(wb, sheet, cols = c(1, 2, 3, 4), widths = c(10, 20, "auto", 20))
+#' setRowHeights(wb, sheet, rows = c(1, 2, 8, 4, 6), heights = c(30, "auto", 15, 15, 30))
+#' 
+#' ## Overwrite row 1 height
+#' setRowHeights(wb, sheet, rows = 1, heights = 40)
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "setRowHeightsExample.xlsx", overwrite = TRUE)
-setRowHeights <- function(wb, sheet, rows, heights){
-  
+#' 
+setRowHeights <- function(wb, sheet, rows, heights,
+                          fontsize = NULL, factor = 1.0,
+                          base_height = 15, extra_height = 12, wrap = TRUE) {
+  # validate sheet
   sheet <- wb$validateSheet(sheet)
-  
-  if(length(rows) > length(heights))
+  if (length(rows) > length(heights))
     heights <- rep(heights, length.out = length(rows))
-  
-  if(length(heights) > length(rows))
+  if (length(heights) > length(rows))
     stop("Greater number of height values than rows.")
-  
   od <- getOption("OutDec")
-  options("OutDec" = ".")
-  on.exit(expr = options("OutDec" = od), add = TRUE)
-  
-  ## Remove duplicates
+  options(OutDec = ".")
+  on.exit(expr = options(OutDec = od), add = TRUE)
+  # clean duplicates
   heights <- heights[!duplicated(rows)]
   rows <- rows[!duplicated(rows)]
-  
-  
-  heights <- as.character(as.numeric(heights))
+  # auto adjust row heights
+  ida <- which(heights == "auto")
+  selected <- rows[ida]
+  out <- auto_heights(wb, sheet, selected, fontsize = fontsize, factor = factor,
+                      base_height = base_height, extra_height = extra_height)
+  cols <- out[[1]]
+  new <- out[[2]]
+  heights[ida] <- new
   names(heights) <- rows
-  
+  # wrap text in cells
+  if (wrap == TRUE) {
+    wrap <- openxlsx::createStyle(wrapText = TRUE)
+    openxlsx::addStyle(wb, sheet, wrap, rows = ida, cols = cols, gridExpand = T, stack = T)
+  }
   wb$setRowHeights(sheet, rows, heights)
-  
 }
+
 
 #' @name setColWidths
 #' @title Set worksheet column widths
@@ -1261,12 +1258,9 @@ setColWidths <- function(wb, sheet, cols, widths = 8.43, hidden = rep(FALSE, len
     all_widths <- all_widths[ord]
     all_hidden <- all_hidden[ord]
     
-    
     names(all_widths) <- all_names
     wb$colWidths[[sheet]] <- all_widths
     attr(wb$colWidths[[sheet]], "hidden") <- all_hidden
-    
-    
     
   }else{
     
@@ -1275,7 +1269,6 @@ setColWidths <- function(wb, sheet, cols, widths = 8.43, hidden = rep(FALSE, len
     attr(wb$colWidths[[sheet]], "hidden") <- as.character(as.integer(hidden))
     
   }
-  
   
   invisible(0)
 }
@@ -1316,20 +1309,12 @@ removeColWidths <- function(wb, sheet, cols){
     if(length(remainingCols) == 0){
       wb$colWidths[[sheet]] <- list()
     }else{
-      
       rem_widths <- wb$colWidths[[sheet]][-removeInds]
       names(rem_widths) <- as.character(remainingCols)
       wb$colWidths[[sheet]] <- rem_widths
-      
     }
-    
-    
-    
   }
-  
-  
 }
-
 
 
 #' @name removeRowHeights
@@ -1360,7 +1345,6 @@ removeRowHeights <- function(wb, sheet, rows){
   removeInds <- which(customRows %in% rows)
   if(length(removeInds) > 0)
     wb$rowHeights[[sheet]] <- wb$rowHeights[[sheet]][-removeInds]
-  
 }
 
 
@@ -1460,7 +1444,6 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 }
 
 
-
 #' @name replaceStyle
 #' @title Replace an existing cell style
 #' @description Replace an existing cell style
@@ -1527,7 +1510,6 @@ getStyles <- function(wb){
 }
 
 
-
 #' @name removeWorksheet
 #' @title Remove a worksheet from a workbook
 #' @description Remove a worksheet from a Workbook object
@@ -1589,11 +1571,9 @@ deleteData <- function(wb, sheet, cols, rows, gridExpand = FALSE){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-  
-  
+
   wb$worksheets[[sheet]]$sheet_data$delete(rows_in = rows, cols_in = cols, grid_expand = gridExpand)
-  
-  
+ 
   invisible(0)
 }
 
@@ -1653,7 +1633,6 @@ modifyBaseFont <- function(wb, fontSize = 11, fontColour = "black", fontName = "
 #' 
 #' getBaseFont(wb)
 getBaseFont <- function(wb){
-  
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -1784,13 +1763,10 @@ setHeaderFooter <- function(wb, sheet,
   if(all(sapply(hf, length) == 0))
     hf <- NULL
   
-  
   wb$worksheets[[sheet]]$headerFooter <- hf
   
   
 }
-
-
 
 
 #' @name pageSetup
@@ -1944,13 +1920,11 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   }else{
     paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
   }
-
   
   ##############################
   ## Keep defaults on orientation, hdpi, vdpi, paperSize
   hdpi <- regmatches(xml, regexpr('(?<=horizontalDpi=")[0-9]+', xml, perl = TRUE))
   vdpi <- regmatches(xml, regexpr('(?<=verticalDpi=")[0-9]+', xml, perl = TRUE))
-  
   
   ##############################
   ## Update
@@ -1974,8 +1948,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet - 1L)
-    
-    
+
   }else if(!is.null(printTitleCols) & is.null(printTitleRows)){
     
     if(!is.numeric(printTitleCols))
@@ -1987,7 +1960,6 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
                          name = "_xlnm.Print_Titles",
                          sheet = names(wb)[[sheet]],
                          localSheetId = sheet - 1L)
-    
     
   }else if(!is.null(printTitleCols) & !is.null(printTitleRows)){
     
@@ -2009,13 +1981,8 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     wb$workbook$definedNames <- c(wb$workbook$definedNames, 
                                   sprintf('<definedName name="_xlnm.Print_Titles" localSheetId="%s">\'%s\'!%s,\'%s\'!%s</definedName>', localSheetId, sheet, cols, sheet, rows)
     )
-    
   }
-  
-  
 }
-
-
 
 
 #' @name showGridLines
@@ -2060,9 +2027,6 @@ showGridLines <- function(wb, sheet, showGridLines = FALSE){
 }
 
 
-
-
-
 #' @name worksheetOrder
 #' @title Order of worksheets in xlsx file
 #' @description Get/set order of worksheets in a Workbook object
@@ -2100,6 +2064,7 @@ worksheetOrder <- function(wb){
   
 }
 
+
 #' @rdname worksheetOrder
 #' @param wb A workbook object
 #' @param value Vector specifying order to write worksheets to file
@@ -2128,8 +2093,6 @@ worksheetOrder <- function(wb){
 }
 
 
-
-
 #' @name convertToDate
 #' @title Convert from excel date number to R Date type
 #' @description Convert from excel date number to R Date type
@@ -2144,15 +2107,11 @@ worksheetOrder <- function(wb){
 #' convertToDate(c(41750, 41751, 41752, 41753, 41754, NA) )
 #' convertToDate(c(41750.2, 41751.99, NA, 41753 ))
 convertToDate <- function(x, origin = "1900-01-01", ...){
-  
   x <- as.numeric(x)
   notNa <- !is.na(x)
   if(origin == "1900-01-01")
     x[notNa] <- x[notNa] - 2
-  
   return(as.Date(x, origin = origin, ...))
-  
-  
 }
 
 
@@ -2197,7 +2156,6 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
 }
 
 
-
 #' @name names
 #' @title get or set worksheet names
 #' @description get or set worksheet names
@@ -2220,6 +2178,7 @@ names.Workbook <- function(x){
   nms <- x$sheet_names
   nms <- replaceXMLEntities(nms)
 }
+
 
 #' @rdname names
 #' @param value a character vector the same length as wb
@@ -2253,7 +2212,6 @@ names.Workbook <- function(x){
   invisible(x)
   
 }
-
 
 
 #' @name createNamedRegion
@@ -2329,7 +2287,6 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
     stop("name cannot look like a cell reference.")
   }
   
-  
   cols <- round(cols)
   rows <- round(rows)
   
@@ -2345,13 +2302,7 @@ createNamedRegion <- function(wb, sheet, cols, rows, name){
   invisible(
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[sheet])
   )
-  
 }
-
-
-
-
-
 
 
 #' @name getNamedRegions
@@ -2397,6 +2348,7 @@ getNamedRegions <- function(x){
   
 }
 
+
 #' @export
 getNamedRegions.default <- function(x){
   
@@ -2433,10 +2385,6 @@ getNamedRegions.Workbook <- function(x){
   return(dn_names)
   
 }
-
-
-
-
 
 
 #' @name addFilter
@@ -2533,15 +2481,6 @@ removeFilter <- function(wb, sheet){
 }
 
 
-
-
-
-
-
-
-
-
-
 #' @name setHeader
 #' @title Set header for all worksheets
 #' @description DEPRECATED
@@ -2634,15 +2573,6 @@ setFooter <- function(wb, text, position = "center"){
 }
 
 
-
-
-
-
-
-
-
-
-
 #' @name dataValidation
 #' @title Add data validation to cells
 #' @description Add Excel data validation to cells 
@@ -2727,7 +2657,6 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
   if(!tolower(type) %in% tolower(valid_types))
     stop("Invalid 'type' argument!")
   
-  
   ## operator == 'between' we leave out
   valid_operators <- c("between",
                        "notBetween",
@@ -2769,7 +2698,6 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
   if(type == "time" & !any(tolower(class(value)) %in% c("posixct", "posixt")))
     stop("If type == 'date' value argument must be a POSIXct or POSIXlt vector.")
   
-  
   value <- head(value, 2)
   allowBlank <- as.integer(allowBlank[1])
   showInputMsg <- as.integer(showInputMsg[1])
@@ -2803,17 +2731,9 @@ dataValidation <- function(wb, sheet, cols, rows, type, operator, value, allowBl
     
   }
   
-  
-  
   invisible(0)
   
 }
-
-
-
-
-
-
 
 
 #' @name getDateOrigin
@@ -2865,12 +2785,6 @@ getDateOrigin <- function(xlsxFile){
 }
 
 
-
-
-
-
-
-
 #' @name getSheetNames
 #' @title Get names of worksheets
 #' @description Returns the worksheet names within an xlsx file
@@ -2907,8 +2821,6 @@ getSheetNames <- function(file){
 }
 
 
-
-
 #' @name sheetVisibility
 #' @title Get/set worksheet visible state
 #' @description Get and set worksheet visible state
@@ -2938,10 +2850,10 @@ sheetVisibility <- function(wb){
   state[grepl("hidden", wb$workbook$sheets)] <- "hidden"
   state[grepl("veryHidden", wb$workbook$sheets, ignore.case = TRUE)] <- "veryHidden"
   
-  
   return(state)
   
 }
+
 
 #' @rdname sheetVisibility
 #' @param value a logical/character vector the same length as sheetVisibility(wb)
@@ -2981,9 +2893,6 @@ sheetVisibility <- function(wb){
   invisible(wb)
   
 }
-
-
-
 
 
 #' @name pageBreak
@@ -3038,28 +2947,11 @@ pageBreak <- function(wb, sheet, i, type = "row"){
     )
   }
   
-  
   # wb$worksheets[[sheet]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', paste(getCellRefs(data.frame("x" = c(rows, rows), "y" = c(min(cols), max(cols)))), collapse = ":"))
   
   invisible(wb)
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #' @name conditionalFormat
@@ -3140,7 +3032,6 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
     
   }
   
-  
   invisible(wb$conditionalFormatCell(sheet,
                                      startRow = min(rows),
                                      endRow = max(rows),
@@ -3155,8 +3046,6 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
 }
 
 
-
-
 #' @name all.equal
 #' @aliases all.equal.Workbook
 #' @title Check equality of workbooks
@@ -3166,7 +3055,6 @@ conditionalFormat <- function(wb, sheet, cols, rows, rule = NULL, style = NULL, 
 #' @param current A \code{Workbook} object
 #' @param ... ignored
 all.equal.Workbook <- function(target, current, ...){
-  
   
   # print("Comparing workbooks...")
   #   ".rels",
@@ -3188,15 +3076,11 @@ all.equal.Workbook <- function(target, current, ...){
   #   "tables.xml.rels",
   #   "theme"
   
-  
   ## TODO
   # sheet_data
   
   x <- target
   y <- current
-  
-  
-  
   
   nSheets <- length(names(x))
   failures <- NULL
@@ -3244,9 +3128,6 @@ all.equal.Workbook <- function(target, current, ...){
     failures <- c(failures, "wb$drawings_rels")
   } 
   
-  
-  
-  
   flag <- all(names(x$media) %in% names(y$media) & names(y$media) %in% names(x$media))
   if(!flag){
     message("media not equal")
@@ -3270,8 +3151,6 @@ all.equal.Workbook <- function(target, current, ...){
     message("sharedStrings not equal")
     failures <- c(failures, "wb$sharedStrings")
   } 
-  
-  
   
   # flag <- sapply(1:nSheets, function(i) isTRUE(all.equal(x$worksheets[[i]]$sheet_data, y$worksheets[[i]]$sheet_data)))
   # if(!all(flag)){
@@ -3317,7 +3196,6 @@ all.equal.Workbook <- function(target, current, ...){
   #   }
   # } 
   
-  
   flag <- all(names(x$styles) %in% names(y$styles)) & all(names(y$styles) %in% names(x$styles))
   if(!flag){
     message("names styles not equal")
@@ -3330,13 +3208,11 @@ all.equal.Workbook <- function(target, current, ...){
     failures <- c(failures, "styles not equal") 
   } 
   
-  
   flag <- length(x$styleObjects) == length(y$styleObjects)
   if(!flag){
     message("styleObjects lengths not equal")
     failures <- c(failures, "styleObjects lengths not equal") 
   } 
-  
   
   nStyles <- length(x$styleObjects)
   if(nStyles > 0){
@@ -3444,7 +3320,6 @@ all.equal.Workbook <- function(target, current, ...){
         failures <- c(failures, sprintf("styleObjects '%s' borderBottomColour not equal", i))
       }
       
-      
       flag <-isTRUE(all.equal(sx$style$halign, sy$style$halign))
       if(!flag){
         message(sprintf("styleObjects '%s' halign not equal", i))
@@ -3462,7 +3337,6 @@ all.equal.Workbook <- function(target, current, ...){
         message(sprintf("styleObjects '%s' indent not equal", i))
         failures <- c(failures, sprintf("styleObjects '%s' indent not equal", i))
       }
-      
       
       flag <-isTRUE(all.equal(sx$style$textRotation, sy$style$textRotation))
       if(!flag){
@@ -3489,9 +3363,7 @@ all.equal.Workbook <- function(target, current, ...){
       }
       
     }
-    
   }
-  
   
   flag <- all(x$sheet_names %in% y$sheet_names) & all(y$sheet_names %in% x$sheet_names)
   if(!flag){
@@ -3510,7 +3382,6 @@ all.equal.Workbook <- function(target, current, ...){
     message("workbook.xml.rels not equal")
     failures <- c(failures, "wb$workbook.xml.rels")
   } 
-  
   
   for(i in 1:nSheets){
     
@@ -3531,18 +3402,14 @@ all.equal.Workbook <- function(target, current, ...){
         message(sprintf("worksheet '%s', element '%s' not equal", i, j))
         failures <- c(failures, sprintf("worksheet '%s', element '%s' not equal", i, j))
       } 
-      
     }
-    
   }
-  
   
   flag <- all(unlist(x$sheetOrder) %in% unlist(y$sheetOrder)) & all(unlist(y$sheetOrder) %in% unlist(x$sheetOrder))
   if(!flag){
     message("sheetOrder not equal")
     failures <- c(failures, "sheetOrder not equal")
   } 
-  
   
   flag <- length(x$tables) == length(y$tables)
   if(!flag){
@@ -3562,7 +3429,6 @@ all.equal.Workbook <- function(target, current, ...){
     failures <- c(failures, "tables not equal")
   } 
   
-  
   flag <- isTRUE(all.equal(x$tables.xml.rels, y$tables.xml.rels))
   if(!flag){
     message("tables.xml.rels not equal")
@@ -3578,7 +3444,6 @@ all.equal.Workbook <- function(target, current, ...){
   if(!is.null(failures))
     return(FALSE)
   
-  
   #   "connections",
   #   "externalLinks",
   #   "externalLinksRels",
@@ -3593,10 +3458,8 @@ all.equal.Workbook <- function(target, current, ...){
   #   "slicerCaches",
   #   "vbaProject",
   
-  
   return(TRUE)
 }
-
 
 
 #' @name sheetVisible
@@ -3631,6 +3494,7 @@ sheetVisible <- function(wb){
   return(state)
   
 }
+
 
 #' @rdname sheetVisible
 #' @param value a logical vector the same length as sheetVisible(wb)
@@ -3667,7 +3531,6 @@ sheetVisible <- function(wb){
 }
 
 
-
 #' @name copyWorkbook
 #' @title Copy a Workbook object.
 #' @description Just a wrapper of wb$copy() 
@@ -3694,9 +3557,6 @@ copyWorkbook <- function(wb){
   return(wb$copy())
   
 }
-
-
-
 
 
 #' @name getTables
@@ -3742,9 +3602,6 @@ getTables <- function(wb, sheet){
   return(tables)
   
 }
-
-
-
 
 
 #' @name removeTable
@@ -3829,6 +3686,5 @@ removeTable <- function(wb, sheet, table){
   deleteData(wb = wb, sheet = sheet, rows = rows, cols = cols, gridExpand = TRUE)
   
   invisible(0)
-  
   
 }
