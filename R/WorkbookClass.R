@@ -179,9 +179,8 @@ Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
   }
   
   
-  ## fix visible value
-  ## TODO: copy visibility from cloned sheet!
-  visible <- "visible"
+  ## copy visibility from cloned sheet!
+  visible <- regmatches(workbook$sheets[[clonedSheet]], regexpr('(?<=state=")[^"]+', workbook$sheets[[clonedSheet]], perl = TRUE))
 
   ##  Add sheet to workbook.xml
   workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state="%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
