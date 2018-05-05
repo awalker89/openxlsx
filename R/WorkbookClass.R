@@ -217,13 +217,72 @@ Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
   sheetOrder <<- c(sheetOrder, as.integer(newSheetIndex))
   sheet_names <<- c(sheet_names, sheetName)
   
-  ## Style objects are stored in a global list, so we need to get all styles 
+  
+  ############################
+  ## STYLE
+  ## ... objects are stored in a global list, so we need to get all styles 
   ## assigned to the cloned sheet and duplicate them
   sheetStyles = Filter(function(s) {s$sheet == sheet_names[[clonedSheet]]}, styleObjects)
   styleObjects <<- c(styleObjects, 
                      Map(function(s) {s$sheet = sheetName; s}, sheetStyles)
                      )
   
+  
+  ############################
+  ## TABLES 
+  ## ... are stored in the $tables list, with the name and sheet as attr
+  ## and in the worksheets[]$tableParts list. We also need to adjust the 
+  ## worksheets_rels and set the content type for the new table
+
+  tbls = tables[attr(tables, "sheet") == clonedSheet]
+  for (t in tbls) {
+      # Extract table name, displayName and ID from the xml
+      oldname = regmatches(t, regexpr('(?<= name=")[^"]+', t, perl = TRUE))
+      olddispname = regmatches(t, regexpr('(?<= displayName=")[^"]+', t, perl = TRUE))
+      oldid = regmatches(t, regexpr('(?<= id=")[^"]+', t, perl = TRUE))
+      ref = regmatches(t, regexpr('(?<= ref=")[^"]+', t, perl = TRUE))
+    
+      # Find new, unused table names by appending _n, where n=1,2,...
+      n <- 0
+      while (paste0(oldname, "_", n) %in% attr(tables, "tableName")) {
+          n <- n + 1
+      }
+      newname <- paste0(oldname, "_", n)
+      newdispname <- paste0(olddispname, "_", n)
+      newid <- as.character(length(tables) + 3L)
+      
+      # Use the table definition from the cloned sheet and simply replace the names
+      newt <- t
+      newt <- gsub(paste0(" name=\"", oldname, "\""), paste0(" name=\"", newname, "\""), newt)
+      newt <- gsub(paste0(" displayName=\"", olddispname, "\""), paste0(" displayName=\"", newdispname, "\""), newt)
+      newt <- gsub(paste0("(<table [^<]* id=\")", oldid, "\""), paste0("\\1", newid, "\""), newt)
+      
+      oldtables = tables
+      tables <<- c(oldtables, newt)
+      names(tables) <<- c(names(oldtables), ref)
+      attr(tables, "sheet")  <<- c(attr(oldtables, "sheet"), newSheetIndex)
+      attr(tables, "tableName") <<- c(attr(oldtables, "tableName"), newname)
+      
+      oldparts = worksheets[[newSheetIndex]]$tableParts
+      worksheets[[newSheetIndex]]$tableParts <<- c(oldparts, sprintf('<tablePart r:id="rId%s"/>', newid))
+      attr(worksheets[[newSheetIndex]]$tableParts, "tableName") <<- c(attr(oldparts, "tableName"), newname)
+      names(attr(worksheets[[newSheetIndex]]$tableParts, "tableName")) <<- c(names(attr(oldparts, "tableName")), ref)
+
+      Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', newid))
+      tables.xml.rels <<- append(tables.xml.rels, "")
+      
+      worksheets_rels[[newSheetIndex]] <<- c(worksheets_rels[[newSheetIndex]],
+                                     sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table%s.xml"/>',  
+                                             newid,  newid))
+
+  }
+  
+  # TODO: The following items are currently NOT copied/duplicated for the cloned sheet:
+  #   - Comments
+  #   - Embedded Pictures
+  #   - Charts
+  #   - Pivot tables
+
   invisible(newSheetIndex)
   
 })
