@@ -2452,7 +2452,7 @@ Workbook$methods(show = function(){
     showText <- c(showText, "\nImages:\n", sprintf('Image %s: "%s"\n', 1:nImages, media))
   
   if(nCharts > 0)
-    showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
+    showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nCharts, charts))
   
   if(nSheets > 0)
     showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
