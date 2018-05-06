@@ -199,10 +199,30 @@ Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
                           sprintf('<Relationship Id="rId0" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet%s.xml"/>', newSheetIndex)
   )
   
-  
   ## create sheet.rels to simplify id assignment
-  worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex) # TODO: Is there any way (or even need) to copy from cloned sheet?
+  worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex)
   drawings_rels[[newSheetIndex]] <<- drawings_rels[[clonedSheet]]
+  
+  # give each chart its own filename (images can re-use the same file, but charts can't)
+  drawings_rels[[newSheetIndex]] <<- sapply(drawings_rels[[newSheetIndex]], function (rl) {
+    chartfiles <- regmatches(rl, gregexpr('(?<=charts/)chart[0-9]+\\.xml', rl, perl = TRUE))[[1]]
+    for (cf in chartfiles) {
+      print(cf)
+      chartid <- length(charts) + 1
+      newname <- paste0("chart", chartid, ".xml")
+      fl <- charts[cf]
+      newfl <- file.path(dirname(fl), newname)
+      charts[newname] <<- newfl
+      file.copy(fl, newfl)
+      Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/charts/%s" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>', newname))
+      rl = gsub(paste0('(?<=charts/)', cf), newname, rl, perl = TRUE)
+    }
+    print(chartfiles)
+    print(rl)
+    rl
+  }, USE.NAMES = FALSE)
+  # The IDs in the drawings array are sheet-specific, so within the new cloned sheet
+  # the same IDs can be used => no need to modify drawings
   drawings[[newSheetIndex]] <<- drawings[[clonedSheet]]
   
   vml_rels[[newSheetIndex]] <<- vml_rels[[clonedSheet]]
@@ -279,8 +299,6 @@ Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
   
   # TODO: The following items are currently NOT copied/duplicated for the cloned sheet:
   #   - Comments
-  #   - Embedded Pictures
-  #   - Charts
   #   - Pivot tables
 
   invisible(newSheetIndex)
