@@ -207,18 +207,23 @@ Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
   drawings_rels[[newSheetIndex]] <<- sapply(drawings_rels[[newSheetIndex]], function (rl) {
     chartfiles <- regmatches(rl, gregexpr('(?<=charts/)chart[0-9]+\\.xml', rl, perl = TRUE))[[1]]
     for (cf in chartfiles) {
-      print(cf)
       chartid <- length(charts) + 1
       newname <- paste0("chart", chartid, ".xml")
       fl <- charts[cf]
+
+      # Read the chartfile and adjust all formulas to point to the new 
+      # sheet name instead of the clone source
+      # The result is saved to a new chart xml file
       newfl <- file.path(dirname(fl), newname)
       charts[newname] <<- newfl
-      file.copy(fl, newfl)
+      chart <- readLines(fl, warn = FALSE, encoding = "UTF-8")
+      chart <- gsub(paste0("(?<=')", sheet_names[[clonedSheet]], "(?='!)"), paste0("'", sheetName, "'"), chart, perl = TRUE)
+      chart <- gsub(paste0("(?<=[^A-Za-z0-9])", sheet_names[[clonedSheet]], "(?=!)"), paste0("'", sheetName, "'"), chart, perl = TRUE)
+      writeLines(chart, newfl)
+      # file.copy(fl, newfl)
       Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/charts/%s" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>', newname))
       rl = gsub(paste0('(?<=charts/)', cf), newname, rl, perl = TRUE)
     }
-    print(chartfiles)
-    print(rl)
     rl
   }, USE.NAMES = FALSE)
   # The IDs in the drawings array are sheet-specific, so within the new cloned sheet
