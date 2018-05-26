@@ -18,7 +18,7 @@ conditionalFormat(wb, sheet, cols, rows, rule = NULL, style = NULL,
 
 \item{rule}{The condition under which to apply the formatting or a vector of colours. See examples.}
 
-\item{style}{A style to apply to those cells that satisify the rule. A Style object returned from createStyle()}
+\item{style}{A style to apply to those cells that satisfy the rule. A Style object returned from createStyle()}
 
 \item{type}{Either 'expression', 'colorscale' or 'databar'. If 'expression' the formatting is determined
 by a formula.  If colorScale cells are coloured based on cell value. See examples.}

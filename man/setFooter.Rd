@@ -11,7 +11,7 @@ setFooter(wb, text, position = "center")
 
 \item{text}{footer text. A character vector of length 1.}
 
-\item{position}{Postion of text in footer. One of "left", "center" or "right"}
+\item{position}{Position of text in footer. One of "left", "center" or "right"}
 }
 \description{
 DEPRECATED

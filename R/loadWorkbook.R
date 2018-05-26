@@ -2,7 +2,7 @@
 
 
 #' @name loadWorkbook 
-#' @title Load an exisiting .xlsx file
+#' @title Load an existing .xlsx file
 #' @author Alexander Walker
 #' @param file A path to an existing .xlsx or .xlsm file
 #' @param xlsxFile alias for file

@@ -267,9 +267,9 @@ sheets <- function(wb){
 #' @param sheetName A name for the new worksheet
 #' @param gridLines A logical. If \code{FALSE}, the worksheet grid lines will be hidden.
 #' @param tabColour Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"
-#' @param zoom A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.
-#' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
-#' @param footer document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param zoom A numeric between 10 and 400. Worksheet zoom level as a percentage.
+#' @param header document header. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.
+#' @param footer document footer. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.
 #' @param evenHeader document header for even pages.
 #' @param evenFooter document footer for even pages.
 #' @param firstHeader document header for first page only.
@@ -536,9 +536,9 @@ convertFromExcelRef <- function(col){
 #'   \item{\bold{FRACTION}}
 #'   \item{\bold{SCIENTIFIC}}
 #'   \item{\bold{TEXT}}
-#'   \item{\bold{COMMA}{  for comma seperated thousands}}
+#'   \item{\bold{COMMA}{  for comma separated thousands}}
 #'   \item{For date/datetime styling a combination of d, m, y and punctuation marks}
-#'   \item{For numeric rouding use "0.00" with the preferred number of decimal places}
+#'   \item{For numeric rounding use "0.00" with the preferred number of decimal places}
 #' }
 #' 
 #' @param border Cell border. A vector of "top", "bottom", "left", "right" or a single string).
@@ -607,7 +607,7 @@ convertFromExcelRef <- function(col){
 #'   } 
 #'   
 #' @param wrapText Logical. If \code{TRUE} cell contents will wrap to fit in column.  
-#' @param textRotation Rotation of text in degrees. 255 for vertial text.
+#' @param textRotation Rotation of text in degrees. 255 for vertical text.
 #' @param indent Horizontal indentation of cell contents.
 #' @return A style object
 #' @export
@@ -1290,7 +1290,7 @@ setColWidths <- function(wb, sheet, cols, widths = 8.43, hidden = rep(FALSE, len
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
-#' @param cols Indices of colunss to remove custom width (if any) from.
+#' @param cols Indices of columns to remove custom width (if any) from.
 #' @seealso \code{\link{setColWidths}}
 #' @export
 #' @examples
@@ -1470,7 +1470,7 @@ insertPlot <- function(wb, sheet, width = 6, height = 4, xy = NULL,
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param index Index of style object to replace
-#' @param newStyle A style to replace the exising style as position index
+#' @param newStyle A style to replace the existing style as position index
 #' @description Replace a style object
 #' @export
 #' @seealso \code{\link{getStyles}}
@@ -1672,8 +1672,8 @@ getBaseFont <- function(wb){
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
-#' @param header document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
-#' @param footer document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.
+#' @param header document header. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.
+#' @param footer document footer. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.
 #' @param evenHeader document header for even pages.
 #' @param evenFooter document footer for even pages.
 #' @param firstHeader document header for first page only.
@@ -1984,7 +1984,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
     if(!is.numeric(printTitleCols))
       stop("printTitleCols must be numeric.")
     
-    cols <- LETTERS(cols = range(printTitleCols), LETTERS = LETTERS)
+    cols <- convert_to_excel_ref(cols = range(printTitleCols), LETTERS = LETTERS)
     wb$createNamedRegion(ref1 = paste0("$", cols[1]),
                          ref2 = paste0("$", cols[2]),
                          name = "_xlnm.Print_Titles",
@@ -2551,7 +2551,7 @@ removeFilter <- function(wb, sheet){
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param text header text. A character vector of length 1.
-#' @param position Postion of text in header. One of "left", "center" or "right"
+#' @param position Position of text in header. One of "left", "center" or "right"
 #' @export
 #' @examples
 #' \dontrun{
@@ -2597,7 +2597,7 @@ setHeader <- function(wb, text, position = "center"){
 #' @author Alexander Walker
 #' @param wb A workbook object
 #' @param text footer text. A character vector of length 1.
-#' @param position Postion of text in footer. One of "left", "center" or "right"
+#' @param position Position of text in footer. One of "left", "center" or "right"
 #' @export
 #' @examples
 #' \dontrun{
@@ -2657,7 +2657,7 @@ setFooter <- function(wb, text, position = "center"){
 #' @param operator One of 'between', 'notBetween', 'equal',
 #'  'notEqual', 'greaterThan', 'lessThan', 'greaterThanOrEqual', 'lessThanOrEqual'
 #' @param value a vector of length 1 or 2 depending on operator (see examples)
-#' @param allowBlank logial
+#' @param allowBlank logical
 #' @param showInputMsg logical
 #' @param showErrorMsg logical
 #' @export
@@ -3074,7 +3074,7 @@ pageBreak <- function(wb, sheet, i, type = "row"){
 #' @param cols Columns to apply conditional formatting to
 #' @param rows Rows to apply conditional formatting to
 #' @param rule The condition under which to apply the formatting or a vector of colours. See examples.
-#' @param style A style to apply to those cells that satisify the rule. A Style object returned from createStyle()
+#' @param style A style to apply to those cells that satisfy the rule. A Style object returned from createStyle()
 #' @details DEPRECATED! USE \code{\link{conditionalFormatting}}
 #' 
 #' Valid operators are "<", "<=", ">", ">=", "==", "!=". See Examples.

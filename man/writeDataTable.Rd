@@ -18,9 +18,9 @@ worksheet.}
 
 \item{x}{A dataframe.}
 
-\item{startCol}{A vector specifiying the starting column to write df}
+\item{startCol}{A vector specifying the starting column to write df}
 
-\item{startRow}{A vector specifiying the starting row to write df}
+\item{startRow}{A vector specifying the starting row to write df}
 
 \item{xy}{An alternative to specifying startCol and startRow individually.
 A vector of the form c(startCol, startRow)}
@@ -39,7 +39,7 @@ A vector of the form c(startCol, startRow)}
 
 \item{keepNA}{If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.}
 
-\item{sep}{Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
+\item{sep}{Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).}
 
 \item{stack}{If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
 existing style is replaced by the new style.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/loadWorkbook.R
 \name{loadWorkbook}
 \alias{loadWorkbook}
-\title{Load an exisiting .xlsx file}
+\title{Load an existing .xlsx file}
 \usage{
 loadWorkbook(file, xlsxFile = NULL)
 }

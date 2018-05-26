@@ -6,7 +6,7 @@ This NOTE is not triggered on win-builder devel.
 
 
 ## Test environments
-* local Windows 7, R 3.3.3 & R devel
+* local Windows 7, R 3.5.0 & R devel
 * local ubuntu 16.10, R 3.3.2
 * win-builder (devel and release)
 

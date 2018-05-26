@@ -11,7 +11,7 @@ setHeader(wb, text, position = "center")
 
 \item{text}{header text. A character vector of length 1.}
 
-\item{position}{Postion of text in header. One of "left", "center" or "right"}
+\item{position}{Position of text in header. One of "left", "center" or "right"}
 }
 \description{
 DEPRECATED

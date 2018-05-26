@@ -19,7 +19,7 @@
 #' If NULL, all rows are read.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
-#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
+#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols parameters are ignored.
 #' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
 #' @param fillMergedCells If TRUE, the value in a merged cell is given to all cells within the merge.
 #' @param skipEmptyCols If \code{TRUE}, empty columns are skipped.

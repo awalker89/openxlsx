@@ -23,7 +23,7 @@ dataValidation(wb, sheet, cols, rows, type, operator, value,
 
 \item{value}{a vector of length 1 or 2 depending on operator (see examples)}
 
-\item{allowBlank}{logial}
+\item{allowBlank}{logical}
 
 \item{showInputMsg}{logical}
 

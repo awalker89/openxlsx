@@ -11,7 +11,7 @@ removeColWidths(wb, sheet, cols)
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{cols}{Indices of colunss to remove custom width (if any) from.}
+\item{cols}{Indices of columns to remove custom width (if any) from.}
 }
 \description{
 Remove column widths from a worksheet
