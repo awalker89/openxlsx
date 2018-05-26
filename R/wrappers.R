@@ -20,7 +20,10 @@
 #' saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
 #' 
 #' ## Set Workbook properties
-#' wb <- createWorkbook(creator = "Me", title = "title here", subject = "this & that", category = "something")
+#' wb <- createWorkbook(creator = "Me"
+#' , title = "title here"
+#' , subject = "this & that"
+#' , category = "something")
 #' 
 createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.getenv("USERNAME"), Sys.getenv("USER"))
                            , title = NULL
@@ -44,7 +47,7 @@ createWorkbook <- function(creator = ifelse(.Platform$OS.type == "windows", Sys.
     if(!"character" %in% class(title))
       stop("title must be a string")
   }
-    
+  
   if(!is.null(subject)){
     if(!"character" %in% class(subject))
       stop("subject must be a string")
@@ -92,7 +95,7 @@ saveWorkbook <- function(wb, file, overwrite = FALSE){
   
   if(!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
-
+  
   if(!is.logical(overwrite))
     overwrite = FALSE
   
@@ -1251,7 +1254,7 @@ setColWidths <- function(wb, sheet, cols, widths = 8.43, hidden = rep(FALSE, len
       existing_widths <- existing_widths[!flag]
       existing_hidden <- existing_hidden[!flag]
     }
-
+    
     all_names <- c(existing_cols, cols)
     all_widths <- c(existing_widths, widths)
     all_hidden <- c(existing_hidden, as.character(as.integer(hidden)))
@@ -1944,7 +1947,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
   }else{
     paperSize <- regmatches(xml, regexpr('(?<=paperSize=")[0-9]+', xml, perl = TRUE)) ## get existing
   }
-
+  
   
   ##############################
   ## Keep defaults on orientation, hdpi, vdpi, paperSize
@@ -2181,11 +2184,11 @@ convertToDateTime <- function(x, origin = "1900-01-01", ...){
   x <- x * 86400
   rem <- x %% 86400
   
-  hours <- floor(rem / 3600)
+  hours <- as.integer(floor(rem / 3600))
   minutes_fraction <- rem %% 3600
-  minutes_whole <- floor(minutes_fraction / 60)
+  minutes_whole <- as.integer(floor(minutes_fraction / 60))
   secs <- minutes_fraction %% 60
-
+  
   y <- sprintf("%02d:%02d:%06.3f", hours, minutes_whole, secs)
   notNA <- !is.na(x)
   date_time = rep(NA, length(x))
@@ -3523,16 +3526,20 @@ all.equal.Workbook <- function(target, current, ...){
       failures <- c(failures, sprintf("names of worksheet elements for sheet %s not equal", i))
     } 
     
-    nms <- names(ws_x)
+    nms <- c("sheetPr", "dataValidations", "sheetViews", "cols", "pageMargins", 
+             "extLst", "conditionalFormatting", "oleObjects", 
+             "colBreaks", "dimension", "drawing", "sheetFormatPr", "tableParts", 
+             "mergeCells", "hyperlinks", "headerFooter", "autoFilter", 
+             "rowBreaks", "pageSetup", "freezePane", "legacyDrawingHF", "legacyDrawing")
+    
     for(j in nms){
-      
       flag <- isTRUE(all.equal(gsub(" |\t", "", ws_x[[j]]), gsub(" |\t", "", ws_y[[j]]))) 
       if(!flag){
         message(sprintf("worksheet '%s', element '%s' not equal", i, j))
         failures <- c(failures, sprintf("worksheet '%s', element '%s' not equal", i, j))
       } 
-      
     }
+    
     
   }
   
@@ -3793,7 +3800,7 @@ removeTable <- function(wb, sheet, table){
   
   ## delete table object and all data in it
   sheet <- wb$validateSheet(sheetName = sheet)
-
+  
   if(!table %in% attr(wb$tables, "tableName"))
     stop(sprintf("table '%s' does not exist.", table), call.=FALSE)
   

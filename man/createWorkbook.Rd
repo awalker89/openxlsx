@@ -31,7 +31,10 @@ wb <- createWorkbook()
 saveWorkbook(wb, file = "createWorkbookExample.xlsx", overwrite = TRUE)
 
 ## Set Workbook properties
-wb <- createWorkbook(creator = "Me", title = "title here", subject = "this & that", category = "something")
+wb <- createWorkbook(creator = "Me"
+, title = "title here"
+, subject = "this & that"
+, category = "something")
 
 }
 \seealso{
