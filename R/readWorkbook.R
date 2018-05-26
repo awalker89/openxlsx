@@ -138,7 +138,7 @@ read.xlsx.default <- function(xlsxFile,
   }
   
   ## create temp dir and unzip
-  xmlDir <- file.path(tempdir(), "_excelXMLRead")
+  xmlDir <- file.path(tempdir(),paste0(sample(LETTERS,10),collapse=""),"_excelXMLRead")
   xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
   
   on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
