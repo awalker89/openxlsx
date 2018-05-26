@@ -9,7 +9,7 @@ context("Writing Posixct")
 
 
 
-test_that("Writing Posixct wikth writeData & writeDataTable", {
+test_that("Writing Posixct with writeData & writeDataTable", {
   
   options("openxlsx.datetimeFormat" = "dd/mm/yy hh:mm")
   
