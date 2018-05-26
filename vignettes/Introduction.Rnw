@@ -26,32 +26,6 @@ bottom=20mm,
 \maketitle
 
 
-\section{Installation}
-\noindent
-The openxlsx package requires a zip application to be available to R, such as the one that comes with Rtools.  \\
-
-\noindent
-If the command
-\begin{verbatim}
-shell("zip") 
-\end{verbatim}
-returns "zip is not recognised..." install Rtools from: https://CRAN.R-project.org/bin/windows/Rtools/ 
-and add the R tools bin directory (defaults to c:\textbackslash Rtools\textbackslash bin on windows) to the system path.\\
-
-\noindent
-If the command returns
-\begin{verbatim}
-Warning message: running command '"zip" -r1 ... had status 127
-\end{verbatim}
-it is most likely because R cannot find a zip application.  First check if the Rtools/bin directory is in the 
-system PATH variable.  This can be checked from within R using the command
-\begin{verbatim}
-shell("PATH")
-\end{verbatim}
-The output should contain a path to Rtools/bin somewhere in the string.
-
-
-
 \newpage
 \section{Basic Examples}
 \subsection{write.xlsx}
