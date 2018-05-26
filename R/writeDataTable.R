@@ -182,7 +182,7 @@ writeDataTable <- function(wb, sheet, x,
   
   ##Coordinates for each section
   if(rowNames)
-    x <- cbind(data.frame("row names" = rownames(x)), x)
+    x <- cbind(data.frame("row names" = rownames(x)), as.data.frame(x))
   
   ## If 0 rows append a blank row  
   
