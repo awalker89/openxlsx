@@ -1,7 +1,10 @@
 language: R
 cache: packages
 
+r_github_packages:
+  - jimhester/covr
+  
 warnings_are_errors: true
 
 after_success:
-  - if [[ "${R_CODECOV}" ]]; then R -e 'covr::codecov(type = "all")'; fi
+  - Rscript -e 'library(covr); codecov()'
