@@ -6,6 +6,7 @@
 #' @author Alexander Walker
 #' @param file A path to an existing .xlsx or .xlsm file
 #' @param xlsxFile alias for file
+#' @param isUnzipped Set to TRUE if the xlsx file is already unzipped
 #' @description  loadWorkbook returns a workbook object conserving styles and 
 #' formatting of the original .xlsx file. 
 #' @return Workbook object. 
@@ -25,9 +26,9 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
   
   ## If this is a unzipped workbook, skip the temp dir stuff
   if(isUnzipped){
-    xmlDir = file
-    xmlFiles <- list.files(path = xmlDir, full.names = T, recursive = T, all.files = T)
-  } else {
+    xmlDir <- file
+    xmlFiles <- list.files(path = xmlDir, full.names = TRUE, recursive = TRUE, all.files = TRUE)
+  }else{
     
     if(!is.null(xlsxFile))
       file <- xlsxFile

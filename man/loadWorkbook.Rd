@@ -4,12 +4,14 @@
 \alias{loadWorkbook}
 \title{Load an existing .xlsx file}
 \usage{
-loadWorkbook(file, xlsxFile = NULL)
+loadWorkbook(file, xlsxFile = NULL, isUnzipped = FALSE)
 }
 \arguments{
 \item{file}{A path to an existing .xlsx or .xlsm file}
 
 \item{xlsxFile}{alias for file}
+
+\item{isUnzipped}{Is the xlsx file already unzipped?}
 }
 \value{
 Workbook object.
