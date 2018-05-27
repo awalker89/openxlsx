@@ -1,5 +1,12 @@
 openxlsx
 ========
+
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Build Status](https://travis-ci.org/awalker89/openxlsx.svg?branch=master)](https://travis-ci.org/awalker89/openxlsx)
+[![Coverage Status](https://codecov.io/github/awalker89/openxlsx/coverage.svg?branch=master)](https://codecov.io/github/awalker89/openxlsx?branch=master)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/openxlsx)](http://cran.r-project.org/package=openxlsx)
+[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/openxlsx)](http://cran.r-project.org/web/packages/openxlsx/index.html)
+
 This [R](https://www.R-project.org/) package simplifies the
 creation of `.xlsx` files by providing 
 a high level interface to writing, styling and editing
