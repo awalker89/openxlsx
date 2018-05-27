@@ -2882,9 +2882,16 @@ Workbook$methods(loadStyles = function(stylesXML){
   }
   
   ## fonts will maintain, sz, color, name, family scheme
-  fonts <- getNodes(xml = stylesTxt, tagIn = "<font>")
+  if(grepl("<font/>", stylesTxt, fixed = TRUE)){ ## empty font node
+    fonts <- getNodes(xml = stylesTxt, tagIn = "<fonts")
+    fonts <- strsplit(fonts, split = "<font/>", fixed = TRUE)[[1]]
+    fonts <- unlist(lapply(fonts, function(xml) c(getNodes(xml, tagIn = "<font>"), "")))
+  }else{
+    fonts <- getNodes(xml = stylesTxt, tagIn = "<font>")
+  }
   styles$fonts[[1]] <<- fonts[[1]]
-  fonts <- buildFontList(fonts)       
+  fonts <- buildFontList(fonts)
+    
   
   fills <- getNodes(xml = stylesTxt, tagIn = "<fill>")
   fills <- buildFillList(fills)

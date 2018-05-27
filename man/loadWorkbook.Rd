@@ -11,7 +11,7 @@ loadWorkbook(file, xlsxFile = NULL, isUnzipped = FALSE)
 
 \item{xlsxFile}{alias for file}
 
-\item{isUnzipped}{Is the xlsx file already unzipped?}
+\item{isUnzipped}{Set to TRUE if the xlsx file is already unzipped}
 }
 \value{
 Workbook object.
