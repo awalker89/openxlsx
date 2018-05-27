@@ -1,0 +1,7 @@
+language: R
+cache: packages
+
+warnings_are_errors: true
+
+after_success:
+  - if [[ "${R_CODECOV}" ]]; then R -e 'covr::codecov(type = "all")'; fi
