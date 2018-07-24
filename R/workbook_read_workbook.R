@@ -124,6 +124,7 @@ read.xlsx.Workbook <- function(xlsxFile,
   }
   
   ## read in worksheet and get cells with a value node, skip emptyStrs cells
+  xlsxFile$worksheets[[sheet]]$order_sheetdata()
   sheet_data <- xlsxFile$worksheets[[sheet]]$sheet_data
   
   

@@ -295,7 +295,7 @@ addWorksheet(wb, "Sheet 1")
 df <- data.frame(matrix(12.987654321, ncol = 7, nrow = 5)) ## data.frame to write
 df[ ,6:7] <- df[ ,6:7]*1E6
 
-## Set column 1 class to "comma" to get comma seperated thousands
+## Set column 1 class to "comma" to get comma separated thousands
 class(df$X1) <- "comma"
 
 writeData(wb, 1, df)

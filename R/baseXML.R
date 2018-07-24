@@ -185,25 +185,6 @@ genBasePic <- function(imageNo){
 }
 
 
-genBaseTable <- function(id, ref, colNames){
-  
-  
-  table <- sprintf('<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="%s" name="Table%s" displayName="Table%s" ref="%s" totalsRowShown="0">', id, id, id, ref)
-  table <- c(table, sprintf('<autoFilter ref="%s"/>', ref))
-  
-  tableCols <- NULL
-  for(i in 1:length(colNames))
-    tableCols <- c(tableCols, sprintf('<tableColumn id="%s" name="%s"/>', i, colNames[[i]]))
-  
-  tableCols <- c(sprintf('<tableColumns count="%s">', length(colNames)), tableCols, '</tableColumns>')
-  tableStyle <- '<tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>'
-  
-  
-  table <- paste(c(table, tableCols, tableStyle, '</table>'))
-  writeLines(table)
-  
-  
-}
 
 
 

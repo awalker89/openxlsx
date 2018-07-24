@@ -22,11 +22,11 @@ addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
 
 \item{tabColour}{Colour of the worksheet tab. A valid colour (belonging to colours()) or a valid hex colour beginning with "#"}
 
-\item{zoom}{A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.}
+\item{zoom}{A numeric between 10 and 400. Worksheet zoom level as a percentage.}
 
-\item{header}{document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
+\item{header}{document header. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.}
 
-\item{footer}{document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
+\item{footer}{document footer. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.}
 
 \item{evenHeader}{document header for even pages.}
 

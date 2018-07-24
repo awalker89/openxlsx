@@ -19,7 +19,7 @@
 #' If NULL, all rows are read.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
-#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols paramters are ignored.
+#' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols parameters are ignored.
 #' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
 #' @param fillMergedCells If TRUE, the value in a merged cell is given to all cells within the merge.
 #' @param skipEmptyCols If \code{TRUE}, empty columns are skipped.
@@ -138,7 +138,7 @@ read.xlsx.default <- function(xlsxFile,
   }
   
   ## create temp dir and unzip
-  xmlDir <- file.path(tempdir(), "_excelXMLRead")
+  xmlDir <- file.path(tempdir(),paste0(sample(LETTERS,10),collapse=""),"_excelXMLRead")
   xmlFiles <- unzip(xlsxFile, exdir = xmlDir)
   
   on.exit(unlink(xmlDir, recursive = TRUE), add = TRUE)
@@ -268,7 +268,7 @@ read.xlsx.default <- function(xlsxFile,
   
   if(fillMergedCells & length(cell_info$cellMerge) > 0){
     
-    stop("Not implemented")
+    # stop("Not implemented")
     
     merge_mapping <- mergeCell2mapping(cell_info$cellMerge)
     
@@ -293,22 +293,20 @@ read.xlsx.default <- function(xlsxFile,
     ## String refs (must sort)
     new_string_refs <- merge_mapping$ref[merge_mapping$anchor_cell %in% cell_info$string_refs]
     cell_info$string_refs <- c(cell_info$string_refs, new_string_refs)
-    cell_info$string_refs <- cell_info$string_refs[order(as.integer(gsub("[A-Z]", "", cell_info$string_refs)), nchar(cell_info$string_refs), cell_info$string_refs)]
+    cell_info$string_refs <- cell_info$string_refs[order(as.integer(gsub("[A-Z]", "", cell_info$string_refs, perl = TRUE)), nchar(cell_info$string_refs), cell_info$string_refs)]
     
     ## r
     cell_info$r <- c(cell_info$r, merge_mapping$ref)
     cell_info$v <- c(cell_info$v, cell_info$v[inds])
     
-    ord <- order(as.integer(gsub("[A-Z]", "", cell_info$r)), nchar(cell_info$r), cell_info$r)
+    ord <- order(as.integer(gsub(pattern = "[A-Z]", replacement = "", x = cell_info$r, perl = TRUE)), nchar(cell_info$r), cell_info$r)
     
     cell_info$r <- cell_info$r[ord]
     cell_info$v <- cell_info$v[ord]
+    if(length(cell_info$s) > 0)
+      cell_info$s <- c(cell_info$s, cell_info$s[inds])[ord]
     
-    if(length(cell_info$s) > 0){
-      cell_info$s <- c(cell_info$s, cell_info$s[inds])
-      cell_info$s <- cell_info$s[ord]
-    }
-    
+  
     cell_info$nRows <- calc_number_rows(x =  cell_info$r, skipEmptyRows = skipEmptyRows)
     
   }

@@ -2,14 +2,16 @@
 % Please edit documentation in R/loadWorkbook.R
 \name{loadWorkbook}
 \alias{loadWorkbook}
-\title{Load an exisiting .xlsx file}
+\title{Load an existing .xlsx file}
 \usage{
-loadWorkbook(file, xlsxFile = NULL)
+loadWorkbook(file, xlsxFile = NULL, isUnzipped = FALSE)
 }
 \arguments{
 \item{file}{A path to an existing .xlsx or .xlsm file}
 
 \item{xlsxFile}{alias for file}
+
+\item{isUnzipped}{Set to TRUE if the xlsx file is already unzipped}
 }
 \value{
 Workbook object.

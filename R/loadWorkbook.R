@@ -2,10 +2,11 @@
 
 
 #' @name loadWorkbook 
-#' @title Load an exisiting .xlsx file
+#' @title Load an existing .xlsx file
 #' @author Alexander Walker
 #' @param file A path to an existing .xlsx or .xlsm file
 #' @param xlsxFile alias for file
+#' @param isUnzipped Set to TRUE if the xlsx file is already unzipped
 #' @description  loadWorkbook returns a workbook object conserving styles and 
 #' formatting of the original .xlsx file. 
 #' @return Workbook object. 
@@ -21,24 +22,31 @@
 #' 
 #' ## Save workbook
 #' saveWorkbook(wb, "loadExample.xlsx", overwrite = TRUE)
-loadWorkbook <- function(file, xlsxFile = NULL){
+loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
   
-  if(!is.null(xlsxFile))
-    file <- xlsxFile
-  
-  file <- getFile(file)
-  
-  file <- getFile(file)
-  if(!file.exists(file))
-    stop("File does not exist.")
+  ## If this is a unzipped workbook, skip the temp dir stuff
+  if(isUnzipped){
+    xmlDir <- file
+    xmlFiles <- list.files(path = xmlDir, full.names = TRUE, recursive = TRUE, all.files = TRUE)
+  }else{
+    
+    if(!is.null(xlsxFile))
+      file <- xlsxFile
+    
+    file <- getFile(file)
+    
+    file <- getFile(file)
+    if(!file.exists(file))
+      stop("File does not exist.")
+    
+    ## create temp dir
+    xmlDir <- file.path(tempdir(),  paste0(tempfile(tmpdir = ""), "_openxlsx_loadWorkbook"))
+    
+    ## Unzip files to temp directory
+    xmlFiles <- unzip(file, exdir = xmlDir)
+  }
   
   wb <- createWorkbook()
-  
-  ## create temp dir
-  xmlDir <- file.path(tempdir(),  paste0(tempfile(tmpdir = ""), "_openxlsx_loadWorkbook"))
-  
-  ## Unzip files to temp directory
-  xmlFiles <- unzip(file, exdir = xmlDir)
   
   ## Not used
   # .relsXML           <- xmlFiles[grepl("_rels/.rels$", xmlFiles, perl = TRUE)]
@@ -87,7 +95,9 @@ loadWorkbook <- function(file, xlsxFile = NULL){
   vbaProject         <- xmlFiles[grepl("vbaProject\\.bin$", xmlFiles, perl = TRUE)]
   
   ## remove all EXCEPT media and charts
-  on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment|embeddings|pivot|slicer|vbaProject", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  if(!isUnzipped){
+    on.exit(expr = unlink(xmlFiles[!grepl("charts|media|vmlDrawing|comment|embeddings|pivot|slicer|vbaProject", xmlFiles, ignore.case = TRUE)], recursive = TRUE, force = TRUE), add = TRUE)
+  }
   
   ## core
   if(length(coreXML) == 1){

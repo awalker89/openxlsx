@@ -13,9 +13,9 @@ setHeaderFooter(wb, sheet, header = NULL, footer = NULL,
 
 \item{sheet}{A name or index of a worksheet}
 
-\item{header}{document header. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
+\item{header}{document header. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.}
 
-\item{footer}{document footer. Character vector of length 3 corresponding to positons left, center, right. Use NA to skip a positon.}
+\item{footer}{document footer. Character vector of length 3 corresponding to positions left, center, right. Use NA to skip a position.}
 
 \item{evenHeader}{document header for even pages.}
 

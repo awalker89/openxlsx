@@ -10,7 +10,7 @@ openxlsx simplifies the the process of writing and styling Excel xlsx files from
 and removes the dependency on Java.
 }
 \details{
-The openxlsx package uses global options to simplfy formatting:
+The openxlsx package uses global options to simplify formatting:
 
 \itemize{
    \item{\code{options("openxlsx.borderColour" = "black")}}

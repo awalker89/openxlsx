@@ -6,8 +6,8 @@
 #' worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
 #' @param x A dataframe.
-#' @param startCol A vector specifiying the starting column to write df
-#' @param startRow A vector specifiying the starting row to write df
+#' @param startCol A vector specifying the starting column to write df
+#' @param startRow A vector specifying the starting row to write df
 #' @param xy An alternative to specifying startCol and startRow individually.  
 #' A vector of the form c(startCol, startRow)
 #' @param colNames If \code{TRUE}, column names of x are written.
@@ -17,7 +17,7 @@
 #' @param headerStyle Custom style to apply to column names.
 #' @param withFilter If \code{TRUE}, columns with have filters in the first row.
 #' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
-#' @param sep Only applies to list columns. The seperator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
+#' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
 #' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
 #' existing style is replaced by the new style.
 #' \cr\cr
@@ -182,7 +182,7 @@ writeDataTable <- function(wb, sheet, x,
   
   ##Coordinates for each section
   if(rowNames)
-    x <- cbind(data.frame("row names" = rownames(x)), x)
+    x <- cbind(data.frame("row names" = rownames(x)), as.data.frame(x))
   
   ## If 0 rows append a blank row  
   

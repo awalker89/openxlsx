@@ -12,7 +12,7 @@
 #' @param cols Columns to apply conditional formatting to
 #' @param rows Rows to apply conditional formatting to
 #' @param rule The condition under which to apply the formatting. See examples.
-#' @param style A style to apply to those cells that satisify the rule. Default is createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+#' @param style A style to apply to those cells that satisfy the rule. Default is createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
 #' @param type Either 'expression', 'colorscale', 'databar', 'duplicates' or "contains' (case insensitive).
 #' @param ... See below 
 #' @details See Examples.
@@ -32,7 +32,7 @@
 #' If type == "databar"
 #' \itemize{
 #'   \item{style is a vector of colours with length 2 or 3}
-#'   \item{rule is a numeric vector specifiying the range of the databar colours. Must be equal length to style}
+#'   \item{rule is a numeric vector specifying the range of the databar colours. Must be equal length to style}
 #'   \item{...
 #'   \itemize{
 #'     \item{\bold{showvalue} If FALSE the cell value is hidden. Default TRUE.}
@@ -261,7 +261,7 @@ conditionalFormatting <- function(wb, sheet, cols, rows, rule = NULL, style = NU
     }
     
     
-    ## Additional paramters passed by ...
+    ## Additional parameters passed by ...
     if("showValue" %in% names(params)){
       params$showValue <- as.integer(params$showValue)
       if(is.na(params$showValue))

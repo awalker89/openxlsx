@@ -781,7 +781,7 @@ mergeCell2mapping <- function(x){
   refs <- regmatches(x, regexpr("(?<=ref=\")[A-Z0-9:]+", x, perl = TRUE))
   refs <- strsplit(refs, split = ":")
   rows <- lapply(refs, function(r) {
-    r <- as.integer(gsub("[A-Z]", "", r))
+    r <- as.integer(gsub(pattern = "[A-Z]", replacement = "", r, perl = TRUE))
     seq(from = r[1], to = r[2], by = 1)
   })
   

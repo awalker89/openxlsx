@@ -61,6 +61,22 @@ CharacterVector get_shared_strings(std::string xmlFile, bool isFile){
   std::string tag = ">";
   std::string tagEnd = "<";
   
+  // Check for rPh and remove if found
+  std::string rPh_tag = "<rPh";
+  std::string rPh_tag_end = "rPh>";
+  
+  for(int i = 0; i < n; i++){
+    xml = x[i]; // find opening tag  
+    pos = xml.find(rPh_tag, 0); // find ttag      
+    if(pos != std::string::npos){
+      if(xml[pos+2] != '/'){
+        endPos = xml.find(rPh_tag_end, pos+2);
+        xml.erase(pos, endPos - pos + 4);
+        x[i] = xml;
+      }
+    }
+  }
+  
   
   // Now check for inline formatting
   pos = line.find("<rPr>", 0);

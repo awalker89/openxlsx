@@ -3,3 +3,4 @@
 cran-comments.md
 ^revdep$
 ^.*\.github$
+.travis.yml

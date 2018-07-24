@@ -11,7 +11,7 @@ replaceStyle(wb, index, newStyle)
 
 \item{index}{Index of style object to replace}
 
-\item{newStyle}{A style to replace the exising style as position index}
+\item{newStyle}{A style to replace the existing style as position index}
 }
 \description{
 Replace an existing cell style
