@@ -2019,6 +2019,139 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
 }
 
 
+#' @name protectWorksheet
+#' @title Protect a worksheet from modifications
+#' @description Protect or unprotect a worksheet from modifications by the user in the graphical user interface. Replaces an existing protection.
+#' @author Reinhold Kainhofer
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param protect Whether to protect or unprotect the sheet (default=TRUE)
+#' @param password (optional) password required to unprotect the worksheet (not fully supported)
+#' @param selectLockedCells Whether selecting locked cells is locked
+#' @param selectUnlockedCells Whether selecting unlocked cells is locked
+#' @param formatCells Whether formatting cells is locked
+#' @param formatColumns Whether formatting columns is locked
+#' @param formatRows Whether formatting rows is locked
+#' @param insertColumns Whether inserting columns is locked
+#' @param insertRows Whether inserting rows is locked
+#' @param insertHyperlinks Whether inserting hyperlinks is locked
+#' @param deleteColumns Whether deleting columns is locked
+#' @param deleteRows Whether deleting rows is locked
+#' @param sort Whether sorting is locked
+#' @param autoFilter Whether auto-filter is locked
+#' @param pivotTables Whether pivot tables are locked
+#' @param objects Whether objects are locked
+#' @param scenarios Whether scenarios are locked
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, 1, x = iris[1:30,])
+#' # Formatting cells / columns is allowed , but inserting / deleting columns is protected:
+#' protectWorksheet(wb, "S1", protect = TRUE, formatCells = FALSE, formatColumns = FALSE, insertColumns = TRUE, deleteColumns = TRUE)
+#' 
+#' # Remove the protection
+#' protectWorksheet(wb, "S1", protect = FALSE)
+#' 
+#' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
+protectWorksheet <- function(wb, sheet, protect = TRUE, password = NULL, 
+                             selectLockedCells = NULL, selectUnlockedCells = NULL, 
+                             formatCells = NULL, formatColumns = NULL, formatRows = NULL, 
+                             insertColumns = NULL, insertRows = NULL, insertHyperlinks = NULL,
+                             deleteColumns = NULL, deleteRows = NULL,
+                             sort = NULL, autoFilter = NULL, pivotTables = NULL, 
+                             objects = NULL, scenarios = NULL
+                      ){
+  
+  # Rotate the 15-bit integer by n bits to the 
+  rotate16bit = function(hash, n = 1) {
+    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
+  }
+  hashPassword = function(password) {
+    # password limited to 15 characters
+    chars = head(strsplit(password, "")[[1]], 15)
+    # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
+    # Start from the last character and for each character
+    # - XOR hash with the ASCII character code
+    # - rotate hash (16 bits) one bit to the left
+    # Finally, XOR hash with 0xCE4B and XOR with password length
+    # Output as hex (uppercase)
+    hash = Reduce(function(char, h) {
+      h = bitwXor(h, as.integer(charToRaw(char)))
+      rotate16bit(h, 1)
+    }, chars, 0, right = TRUE)
+    hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
+    format(as.hexmode(hash), upper.case = TRUE)
+  }; hashPassword("Passwort")
+
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  xml <- wb$worksheets[[sheet]]$sheetProtection
+  
+  props = c()
+  
+  if (!missing(password) && !is.null(password)) {
+    props["password"] = hashPassword(password)
+  }
+  
+  if (!missing(selectLockedCells) && !is.null(selectLockedCells)) {
+    props["selectLockedCells"] = toString(as.numeric(selectLockedCells))
+  }
+  if (!missing(selectUnlockedCells) && !is.null(selectUnlockedCells)) {
+    props["selectUnlockedCells"] = toString(as.numeric(selectUnlockedCells))
+  }
+  if (!missing(formatCells) && !is.null(formatCells)) {
+    props["formatCells"] = toString(as.numeric(formatCells))
+  }
+  if (!missing(formatColumns) && !is.null(formatColumns)) {
+    props["formatCells"] = toString(as.numeric(formatCells))
+  }
+  if (!missing(formatRows) && !is.null(formatRows)) {
+    props["formatRows"] = toString(as.numeric(formatRows))
+  }
+  if (!missing(insertColumns) && !is.null(insertColumns)) {
+    props["insertColumns"] = toString(as.numeric(insertColumns))
+  }
+  if (!missing(insertRows) && !is.null(insertRows)) {
+    props["insertRows"] = toString(as.numeric(insertRows))
+  }
+  if (!missing(insertHyperlinks) && !is.null(insertHyperlinks)) {
+    props["insertHyperlinks"] = toString(as.numeric(insertHyperlinks))
+  }
+  if (!missing(deleteColumns) && !is.null(deleteColumns)) {
+    props["deleteColumns"] = toString(as.numeric(deleteColumns))
+  }
+  if (!missing(deleteRows) && !is.null(deleteRows)) {
+    props["deleteRows"] = toString(as.numeric(deleteRows))
+  }
+  if (!missing(sort) && !is.null(sort)) {
+    props["sort"] = toString(as.numeric(sort))
+  }
+  if (!missing(autoFilter) && !is.null(autoFilter)) {
+    props["autoFilter"] = toString(as.numeric(autoFilter))
+  }
+  if (!missing(pivotTables) && !is.null(pivotTables)) {
+    props["pivotTables"] = toString(as.numeric(pivotTables))
+  }
+  if (!missing(objects) && !is.null(objects)) {
+    props["objects"] = toString(as.numeric(objects))
+  }
+  if (!missing(scenarios) && !is.null(scenarios)) {
+    props["scenarios"] = toString(as.numeric(scenarios))
+  }
+  
+  if (protect) {
+    props["sheet"] = "1"
+    wb$worksheets[[sheet]]$sheetProtection = sprintf('<sheetProtection %s>', paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "="))
+  } else {
+    wb$worksheets[[sheet]]$sheetProtection = ""
+  }
+
+}
+
+
 
 
 #' @name showGridLines

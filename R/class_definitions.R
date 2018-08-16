@@ -122,6 +122,7 @@ WorkSheet <- setRefClass("WorkSheet",
                                     "freezePane" = "character",
                                     "hyperlinks" = "ANY",
                                     
+                                    "sheetProtection" = "character",
                                     "pageMargins" = "character",
                                     "pageSetup" = "character",
                                     "headerFooter" = "ANY",
