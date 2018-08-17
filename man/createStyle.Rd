@@ -7,9 +7,10 @@
 createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   numFmt = "GENERAL", border = NULL,
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), bgFill = NULL,
-  fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
-  wrapText = FALSE, textRotation = NULL, indent = NULL)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"),
+  bgFill = NULL, fgFill = NULL, halign = NULL, valign = NULL,
+  textDecoration = NULL, wrapText = FALSE, textRotation = NULL,
+  indent = NULL, locked = NULL, hidden = NULL)
 }
 \arguments{
 \item{fontName}{A name of a font. Note the font name is not validated. If fontName is NULL,
@@ -109,6 +110,10 @@ Vertical alignment of cell contents
 \item{textRotation}{Rotation of text in degrees. 255 for vertical text.}
 
 \item{indent}{Horizontal indentation of cell contents.}
+
+\item{locked}{Whether cell contents are locked (if worksheet protection is turned on)}
+
+\item{hidden}{Whether the formula of the cell contents will be hidden (if worksheet protection is turned on)}
 }
 \value{
 A style object
