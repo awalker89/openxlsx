@@ -2243,6 +2243,10 @@ protectRange <- function(wb, sheet, range, password = NULL, name = NULL) {
   if (!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
   
+  if(!is.character(range)) {
+    stop("The `range` must be a character.")
+  }
+  
   sheet <- wb$validateSheet(sheet)
   xml <- wb$worksheets[[sheet]]$protectedRanges
   
