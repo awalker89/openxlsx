@@ -130,6 +130,10 @@ WorkSheet$methods(get_post_sheet_data = function(){
   if (length(sheetProtection) > 0)
     xml <- paste0(xml, sheetProtection, collapse = "")
   
+  if (length(protectedRanges) > 0) {
+    xml <- paste0(xml, protectedRanges, collapse = "")
+  }
+  
   if(length(autoFilter) > 0)
     xml <- paste0(xml, autoFilter, collapse = "")
   

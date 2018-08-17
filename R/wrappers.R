@@ -2160,7 +2160,103 @@ protectWorkbook <- function(wb, protect = TRUE, password = NULL, lockStructure =
 }
 
 
-
+#' @name protectRange
+#' @title Protect a range from modifications
+#' @description Protect a range from modifications in the gui. Additionally, this allows a range to be unlocked
+#' and edited separately from the worksheet when the worksheet is locked.
+#'
+#' @param wb A workbook object
+#' @param sheet A worksheet where the range is located
+#' @param range A reference to the range to protect (example: `"A1:C3"`)
+#' @param password A password to protect the range with
+#' @param name A name to give to the protected range
+#'
+#' @export
+#' 
+#' @examples
+#' 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3", password = "password", name = "myrange")
+#' protectWorksheet(wb, "sheet")
+#' saveWorkbook(wb, "Workbook_With_Range_Protection.xlsx")
+#'
+protectRange <- function(wb, sheet, range, password = NULL, name = NULL) {
+  
+  # Rotate the 15-bit integer by n bits to the 
+  rotate16bit = function(hash, n = 1) {
+    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
+  }
+  hashPassword = function(password) {
+    # password limited to 15 characters
+    chars = head(strsplit(password, "")[[1]], 15)
+    # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
+    # Start from the last character and for each character
+    # - XOR hash with the ASCII character code
+    # - rotate hash (16 bits) one bit to the left
+    # Finally, XOR hash with 0xCE4B and XOR with password length
+    # Output as hex (uppercase)
+    hash = Reduce(function(char, h) {
+      h = bitwXor(h, as.integer(charToRaw(char)))
+      rotate16bit(h, 1)
+    }, chars, 0, right = TRUE)
+    hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
+    format(as.hexmode(hash), upper.case = TRUE)
+  } 
+  
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  xml <- wb$worksheets[[sheet]]$protectedRanges
+  
+  props = c()
+  
+  if(!missing(password) && !is.null(password)) {
+    props["password"] = hashPassword(password)
+  }
+  
+  props["sqref"] <- range
+  
+  if(!missing(name) && !is.null(name)) {
+    props["name"] = name
+  } else {
+    # Random name
+    props["name"] = paste0(sample(letters, 10, TRUE), collapse = "")
+  }
+  
+  protected_range <- sprintf(
+    '<protectedRange %s/>',
+    paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "=")
+  )
+  
+  # Existing protectedRanges
+  if(length(xml) > 0) {
+    
+    protected_ranges <- unlist(strsplit(xml, "</protectedRanges>"))
+    
+    wb$worksheets[[sheet]]$protectedRanges <- paste(
+      protected_ranges, 
+      protected_range, 
+      "</protectedRanges>", 
+      collapse = "", 
+      sep = ""
+    )
+    
+  # New protectedRanges
+  } else {
+    
+    wb$worksheets[[sheet]]$protectedRanges <- paste(
+      "<protectedRanges>", 
+      protected_range, 
+      "</protectedRanges>", 
+      collapse = "", 
+      sep = ""
+    )
+    
+  }
+  
+}
 
 
 #' @name showGridLines
