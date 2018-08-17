@@ -2026,7 +2026,7 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
 #' @param wb A workbook object
 #' @param sheet A name or index of a worksheet
 #' @param protect Whether to protect or unprotect the sheet (default=TRUE)
-#' @param password (optional) password required to unprotect the worksheet (not fully supported)
+#' @param password (optional) password required to unprotect the worksheet
 #' @param selectLockedCells Whether selecting locked cells is locked
 #' @param selectUnlockedCells Whether selecting unlocked cells is locked
 #' @param formatCells Whether formatting cells is locked
@@ -2063,26 +2063,6 @@ protectWorksheet <- function(wb, sheet, protect = TRUE, password = NULL,
                              objects = NULL, scenarios = NULL
                       ){
   
-  # Rotate the 15-bit integer by n bits to the 
-  rotate16bit = function(hash, n = 1) {
-    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
-  }
-  hashPassword = function(password) {
-    # password limited to 15 characters
-    chars = head(strsplit(password, "")[[1]], 15)
-    # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
-    # Start from the last character and for each character
-    # - XOR hash with the ASCII character code
-    # - rotate hash (16 bits) one bit to the left
-    # Finally, XOR hash with 0xCE4B and XOR with password length
-    # Output as hex (uppercase)
-    hash = Reduce(function(char, h) {
-      h = bitwXor(h, as.integer(charToRaw(char)))
-      rotate16bit(h, 1)
-    }, chars, 0, right = TRUE)
-    hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
-    format(as.hexmode(hash), upper.case = TRUE)
-  }; hashPassword("Passwort")
 
   if (!"Workbook" %in% class(wb))
     stop("First argument must be a Workbook.")
@@ -2144,12 +2124,41 @@ protectWorksheet <- function(wb, sheet, protect = TRUE, password = NULL,
   
   if (protect) {
     props["sheet"] = "1"
-    wb$worksheets[[sheet]]$sheetProtection = sprintf('<sheetProtection %s>', paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "="))
+    wb$worksheets[[sheet]]$sheetProtection = sprintf('<sheetProtection %s/>', paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "="))
   } else {
     wb$worksheets[[sheet]]$sheetProtection = ""
   }
 
 }
+
+
+
+#' @name protectWorkbook
+#' @title Protect a workbook from modifications
+#' @description Protect or unprotect a workbook from modifications by the user in the graphical user interface. Replaces an existing protection.
+#' @author Reinhold Kainhofer
+#' @param wb A workbook object
+#' @param protect Whether to protect or unprotect the sheet (default=TRUE)
+#' @param password (optional) password required to unprotect the workbook
+#' @param lockStructure Whether the workbook structure should be locked
+#' @param lockWindows Whether the window position of the spreadsheet should be locked
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectWorkbook(wb, protect = TRUE, password = "Password", lockStructure = TRUE)
+#' saveWorkbook(wb, "WorkBook_Protection.xlsx")
+#' # Remove the protection
+#' protectWorkbook(wb, protect = FALSE)
+#' saveWorkbook(wb, "WorkBook_Protection_unprotected.xlsx")
+protectWorkbook <- function(wb, protect = TRUE, password = NULL, lockStructure = FALSE, lockWindows = FALSE) {
+
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  invisible(wb$protectWorkbook(protect = protect, password = password, lockStructure = lockStructure, lockWindows = lockWindows))
+}
+
 
 
 

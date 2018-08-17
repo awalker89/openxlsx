@@ -19,7 +19,7 @@ protectWorksheet(wb, sheet, protect = TRUE, password = NULL,
 
 \item{protect}{Whether to protect or unprotect the sheet (default=TRUE)}
 
-\item{password}{(optional) password required to unprotect the worksheet (not fully supported)}
+\item{password}{(optional) password required to unprotect the worksheet}
 
 \item{selectLockedCells}{Whether selecting locked cells is locked}
 
