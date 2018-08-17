@@ -861,3 +861,23 @@ getFile <- function(xlsxFile){
   
 }
 
+# Rotate the 15-bit integer by n bits to the 
+hashPassword <- function(password) {
+  # password limited to 15 characters
+  chars = head(strsplit(password, "")[[1]], 15)
+  # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
+  # Start from the last character and for each character
+  # - XOR hash with the ASCII character code
+  # - rotate hash (16 bits) one bit to the left
+  # Finally, XOR hash with 0xCE4B and XOR with password length
+  # Output as hex (uppercase)
+  rotate16bit <- function(hash, n = 1) {
+    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
+  }
+  hash = Reduce(function(char, h) {
+    h = bitwXor(h, as.integer(charToRaw(char)))
+    rotate16bit(h, 1)
+  }, chars, 0, right = TRUE)
+  hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
+  format(as.hexmode(hash), upper.case = TRUE)
+}

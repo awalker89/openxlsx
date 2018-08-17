@@ -59,6 +59,7 @@ Workbook$methods(initialize = function(creator = "", title = NULL, subject = NUL
   
   workbook <<- genBaseWorkbook()
   workbook.xml.rels <<- genBaseWorkbook.xml.rels()
+  workbookProtection <<- NULL
   
   worksheets <<- list()
   worksheets_rels <<- list()
@@ -516,6 +517,14 @@ Workbook$methods(saveWorkbook = function(){
   workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
   if(length(workbookXML$definedNames) > 0)
     workbookXML$definedNames <- paste0("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
+
+  
+  
+  if (length(workbookProtection) > 0) {
+    # Worksheet protection needs to be right after fileVersion, fileSharing and workbookPr, otherwise Excel will complain
+    workbookXML <- append(workbookXML, list(workbookProtection = workbookProtection), 
+                          after = max(which(names(workbookXML) %in% c("fileVersion", "fileSharing", "workbookPr"))))
+  }
   
   
   write_file(head = '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
@@ -786,6 +795,7 @@ Workbook$methods(updateStyles = function(style){
   # if(!is.null(style$xfId))
   # xfNode$xfId <- style$xfId
   
+  childNodes = ""
   
   ## Alignment
   if(!is.null(style$halign) | !is.null(style$valign) | !is.null(style$wrapText) | !is.null(style$textRotation) | !is.null(style$indent)){
@@ -815,10 +825,25 @@ Workbook$methods(updateStyles = function(style){
     
     alignmentFlag <- TRUE
     xfNode <- append(xfNode, list("applyAlignment" = "1"))
+    
+    childNodes = paste0(childNodes, alignNode)
   }
   
-  if(alignmentFlag){
-    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), ">", alignNode, '</xf>')  
+  if (!is.null(style$hidden) | !is.null(style$locked)) {
+    xfNode <- append(xfNode, list("applyProtection" = "1"))
+    protectionNode <- "<protection"
+    
+    if (!is.null(style$hidden))
+      protectionNode <- paste(protectionNode, sprintf('hidden="%s"', as.numeric(style$hidden)))
+    if (!is.null(style$locked))
+      protectionNode <- paste(protectionNode, sprintf('locked="%s"', as.numeric(style$locked)))
+    
+    protectionNode <- paste0(protectionNode, "/>")
+    childNodes = paste0(childNodes, protectionNode)
+  }
+  
+  if(length(childNodes) > 0){
+    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), ">", childNodes, '</xf>')  
   }else{
     xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
   }
@@ -3060,6 +3085,13 @@ Workbook$methods(loadStyles = function(stylesXML){
       
       
     } ## end if !all(s == "0")
+
+    # Cell protection settings can be "0", so we cannot just skip all zeroes
+    if("locked" %in% names(s))
+      style$locked <- (s[["locked"]] == "1")
+    
+    if("hidden" %in% names(s))
+      style$hidden <- (s[["hidden"]] == "1")
     
     ## we need to skip the first one as this is used as the base style
     if(flag)
@@ -3078,5 +3110,22 @@ Workbook$methods(loadStyles = function(stylesXML){
   
 })
 
+Workbook$methods(protectWorkbook = function(protect = TRUE, lockStructure = FALSE, lockWindows = FALSE, password = NULL) {
+  attr = c()
+  if (!is.null(password)) {
+    attr["workbookPassword"] <- hashPassword(password)
+  }
+  if (!missing(lockStructure) && !is.null(lockStructure)) {
+    attr["lockStructure"] <- toString(as.numeric(lockStructure))
+  }
+  if (!missing(lockWindows) && !is.null(lockWindows)) {
+    attr["lockWindows"] <- toString(as.numeric(lockWindows))
+  }
+  if (protect) {
+    workbookProtection <<- sprintf('<workbookProtection %s/>', paste(names(attr), '="', attr, '"', collapse = " ", sep = ""))
+  } else {
+    workbookProtection <<- ""
+  }
+})
 
 

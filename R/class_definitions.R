@@ -5,6 +5,7 @@
 Workbook <- setRefClass("Workbook", 
                         
                         fields = c("sheet_names" = "character",
+                                   "workbookProtection" = "ANY",
                                    
                                    "charts" = "ANY",
                                    "isChartSheet" = "logical",
@@ -83,6 +84,8 @@ Style <- setRefClass("Style",
                                 "numFmt",
                                 "fill",
                                 "wrapText",
+                                "locked",
+                                "hidden",
                                 "xfId"),
                      methods = list()
 )
@@ -122,6 +125,7 @@ WorkSheet <- setRefClass("WorkSheet",
                                     "freezePane" = "character",
                                     "hyperlinks" = "ANY",
                                     
+                                    "sheetProtection" = "character",
                                     "pageMargins" = "character",
                                     "pageSetup" = "character",
                                     "headerFooter" = "ANY",
