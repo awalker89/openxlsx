@@ -2166,20 +2166,56 @@ protectWorkbook <- function(wb, protect = TRUE, password = NULL, lockStructure =
 #' and edited separately from the worksheet when the worksheet is locked.
 #'
 #' @param wb A workbook object
-#' @param sheet A worksheet where the range is located
-#' @param range A reference to the range to protect (example: `"A1:C3"`)
-#' @param password A password to protect the range with
-#' @param name A name to give to the protected range
+#' @param sheet A worksheet where the range is located.
+#' @param range A reference to the range to protect (example: \code{"A1:C3"}).
+#' @param password An optional password to protect the range with.
+#' @param name An optional name to give to the protected range. If none is given,
+#' a random range name is created.
+#' 
+#' @details 
+#' 
+#' Multiple ranges can be created with multiple calls to 
+#' \code{protectRange()}.
+#' 
+#' While generally not useful, overlapping protected ranges are allowed
+#' and are meaningful. Consider the case of protecting \code{"A1:C3"} with 
+#' the password \code{"p1"}, and protecting \code{"A2:C3"} with the password
+#' \code{"p2"}. The following situations could arise:
+#' 
+#' \itemize{
+#' \item{}{Clicking in \code{"A1"} and entering \code{"p1"} will unlock all of \code{"A1:C3"}.}
+#' \item{}{Clicking in \code{"A2"} and entering \code{"p1"} will unlock all of \code{"A1:C3"}.}
+#' \item{}{Clicking in \code{"A2"} and entering \code{"p2"} will unlock all of \code{"A2:C3"}.
+#' In this case, \code{"A1:C1"} will still be locked, and requires the password \code{"p1"} to unlock.} 
+#' }
 #'
 #' @export
 #' 
 #' @examples
 #' 
+#' # Create a workbook where range A1:C3 is password protected
+#' # and the rest of the workbook is locked down and unaccessable
 #' wb <- createWorkbook()
 #' addWorksheet(wb, "S1")
 #' protectRange(wb, "S1", range = "A1:C3", password = "password", name = "myrange")
-#' protectWorksheet(wb, "sheet")
+#' protectWorksheet(wb, "S1")
 #' saveWorkbook(wb, "Workbook_With_Range_Protection.xlsx")
+#'
+#' # A password is not required, and if no name is supplied, 
+#' # a random name is created 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3")
+#' protectWorksheet(wb, "S1")
+#' saveWorkbook(wb, "Workbook_With_Range_Protection_But_No_Password.xlsx")
+#'
+#' # You can create a protected range without protecting the worksheet,
+#' # but the protection will NOT be enforced until you protect the worksheet
+#' # from within Excel
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3", password = "password")
+#' saveWorkbook(wb, "Workbook_With_Unactivated_Range_Protection.xlsx")
 #'
 protectRange <- function(wb, sheet, range, password = NULL, name = NULL) {
   
