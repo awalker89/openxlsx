@@ -2019,6 +2019,284 @@ pageSetup <- function(wb, sheet, orientation = NULL, scale = 100,
 }
 
 
+#' @name protectWorksheet
+#' @title Protect a worksheet from modifications
+#' @description Protect or unprotect a worksheet from modifications by the user in the graphical user interface. Replaces an existing protection.
+#' @author Reinhold Kainhofer
+#' @param wb A workbook object
+#' @param sheet A name or index of a worksheet
+#' @param protect Whether to protect or unprotect the sheet (default=TRUE)
+#' @param password (optional) password required to unprotect the worksheet
+#' @param selectLockedCells Whether selecting locked cells is locked
+#' @param selectUnlockedCells Whether selecting unlocked cells is locked
+#' @param formatCells Whether formatting cells is locked
+#' @param formatColumns Whether formatting columns is locked
+#' @param formatRows Whether formatting rows is locked
+#' @param insertColumns Whether inserting columns is locked
+#' @param insertRows Whether inserting rows is locked
+#' @param insertHyperlinks Whether inserting hyperlinks is locked
+#' @param deleteColumns Whether deleting columns is locked
+#' @param deleteRows Whether deleting rows is locked
+#' @param sort Whether sorting is locked
+#' @param autoFilter Whether auto-filter is locked
+#' @param pivotTables Whether pivot tables are locked
+#' @param objects Whether objects are locked
+#' @param scenarios Whether scenarios are locked
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' writeDataTable(wb, 1, x = iris[1:30,])
+#' # Formatting cells / columns is allowed , but inserting / deleting columns is protected:
+#' protectWorksheet(wb, "S1", protect = TRUE, formatCells = FALSE, formatColumns = FALSE, insertColumns = TRUE, deleteColumns = TRUE)
+#' 
+#' # Remove the protection
+#' protectWorksheet(wb, "S1", protect = FALSE)
+#' 
+#' saveWorkbook(wb, "pageSetupExample.xlsx", overwrite = TRUE)
+protectWorksheet <- function(wb, sheet, protect = TRUE, password = NULL, 
+                             selectLockedCells = NULL, selectUnlockedCells = NULL, 
+                             formatCells = NULL, formatColumns = NULL, formatRows = NULL, 
+                             insertColumns = NULL, insertRows = NULL, insertHyperlinks = NULL,
+                             deleteColumns = NULL, deleteRows = NULL,
+                             sort = NULL, autoFilter = NULL, pivotTables = NULL, 
+                             objects = NULL, scenarios = NULL
+                      ){
+  
+
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  sheet <- wb$validateSheet(sheet)
+  xml <- wb$worksheets[[sheet]]$sheetProtection
+  
+  props = c()
+  
+  if (!missing(password) && !is.null(password)) {
+    props["password"] = hashPassword(password)
+  }
+  
+  if (!missing(selectLockedCells) && !is.null(selectLockedCells)) {
+    props["selectLockedCells"] = toString(as.numeric(selectLockedCells))
+  }
+  if (!missing(selectUnlockedCells) && !is.null(selectUnlockedCells)) {
+    props["selectUnlockedCells"] = toString(as.numeric(selectUnlockedCells))
+  }
+  if (!missing(formatCells) && !is.null(formatCells)) {
+    props["formatCells"] = toString(as.numeric(formatCells))
+  }
+  if (!missing(formatColumns) && !is.null(formatColumns)) {
+    props["formatCells"] = toString(as.numeric(formatCells))
+  }
+  if (!missing(formatRows) && !is.null(formatRows)) {
+    props["formatRows"] = toString(as.numeric(formatRows))
+  }
+  if (!missing(insertColumns) && !is.null(insertColumns)) {
+    props["insertColumns"] = toString(as.numeric(insertColumns))
+  }
+  if (!missing(insertRows) && !is.null(insertRows)) {
+    props["insertRows"] = toString(as.numeric(insertRows))
+  }
+  if (!missing(insertHyperlinks) && !is.null(insertHyperlinks)) {
+    props["insertHyperlinks"] = toString(as.numeric(insertHyperlinks))
+  }
+  if (!missing(deleteColumns) && !is.null(deleteColumns)) {
+    props["deleteColumns"] = toString(as.numeric(deleteColumns))
+  }
+  if (!missing(deleteRows) && !is.null(deleteRows)) {
+    props["deleteRows"] = toString(as.numeric(deleteRows))
+  }
+  if (!missing(sort) && !is.null(sort)) {
+    props["sort"] = toString(as.numeric(sort))
+  }
+  if (!missing(autoFilter) && !is.null(autoFilter)) {
+    props["autoFilter"] = toString(as.numeric(autoFilter))
+  }
+  if (!missing(pivotTables) && !is.null(pivotTables)) {
+    props["pivotTables"] = toString(as.numeric(pivotTables))
+  }
+  if (!missing(objects) && !is.null(objects)) {
+    props["objects"] = toString(as.numeric(objects))
+  }
+  if (!missing(scenarios) && !is.null(scenarios)) {
+    props["scenarios"] = toString(as.numeric(scenarios))
+  }
+  
+  if (protect) {
+    props["sheet"] = "1"
+    wb$worksheets[[sheet]]$sheetProtection = sprintf('<sheetProtection %s/>', paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "="))
+  } else {
+    wb$worksheets[[sheet]]$sheetProtection = ""
+  }
+
+}
+
+
+
+#' @name protectWorkbook
+#' @title Protect a workbook from modifications
+#' @description Protect or unprotect a workbook from modifications by the user in the graphical user interface. Replaces an existing protection.
+#' @author Reinhold Kainhofer
+#' @param wb A workbook object
+#' @param protect Whether to protect or unprotect the sheet (default=TRUE)
+#' @param password (optional) password required to unprotect the workbook
+#' @param lockStructure Whether the workbook structure should be locked
+#' @param lockWindows Whether the window position of the spreadsheet should be locked
+#' @export
+#' @examples
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectWorkbook(wb, protect = TRUE, password = "Password", lockStructure = TRUE)
+#' saveWorkbook(wb, "WorkBook_Protection.xlsx")
+#' # Remove the protection
+#' protectWorkbook(wb, protect = FALSE)
+#' saveWorkbook(wb, "WorkBook_Protection_unprotected.xlsx")
+protectWorkbook <- function(wb, protect = TRUE, password = NULL, lockStructure = FALSE, lockWindows = FALSE) {
+
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  invisible(wb$protectWorkbook(protect = protect, password = password, lockStructure = lockStructure, lockWindows = lockWindows))
+}
+
+
+#' @name protectRange
+#' @title Protect a range from modifications
+#' @description Protect a range from modifications in the gui. Additionally, this allows a range to be unlocked
+#' and edited separately from the worksheet when the worksheet is locked.
+#'
+#' @param wb A workbook object
+#' @param sheet A worksheet where the range is located.
+#' @param range A reference to the range to protect (example: \code{"A1:C3"}).
+#' @param password An optional password to protect the range with.
+#' @param name An optional name to give to the protected range. If none is given,
+#' a random range name is created.
+#' 
+#' @details 
+#' 
+#' Multiple ranges can be created with multiple calls to 
+#' \code{protectRange()}.
+#' 
+#' While generally not useful, overlapping protected ranges are allowed
+#' and are meaningful. Consider the case of protecting \code{"A1:C3"} with 
+#' the password \code{"p1"}, and protecting \code{"A2:C3"} with the password
+#' \code{"p2"}. The following situations could arise:
+#' 
+#' \itemize{
+#' \item{}{Clicking in \code{"A1"} and entering \code{"p1"} will unlock all of \code{"A1:C3"}.}
+#' \item{}{Clicking in \code{"A2"} and entering \code{"p1"} will unlock all of \code{"A1:C3"}.}
+#' \item{}{Clicking in \code{"A2"} and entering \code{"p2"} will unlock all of \code{"A2:C3"}.
+#' In this case, \code{"A1:C1"} will still be locked, and requires the password \code{"p1"} to unlock.} 
+#' }
+#'
+#' @export
+#' 
+#' @examples
+#' 
+#' # Create a workbook where range A1:C3 is password protected
+#' # and the rest of the workbook is locked down and unaccessable
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3", password = "password", name = "myrange")
+#' protectWorksheet(wb, "S1")
+#' saveWorkbook(wb, "Workbook_With_Range_Protection.xlsx")
+#'
+#' # A password is not required, and if no name is supplied, 
+#' # a random name is created 
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3")
+#' protectWorksheet(wb, "S1")
+#' saveWorkbook(wb, "Workbook_With_Range_Protection_But_No_Password.xlsx")
+#'
+#' # You can create a protected range without protecting the worksheet,
+#' # but the protection will NOT be enforced until you protect the worksheet
+#' # from within Excel
+#' wb <- createWorkbook()
+#' addWorksheet(wb, "S1")
+#' protectRange(wb, "S1", range = "A1:C3", password = "password")
+#' saveWorkbook(wb, "Workbook_With_Unactivated_Range_Protection.xlsx")
+#'
+protectRange <- function(wb, sheet, range, password = NULL, name = NULL) {
+  
+  # Rotate the 15-bit integer by n bits to the 
+  rotate16bit = function(hash, n = 1) {
+    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
+  }
+  hashPassword = function(password) {
+    # password limited to 15 characters
+    chars = head(strsplit(password, "")[[1]], 15)
+    # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
+    # Start from the last character and for each character
+    # - XOR hash with the ASCII character code
+    # - rotate hash (16 bits) one bit to the left
+    # Finally, XOR hash with 0xCE4B and XOR with password length
+    # Output as hex (uppercase)
+    hash = Reduce(function(char, h) {
+      h = bitwXor(h, as.integer(charToRaw(char)))
+      rotate16bit(h, 1)
+    }, chars, 0, right = TRUE)
+    hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
+    format(as.hexmode(hash), upper.case = TRUE)
+  } 
+  
+  if (!"Workbook" %in% class(wb))
+    stop("First argument must be a Workbook.")
+  
+  if(!is.character(range)) {
+    stop("The `range` must be a character.")
+  }
+  
+  sheet <- wb$validateSheet(sheet)
+  xml <- wb$worksheets[[sheet]]$protectedRanges
+  
+  props = c()
+  
+  if(!missing(password) && !is.null(password)) {
+    props["password"] = hashPassword(password)
+  }
+  
+  props["sqref"] <- range
+  
+  if(!missing(name) && !is.null(name)) {
+    props["name"] = name
+  } else {
+    # Random name
+    props["name"] = paste0(sample(letters, 10, TRUE), collapse = "")
+  }
+  
+  protected_range <- sprintf(
+    '<protectedRange %s/>',
+    paste(names(props), paste0('"', props, '"'), collapse = " ", sep = "=")
+  )
+  
+  # Existing protectedRanges
+  if(length(xml) > 0) {
+    
+    protected_ranges <- unlist(strsplit(xml, "</protectedRanges>"))
+    
+    wb$worksheets[[sheet]]$protectedRanges <- paste(
+      protected_ranges, 
+      protected_range, 
+      "</protectedRanges>", 
+      collapse = "", 
+      sep = ""
+    )
+    
+  # New protectedRanges
+  } else {
+    
+    wb$worksheets[[sheet]]$protectedRanges <- paste(
+      "<protectedRanges>", 
+      protected_range, 
+      "</protectedRanges>", 
+      collapse = "", 
+      sep = ""
+    )
+    
+  }
+  
+}
 
 
 #' @name showGridLines

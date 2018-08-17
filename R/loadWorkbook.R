@@ -199,8 +199,12 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     
     
     workbookPr <- getChildlessNode(xml = workbook, tag = "<workbookPr ")
-    if(length(calcPr) > 0)
+    if(length(workbookPr) > 0)
       wb$workbook$workbookPr <- workbookPr
+    
+    workbookProtection <- getChildlessNode(xml = workbook, tag = "<workbookProtection ")
+    if(length(workbookProtection) > 0)
+      wb$workbook$workbookProtection <- workbookProtection
     
     
     ## defined Names

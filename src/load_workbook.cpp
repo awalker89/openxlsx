@@ -163,6 +163,15 @@ SEXP loadworksheets(Reference wb, List styleObjects, std::vector<std::string> xm
       
       std::string xml_post = xml.substr(pos_post);
       
+      node_xml = getChildlessNode(xml_post, "<sheetProtection ");
+      if(node_xml.size() > 0) {
+        this_worksheet.field("sheetProtection") = node_xml;
+      }
+      
+      node_xml = getNodes(xml_pre, "<protectedRanges>");
+      if(node_xml.size() > 0)
+        this_worksheet.field("protectedRanges") = node_xml;
+      
       
       node_xml = getChildlessNode(xml_post, "<autoFilter ");
       if(node_xml.size() > 0)

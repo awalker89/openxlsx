@@ -516,6 +516,14 @@ Workbook$methods(saveWorkbook = function(){
   workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
   if(length(workbookXML$definedNames) > 0)
     workbookXML$definedNames <- paste0("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
+
+  
+  
+  if (length(workbookProtection) > 0) {
+    # Worksheet protection needs to be right after fileVersion, fileSharing and workbookPr, otherwise Excel will complain
+    workbookXML <- append(workbookXML, list(workbookProtection = workbookProtection), 
+                          after = max(which(names(workbookXML) %in% c("fileVersion", "fileSharing", "workbookPr"))))
+  }
   
   
   write_file(head = '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
@@ -3078,5 +3086,22 @@ Workbook$methods(loadStyles = function(stylesXML){
   
 })
 
+Workbook$methods(protectWorkbook = function(protect = TRUE, lockStructure = FALSE, lockWindows = FALSE, password = NULL) {
+  attr = c()
+  if (!is.null(password)) {
+    attr["workbookPassword"] <- hashPassword(password)
+  }
+  if (!missing(lockStructure) && !is.null(lockStructure)) {
+    attr["lockStructure"] <- toString(as.numeric(lockStructure))
+  }
+  if (!missing(lockWindows) && !is.null(lockWindows)) {
+    attr["lockWindows"] <- toString(as.numeric(lockWindows))
+  }
+  if (protect) {
+    workbookProtection <<- sprintf('<workbookProtection %s/>', paste(names(attr), paste0('"', attr, '"'), collapse = " ", sep = "="))
+  } else {
+    workbookProtection <<- ""
+  }
+})
 
 
