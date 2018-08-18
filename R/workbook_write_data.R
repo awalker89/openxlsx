@@ -130,8 +130,10 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   
   
   
-  
-  if(keepNA){
+  if (is.character(keepNA)) {
+    t[is.na(v)] <- 4L
+    v[is.na(v)] <- keepNA
+  } else if (keepNA) {
     t[is.na(v)] <- 4L
     v[is.na(v)] <- "#N/A"
   }else{
