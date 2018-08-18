@@ -61,7 +61,7 @@ data.  If "rows", a surrounding border is drawn a border around each row. If "co
 between each column.  If "\code{all}" all cell borders are drawn.}
   \item{\bold{borderColour}}{ Colour of cell border}
   \item{\bold{borderStyle}}{ Border line style.}
-  \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE.}
+  \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE. If a string is passed, that string is used instead of #N/A.}
 }
 
 \bold{freezePane Parameters}

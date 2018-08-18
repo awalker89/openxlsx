@@ -38,7 +38,7 @@
 #'    \item{\bold{slantDashDot}}{ slanted dash-dot border}
 #'   }
 #' @param withFilter If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet. 
-#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. If a string is passed, that string is used instead of "#N/A".
 #' @param name If not NULL, a named region is defined.
 #' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
 #' @seealso \code{\link{writeDataTable}}

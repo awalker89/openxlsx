@@ -47,7 +47,7 @@
 #' between each column.  If "\code{all}" all cell borders are drawn.}
 #'   \item{\bold{borderColour}}{ Colour of cell border}
 #'   \item{\bold{borderStyle}}{ Border line style.}
-#'   \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE.}
+#'   \item{\bold{keepNA}} {If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. Defaults to FALSE. If a string is passed, that string is used instead of #N/A.}
 #' }
 #' 
 #' \bold{freezePane Parameters}
@@ -319,8 +319,8 @@ write.xlsx <- function(x, file, asTable = FALSE, ...){
   
   keepNA <- FALSE
   if("keepNA" %in% names(params)){
-    if(!"logical" %in% class(keepNA)){
-      stop("keepNA must be a logical.")
+    if(!"logical" %in% class(keepNA) && !"character" %in% class(keepNA)){
+      stop("keepNA must be a logical or a string.")
     }else{
       keepNA <- params$keepNA
     }

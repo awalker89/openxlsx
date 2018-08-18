@@ -16,7 +16,7 @@
 #' @param tableName name of table in workbook. The table name must be unique.
 #' @param headerStyle Custom style to apply to column names.
 #' @param withFilter If \code{TRUE}, columns with have filters in the first row.
-#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
+#' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty. If a string is passed, that string is used instead of "#N/A".
 #' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
 #' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
 #' existing style is replaced by the new style.
