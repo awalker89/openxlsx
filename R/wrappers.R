@@ -357,13 +357,13 @@ addWorksheet <- function(wb, sheetName,
     stop("First argument must be a Workbook.")
   
   if(tolower(sheetName) %in% tolower(wb$sheet_names))
-    stop("A worksheet by that name already exists! Sheet names must be unique case-insensitive.")
+    stop(paste0("A worksheet by the name '", sheetName, "' already exists! Sheet names must be unique case-insensitive."))
   
   if(!is.logical(gridLines) | length(gridLines) > 1)
     stop("gridLines must be a logical of length 1.")
   
   if(nchar(sheetName) > 31)
-    stop("sheetName too long! Max length is 31 characters.")
+    stop(paste0("sheetName '", sheetName, "' too long! Max length is 31 characters."))
   
   if(!is.null(tabColour))
     tabColour <- validateColour(tabColour, "Invalid tabColour in addWorksheet.")
