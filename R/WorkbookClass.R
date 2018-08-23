@@ -1271,7 +1271,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         
         ## Check if any tables were deleted - remove these from rels
         if(length(tables) > 0){
-          table_inds <- which(grepl("tables/table[0-9].xml", ws_rels))
+          table_inds <- which(grepl("tables/table[0-9]+.xml", ws_rels))
           
           if(length(table_inds) > 0){
             
@@ -1915,7 +1915,7 @@ Workbook$methods(preSaveCleanUp = function(){
   
   ## Reordering of workbook.xml.rels
   ## don't want to re-assign rIds for pivot tables or slicer caches
-  pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9].xml", workbook.xml.rels)]
+  pivotNode <- workbook.xml.rels[grepl("pivotCache/pivotCacheDefinition[0-9]+.xml", workbook.xml.rels)]
   slicerNode <- workbook.xml.rels[which(grepl("slicerCache[0-9]+.xml", workbook.xml.rels))]
   
   ## Reorder children of workbook.xml.rels

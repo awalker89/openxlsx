@@ -273,7 +273,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     
     
     # ## Check what caches are used
-    cache_keep <- unlist(regmatches(wb$pivotTables.xml.rels, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9](?=\\.xml)",
+    cache_keep <- unlist(regmatches(wb$pivotTables.xml.rels, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9]+(?=\\.xml)",
                                                                       wb$pivotTables.xml.rels, perl = TRUE, ignore.case = TRUE)))
     
     ## pivot cache records
@@ -322,7 +322,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     
     ## workbook rels
     wb$workbook.xml.rels <- c(wb$workbook.xml.rels,    
-                              sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition%s.xml"/>', rIds, 1:length(pivotDefXML))
+                              paste0('<Relationship Id="rId',rIds,'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition" Target="pivotCache/pivotCacheDefinition',1:length(pivotDefXML),'.xml"/>')
     )
     
     
