@@ -273,7 +273,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     
     
     # ## Check what caches are used
-    cache_keep <- unlist(regmatches(wb$pivotTables.xml.rels, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9](?=\\.xml)",
+    cache_keep <- unlist(regmatches(wb$pivotTables.xml.rels, gregexpr("(?<=pivotCache/pivotCacheDefinition)[0-9]+(?=\\.xml)",
                                                                       wb$pivotTables.xml.rels, perl = TRUE, ignore.case = TRUE)))
     
     ## pivot cache records
