@@ -113,6 +113,10 @@ buildCellList <- function(r, t, v) {
     .Call(`_openxlsx_buildCellList`, r, t, v)
 }
 
+write_worksheet_xml_2 <- function(prior, post, sheet_data, row_heights, R_fileName) {
+    .Call(`_openxlsx_write_worksheet_xml_2`, prior, post, sheet_data, row_heights, R_fileName)
+}
+
 write_worksheet_xml <- function(prior, post, sheet_data, R_fileName) {
     .Call(`_openxlsx_write_worksheet_xml`, prior, post, sheet_data, R_fileName)
 }
@@ -131,9 +135,5 @@ matrixRowInds <- function(indices) {
 
 build_table_xml <- function(table, tableStyleXML, ref, colNames, showColNames, withFilter) {
     .Call(`_openxlsx_build_table_xml`, table, tableStyleXML, ref, colNames, showColNames, withFilter)
-}
-
-write_worksheet_xml_2 <- function(prior, post, sheet_data, row_heights, R_fileName) {
-    .Call(`_openxlsx_write_worksheet_xml_2`, prior, post, sheet_data, row_heights, R_fileName)
 }
 
