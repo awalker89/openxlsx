@@ -144,8 +144,14 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     
     workbook <- readLines(workbookXML, warn=FALSE, encoding="UTF-8")
     workbook <-  removeHeadTag(workbook)
+    sheets <- unlist(regmatches(workbook, gregexpr("(?<=<sheets>).*(?=</sheets>)", workbook, perl = TRUE)))
+    sheets <- unlist(regmatches(sheets, gregexpr("<sheet[^>]*>", sheets, perl=TRUE)))
     
-    sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
+    ## Some veryHidden sheets do not have a sheet content and their rId is empty.
+    ## Such sheets need to be filtered out because otherwise their sheet names
+    ## occur in the list of all sheet names, leading to a wrong association
+    ## of sheet names with sheet indeces.
+    sheets <- grep('r:id="[[:blank:]]*"', sheets, invert = TRUE, value = TRUE)
     
     ## sheetId is meaningless
     ## sheet rId links to the workbook.xml.resl which links worksheets/sheet(i).xml file
@@ -154,6 +160,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
     sheetrId <- unlist(getRId(sheets))
     sheetId <- unlist(regmatches(sheets, gregexpr('(?<=sheetId=")[0-9]+', sheets, perl = TRUE)))
     sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
+    sheetNames <- replaceXMLEntities(sheetNames)
     
     is_chart_sheet <- sheetrId %in% chartSheetRIds
     is_visible <- !grepl("hidden",  unlist(strsplit(sheets, split = "<sheet "))[-1])
@@ -765,7 +772,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
       hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
       
       commentXMLrelationship <- lapply(xml, function(x) x[grepl("comments[0-9]+\\.xml", x)])
-      hasComment <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
+      hasComment <- sapply(commentXMLrelationship, length) > 0 ## which sheets have a comment
       
       for(i in 1:length(xml)){
         
