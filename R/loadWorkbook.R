@@ -772,7 +772,7 @@ loadWorkbook <- function(file, xlsxFile = NULL, isUnzipped = FALSE){
       hasDrawing <- sapply(drawXMLrelationship, length) > 0 ## which sheets have a drawing
       
       commentXMLrelationship <- lapply(xml, function(x) x[grepl("comments[0-9]+\\.xml", x)])
-      hasComment <- sapply(commentXMLrelationship, length) > 0 ## which sheets have a drawing
+      hasComment <- sapply(commentXMLrelationship, length) > 0 ## which sheets have a comment
       
       for(i in 1:length(xml)){
         
