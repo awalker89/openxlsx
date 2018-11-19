@@ -3061,7 +3061,15 @@ getSheetNames <- function(file){
   workbook <- xmlFiles[grepl("workbook.xml$", xmlFiles, perl = TRUE)]
   workbook <- readLines(workbook, warn=FALSE, encoding="UTF-8")
   workbook <-  removeHeadTag(workbook)
-  sheets <- unlist(regmatches(workbook, gregexpr("<sheet .*/sheets>", workbook, perl = TRUE)))
+  sheets <- unlist(regmatches(workbook, gregexpr("(?<=<sheets>).*(?=</sheets>)", workbook, perl = TRUE)))
+  sheets <- unlist(regmatches(sheets, gregexpr("<sheet[^>]*>", sheets, perl=TRUE)))
+
+  ## Some veryHidden sheets do not have a sheet content and their rId is empty.
+  ## Such sheets need to be filtered out because otherwise their sheet names
+  ## occur in the list of all sheet names, leading to a wrong association
+  ## of sheet names with sheet indeces.
+  sheets <- grep('r:id="[[:blank:]]*"', sheets, invert = TRUE, value = TRUE)
+  
   sheetNames <- unlist(regmatches(sheets, gregexpr('(?<=name=")[^"]+', sheets, perl = TRUE)))
   sheetNames <- replaceXMLEntities(sheetNames)
   
