@@ -5,8 +5,8 @@
 \title{Create a new Workbook object}
 \usage{
 createWorkbook(creator = ifelse(.Platform$OS.type == "windows",
-  Sys.getenv("USERNAME"), Sys.getenv("USER")), title = NULL, subject = NULL,
-  category = NULL)
+  Sys.getenv("USERNAME"), Sys.getenv("USER")), title = NULL,
+  subject = NULL, category = NULL)
 }
 \arguments{
 \item{creator}{Creator of the workbook (your name). Defaults to login username}
