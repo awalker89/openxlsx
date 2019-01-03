@@ -336,7 +336,7 @@ replaceIllegalCharacters <- function(v){
   
   flg <- vEnc != "UTF-8"
   if(any(flg))
-    v[flg] <- iconv(v[flg], from = "", to = "UTF-8")
+    v[flg] <- stri_conv(v[flg], from = "", to = "UTF-8")
   
   v <- stri_replace_all_fixed(v, illegalchars, illegalcharsreplace, vectorize_all = FALSE)
 
