@@ -327,7 +327,8 @@ writeCommentXML <- function(comment_list, file_name){
 }
 
 
-
+illegalchars <- c('&', '"', "'", '<', '>', "\a", "\b", "\v", "\f")
+illegalcharsreplace <- c("&amp;", "&quot;", "&apos;", "&lt;", "&gt;", "", "", "", "")
 replaceIllegalCharacters <- function(v){
   
   vEnc <- Encoding(v)
@@ -337,17 +338,7 @@ replaceIllegalCharacters <- function(v){
   if(any(flg))
     v[flg] <- iconv(v[flg], from = "", to = "UTF-8")
   
-  v <- gsub('&', "&amp;", v, fixed = TRUE)
-  v <- gsub('"', "&quot;", v, fixed = TRUE)
-  v <- gsub("'", "&apos;", v, fixed = TRUE)
-  v <- gsub('<', "&lt;", v, fixed = TRUE)
-  v <- gsub('>', "&gt;", v, fixed = TRUE)
-  
-  ## Escape sequences
-  v <- gsub("\a", "", v, fixed = TRUE)
-  v <- gsub("\b", "", v, fixed = TRUE)
-  v <- gsub("\v", "", v, fixed = TRUE)
-  v <- gsub("\f", "", v, fixed = TRUE)
+  v <- stri_replace_all_fixed(v, illegalchars, illegalcharsreplace, vectorize_all = FALSE)
 
   return(v)
 }
