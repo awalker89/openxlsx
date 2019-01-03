@@ -40,7 +40,7 @@
 #' @param withFilter If \code{TRUE}, add filters to the column name row. NOTE can only have one filter per worksheet. 
 #' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @param name If not NULL, a named region is defined.
-#' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
+#' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, stri_join, collapse = sep).
 #' @seealso \code{\link{writeDataTable}}
 #' @export writeData
 #' @details Formulae written using writeFormula to a Workbook object will not get picked up by read.xlsx().
@@ -112,7 +112,7 @@
 #' ## - vectors/columns with class 'hyperlink' are written as hyperlinks'
 #' 
 #' v <- rep("https://CRAN.R-project.org/", 4)
-#' names(v) <- paste("Hyperlink", 1:4) # Optional: names will be used as display text
+#' names(v) <- stri_join("Hyperlink", 1:4) # Optional: names will be used as display text
 #' class(v) <- 'hyperlink'
 #' writeData(wb, "Cars", x = v, xy = c("B", 32))
 #'
@@ -122,7 +122,7 @@
 #' ## - vectors/columns with class 'formula' are written as formulas'
 #' 
 #' df <- data.frame(x=1:3, y = 1:3,
-#'                  z = paste(paste0("A", 1:3+1L), paste0("B", 1:3+1L), sep = " + "),
+#'                  z = stri_join(stri_join("A", 1:3+1L), stri_join("B", 1:3+1L), sep = " + "),
 #'                  stringsAsFactors = FALSE)
 #' 
 #' class(df$z) <- c(class(df$z), "formula")
@@ -267,12 +267,12 @@ writeData <- function(wb,
   if(withFilter){
     
     coords <- data.frame("x" = c(startRow, startRow + nRow + colNames - 1L), "y" = c(startCol, startCol + nCol - 1L))
-    ref <- paste(getCellRefs(coords), collapse = ":")
+    ref <- stri_join(getCellRefs(coords), collapse = ":")
     
     wb$worksheets[[sheetX]]$autoFilter <- sprintf('<autoFilter ref="%s"/>', ref)
 
     l <- convert_to_excel_ref(cols = unlist(coords[,2]), LETTERS = LETTERS)
-    dfn <- sprintf("'%s'!%s", names(wb)[sheetX],  paste0("$", l, "$", coords[,1], collapse=":"))
+    dfn <- sprintf("'%s'!%s", names(wb)[sheetX],  stri_join("$", l, "$", coords[,1], collapse=":"))
     
     dn <- sprintf('<definedName name="_xlnm._FilterDatabase" localSheetId="%s" hidden="1">%s</definedName>', sheetX - 1L, dfn)
     
@@ -314,8 +314,8 @@ writeData <- function(wb,
   ## named region
   if(!is.null(name)){
     
-    ref1 <- paste0("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
-    ref2 <- paste0("$", convert_to_excel_ref(cols = startCol + nCol - 1L, LETTERS = LETTERS), "$", startRow + nRow - 1L + colNames)
+    ref1 <- stri_join("$", convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), "$", startRow)
+    ref2 <- stri_join("$", convert_to_excel_ref(cols = startCol + nCol - 1L, LETTERS = LETTERS), "$", startRow + nRow - 1L + colNames)
     wb$createNamedRegion(ref1 = ref1, ref2 = ref2, name = name, sheet = wb$sheet_names[wb$validateSheet(sheet)])
     
   }
@@ -421,7 +421,7 @@ writeData <- function(wb,
 #' 
 #' df <- data.frame(x=1:3,
 #'                  y = 1:3,
-#'                  z = paste(paste0("A", 1:3+1L), paste0("B", 1:3+1L), sep = " + "),
+#'                  z = stri_join(stri_join("A", 1:3+1L), stri_join("B", 1:3+1L), sep = " + "),
 #'                  z2 = sprintf("ADDRESS(1,%s)", 1:3),
 #'                  stringsAsFactors = FALSE)
 #' 
