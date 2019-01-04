@@ -34,7 +34,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     dInds <- which(sapply(colClasses, function(x) "date" %in% x))
     
     origin <- 25569L
-    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+    if(grepl('date1904="1"|date1904="true"', stri_join(unlist(workbook), collapse = ""), ignore.case = TRUE))
       origin <- 24107L
     
     for(i in dInds)
@@ -83,7 +83,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   ##
   if("list" %in% allColClasses){
     for(i in which(sapply(colClasses, function(x) "list" %in% x)))
-      df[[i]] <- sapply(lapply(df[[i]], unlist), paste, collapse = list_sep)
+      df[[i]] <- sapply(lapply(df[[i]], unlist), stri_join, collapse = list_sep, sep= " ")
   }
   
   if("formula" %in% allColClasses){
@@ -162,7 +162,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
     
     ## alter the elements of t where we have a formula to be "str"
     formula_cols <- which(sapply(colClasses, function(x) "openxlsx_formula" %in% x, USE.NAMES = FALSE), useNames = FALSE)
-    formula_strs <- paste0("<f>", unlist(df[formula_cols], use.names = FALSE), "</f>")
+    formula_strs <- stri_join("<f>", unlist(df[formula_cols], use.names = FALSE), "</f>")
     formula_inds <- unlist(lapply(formula_cols, function(i) i + (1:(nRows - colNames) - 1)*nCols + (colNames * nCols)), use.names = FALSE)
     f_in[formula_inds] <- formula_strs
     any_functions <- TRUE
@@ -222,7 +222,7 @@ Workbook$methods(writeData = function(df, sheet, startRow, startCol, colNames, c
   if(length(newStrs) > 0){
     
     newStrs <- replaceIllegalCharacters(newStrs)
-    newStrs <- paste0("<si><t xml:space=\"preserve\">", newStrs, "</t></si>")
+    newStrs <- stri_join("<si><t xml:space=\"preserve\">", newStrs, "</t></si>")
     
     uNewStr <- unique(newStrs)
     

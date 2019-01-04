@@ -1,6 +1,6 @@
 
 #' @include class_definitions.R
-
+#' @import stringi
 Workbook$methods(initialize = function(creator = "", title = NULL, subject = NULL, category = NULL){
   
   charts <<- list()
@@ -272,7 +272,7 @@ Workbook$methods(saveWorkbook = function(){
     close(con)  
   }else{
     lapply(1:nThemes, function(i){
-      con <- file(file.path(xlthemeDir, paste0("theme", i, ".xml")), open = "wb")
+      con <- file(file.path(xlthemeDir, stri_join("theme", i, ".xml"), open = "wb"))
       writeBin(charToRaw(pxml(theme[[i]])), con)
       close(con)        
     })
@@ -477,7 +477,7 @@ Workbook$methods(saveWorkbook = function(){
   ct <- Content_Types
   if(length(sharedStrings) > 0){
     write_file(head = sprintf('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="%s" uniqueCount="%s">',   length(sharedStrings),   attr(sharedStrings, "uniqueCount")),
-               body = paste(sharedStrings, collapse = ""),
+               body = stri_join(sharedStrings, sep = " ", collapse = ""),
                tail = "</sst>",
                fl = file.path(xlDir,"sharedStrings.xml"))
   }else{
@@ -497,14 +497,14 @@ Workbook$methods(saveWorkbook = function(){
   
   
   styleXML <- styles
-  styleXML$numFmts <- paste0(sprintf('<numFmts count="%s">', length(styles$numFmts)), pxml(styles$numFmts), '</numFmts>')
-  styleXML$fonts <- paste0(sprintf('<fonts count="%s">', length(styles$fonts)), pxml(styles$fonts), '</fonts>')
-  styleXML$fills <- paste0(sprintf('<fills count="%s">', length(styles$fills)), pxml(styles$fills), '</fills>')
-  styleXML$borders <- paste0(sprintf('<borders count="%s">', length(styles$borders)), pxml(styles$borders), '</borders>')
+  styleXML$numFmts <- stri_join(sprintf('<numFmts count="%s">', length(styles$numFmts)), pxml(styles$numFmts), '</numFmts>')
+  styleXML$fonts <- stri_join(sprintf('<fonts count="%s">', length(styles$fonts)), pxml(styles$fonts), '</fonts>')
+  styleXML$fills <- stri_join(sprintf('<fills count="%s">', length(styles$fills)), pxml(styles$fills), '</fills>')
+  styleXML$borders <- stri_join(sprintf('<borders count="%s">', length(styles$borders)), pxml(styles$borders), '</borders>')
   styleXML$cellStyleXfs <- c(sprintf('<cellStyleXfs count="%s">', length(styles$cellStyleXfs)), pxml(styles$cellStyleXfs), '</cellStyleXfs>')
-  styleXML$cellXfs <- paste0(sprintf('<cellXfs count="%s">', length(styles$cellXfs)), pxml(styles$cellXfs), '</cellXfs>')
-  styleXML$cellStyles <- paste0(sprintf('<cellStyles count="%s">', length(styles$cellStyles)), pxml(styles$cellStyles), '</cellStyles>')
-  styleXML$dxfs <- ifelse(length(styles$dxfs) == 0, '<dxfs count="0"/>', paste0(sprintf('<dxfs count="%s">', length(styles$dxfs)), paste(unlist(styles$dxfs), collapse = ""), '</dxfs>'))
+  styleXML$cellXfs <- stri_join(sprintf('<cellXfs count="%s">', length(styles$cellXfs)), pxml(styles$cellXfs), '</cellXfs>')
+  styleXML$cellStyles <- stri_join(sprintf('<cellStyles count="%s">', length(styles$cellStyles)), pxml(styles$cellStyles), '</cellStyles>')
+  styleXML$dxfs <- ifelse(length(styles$dxfs) == 0, '<dxfs count="0"/>', stri_join(sprintf('<dxfs count="%s">', length(styles$dxfs)), stri_join(unlist(styles$dxfs), sep = " ", collapse = ""), '</dxfs>'))
   
   ## write styles.xml
   write_file(head = '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">',
@@ -514,9 +514,9 @@ Workbook$methods(saveWorkbook = function(){
   
   ## write workbook.xml
   workbookXML <- workbook
-  workbookXML$sheets <- paste0("<sheets>", pxml(workbookXML$sheets), "</sheets>")
+  workbookXML$sheets <- stri_join("<sheets>", pxml(workbookXML$sheets), "</sheets>")
   if(length(workbookXML$definedNames) > 0)
-    workbookXML$definedNames <- paste0("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
+    workbookXML$definedNames <- stri_join("<definedNames>", pxml(workbookXML$definedNames), "</definedNames>")
 
   
   
@@ -673,7 +673,7 @@ Workbook$methods(writeDrawingVML = function(dir){
     ## write head
     if(nComments > 0 | length(vml[[i]]) > 0){
       
-      write(x = paste('<xml xmlns:v="urn:schemas-microsoft-com:vml"
+      write(x = stri_join('<xml xmlns:v="urn:schemas-microsoft-com:vml"
                     xmlns:o="urn:schemas-microsoft-com:office:office"
                     xmlns:x="urn:schemas-microsoft-com:office:excel">
                     <o:shapelayout v:ext="edit">
@@ -683,7 +683,7 @@ Workbook$methods(writeDrawingVML = function(dir){
                     path="m,l,21600r21600,l21600,xe">
                     <v:stroke joinstyle="miter"/>
                     <v:path gradientshapeok="t" o:connecttype="rect"/>
-                    </v:shapetype>'), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)))
+                    </v:shapetype>'), file = file.path(dir, sprintf("vmlDrawing%s.vml", i)), sep = " ")
       
     }
     
@@ -804,29 +804,29 @@ Workbook$methods(updateStyles = function(style){
     alignNode <- "<alignment"
     
     if(!is.null(style$textRotation))
-      alignNode <- paste(alignNode, sprintf('textRotation="%s"', style$textRotation))
+      alignNode <- stri_join(alignNode, sprintf('textRotation="%s"', style$textRotation), sep = " ")
     
     if(!is.null(style$halign))
-      alignNode <- paste(alignNode, sprintf('horizontal="%s"', style$halign))
+      alignNode <- stri_join(alignNode, sprintf('horizontal="%s"', style$halign), sep = " ")
     
     if(!is.null(style$valign))
-      alignNode <- paste(alignNode, sprintf('vertical="%s"', style$valign))
+      alignNode <- stri_join(alignNode, sprintf('vertical="%s"', style$valign), sep = " ")
     
     if(!is.null(style$indent))
-      alignNode <- paste(alignNode, sprintf('indent="%s"', style$indent))
+      alignNode <- stri_join(alignNode, sprintf('indent="%s"', style$indent), sep = " ")
     
     if(!is.null(style$wrapText)){
       if(style$wrapText)
-        alignNode <- paste(alignNode, 'wrapText="1"')
+        alignNode <- stri_join(alignNode, 'wrapText="1"')
     }
     
     
-    alignNode <- paste0(alignNode, "/>")
+    alignNode <- stri_join(alignNode, "/>")
     
     alignmentFlag <- TRUE
     xfNode <- append(xfNode, list("applyAlignment" = "1"))
     
-    childNodes = paste0(childNodes, alignNode)
+    childNodes = stri_join(childNodes, alignNode)
   }
   
   if (!is.null(style$hidden) | !is.null(style$locked)) {
@@ -834,18 +834,18 @@ Workbook$methods(updateStyles = function(style){
     protectionNode <- "<protection"
     
     if (!is.null(style$hidden))
-      protectionNode <- paste(protectionNode, sprintf('hidden="%s"', as.numeric(style$hidden)))
+      protectionNode <- stri_join(protectionNode, sprintf('hidden="%s"', as.numeric(style$hidden)), sep = " ")
     if (!is.null(style$locked))
-      protectionNode <- paste(protectionNode, sprintf('locked="%s"', as.numeric(style$locked)))
+      protectionNode <- stri_join(protectionNode, sprintf('locked="%s"', as.numeric(style$locked)), sep = " ")
     
-    protectionNode <- paste0(protectionNode, "/>")
-    childNodes = paste0(childNodes, protectionNode)
+    protectionNode <- stri_join(protectionNode, "/>")
+    childNodes = stri_join(childNodes, protectionNode)
   }
   
   if(length(childNodes) > 0){
-    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), ">", childNodes, '</xf>')  
+    xfNode <- stri_join("<xf ", stri_join(stri_join(names(xfNode), '="',xfNode, '"'), sep = " ", collapse = " "), ">", childNodes, '</xf>')  
   }else{
-    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
+    xfNode <- stri_join("<xf ", stri_join(stri_join(names(xfNode), '="',xfNode, '"'), sep = " ", collapse = " "), "/>")
   }
   
   styleId <- which(styles$cellXfs == xfNode) - 1L
@@ -949,7 +949,7 @@ Workbook$methods(updateCellStyles = function(){
       xfNode <- append(xfNode, list("applyBorder" = "1"))
     }
     
-    xfNode <- paste0("<xf ", paste(paste0(names(xfNode), '="',xfNode, '"'), collapse = " "), "/>")
+    xfNode <- stri_join("<xf ", stri_join(stri_join(names(xfNode), '="',xfNode, '"'), sep = " ", collapse = " "), "/>")
     
     if(flag){
       styles$cellStyleXfs <<- xfNode
@@ -1004,23 +1004,23 @@ Workbook$methods(createFontNode = function(style){
   
   ## size
   if(is.null(style$fontSize[[1]])){
-    fontNode <- paste0(fontNode, sprintf('<sz %s="%s"/>', names(baseFont$size), baseFont$size))
+    fontNode <- stri_join(fontNode, sprintf('<sz %s="%s"/>', names(baseFont$size), baseFont$size))
   }else{
-    fontNode <- paste0(fontNode, sprintf('<sz %s="%s"/>', names(style$fontSize), style$fontSize))
+    fontNode <- stri_join(fontNode, sprintf('<sz %s="%s"/>', names(style$fontSize), style$fontSize))
   }
   
   ## colour
   if(is.null(style$fontColour[[1]])){
-    fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(baseFont$colour), baseFont$colour))
+    fontNode <- stri_join(fontNode, sprintf('<color %s="%s"/>', names(baseFont$colour), baseFont$colour))
   }else{
     
     if(length(style$fontColour) > 1){
       
-      fontNode <- paste0(fontNode, sprintf('<color %s/>', 
-                                           paste(sapply(1:length(style$fontColour), function(i) sprintf('%s="%s"', names(style$fontColour)[i], style$fontColour[i])), collapse = " ")))
+      fontNode <- stri_join(fontNode, sprintf('<color %s/>', 
+                                           stri_join(sapply(1:length(style$fontColour), function(i) sprintf('%s="%s"', names(style$fontColour)[i], style$fontColour[i])), sep = " ", collapse = " ")))
       
     }else{
-      fontNode <- paste0(fontNode, sprintf('<color %s="%s"/>', names(style$fontColour), style$fontColour))
+      fontNode <- stri_join(fontNode, sprintf('<color %s="%s"/>', names(style$fontColour), style$fontColour))
     }
     
     
@@ -1030,34 +1030,34 @@ Workbook$methods(createFontNode = function(style){
   
   ## name
   if(is.null(style$fontName[[1]])){
-    fontNode <- paste0(fontNode, sprintf('<name %s="%s"/>', names(baseFont$name), baseFont$name))
+    fontNode <- stri_join(fontNode, sprintf('<name %s="%s"/>', names(baseFont$name), baseFont$name))
   }else{
-    fontNode <- paste0(fontNode, sprintf('<name %s="%s"/>', names(style$fontName), style$fontName))
+    fontNode <- stri_join(fontNode, sprintf('<name %s="%s"/>', names(style$fontName), style$fontName))
   }
   
   ### Create new font and return Id  
   if(!is.null(style$fontFamily))
-    fontNode <- paste0(fontNode, sprintf('<family val = "%s"/>', style$fontFamily))
+    fontNode <- stri_join(fontNode, sprintf('<family val = "%s"/>', style$fontFamily))
   
   if(!is.null(style$fontScheme))
-    fontNode <- paste0(fontNode, sprintf('<scheme val = "%s"/>', style$fontScheme))
+    fontNode <- stri_join(fontNode, sprintf('<scheme val = "%s"/>', style$fontScheme))
   
   if("BOLD" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<b/>')
+    fontNode <- stri_join(fontNode, '<b/>')
   
   if("ITALIC" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<i/>')
+    fontNode <- stri_join(fontNode, '<i/>')
   
   if("UNDERLINE" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<u val="single"/>')
+    fontNode <- stri_join(fontNode, '<u val="single"/>')
   
   if("UNDERLINE2" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<u val="double"/>')
+    fontNode <- stri_join(fontNode, '<u val="double"/>')
   
   if("STRIKEOUT" %in% style$fontDecoration)
-    fontNode <- paste0(fontNode, '<strike/>')
+    fontNode <- stri_join(fontNode, '<strike/>')
   
-  paste0(fontNode, "</font>")
+  stri_join(fontNode, "</font>")
   
 })
 
@@ -1067,29 +1067,29 @@ Workbook$methods(createBorderNode = function(style){
   borderNode <- "<border"
   
   if(style$borderDiagonalUp)
-    borderNode <- paste(borderNode, 'diagonalUp="1"', sep = " ")
+    borderNode <- stri_join(borderNode, 'diagonalUp="1"', sep = " ")
   
   if(style$borderDiagonalDown)
-    borderNode <- paste(borderNode, 'diagonalDown="1"', sep = " ")
+    borderNode <- stri_join(borderNode, 'diagonalDown="1"', sep = " ")
   
-  borderNode <- paste0(borderNode, ">")
+  borderNode <- stri_join(borderNode, ">")
     
   if(!is.null(style$borderLeft))
-    borderNode <- paste0(borderNode, sprintf('<left style="%s">', style$borderLeft), sprintf('<color %s="%s"/>', names(style$borderLeftColour), style$borderLeftColour), '</left>')
+    borderNode <- stri_join(borderNode, sprintf('<left style="%s">', style$borderLeft), sprintf('<color %s="%s"/>', names(style$borderLeftColour), style$borderLeftColour), '</left>')
   
   if(!is.null(style$borderRight))
-    borderNode <- paste0(borderNode, sprintf('<right style="%s">', style$borderRight), sprintf('<color %s="%s"/>', names(style$borderRightColour), style$borderRightColour), '</right>')
+    borderNode <- stri_join(borderNode, sprintf('<right style="%s">', style$borderRight), sprintf('<color %s="%s"/>', names(style$borderRightColour), style$borderRightColour), '</right>')
   
   if(!is.null(style$borderTop))
-    borderNode <- paste0(borderNode, sprintf('<top style="%s">', style$borderTop), sprintf('<color %s="%s"/>', names(style$borderTopColour), style$borderTopColour), '</top>')
+    borderNode <- stri_join(borderNode, sprintf('<top style="%s">', style$borderTop), sprintf('<color %s="%s"/>', names(style$borderTopColour), style$borderTopColour), '</top>')
   
   if(!is.null(style$borderBottom))
-    borderNode <- paste0(borderNode, sprintf('<bottom style="%s">', style$borderBottom), sprintf('<color %s="%s"/>', names(style$borderBottomColour), style$borderBottomColour), '</bottom>')
+    borderNode <- stri_join(borderNode, sprintf('<bottom style="%s">', style$borderBottom), sprintf('<color %s="%s"/>', names(style$borderBottomColour), style$borderBottomColour), '</bottom>')
   
   if(!is.null(style$borderDiagonal))
-    borderNode <- paste0(borderNode, sprintf('<diagonal style="%s">', style$borderDiagonal), sprintf('<color %s="%s"/>', names(style$borderDiagonalColour), style$borderDiagonalColour), '</diagonal>')
+    borderNode <- stri_join(borderNode, sprintf('<diagonal style="%s">', style$borderDiagonal), sprintf('<color %s="%s"/>', names(style$borderDiagonalColour), style$borderDiagonalColour), '</diagonal>')
   
-  paste0(borderNode, "</border>")
+  stri_join(borderNode, "</border>")
   
 })
 
@@ -1101,19 +1101,19 @@ Workbook$methods(createFillNode = function(style, patternType = "solid"){
   ## gradientFill
   if(any(grepl("gradientFill", fill))){
     
-    fillNode <- fill #paste0("<fill>", fill, "</fill>")
+    fillNode <- fill #stri_join("<fill>", fill, "</fill>")
     
   }else if(!is.null(fill$fillFg) | !is.null(fill$fillBg)){
     
-    fillNode <- paste0('<fill>', sprintf('<patternFill patternType="%s">', patternType))
+    fillNode <- stri_join('<fill>', sprintf('<patternFill patternType="%s">', patternType))
     
     if(!is.null(fill$fillFg))
-      fillNode <- paste0(fillNode, sprintf('<fgColor %s/>', paste(paste0(names(fill$fillFg), '="', fill$fillFg, '"'), collapse = " ")))
+      fillNode <- stri_join(fillNode, sprintf('<fgColor %s/>', stri_join(stri_join(names(fill$fillFg), '="', fill$fillFg, '"'), sep = " ", collapse = " ")))
     
     if(!is.null(fill$fillBg))
-      fillNode <- paste0(fillNode, sprintf('<bgColor %s/>', paste(paste0(names(fill$fillBg), '="', fill$fillBg, '"'), collapse = " ")))
+      fillNode <- stri_join(fillNode, sprintf('<bgColor %s/>', stri_join(stri_join(names(fill$fillBg), '="', fill$fillBg, '"'), sep = " ", collapse = " ")))
     
-    fillNode <- paste0(fillNode, "</patternFill></fill>")
+    fillNode <- stri_join(fillNode, "</patternFill></fill>")
     
   }else{
     return(NULL)
@@ -1190,19 +1190,19 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
       write_file(head = '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
                  body = pxml(drawings[[i]]),
                  tail = '</xdr:wsDr>',
-                 fl =  file.path(xldrawingsDir, paste0("drawing", i,".xml")))
+                 fl =  file.path(xldrawingsDir, stri_join("drawing", i,".xml")))
       
       write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
                  body = pxml(drawings_rels[[i]]),
                  tail = '</Relationships>',
-                 fl =  file.path(xldrawingsRelsDir, paste0("drawing", i,".xml.rels")))
+                 fl =  file.path(xldrawingsRelsDir, stri_join("drawing", i,".xml.rels")))
     }else{
       worksheets[[i]]$drawing <<- character(0)
     }
     
     ## vml drawing
     if(length(vml_rels[[i]]) > 0)
-      file.copy(from = vml_rels[[i]], to = file.path(xldrawingsRelsDir, paste0("vmlDrawing", i,".vml.rels")))
+      file.copy(from = vml_rels[[i]], to = file.path(xldrawingsRelsDir, stri_join("vmlDrawing", i,".vml.rels")))
     
     
     
@@ -1216,7 +1216,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         dir.create(chartSheetRelsDir, recursive = TRUE)
       }
       
-      write_file(body = worksheets[[i]]$get_prior_sheet_data(), fl = file.path(chartSheetDir, paste0("sheet", i,".xml")))
+      write_file(body = worksheets[[i]]$get_prior_sheet_data(), fl = file.path(chartSheetDir, stri_join("sheet", i,".xml")))
       
       write_file(head = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">', 
                  body = pxml(worksheets_rels[[i]]),
@@ -1265,7 +1265,7 @@ Workbook$methods(writeSheetDataXML = function(xldrawingsDir, xldrawingsRelsDir, 
         
         ws_rels <- worksheets_rels[[i]]
         if(hasHL){
-          h_inds <- paste0(1:length(worksheets[[i]]$hyperlinks), "h")
+          h_inds <- stri_join(1:length(worksheets[[i]]$hyperlinks), "h")
           ws_rels <- c(ws_rels, unlist(lapply(1:length(h_inds), function(j) worksheets[[i]]$hyperlinks[[j]]$to_target_xml(h_inds[j]))))
         }
         
@@ -1392,10 +1392,10 @@ Workbook$methods(deleteWorksheet = function(sheet){
     ## sheet rels links to a pivotTable file, the corresponding pivotTable_rels file links to the cacheDefn which is listing in workbook.xml.rels
     ## remove reference to this file from the workbook.xml.rels
     fileNo <- as.integer(unlist(regmatches(removeRels, gregexpr('(?<=pivotTable)[0-9]+(?=\\.xml)', removeRels, perl = TRUE))))
-    toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")    
+    toRemove <- stri_join(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), sep = " ", collapse = "|")    
     
     fileNo <- which(grepl(toRemove, pivotTables.xml.rels))
-    toRemove <- paste(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), collapse = "|")
+    toRemove <- stri_join(sprintf("(pivotCacheDefinition%s\\.xml)", fileNo), sep = " ", collapse = "|")
     
     ## remove reference to file from workbook.xml.res
     workbook.xml.rels <<- workbook.xml.rels[!grepl(toRemove, workbook.xml.rels)]
@@ -1423,7 +1423,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
     ## Need to flag a table as deleted
     if(any(inds)){
       tableSheets[inds] <- 0
-      tableNames[inds] <- paste0(tableNames[inds], "_openxlsx_deleted")
+      tableNames[inds] <- stri_join(tableNames[inds], "_openxlsx_deleted")
     }
     attr(tables, "tableName") <<- tableNames
     attr(tables, "sheet") <<- tableSheets
@@ -1446,7 +1446,7 @@ Workbook$methods(deleteWorksheet = function(sheet){
   ## Reset rIds
   if(nSheets > 1){
     for(i in (sheet+1L):nSheets)
-      workbook$sheets <<- gsub(paste0("rId", i), paste0("rId", i-1L), workbook$sheets, fixed = TRUE)
+      workbook$sheets <<- gsub(stri_join("rId", i), stri_join("rId", i-1L), workbook$sheets, fixed = TRUE)
   }else{
     workbook$sheets <<- NULL
   }
@@ -1468,16 +1468,16 @@ Workbook$methods(deleteWorksheet = function(sheet){
 Workbook$methods(addDXFS = function(style){
   
   dxf <- '<dxf>'
-  dxf <- paste0(dxf, createFontNode(style))
+  dxf <- stri_join(dxf, createFontNode(style))
   fillNode <- NULL
   
   if(!is.null(style$fill$fillFg) | !is.null(style$fill$fillBg))
-    dxf <- paste0(dxf, createFillNode(style))
+    dxf <- stri_join(dxf, createFillNode(style))
   
   if(any(!is.null(c(style$borderLeft, style$borderRight, style$borderTop, style$borderBottom, style$borderDiagonal))))
-    dxf <- paste0(dxf, createBorderNode(style))
+    dxf <- stri_join(dxf, createBorderNode(style))
   
-  dxf <- paste(dxf, "</dxf>")
+  dxf <- stri_join(dxf, "</dxf>", sep = " ")
   if(dxf %in% styles$dxfs)
     return(which(styles$dxfs == dxf) - 1L)
   
@@ -1492,7 +1492,7 @@ Workbook$methods(addDXFS = function(style){
 Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, endCol, type, operator, value, allowBlank, showInputMsg, showErrorMsg){
   
   sheet = validateSheet(sheet)
-  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  sqref <- stri_join(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), sep = " ", collapse = ":")
   
   header <- sprintf('<dataValidation type="%s" operator="%s" allowBlank="%s" showInputMessage="%s" showErrorMessage="%s" sqref="%s">',
                     type, operator, allowBlank, showInputMsg, showErrorMsg, sqref)
@@ -1501,7 +1501,7 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
   if(type == "date"){
     
     origin <- 25569L
-    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+    if(grepl('date1904="1"|date1904="true"', stri_join(unlist(workbook), sep = " ", collapse = ""), ignore.case = TRUE))
       origin <- 24107L
     
     value <- as.integer(value) + origin
@@ -1511,7 +1511,7 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
   if(type == "time"){
     
     origin <- 25569L
-    if(grepl('date1904="1"|date1904="true"', paste(unlist(workbook), collapse = ""), ignore.case = TRUE))
+    if(grepl('date1904="1"|date1904="true"', stri_join(unlist(workbook), sep = " ", collapse = ""), ignore.case = TRUE))
       origin <- 24107L
     
     t <- format(value[1], "%z")
@@ -1523,7 +1523,7 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
   }    
   
   form <- sapply(1:length(value), function(i) sprintf("<formula%s>%s</formula%s>", i, value[i], i))
-  worksheets[[sheet]]$dataValidations <<- c(worksheets[[sheet]]$dataValidations, paste0(header, paste(form, collapse = ""), "</dataValidation>"))
+  worksheets[[sheet]]$dataValidations <<- c(worksheets[[sheet]]$dataValidations, stri_join(header, stri_join(form, sep = " ", collapse = ""), "</dataValidation>"))
   
   invisible(0)
   
@@ -1534,7 +1534,7 @@ Workbook$methods(dataValidation = function(sheet, startRow, endRow, startCol, en
 Workbook$methods(dataValidation_list = function(sheet, startRow, endRow, startCol, endCol, value, allowBlank, showInputMsg, showErrorMsg){
   
   sheet = validateSheet(sheet)
-  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  sqref <- stri_join(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), sep = " ", collapse = ":")
   
   header <- '<ext uri="{CCE6A557-97BC-4b89-ADB6-D9C93CAAB3DF}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
 			        <x14:dataValidations count="1" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">'
@@ -1545,7 +1545,7 @@ Workbook$methods(dataValidation_list = function(sheet, startRow, endRow, startCo
   formula <- sprintf("<x14:formula1><xm:f>%s</xm:f></x14:formula1>", value)
   sqref <- sprintf('<xm:sqref>%s</xm:sqref>', sqref)
   
-  xml <- paste0(header, data_val, formula, sqref, '</x14:dataValidation></x14:dataValidations></ext>')
+  xml <- stri_join(header, data_val, formula, sqref, '</x14:dataValidation></x14:dataValidations></ext>')
   
   worksheets[[sheet]]$extLst <<- c(worksheets[[sheet]]$extLst, xml)
   
@@ -1561,7 +1561,7 @@ Workbook$methods(dataValidation_list = function(sheet, startRow, endRow, startCo
 Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type, values, params){
   
   sheet = validateSheet(sheet)
-  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  sqref <- stri_join(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), sep = " ", collapse = ":")
   
   
   
@@ -1635,7 +1635,7 @@ Workbook$methods(conditionalFormatting = function(sheet, startRow, endRow, start
       negColour <- "FFFF0000"
     }
     
-    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
+    guid <- stri_join("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
     
     showValue <- 1
     if("showValue" %in% names(params))
@@ -1729,11 +1729,11 @@ Workbook$methods(mergeCells = function(sheet, startRow, endRow, startCol, endCol
     ## Error if merge intersects    
     mergeIntersections <- sapply(exMergedCells, function(x) any(x %in% newMerge))
     if(any(mergeIntersections))
-      stop(sprintf("Merge intersects with existing merged cells: \n\t\t%s.\nRemove existing merge first.", paste(exMerges[mergeIntersections], collapse = "\n\t\t")))
+      stop(sprintf("Merge intersects with existing merged cells: \n\t\t%s.\nRemove existing merge first.", stri_join(exMerges[mergeIntersections], sep = " ", collapse = "\n\t\t")))
     
   }
   
-  worksheets[[sheet]]$mergeCells <<- c(worksheets[[sheet]]$mergeCells, sprintf('<mergeCell ref="%s"/>', paste(sqref, collapse = ":")))
+  worksheets[[sheet]]$mergeCells <<- c(worksheets[[sheet]]$mergeCells, sprintf('<mergeCell ref="%s"/>', stri_join(sqref, sep = " ", collapse = ":")))
   
   
 })
@@ -1803,7 +1803,7 @@ Workbook$methods(freezePanes = function(sheet, firstActiveRow = NULL, firstActiv
     topLeftCell <- getCellRefs(data.frame(firstActiveRow, firstActiveCol))
     
     paneNode <- sprintf('<pane %s topLeftCell="%s" activePane="%s" state="frozen"/><selection pane="%s"/>', 
-                        paste(attrs, collapse = " "), topLeftCell, activePane, activePane)
+                        stri_join(attrs, sep = " ", collapse = " "), topLeftCell, activePane, activePane)
     
   } 
   
@@ -1832,7 +1832,7 @@ Workbook$methods(insertImage = function(sheet, file, startRow, startCol, width, 
   startCol <- convertFromExcelRef(startCol)
   
   ## update Content_Types
-  if(!any(grepl(paste0("image/", imageType), Content_Types)))
+  if(!any(grepl(stri_join("image/", imageType), Content_Types)))
     Content_Types <<- unique(c(sprintf('<Default Extension="%s" ContentType="image/%s"/>', imageType, imageType), Content_Types))
   
   ## drawings rels (Reference from drawings.xml to image file in media folder)
@@ -1841,7 +1841,7 @@ Workbook$methods(insertImage = function(sheet, file, startRow, startCol, width, 
   
   ## write file path to media slot to copy across on save
   tmp <- file
-  names(tmp) <- paste0("image", mediaNo,".", imageType)
+  names(tmp) <- stri_join("image", mediaNo,".", imageType)
   media <<- append(media, tmp)
   
   ## create drawing.xml    
@@ -1855,7 +1855,7 @@ Workbook$methods(insertImage = function(sheet, file, startRow, startCol, width, 
     <xdr:rowOff xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing">%s</xdr:rowOff>
   </xdr:from>' , startCol - 1L, colOffset, startRow - 1L, rowOffset)
   
-  drawingsXML <- paste0(
+  drawingsXML <- stri_join(
     anchor,
     from,
     sprintf('<xdr:ext xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" cx="%s" cy="%s"/>', width, height),
@@ -1985,8 +1985,8 @@ Workbook$methods(preSaveCleanUp = function(){
   ## update workbook r:id to match reordered workbook.xml.rels externalLink element
   if(length(extRefInds) > 0){
     newInds <- as.integer(1:length(extRefInds) + length(sheetInds))
-    workbook$externalReferences <<- paste0("<externalReferences>",
-                                           paste0(sprintf('<externalReference r:id=\"rId%s\"/>', newInds), collapse = ""),
+    workbook$externalReferences <<- stri_join("<externalReferences>",
+                                           stri_join(sprintf('<externalReference r:id=\"rId%s\"/>', newInds), collapse = ""),
                                            "</externalReferences>")
   }
   
@@ -2013,8 +2013,8 @@ Workbook$methods(preSaveCleanUp = function(){
       sheet <- which(sheet_names == x$sheet)
       sId <- .self$updateStyles(this.sty) ## this creates the XML for styles.XML
       
-      cells_to_style <- paste(x$rows, x$cols, sep = ",")
-      existing_cells <- paste(worksheets[[sheet]]$sheet_data$rows, worksheets[[sheet]]$sheet_data$cols, sep = ",")
+      cells_to_style <- stri_join(x$rows, x$cols, sep = ",")
+      existing_cells <- stri_join(worksheets[[sheet]]$sheet_data$rows, worksheets[[sheet]]$sheet_data$cols, sep = ",")
       
       ## In here we create any style_ids that don't yet exist in sheet_data
       worksheets[[sheet]]$sheet_data$style_id[existing_cells %in% cells_to_style] <<- sId
@@ -2102,8 +2102,8 @@ Workbook$methods(addStyle = function(sheet, style, rows, cols, stack){
         ## toRemove are the elements that the new style doesn't apply to, we remove these from the style object as it
         ## is copied, merged with the new style and given the new data points
         
-        ex_row_cols <- paste(styleObjects[[i]]$rows, styleObjects[[i]]$cols, sep = "-")
-        new_row_cols <- paste(rows, cols, sep = "-")
+        ex_row_cols <- stri_join(styleObjects[[i]]$rows, styleObjects[[i]]$cols, sep = "-")
+        new_row_cols <- stri_join(rows, cols, sep = "-")
         
         
         ## mergeInds are the intersection of the two styles that will need to merge
@@ -2300,7 +2300,7 @@ Workbook$methods(show = function(){
       if(length(rowHeights[[i]]) > 0){
         
         tmpTxt <- append(tmpTxt, c("\n\tCustom row heights (row: height)\n\t", 
-                                   paste(sprintf("%s: %s", names(rowHeights[[i]]), round(as.numeric(rowHeights[[i]]), 2)), collapse = ", ")
+                                   stri_join(sprintf("%s: %s", names(rowHeights[[i]]), round(as.numeric(rowHeights[[i]]), 2)), sep = " ", collapse = ", ")
         )
         )
       }
@@ -2312,7 +2312,7 @@ Workbook$methods(show = function(){
         
         widths[widths != "auto"] <- as.numeric(widths[widths != "auto"])
         tmpTxt <- append(tmpTxt, c("\n\tCustom column widths (column: width)\n\t ",
-                                   paste(sprintf("%s: %s", cols, substr(widths,1,5)), collapse = ", "))
+                                   stri_join(sprintf("%s: %s", cols, substr(widths,1,5)), sep = " ", collapse = ", "))
         )
         tmpTxt <- c(tmpTxt, "\n") 
       }
@@ -2333,7 +2333,7 @@ Workbook$methods(show = function(){
     showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
   
   if(nSheets > 0)
-    showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))
+    showText <- c(showText, sprintf("Worksheet write order: %s", stri_join(sheetOrder, sep = " ",  collapse = ", ")))
   
   cat(unlist(showText))
   
@@ -2343,7 +2343,7 @@ Workbook$methods(show = function(){
 # ## function to create the below
 # strs <- "data.frame("
 # for(i in 1:nrow(tab))
-#   strs <- append(strs, paste0('"', gsub(" ", ".", tolower(tab$Font[[i]])), '" = ',  paste(capture.output(dput(unname(unlist(tab[1,2:ncol(tab)])))), collapse = ""), ", \n"))
+#   strs <- append(strs, stri_join('"', gsub(" ", ".", tolower(tab$Font[[i]])), '" = ',  paste(capture.output(dput(unname(unlist(tab[1,2:ncol(tab)])))), collapse = ""), ", \n"))
 # strs[length(strs)] <- gsub(", \\\n$", ")", strs[length(strs)])
 # cat(strs)
 
@@ -2817,7 +2817,7 @@ openxlsxFontSizeLookupTableBold <-
 Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, startCol, endCol, dxfId, formula, type){
   
   sheet = validateSheet(sheet)
-  sqref <- paste(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), collapse = ":")
+  sqref <- stri_join(getCellRefs(data.frame("x" = c(startRow, endRow), "y" = c(startCol, endCol))), sep  = " ", collapse = ":")
   
   ## Increment priority of conditional formatting rule
   if(length((worksheets[[sheet]]$conditionalFormatting)) > 0){
@@ -2841,7 +2841,7 @@ Workbook$methods(conditionalFormatCell = function(sheet, startRow, endRow, start
       negColour <- "FFFF0000"
     }
     
-    guid <- paste0("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
+    guid <- stri_join("F7189283-14F7-4DE0-9601-54DE9DB", 40000L + length(worksheets[[sheet]]$extLst))
     cfRule <- sprintf('<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min"/><cfvo type="max"/><color rgb="%s"/></dataBar><extLst><ext uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:id>{%s}</x14:id></ext></extLst></cfRule>', posColour, guid)
     
   }else if(length(formula) == 2L){
@@ -2875,7 +2875,7 @@ Workbook$methods(loadStyles = function(stylesXML){
   ## Indexed colours
   vals <- getNodes(xml = stylesTxt, tagIn = "<indexedColors>")
   if(length(vals) > 0)
-    styles$indexedColors <<- paste0("<colors>", vals, "</colors>")
+    styles$indexedColors <<- stri_join("<colors>", vals, "</colors>")
   
   ## dxf (don't need these, I don't think)
   dxf <- getNodes(xml = stylesTxt, tagIn = "<dxfs")
@@ -2887,7 +2887,7 @@ Workbook$methods(loadStyles = function(stylesXML){
   
   tableStyles <- getNodes(xml = stylesTxt, tagIn = "<tableStyles")
   if(length(tableStyles) > 0)
-    styles$tableStyles <<- paste0(tableStyles, ">")
+    styles$tableStyles <<- stri_join(tableStyles, ">")
   
   extLst <- getNodes(xml = stylesTxt, tagIn = "<extLst>")
   if(length(extLst) > 0)
@@ -3122,7 +3122,7 @@ Workbook$methods(protectWorkbook = function(protect = TRUE, lockStructure = FALS
     attr["lockWindows"] <- toString(as.numeric(lockWindows))
   }
   if (protect) {
-    workbookProtection <<- sprintf('<workbookProtection %s/>', paste(names(attr), '="', attr, '"', collapse = " ", sep = ""))
+    workbookProtection <<- sprintf('<workbookProtection %s/>', stri_join(names(attr), '="', attr, '"', collapse = " ", sep = ""))
   } else {
     workbookProtection <<- ""
   }
