@@ -9,7 +9,7 @@
 #' @import grDevices
 #' @import stats
 #' @importFrom Rcpp sourceCpp 
-#' @importFrom zip zip
+#' @importFrom zip zipr
 #' @importFrom utils download.file head menu unzip
 #' 
 #' @seealso
