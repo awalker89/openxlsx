@@ -1,7 +1,6 @@
 
 
-genBaseContent_Type <- function(){
-  
+genBaseContent_Type <- function() {
   c(
     '<Default Extension="bin" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"/>',
     '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
@@ -13,154 +12,151 @@ genBaseContent_Type <- function(){
     '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>',
     '<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>'
   )
-  
 }
 
 
-genBaseShapeVML <- function(clientData, id){
-  
-  if(grepl("visible", clientData, ignore.case = TRUE)){
+genBaseShapeVML <- function(clientData, id) {
+  if (grepl("visible", clientData, ignore.case = TRUE)) {
     visible <- "visible"
-  }else{
+  } else {
     visible <- "hidden"
   }
-  
-  paste0(sprintf('<v:shape id="_x0000_s%s" type="#_x0000_t202" style=\'position:absolute;', id),
-         sprintf('margin-left:107.25pt;margin-top:172.5pt;width:147pt;height:96pt;z-index:1;
-          visibility:%s;mso-wrap-style:tight\' fillcolor="#ffffe1" o:insetmode="auto">',  visible),
-            '<v:fill color2="#ffffe1"/>
+
+  paste0(
+    sprintf('<v:shape id="_x0000_s%s" type="#_x0000_t202" style=\'position:absolute;', id),
+    sprintf('margin-left:107.25pt;margin-top:172.5pt;width:147pt;height:96pt;z-index:1;
+          visibility:%s;mso-wrap-style:tight\' fillcolor="#ffffe1" o:insetmode="auto">', visible),
+    '<v:fill color2="#ffffe1"/>
             <v:shadow color="black" obscured="t"/>
             <v:path o:connecttype="none"/>
             <v:textbox style=\'mso-direction-alt:auto\'>
             <div style=\'text-align:left\'/>
-            </v:textbox>', clientData, '</v:shape>')
+            </v:textbox>', clientData, "</v:shape>"
+  )
 }
 
 
 
 
 
-genClientData <- function(col, row, visible, height, width){
+genClientData <- function(col, row, visible, height, width) {
+  txt <- sprintf(
+    '<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column>',
+    col, row - 2L, col + width - 1L, row + height - 1L, row - 1L, col - 1L
+  )
 
-  txt <- sprintf('<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%s, 15, %s, 10, %s, 147, %s, 18</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%s</x:Row><x:Column>%s</x:Column>',
-          col, row-2L, col + width - 1L, row + height - 1L, row-1L, col-1L)
-  
-  if(visible)
-    txt <- paste0(txt, '<x:Visible/>')
-  
-  txt <- paste0(txt, '</x:ClientData>')
-  
+  if (visible) {
+    txt <- paste0(txt, "<x:Visible/>")
+  }
+
+  txt <- paste0(txt, "</x:ClientData>")
+
   return(txt)
-  
 }
 
 
 # genBaseRels <- function(){
-#   
+#
 #   '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
 #    <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
 #    <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
-#   
+#
 # }
-# 
-# 
+#
+#
 # genBaseApp <- function(){
 #   list('<Application>Microsoft Excel</Application>')
 # }
 
 
-genBaseCore <- function(creator = "", title = NULL, subject = NULL, category = NULL){  
-  
+genBaseCore <- function(creator = "", title = NULL, subject = NULL, category = NULL) {
   core <- '<coreProperties xmlns="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-  
-  core <- c(core, sprintf('<dc:creator>%s</dc:creator>', creator))
+
+  core <- c(core, sprintf("<dc:creator>%s</dc:creator>", creator))
   core <- c(core, sprintf('<dcterms:created xsi:type="dcterms:W3CDTF">%s</dcterms:created>', format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ")))
-  
-  if(!is.null(title))
-    core <- c(core, sprintf('<dc:title>%s</dc:title>', replaceIllegalCharacters(title)))
-  
-  if(!is.null(subject))
-    core <- c(core, sprintf('<dc:subject>%s</dc:subject>', replaceIllegalCharacters(subject)))
-  
-  if(!is.null(category))
-    core <- c(core, sprintf('<cp:category>%s</cp:category>', replaceIllegalCharacters(category)))
 
-  core <- c(core, '</coreProperties>')
-  
+  if (!is.null(title)) {
+    core <- c(core, sprintf("<dc:title>%s</dc:title>", replaceIllegalCharacters(title)))
+  }
+
+  if (!is.null(subject)) {
+    core <- c(core, sprintf("<dc:subject>%s</dc:subject>", replaceIllegalCharacters(subject)))
+  }
+
+  if (!is.null(category)) {
+    core <- c(core, sprintf("<cp:category>%s</cp:category>", replaceIllegalCharacters(category)))
+  }
+
+  core <- c(core, "</coreProperties>")
+
   return(core)
-  
-} 
+}
 
 
-genBaseWorkbook.xml.rels <- function(){
-  
-  c('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>',
+genBaseWorkbook.xml.rels <- function() {
+  c(
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>',
     '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>',
-    '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>')
-}
-
-
-genBaseWorkbook <- function(){
-  
-  list(workbookPr = '<workbookPr date1904="false"/>',
-       bookViews = 	'<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="13125" windowHeight="6105"/></bookViews>',
-       sheets = NULL,
-       externalReferences = NULL,
-       definedNames = NULL,
-       calcPr = NULL,
-       pivotCaches = NULL,
-       extLst = NULL
+    '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>'
   )
-  
+}
+
+
+genBaseWorkbook <- function() {
+  list(
+    workbookPr = '<workbookPr date1904="false"/>',
+    bookViews = '<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="13125" windowHeight="6105"/></bookViews>',
+    sheets = NULL,
+    externalReferences = NULL,
+    definedNames = NULL,
+    calcPr = NULL,
+    pivotCaches = NULL,
+    extLst = NULL
+  )
 }
 
 
 
 
-genBaseSheetRels <- function(sheetInd){
-  
+genBaseSheetRels <- function(sheetInd) {
   c(
     sprintf('<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing%s.xml"/>', sheetInd),
     sprintf('<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings" Target="../printerSettings/printerSettings%s.bin"/>', sheetInd),
     sprintf('<Relationship Id="rIdvml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing" Target="../drawings/vmlDrawing%s.vml"/>', sheetInd)
   )
-  
 }
 
-genBaseStyleSheet <- function(dxfs = NULL, tableStyles = NULL, extLst = NULL){
-  
+genBaseStyleSheet <- function(dxfs = NULL, tableStyles = NULL, extLst = NULL) {
   list(
-    
     numFmts = NULL,
-    
+
     fonts = c('<font><sz val="11"/><color rgb="FF000000"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>'),
-    
-    fills = c('<fill><patternFill patternType="none"/></fill>',
-              '<fill><patternFill patternType="gray125"/></fill>'),
-    
-    borders = c('<border><left/><right/><top/><bottom/><diagonal/></border>'),
-    
+
+    fills = c(
+      '<fill><patternFill patternType="none"/></fill>',
+      '<fill><patternFill patternType="gray125"/></fill>'
+    ),
+
+    borders = c("<border><left/><right/><top/><bottom/><diagonal/></border>"),
+
     cellStyleXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>'),
-    
+
     cellXfs = c('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'),
-    
+
     cellStyles = c('<cellStyle name="Normal" xfId="0" builtinId="0"/>'),
-    
+
     dxfs = dxfs,
-    
+
     tableStyles = tableStyles,
-    
+
     indexedColors = NULL,
-    
+
     extLst = extLst
-    
   )
-  
 }
 
 
-genBasePic <- function(imageNo){
-  
+genBasePic <- function(imageNo) {
   sprintf('<xdr:pic xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing">
       <xdr:nvPicPr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing">
         <xdr:cNvPr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" id="%s" name="Picture %s"/>
@@ -181,7 +177,6 @@ genBasePic <- function(imageNo){
         </a:prstGeom>
       </xdr:spPr>
     </xdr:pic>', imageNo, imageNo, imageNo)
-  
 }
 
 
@@ -193,8 +188,7 @@ genBasePic <- function(imageNo){
 
 
 
-genBaseTheme <- function(){
-  
+genBaseTheme <- function() {
   '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme">
   <a:themeElements><a:clrScheme name="Office">
   <a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1>
@@ -341,65 +335,55 @@ genBaseTheme <- function(){
   <a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="30000"/><a:satMod val="200000"/></a:schemeClr></a:gs>
   </a:gsLst>
   <a:path path="circle"><a:fillToRect l="50000" t="50000" r="50000" b="50000"/></a:path>
-  </a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>'  
-  
-  
+  </a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>'
 }
 
 
 
 
-genPrinterSettings <- function(){
+genPrinterSettings <- function() {
   "5c 00 5c 00 41 00 55 00 43 00 41 00 4c 00 50 00 52 00 4f 00 44 00 46 00 50 00 5c 00 4c 00 31 00 34 00 78 00 65 00 72 00 6f 00 78 00 31 00 20 00 2d 00 20 00 58 00 65 00 72 00 6f 00 00 00 00 00 01 04 00 52 dc 00 5c 05 13 ff 81 07 02 00 09 00 9a 0b 34 08 64 00 01 00 0f 00 2c 01 02 00 02 00 2c 01 03 00 01 00 41 00 34 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 c0 21 46 00 58 00 20 00 41 00 70 00 65 00 6f 00 73 00 50 00 6f 00 72 00 74 00 2d 00 49 00 49 00 49 00 20 00 43 00 34 00 34 00 30 00 30 00 20 00 50 00 43 00 4c 00 20 00 36 00 00 00 00 00 00 00 00 00 4e 08 a0 13 40 09 08 00 0b 01 64 00 01 00 07 00 01 00 00 00 00 00 00 00 00 00 07 00 01 00 08 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 08 08 08 00 08 08 08 00 08 08 08 00 08 08 08 00 00 01 03 00 02 02 00 01 02 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 02 02 48 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 bc 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 05 00 00 00 00 00 00 08 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0b 96 00 00 00 c8 00 01 01 01 01 01 01 01 01 01 01 01 01 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 bc 02 00 00 00 00 00 00 00 00 02 00 41 00 72 00 69 00 61 00 6c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 12 70 5f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 }
 
 
-gen_databar_extlst <- function(guid, sqref, posColour, negColour, values, border, gradient){
-
+gen_databar_extlst <- function(guid, sqref, posColour, negColour, values, border, gradient) {
   xml <- sprintf('<x14:cfRule type="dataBar" id="{%s}"><x14:dataBar minLength="0" maxLength="100" border="%s" gradient = "%s" negativeBarBorderColorSameAsPositive="0">', guid, border, gradient)
-  
-  if(is.null(values)){
-    
+
+  if (is.null(values)) {
     xml <- sprintf('<ext uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:conditionalFormattings><x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
                       %s
                       <x14:cfvo type="autoMin"/><x14:cfvo type="autoMax"/><x14:borderColor rgb="%s"/><x14:negativeFillColor rgb="%s"/><x14:negativeBorderColor rgb="%s"/><x14:axisColor rgb="FF000000"/>
                       </x14:dataBar></x14:cfRule><xm:sqref>%s</xm:sqref></x14:conditionalFormatting></x14:conditionalFormattings></ext>', xml, posColour, negColour, negColour, sqref)
-  }else{
-    
+  } else {
     xml <- sprintf('<ext uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:conditionalFormattings><x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
                       %s
                       <x14:cfvo type="num"><xm:f>%s</xm:f></x14:cfvo><x14:cfvo type="num"><xm:f>%s</xm:f></x14:cfvo>
                       <x14:borderColor rgb="%s"/><x14:negativeFillColor rgb="%s"/><x14:negativeBorderColor rgb="%s"/><x14:axisColor rgb="FF000000"/>
                       </x14:dataBar></x14:cfRule><xm:sqref>%s</xm:sqref></x14:conditionalFormatting></x14:conditionalFormattings></ext>', xml, values[[1]], values[[2]], posColour, negColour, negColour, sqref)
-    
-    
-    
   }
-  
+
   return(xml)
-  
 }
 
 
 
-contentTypePivotXML <- function(i){
-  
-  c(sprintf('<Override PartName="/xl/pivotCache/pivotCacheDefinition%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml"/>', i),
+contentTypePivotXML <- function(i) {
+  c(
+    sprintf('<Override PartName="/xl/pivotCache/pivotCacheDefinition%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml"/>', i),
     sprintf('<Override PartName="/xl/pivotCache/pivotCacheRecords%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml"/>', i),
-    sprintf('<Override PartName="/xl/pivotTables/pivotTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml"/>', i))
-  
+    sprintf('<Override PartName="/xl/pivotTables/pivotTable%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml"/>', i)
+  )
 }
 
-contentTypeSlicerCacheXML <- function(i){
-  
-  c(sprintf('<Override PartName="/xl/slicerCaches/slicerCache%s.xml" ContentType="application/vnd.ms-excel.slicerCache+xml"/>', i),
+contentTypeSlicerCacheXML <- function(i) {
+  c(
+    sprintf('<Override PartName="/xl/slicerCaches/slicerCache%s.xml" ContentType="application/vnd.ms-excel.slicerCache+xml"/>', i),
     sprintf('<Override PartName="/xl/slicers/slicer%s.xml" ContentType="application/vnd.ms-excel.slicer+xml"/>', i)
   )
-  
 }
 
 
-genBaseSlicerXML <- function(){
+genBaseSlicerXML <- function() {
   '<ext uri="{A8765BA9-456A-4dab-B4F3-ACF838C121DE}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main">
     <x14:slicerList>
     <x14:slicer r:id="rId0"/>
@@ -408,16 +392,14 @@ genBaseSlicerXML <- function(){
 }
 
 
-genSlicerCachesExtLst <- function(i){
-  
+genSlicerCachesExtLst <- function(i) {
   paste0(
     '<extLst>
     <ext uri=\"{BBE1A952-AA13-448e-AADC-164F8A28A991}\" xmlns:x14=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/main\">
     <x14:slicerCaches>',
-    
+
     paste(sprintf('<x14:slicerCache r:id="rId%s"/>', i), collapse = ""),
-    
-    '</x14:slicerCaches></ext></extLst>')
-  
-  
+
+    "</x14:slicerCaches></ext></extLst>"
+  )
 }
