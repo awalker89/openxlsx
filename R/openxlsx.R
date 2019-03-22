@@ -2,16 +2,16 @@
 #'
 #' openxlsx simplifies the the process of writing and styling Excel xlsx files from R
 #' and removes the dependency on Java.
-#' 
+#'
 #' @name openxlsx
 #' @docType package
 #' @useDynLib openxlsx, .registration=TRUE
 #' @import grDevices
 #' @import stats
-#' @importFrom Rcpp sourceCpp 
+#' @importFrom Rcpp sourceCpp
 #' @importFrom zip zip
 #' @importFrom utils download.file head menu unzip
-#' 
+#'
 #' @seealso
 #' \itemize{
 #'    \item{\code{vignette("Introduction", package = "openxlsx")}}
@@ -20,12 +20,12 @@
 #'    \item{\code{\link{writeDataTable}}}
 #'    \item{\code{\link{write.xlsx}}}
 #'    \item{\code{\link{read.xlsx}}}
-#'   } 
+#'   }
 #' for examples
-#' 
+#'
 #' @details
 #' The openxlsx package uses global options to simplify formatting:
-#' 
+#'
 #' \itemize{
 #'    \item{\code{options("openxlsx.borderColour" = "black")}}
 #'    \item{\code{options("openxlsx.borderStyle" = "thin")}}
@@ -34,16 +34,16 @@
 #'    \item{\code{options("openxlsx.numFmt" = NULL)}}
 #'    \item{\code{options("openxlsx.paperSize" = 9)}} ## A4
 #'    \item{\code{options("openxlsx.orientation" = "portrait")}} ## page orientation
-#' } 
-#'  See the Formatting vignette for examples. 
-#' 
-#' 
-#' 
-#' 
+#' }
+#'  See the Formatting vignette for examples.
+#'
+#'
+#'
+#'
 #' Additional options
-#' 
+#'
 #' \itemize{
 #' \item{\code{options("openxlsx.compressionLevel" = "9")}} ## set zip compression level, default is "1".
-#' } 
-#' 
+#' }
+#'
 NULL

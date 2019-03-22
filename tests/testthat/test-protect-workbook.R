@@ -4,7 +4,6 @@ context("Protection")
 
 
 test_that("Protect Workbook", {
-  
   wb <- createWorkbook()
   addWorksheet(wb, "s1")
 
@@ -14,7 +13,4 @@ test_that("Protect Workbook", {
 
   wb$protectWorkbook(protect = FALSE, password = "abcdefghij", lockStructure = TRUE, lockWindows = TRUE)
   expect_true(wb$workbookProtection == "")
-  
 })
-  
-

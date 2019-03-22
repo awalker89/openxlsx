@@ -1,45 +1,40 @@
 
-require('openxlsx')
+require("openxlsx")
 
-unzip_xlsx <- function(fl){
-  
+unzip_xlsx <- function(fl) {
   wd <- getwd()
   d <- file.path(tempdir(), paste(sample(LETTERS, 10), collapse = ""))
   unlink(d, recursive = TRUE, force = TRUE)
   dir.create(d)
-  
+
   new_fl <- file.path(d, basename(fl))
   file.copy(from = fl, to = new_fl)
-  
+
   setwd(d)
   unzip(zipfile = new_fl, junkpaths = FALSE)
   cmd <- paste("start", d)
   shell(cmd)
-  
+
   unlink(new_fl)
-  
+
   setwd(wd)
-  
+
   return(d)
-  
 }
 
 
-zip_xlsx <- function(d){
-  
+zip_xlsx <- function(d) {
   wd <- getwd()
   setwd(d)
-  
-  zipfile = "a.xlsx"
+
+  zipfile <- "a.xlsx"
   files <- list.files()
-  flags = "-r1"
-  extras = ""
-  zip = Sys.getenv("R_ZIPCMD", "zip")
+  flags <- "-r1"
+  extras <- ""
+  zip <- Sys.getenv("R_ZIPCMD", "zip")
   args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files), extras)
   res <- invisible(suppressWarnings(system2(zip, args, stdout = NULL)))
   setwd(wd)
-  
-  
 }
 
 ## Get loading files
@@ -159,17 +154,11 @@ openXL(wb)
 ## write jsuts a date
 wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")
-writeData(wb, 1, as.Date('2014-01-01'))
+writeData(wb, 1, as.Date("2014-01-01"))
 openXL(wb)
 
 wb <- loadWorkbook(file.path(test_file_dir, "pivotTest.xlsx"))
-writeData(wb, 1, iris[,1:3]*100, colNames = FALSE, startRow = 2)
+writeData(wb, 1, iris[, 1:3] * 100, colNames = FALSE, startRow = 2)
 openXL(wb)
 
 openXL(file.path(test_file_dir, "pivotTest.xlsx"))
-
-
-
-
-
-

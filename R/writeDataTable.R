@@ -2,13 +2,13 @@
 #' @name writeDataTable
 #' @title Write to a worksheet as an Excel table
 #' @description Write to a worksheet and format as an Excel table
-#' @param wb A Workbook object containing a 
+#' @param wb A Workbook object containing a
 #' worksheet.
 #' @param sheet The worksheet to write to. Can be the worksheet index or name.
 #' @param x A dataframe.
 #' @param startCol A vector specifying the starting column to write df
 #' @param startRow A vector specifying the starting row to write df
-#' @param xy An alternative to specifying startCol and startRow individually.  
+#' @param xy An alternative to specifying startCol and startRow individually.
 #' A vector of the form c(startCol, startRow)
 #' @param colNames If \code{TRUE}, column names of x are written.
 #' @param rowNames If \code{TRUE}, row names of x are written.
@@ -18,19 +18,19 @@
 #' @param withFilter If \code{TRUE}, columns with have filters in the first row.
 #' @param keepNA If \code{TRUE}, NA values are converted to #N/A in Excel else NA cells will be empty.
 #' @param sep Only applies to list columns. The separator used to collapse list columns to a character vector e.g. sapply(x$list_column, paste, collapse = sep).
-#' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any 
+#' @param stack If \code{TRUE} the new style is merged with any existing cell styles.  If FALSE, any
 #' existing style is replaced by the new style.
 #' \cr\cr
 #' \cr\bold{The below options correspond to Excel table options:}
 #' \cr
 #' \if{html}{\figure{tableoptions.png}{options: width="40\%" alt="Figure: table_options.png"}}
 #' \if{latex}{\figure{tableoptions.pdf}{options: width=7cm}}
-#' 
+#'
 #' @param firstColumn logical. If TRUE, the first column is bold
 #' @param lastColumn logical. If TRUE, the last column is bold
 #' @param bandedRows logical. If TRUE, rows are colour banded
 #' @param bandedCols logical. If TRUE, the columns are colour banded
-#' @details columns of x with class Date/POSIXt, currency, accounting, 
+#' @details columns of x with class Date/POSIXt, currency, accounting,
 #' hyperlink, percentage are automatically styled as dates, currency, accounting,
 #' hyperlinks, percentages respectively.
 #' @seealso \code{\link{addWorksheet}}
@@ -55,16 +55,20 @@
 #' 
 #' writeDataTable(wb, "S1", x = iris)
 #' 
-#' writeDataTable(wb, "S2", x = mtcars, xy = c("B", 3), rowNames = TRUE,
-#'   tableStyle = "TableStyleLight9")
+#' writeDataTable(wb, "S2",
+#'   x = mtcars, xy = c("B", 3), rowNames = TRUE,
+#'   tableStyle = "TableStyleLight9"
+#' )
 #' 
-#' df <- data.frame("Date" = Sys.Date()-0:19,
-#'                  "T" = TRUE, "F" = FALSE,
-#'                  "Time" = Sys.time()-0:19*60*60,
-#'                  "Cash" = paste("$",1:20), "Cash2" = 31:50,
-#'                  "hLink" = "https://CRAN.R-project.org/", 
-#'                  "Percentage" = seq(0, 1, length.out=20),
-#'                  "TinyNumbers" = runif(20) / 1E9,  stringsAsFactors = FALSE)
+#' df <- data.frame(
+#'   "Date" = Sys.Date() - 0:19,
+#'   "T" = TRUE, "F" = FALSE,
+#'   "Time" = Sys.time() - 0:19 * 60 * 60,
+#'   "Cash" = paste("$", 1:20), "Cash2" = 31:50,
+#'   "hLink" = "https://CRAN.R-project.org/",
+#'   "Percentage" = seq(0, 1, length.out = 20),
+#'   "TinyNumbers" = runif(20) / 1E9, stringsAsFactors = FALSE
+#' )
 #' 
 #' ## openxlsx will apply default Excel styling for these classes
 #' class(df$Cash) <- c(class(df$Cash), "currency")
@@ -78,11 +82,13 @@
 #' #####################################################################################
 #' ## Additional Header Styling and remove column filters
 #' 
-#' writeDataTable(wb, sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
-#'                  withFilter = FALSE)
+#' writeDataTable(wb,
+#'   sheet = 1, x = iris, startCol = 7, headerStyle = createStyle(textRotation = 45),
+#'   withFilter = FALSE
+#' )
 #' 
 #' 
-#' ##################################################################################### 
+#' #####################################################################################
 #' ## Save workbook
 #' ## Open in excel without saving file: openXL(wb)
 #' 
@@ -92,38 +98,37 @@
 #' 
 #' 
 #' 
-#' ##################################################################################### 
+#' #####################################################################################
 #' ## Pre-defined table styles gallery
 #' 
 #' wb <- createWorkbook(paste0("tableStylesGallery.xlsx"))
 #' addWorksheet(wb, "Style Samples")
-#' for(i in 1:21) {
+#' for (i in 1:21) {
 #'   style <- paste0("TableStyleLight", i)
-#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 1, startCol = i*3-2)
+#'   writeDataTable(wb, x = data.frame(style), sheet = 1, tableStyle = style, startRow = 1, startCol = i * 3 - 2)
 #' }
 #' 
-#' for(i in 1:28) {
+#' for (i in 1:28) {
 #'   style <- paste0("TableStyleMedium", i)
-#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 4, startCol = i*3-2)
+#'   writeDataTable(wb, x = data.frame(style), sheet = 1, tableStyle = style, startRow = 4, startCol = i * 3 - 2)
 #' }
 #' 
-#' for(i in 1:11) {
+#' for (i in 1:11) {
 #'   style <- paste0("TableStyleDark", i)
-#'   writeDataTable(wb, x=data.frame(style), sheet=1, tableStyle=style, startRow = 7, startCol = i*3-2)
-#' } 
+#'   writeDataTable(wb, x = data.frame(style), sheet = 1, tableStyle = style, startRow = 7, startCol = i * 3 - 2)
+#' }
 #' 
 #' ## openXL(wb)
 #' saveWorkbook(wb, file = "tableStylesGallery.xlsx", overwrite = TRUE)
-#' 
 writeDataTable <- function(wb, sheet, x,
                            startCol = 1,
-                           startRow = 1, 
+                           startRow = 1,
                            xy = NULL,
                            colNames = TRUE,
                            rowNames = FALSE,
                            tableStyle = "TableStyleLight9",
                            tableName = NULL,
-                           headerStyle= NULL,
+                           headerStyle = NULL,
                            withFilter = TRUE,
                            keepNA = FALSE,
                            sep = ", ",
@@ -131,145 +136,152 @@ writeDataTable <- function(wb, sheet, x,
                            firstColumn = FALSE,
                            lastColumn = FALSE,
                            bandedRows = TRUE,
-                           bandedCols = FALSE){
-  
-  
-  if(!is.null(xy)){
-    if(length(xy) != 2)
+                           bandedCols = FALSE) {
+  if (!is.null(xy)) {
+    if (length(xy) != 2) {
       stop("xy parameter must have length 2")
-    startCol = xy[[1]]
-    startRow = xy[[2]]
+    }
+    startCol <- xy[[1]]
+    startRow <- xy[[2]]
   }
-  
+
   ## Input validating
-  if(!"Workbook" %in% class(wb)) stop("First argument must be a Workbook.")
-  if(!"data.frame" %in% class(x)) stop("x must be a data.frame.")
-  if(!is.logical(colNames)) stop("colNames must be a logical.")
-  if(!is.logical(rowNames)) stop("rowNames must be a logical.")
-  if(!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
-  if(!is.logical(withFilter)) stop("withFilter must be a logical.")
-  if((!is.character(sep)) | (length(sep) != 1)) stop("sep must be a character vector of length 1")
-  
-  if(!is.logical(firstColumn)) stop("firstColumn must be a logical.")
-  if(!is.logical(lastColumn)) stop("lastColumn must be a logical.")
-  if(!is.logical(bandedRows)) stop("bandedRows must be a logical.")
-  if(!is.logical(bandedCols)) stop("bandedCols must be a logical.")
-  
-  if(is.null(tableName)){
+  if (!"Workbook" %in% class(wb)) stop("First argument must be a Workbook.")
+  if (!"data.frame" %in% class(x)) stop("x must be a data.frame.")
+  if (!is.logical(colNames)) stop("colNames must be a logical.")
+  if (!is.logical(rowNames)) stop("rowNames must be a logical.")
+  if (!is.null(headerStyle) & !"Style" %in% class(headerStyle)) stop("headerStyle must be a style object or NULL.")
+  if (!is.logical(withFilter)) stop("withFilter must be a logical.")
+  if ((!is.character(sep)) | (length(sep) != 1)) stop("sep must be a character vector of length 1")
+
+  if (!is.logical(firstColumn)) stop("firstColumn must be a logical.")
+  if (!is.logical(lastColumn)) stop("lastColumn must be a logical.")
+  if (!is.logical(bandedRows)) stop("bandedRows must be a logical.")
+  if (!is.logical(bandedCols)) stop("bandedCols must be a logical.")
+
+  if (is.null(tableName)) {
     tableName <- paste0("Table", as.character(length(wb$tables) + 3L))
-  }else{
+  } else {
     tableName <- wb$validate_table_name(tableName)
   }
-  
-  
-  ## increase scipen to avoid writing in scientific 
+
+
+  ## increase scipen to avoid writing in scientific
   exSciPen <- getOption("scipen")
   od <- getOption("OutDec")
   exDigits <- getOption("digits")
-  
+
   options("scipen" = 200)
   options("OutDec" = ".")
   options("digits" = 22)
-  
+
   on.exit(options("scipen" = exSciPen), add = TRUE)
   on.exit(expr = options("OutDec" = od), add = TRUE)
   on.exit(options("digits" = exDigits), add = TRUE)
-  
+
   ## convert startRow and startCol
-  if(!is.numeric(startCol))
+  if (!is.numeric(startCol)) {
     startCol <- convertFromExcelRef(startCol)
+  }
   startRow <- as.integer(startRow)
-  
-  ##Coordinates for each section
-  if(rowNames)
+
+  ## Coordinates for each section
+  if (rowNames) {
     x <- cbind(data.frame("row names" = rownames(x)), as.data.frame(x))
-  
-  ## If 0 rows append a blank row  
-  
+  }
+
+  ## If 0 rows append a blank row
+
   validNames <- c("none", paste0("TableStyleLight", 1:21), paste0("TableStyleMedium", 1:28), paste0("TableStyleDark", 1:11))
-  if(!tolower(tableStyle) %in% tolower(validNames)){
+  if (!tolower(tableStyle) %in% tolower(validNames)) {
     stop("Invalid table style.")
-  }else{
+  } else {
     tableStyle <- validNames[grepl(paste0("^", tableStyle, "$"), validNames, ignore.case = TRUE)]
   }
-  
+
   tableStyle <- na.omit(tableStyle)
-  if(length(tableStyle) == 0)
+  if (length(tableStyle) == 0) {
     stop("Unknown table style.")
-  
-  ## header style  
-  if("Style" %in% class(headerStyle))
-    addStyle(wb = wb, sheet = sheet, style=headerStyle,
-             rows = startRow,
-             cols = 0:(ncol(x) - 1L) + startCol,
-             gridExpand = TRUE)
-  
+  }
+
+  ## header style
+  if ("Style" %in% class(headerStyle)) {
+    addStyle(
+      wb = wb, sheet = sheet, style = headerStyle,
+      rows = startRow,
+      cols = 0:(ncol(x) - 1L) + startCol,
+      gridExpand = TRUE
+    )
+  }
+
   showColNames <- colNames
-  
-  if(colNames){
+
+  if (colNames) {
     colNames <- colnames(x)
-    if(any(duplicated(tolower(colNames))))
+    if (any(duplicated(tolower(colNames)))) {
       stop("Column names of x must be case-insensitive unique.")
-    
+    }
+
     ## zero char names are invalid
     char0 <- nchar(colNames) == 0
-    if(any(char0)){
+    if (any(char0)) {
       colNames[char0] <- colnames(x)[char0] <- paste0("Column", which(char0))
     }
-    
-  }else{
+  } else {
     colNames <- paste0("Column", 1:ncol(x))
     names(x) <- colNames
   }
   ## If zero rows, append an empty row (prevent XML from corrupting)
-  if(nrow(x) == 0){
+  if (nrow(x) == 0) {
     x <- rbind(as.data.frame(x), matrix("", nrow = 1, ncol = ncol(x), dimnames = list(character(), colnames(x))))
     names(x) <- colNames
   }
-  
+
   ref1 <- paste0(convert_to_excel_ref(cols = startCol, LETTERS = LETTERS), startRow)
-  ref2 <- paste0(convert_to_excel_ref(cols = startCol+ncol(x)-1, LETTERS = LETTERS), startRow + nrow(x))
+  ref2 <- paste0(convert_to_excel_ref(cols = startCol + ncol(x) - 1, LETTERS = LETTERS), startRow + nrow(x))
   ref <- paste(ref1, ref2, sep = ":")
-  
+
   ## check not overwriting another table
-  wb$check_overwrite_tables(sheet = sheet
-                            , new_rows = c(startRow, startRow + nrow(x) - 1L + 1L) ## + header
-                            , new_cols = c(startCol, startCol + ncol(x) - 1L))
-  
-  
+  wb$check_overwrite_tables(
+    sheet =
+      sheet, new_rows = c(startRow, startRow + nrow(x) - 1L + 1L) ## + header
+    , new_cols = c(startCol, startCol + ncol(x) - 1L)
+  )
+
+
   ## column class styling
   colClasses <- lapply(x, function(x) tolower(class(x)))
   classStyles(wb, sheet = sheet, startRow = startRow, startCol = startCol, colNames = TRUE, nRow = nrow(x), colClasses = colClasses, stack = stack)
-  
+
   ## write data to worksheet
-  wb$writeData(df = x,
-               colNames = TRUE,
-               sheet = sheet,
-               startRow = startRow,
-               startCol = startCol,
-               colClasses = colClasses,
-               hlinkNames = NULL,
-               keepNA = keepNA,
-               list_sep = sep)
-  
+  wb$writeData(
+    df = x,
+    colNames = TRUE,
+    sheet = sheet,
+    startRow = startRow,
+    startCol = startCol,
+    colClasses = colClasses,
+    hlinkNames = NULL,
+    keepNA = keepNA,
+    list_sep = sep
+  )
+
   ## replace invalid XML characters
   colNames <- replaceIllegalCharacters(colNames)
-  
+
   ## create table.xml and assign an id to worksheet tables
-  wb$buildTable(sheet = sheet
-                , colNames = colNames
-                , ref = ref
-                , showColNames = showColNames
-                , tableStyle = tableStyle
-                , tableName = tableName
-                , withFilter = withFilter[1]
-                , totalsRowCount = 0L
-                , showFirstColumn = firstColumn[1]
-                , showLastColumn = lastColumn[1]
-                , showRowStripes = bandedRows[1]
-                , showColumnStripes = bandedCols[1]
+  wb$buildTable(
+    sheet =
+      sheet, colNames =
+      colNames, ref =
+      ref, showColNames =
+      showColNames, tableStyle =
+      tableStyle, tableName =
+      tableName, withFilter =
+      withFilter[1], totalsRowCount =
+      0L, showFirstColumn =
+      firstColumn[1], showLastColumn =
+      lastColumn[1], showRowStripes =
+      bandedRows[1], showColumnStripes = bandedCols[1]
   )
-  
-  
-  
 }

@@ -15,12 +15,10 @@ font <- tolower(gsub(" ", ".", gsub("\\.xlsx", "", files2)))
 strs <- "openxlsxFontSizeLookupTable <- \ndata.frame("
 allWidths <- rep(8.43, 29)
 names(allWidths) <- 1:29
-for(i in 1:length(files)){
-  
+for (i in 1:length(files)) {
   f <- font[[i]]
-  widths <- round(as.numeric(read.xlsx(files[[i]])[2,]), 6)
+  widths <- round(as.numeric(read.xlsx(files[[i]])[2, ]), 6)
   strs <- c(strs, sprintf('"%s"= c(%s),\n', f, paste(widths, collapse = ", ")))
-  
 }
 
 strs[length(strs)] <- gsub(",\n", ")", strs[length(strs)])
@@ -42,12 +40,10 @@ font <- tolower(gsub(" ", ".", gsub("\\-bold.xlsx", "", files2)))
 strsBold <- "openxlsxFontSizeLookupTableBold <- \ndata.frame("
 allWidths <- rep(8.43, 29)
 names(allWidths) <- 1:29
-for(i in 1:length(files)){
-  
+for (i in 1:length(files)) {
   f <- font[[i]]
-  widths <- round(as.numeric(read.xlsx(files[[i]])[2,]), 6)
+  widths <- round(as.numeric(read.xlsx(files[[i]])[2, ]), 6)
   strsBold <- c(strsBold, sprintf('"%s"= c(%s),\n', f, paste(widths, collapse = ", ")))
-  
 }
 
 strsBold[length(strsBold)] <- gsub(",\n", ")", strsBold[length(strsBold)])
@@ -55,8 +51,3 @@ strsBold[length(strsBold)] <- gsub(",\n", ")", strsBold[length(strsBold)])
 
 allStrs <- c(strs, "\n\n\n", strsBold)
 cat(allStrs)
-
-
-
-
-
