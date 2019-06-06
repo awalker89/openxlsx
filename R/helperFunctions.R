@@ -516,11 +516,15 @@ get_named_regions_from_string <- function(dn){
   dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
   
   dn_pos <- regmatches(dn, regexpr("(?<=>).*", dn, perl = TRUE))
-  dn_coords <- regmatches(dn_pos, regexpr("(?<=!).*", dn_pos, perl = TRUE))
-  dn_coords <- gsub("$", "", dn_coords, fixed = TRUE)
-  
-  dn_sheets <- regmatches(dn_pos, regexpr(".*(?=!)", dn_pos, perl = TRUE))
-  dn_sheets <- gsub("'", "", dn_sheets, fixed = TRUE)
+  dn_pos <- gsub("[$']", "", dn_pos)
+
+  has_bang <- grepl("!", dn_pos, fixed=TRUE)
+  dn_sheets <- ifelse(has_bang,
+                      gsub("^(.*)!.*$", "\\1", dn_pos),
+                      "")
+  dn_coords <- ifelse(has_bang,
+                      gsub("^.*!(.*)$", "\\1", dn_pos),
+                      "")
   
   attr(dn_names, "sheet") <- dn_sheets
   attr(dn_names, "position") <- dn_coords

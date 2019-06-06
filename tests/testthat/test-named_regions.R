@@ -118,6 +118,23 @@ test_that("Correctly Loading Named Regions Created in Excel",{
 })
 
 
+test_that("Load names from an Excel file with funky non-region names", {
+  filename <- system.file("namedRegions2.xlsx", package = "openxlsx")
+  wb <- loadWorkbook(filename)
+  names <- getNamedRegions(wb)
+  sheets <- attr(names, "sheet")
+  positions <- attr(names, "position")
+
+  expect_true(length(names) == length(sheets))
+  expect_true(length(names) == length(positions))
+  expect_equal(head(names, 5),
+               c("barref", "barref", "fooref", "fooref", "IQ_CH"))
+  expect_equal(sheets,
+               c("Sheet with space", "Sheet1", "Sheet with space", "Sheet1",
+                 rep("", 26)))
+  expect_equal(positions, c("B4", "B4", "B3", "B3", rep("", 26)))
+})
+
 
 
 test_that("Missing rows in named regions", {
