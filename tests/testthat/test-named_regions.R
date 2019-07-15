@@ -133,8 +133,10 @@ test_that("Load names from an Excel file with funky non-region names", {
                c("Sheet with space", "Sheet1", "Sheet with space", "Sheet1",
                  rep("", 26)))
   expect_equal(positions, c("B4", "B4", "B3", "B3", rep("", 26)))
-})
 
+  names2 <- getNamedRegions(filename)
+  expect_equal(names, names2)
+})
 
 
 test_that("Missing rows in named regions", {

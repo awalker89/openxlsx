@@ -512,6 +512,7 @@ get_named_regions_from_string <- function(dn){
   dn <- gsub("</workbook>", "", dn, fixed = TRUE)
   
   dn <- unique(unlist(strsplit(dn, split = "</definedName>", fixed = TRUE)))
+  dn <- dn[grepl("<definedName", dn, fixed=TRUE)]
   
   dn_names <- regmatches(dn, regexpr('(?<=name=")[^"]+', dn, perl = TRUE))
   
