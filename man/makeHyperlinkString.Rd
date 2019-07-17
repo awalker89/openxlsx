@@ -4,7 +4,8 @@
 \alias{makeHyperlinkString}
 \title{create Excel hyperlink string}
 \usage{
-makeHyperlinkString(sheet, row = 1, col = 1, text = NULL, file = NULL)
+makeHyperlinkString(sheet, row = 1, col = 1, text = NULL,
+  file = NULL)
 }
 \arguments{
 \item{sheet}{Name of a worksheet}

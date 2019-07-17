@@ -4,8 +4,9 @@
 \alias{insertPlot}
 \title{Insert the current plot into a worksheet}
 \usage{
-insertPlot(wb, sheet, width = 6, height = 4, xy = NULL, startRow = 1,
-  startCol = 1, fileType = "png", units = "in", dpi = 300)
+insertPlot(wb, sheet, width = 6, height = 4, xy = NULL,
+  startRow = 1, startCol = 1, fileType = "png", units = "in",
+  dpi = 300)
 }
 \arguments{
 \item{wb}{A workbook object}

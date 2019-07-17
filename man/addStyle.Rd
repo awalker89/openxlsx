@@ -4,7 +4,8 @@
 \alias{addStyle}
 \title{Add a style to a set of cells}
 \usage{
-addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE, stack = FALSE)
+addStyle(wb, sheet, style, rows, cols, gridExpand = FALSE,
+  stack = FALSE)
 }
 \arguments{
 \item{wb}{A Workbook object containing a worksheet.}
