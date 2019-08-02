@@ -40,7 +40,7 @@ extern SEXP _openxlsx_map_cell_types_to_char(SEXP);
 extern SEXP _openxlsx_map_cell_types_to_integer(SEXP);
 extern SEXP _openxlsx_matrixRowInds(SEXP);
 extern SEXP _openxlsx_read_file_newline(SEXP);
-extern SEXP _openxlsx_read_workbook(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _openxlsx_read_workbook(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _openxlsx_write_worksheet_xml(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _openxlsx_write_worksheet_xml_2(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _openxlsx_write_file(SEXP, SEXP, SEXP, SEXP);
@@ -76,7 +76,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"_openxlsx_map_cell_types_to_integer",   (DL_FUNC) &_openxlsx_map_cell_types_to_integer,    1},
   {"_openxlsx_matrixRowInds",               (DL_FUNC) &_openxlsx_matrixRowInds,                1},
   {"_openxlsx_read_file_newline",           (DL_FUNC) &_openxlsx_read_file_newline,            1},
-  {"_openxlsx_read_workbook",               (DL_FUNC) &_openxlsx_read_workbook,               10},
+  {"_openxlsx_read_workbook",               (DL_FUNC) &_openxlsx_read_workbook,               11},
   {"_openxlsx_write_worksheet_xml",         (DL_FUNC) &_openxlsx_write_worksheet_xml,          4},
   {"_openxlsx_write_worksheet_xml_2",       (DL_FUNC) &_openxlsx_write_worksheet_xml_2,        5},
   {"_openxlsx_write_file",                   (DL_FUNC) &_openxlsx_write_file,                  4},

@@ -81,8 +81,8 @@ getCellInfo <- function(xmlFile, sharedStrings, skipEmptyRows, startRow, rows, g
     .Call(`_openxlsx_getCellInfo`, xmlFile, sharedStrings, skipEmptyRows, startRow, rows, getDates)
 }
 
-read_workbook <- function(cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names) {
-    .Call(`_openxlsx_read_workbook`, cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names)
+read_workbook <- function(cols_in, rows_in, v, string_inds, is_date, hasColNames, hasSepNames, skipEmptyRows, skipEmptyCols, nRows, clean_names) {
+    .Call(`_openxlsx_read_workbook`, cols_in, rows_in, v, string_inds, is_date, hasColNames, hasSepNames, skipEmptyRows, skipEmptyCols, nRows, clean_names)
 }
 
 calc_number_rows <- function(x, skipEmptyRows) {

@@ -19,6 +19,7 @@
 #' If NULL, all rows are read.
 #' @param check.names logical. If TRUE then the names of the variables in the data frame 
 #' are checked to ensure that they are syntactically valid variable names
+#' @param sep.names One character which substitutes blanks in column names. By default, "."
 #' @param namedRegion A named region in the Workbook. If not NULL startRow, rows and cols parameters are ignored.
 #' @param na.strings A character vector of strings which are to be interpreted as NA. Blank cells will be returned as NA.
 #' @param fillMergedCells If TRUE, the value in a merged cell is given to all cells within the merge.
@@ -72,6 +73,7 @@ read.xlsx <- function(xlsxFile,
                       rows = NULL,
                       cols = NULL,
                       check.names = FALSE,
+                      sep.names = ".",
                       namedRegion = NULL,
                       na.strings = "NA",
                       fillMergedCells = FALSE){
@@ -92,6 +94,7 @@ read.xlsx.default <- function(xlsxFile,
                               rows = NULL,
                               cols = NULL,
                               check.names = FALSE,
+                              sep.names = ".",
                               namedRegion = NULL,
                               na.strings = "NA",
                               fillMergedCells = FALSE){
@@ -120,6 +123,9 @@ read.xlsx.default <- function(xlsxFile,
   
   if(!is.logical(check.names))
     stop("check.names must be TRUE/FALSE.")
+  
+  if(!is.character(sep.names) | nchar(sep.names)!=1)
+    stop("sep.names must be a character and only one.")
   
   if(length(sheet) > 1)
     stop("sheet must be of length 1.")
@@ -440,6 +446,7 @@ read.xlsx.default <- function(xlsxFile,
                      string_inds = string_refs,
                      is_date = isDate,
                      hasColNames = colNames,
+                     hasSepNames = sep.names,
                      skipEmptyRows = skipEmptyRows,
                      skipEmptyCols = skipEmptyCols,
                      nRows = nRows,
@@ -494,6 +501,7 @@ readWorkbook <- function(xlsxFile,
                          rows = NULL,
                          cols = NULL,
                          check.names = FALSE,
+                         sep.names = ".",
                          namedRegion = NULL,
                          na.strings = "NA",
                          fillMergedCells = FALSE){
@@ -509,6 +517,7 @@ readWorkbook <- function(xlsxFile,
             rows = rows,
             cols = cols,
             check.names = check.names,
+            sep.names = ".",
             namedRegion = namedRegion,
             na.strings = na.strings,
             fillMergedCells = fillMergedCells)
