@@ -7,11 +7,12 @@
 addWorksheet(wb, sheetName, gridLines = TRUE, tabColour = NULL,
   zoom = 100, header = NULL, footer = NULL, evenHeader = NULL,
   evenFooter = NULL, firstHeader = NULL, firstFooter = NULL,
-  visible = TRUE, paperSize = getOption("openxlsx.paperSize", default = 9),
-  orientation = getOption("openxlsx.orientation", default = "portrait"),
-  vdpi = getOption("openxlsx.vdpi", default = getOption("openxlsx.dpi",
-  default = 300)), hdpi = getOption("openxlsx.hdpi", default =
-  getOption("openxlsx.dpi", default = 300)))
+  visible = TRUE, paperSize = getOption("openxlsx.paperSize", default =
+  9), orientation = getOption("openxlsx.orientation", default =
+  "portrait"), vdpi = getOption("openxlsx.vdpi", default =
+  getOption("openxlsx.dpi", default = 300)),
+  hdpi = getOption("openxlsx.hdpi", default = getOption("openxlsx.dpi",
+  default = 300)))
 }
 \arguments{
 \item{wb}{A Workbook object to attach the new worksheet}

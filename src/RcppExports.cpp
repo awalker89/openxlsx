@@ -252,8 +252,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // read_workbook
-SEXP read_workbook(IntegerVector cols_in, IntegerVector rows_in, CharacterVector v, IntegerVector string_inds, LogicalVector is_date, bool hasColNames, bool skipEmptyRows, bool skipEmptyCols, int nRows, Function clean_names);
-RcppExport SEXP _openxlsx_read_workbook(SEXP cols_inSEXP, SEXP rows_inSEXP, SEXP vSEXP, SEXP string_indsSEXP, SEXP is_dateSEXP, SEXP hasColNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP nRowsSEXP, SEXP clean_namesSEXP) {
+SEXP read_workbook(IntegerVector cols_in, IntegerVector rows_in, CharacterVector v, IntegerVector string_inds, LogicalVector is_date, bool hasColNames, char hasSepNames, bool skipEmptyRows, bool skipEmptyCols, int nRows, Function clean_names);
+RcppExport SEXP _openxlsx_read_workbook(SEXP cols_inSEXP, SEXP rows_inSEXP, SEXP vSEXP, SEXP string_indsSEXP, SEXP is_dateSEXP, SEXP hasColNamesSEXP, SEXP hasSepNamesSEXP, SEXP skipEmptyRowsSEXP, SEXP skipEmptyColsSEXP, SEXP nRowsSEXP, SEXP clean_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -263,11 +263,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type string_inds(string_indsSEXP);
     Rcpp::traits::input_parameter< LogicalVector >::type is_date(is_dateSEXP);
     Rcpp::traits::input_parameter< bool >::type hasColNames(hasColNamesSEXP);
+    Rcpp::traits::input_parameter< char >::type hasSepNames(hasSepNamesSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyRows(skipEmptyRowsSEXP);
     Rcpp::traits::input_parameter< bool >::type skipEmptyCols(skipEmptyColsSEXP);
     Rcpp::traits::input_parameter< int >::type nRows(nRowsSEXP);
     Rcpp::traits::input_parameter< Function >::type clean_names(clean_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(read_workbook(cols_in, rows_in, v, string_inds, is_date, hasColNames, skipEmptyRows, skipEmptyCols, nRows, clean_names));
+    rcpp_result_gen = Rcpp::wrap(read_workbook(cols_in, rows_in, v, string_inds, is_date, hasColNames, hasSepNames, skipEmptyRows, skipEmptyCols, nRows, clean_names));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -465,7 +466,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_openxlsx_int_2_cell_ref", (DL_FUNC) &_openxlsx_int_2_cell_ref, 1},
     {"_openxlsx_get_shared_strings", (DL_FUNC) &_openxlsx_get_shared_strings, 2},
     {"_openxlsx_getCellInfo", (DL_FUNC) &_openxlsx_getCellInfo, 6},
-    {"_openxlsx_read_workbook", (DL_FUNC) &_openxlsx_read_workbook, 10},
+    {"_openxlsx_read_workbook", (DL_FUNC) &_openxlsx_read_workbook, 11},
     {"_openxlsx_calc_number_rows", (DL_FUNC) &_openxlsx_calc_number_rows, 2},
     {"_openxlsx_map_cell_types_to_integer", (DL_FUNC) &_openxlsx_map_cell_types_to_integer, 1},
     {"_openxlsx_map_cell_types_to_char", (DL_FUNC) &_openxlsx_map_cell_types_to_char, 1},

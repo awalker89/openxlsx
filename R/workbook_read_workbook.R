@@ -14,6 +14,7 @@ read.xlsx.Workbook <- function(xlsxFile,
                                rows = NULL,
                                cols = NULL,
                                check.names = FALSE,
+                               sep.names = ".",
                                namedRegion = NULL,
                                na.strings = "NA",
                                fillMergedCells = FALSE){
@@ -34,6 +35,9 @@ read.xlsx.Workbook <- function(xlsxFile,
   
   if(!is.logical(check.names))
     stop("check.names must be TRUE/FALSE.")
+  
+  if(!is.character(sep.names) | nchar(sep.names)!=1)
+    stop("sep.names must be a character and only one.")
   
   if(length(sheet) != 1)
     stop("sheet must be of length 1.")
@@ -326,6 +330,7 @@ read.xlsx.Workbook <- function(xlsxFile,
                      , string_inds = string_refs
                      , is_date = isDate
                      , hasColNames = colNames
+                     , hasSepNames = sep.names
                      , skipEmptyRows = skipEmptyRows
                      , skipEmptyCols = skipEmptyCols
                      , nRows = nRows

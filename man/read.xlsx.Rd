@@ -6,8 +6,9 @@
 \usage{
 read.xlsx(xlsxFile, sheet = 1, startRow = 1, colNames = TRUE,
   rowNames = FALSE, detectDates = FALSE, skipEmptyRows = TRUE,
-  skipEmptyCols = TRUE, rows = NULL, cols = NULL, check.names = FALSE,
-  namedRegion = NULL, na.strings = "NA", fillMergedCells = FALSE)
+  skipEmptyCols = TRUE, rows = NULL, cols = NULL,
+  check.names = FALSE, sep.names = ".", namedRegion = NULL,
+  na.strings = "NA", fillMergedCells = FALSE)
 }
 \arguments{
 \item{xlsxFile}{An xlsx file, Workbook object or URL to xlsx file.}
@@ -36,6 +37,8 @@ If NULL, all columns are read.}
 
 \item{check.names}{logical. If TRUE then the names of the variables in the data frame 
 are checked to ensure that they are syntactically valid variable names}
+
+\item{sep.names}{One character which substitutes blanks in column names. By default, "."}
 
 \item{namedRegion}{A named region in the Workbook. If not NULL startRow, rows and cols parameters are ignored.}
 

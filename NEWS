@@ -2,7 +2,9 @@
 openxlsx 4.1.1
 ----------------------------------------------------------------
 
+NEW FEATURES
 
+* sep.names allows choose other separator than '.' for variable names with a blank inside
 
 openxlsx 4.1.0
 ----------------------------------------------------------------
