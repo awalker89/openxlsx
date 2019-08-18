@@ -166,6 +166,151 @@ Workbook$methods(addWorksheet = function(sheetName
 })
 
 
+Workbook$methods(cloneWorksheet = function(sheetName, clonedSheet){
+  clonedSheet = validateSheet(clonedSheet)
+  if (!missing(sheetName)) {
+    if (grepl(pattern=":", x=sheetName)) stop("colon not allowed in sheet names in Excel")
+  }	
+  newSheetIndex = length(worksheets) + 1L
+  if(newSheetIndex > 1){
+    sheetId <- max(as.integer(regmatches(workbook$sheets, regexpr('(?<=sheetId=")[0-9]+', workbook$sheets, perl = TRUE)))) + 1L
+  }else{
+    sheetId <- 1
+  }
+  
+  
+  ## copy visibility from cloned sheet!
+  visible <- regmatches(workbook$sheets[[clonedSheet]], regexpr('(?<=state=")[^"]+', workbook$sheets[[clonedSheet]], perl = TRUE))
+
+  ##  Add sheet to workbook.xml
+  workbook$sheets <<- c(workbook$sheets, sprintf('<sheet name="%s" sheetId="%s" state="%s" r:id="rId%s"/>', sheetName, sheetId, visible, newSheetIndex))
+  
+  ## append to worksheets list
+  worksheets <<- append(worksheets, worksheets[[clonedSheet]]$copy())
+  
+  
+  ## update content_tyes
+  ## add a drawing.xml for the worksheet
+  Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/worksheets/sheet%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>', newSheetIndex),
+                      sprintf('<Override PartName="/xl/drawings/drawing%s.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>', newSheetIndex))
+  
+  ## Update xl/rels
+  workbook.xml.rels <<- c(workbook.xml.rels,
+                          sprintf('<Relationship Id="rId0" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet%s.xml"/>', newSheetIndex)
+  )
+  
+  ## create sheet.rels to simplify id assignment
+  worksheets_rels[[newSheetIndex]] <<- genBaseSheetRels(newSheetIndex)
+  drawings_rels[[newSheetIndex]] <<- drawings_rels[[clonedSheet]]
+  
+  # give each chart its own filename (images can re-use the same file, but charts can't)
+  drawings_rels[[newSheetIndex]] <<- sapply(drawings_rels[[newSheetIndex]], function (rl) {
+    chartfiles <- regmatches(rl, gregexpr('(?<=charts/)chart[0-9]+\\.xml', rl, perl = TRUE))[[1]]
+    for (cf in chartfiles) {
+      chartid <- length(charts) + 1
+      newname <- paste0("chart", chartid, ".xml")
+      fl <- charts[cf]
+
+      # Read the chartfile and adjust all formulas to point to the new 
+      # sheet name instead of the clone source
+      # The result is saved to a new chart xml file
+      newfl <- file.path(dirname(fl), newname)
+      charts[newname] <<- newfl
+      chart <- readLines(fl, warn = FALSE, encoding = "UTF-8")
+      chart <- gsub(paste0("(?<=')", sheet_names[[clonedSheet]], "(?='!)"), paste0("'", sheetName, "'"), chart, perl = TRUE)
+      chart <- gsub(paste0("(?<=[^A-Za-z0-9])", sheet_names[[clonedSheet]], "(?=!)"), paste0("'", sheetName, "'"), chart, perl = TRUE)
+      writeLines(chart, newfl)
+      # file.copy(fl, newfl)
+      Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/charts/%s" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>', newname))
+      rl = gsub(paste0('(?<=charts/)', cf), newname, rl, perl = TRUE)
+    }
+    rl
+  }, USE.NAMES = FALSE)
+  # The IDs in the drawings array are sheet-specific, so within the new cloned sheet
+  # the same IDs can be used => no need to modify drawings
+  drawings[[newSheetIndex]] <<- drawings[[clonedSheet]]
+  
+  vml_rels[[newSheetIndex]] <<- vml_rels[[clonedSheet]]
+  vml[[newSheetIndex]] <<- vml[[clonedSheet]]
+  
+  isChartSheet[[newSheetIndex]] <<- isChartSheet[[clonedSheet]]
+  comments[[newSheetIndex]] <<- comments[[clonedSheet]]
+  
+  rowHeights[[newSheetIndex]] <<- rowHeights[[clonedSheet]]
+  colWidths[[newSheetIndex]] <<- colWidths[[clonedSheet]]
+  
+  sheetOrder <<- c(sheetOrder, as.integer(newSheetIndex))
+  sheet_names <<- c(sheet_names, sheetName)
+  
+  
+  ############################
+  ## STYLE
+  ## ... objects are stored in a global list, so we need to get all styles 
+  ## assigned to the cloned sheet and duplicate them
+  sheetStyles = Filter(function(s) {s$sheet == sheet_names[[clonedSheet]]}, styleObjects)
+  styleObjects <<- c(styleObjects, 
+                     Map(function(s) {s$sheet = sheetName; s}, sheetStyles)
+                     )
+  
+  
+  ############################
+  ## TABLES 
+  ## ... are stored in the $tables list, with the name and sheet as attr
+  ## and in the worksheets[]$tableParts list. We also need to adjust the 
+  ## worksheets_rels and set the content type for the new table
+
+  tbls = tables[attr(tables, "sheet") == clonedSheet]
+  for (t in tbls) {
+      # Extract table name, displayName and ID from the xml
+      oldname = regmatches(t, regexpr('(?<= name=")[^"]+', t, perl = TRUE))
+      olddispname = regmatches(t, regexpr('(?<= displayName=")[^"]+', t, perl = TRUE))
+      oldid = regmatches(t, regexpr('(?<= id=")[^"]+', t, perl = TRUE))
+      ref = regmatches(t, regexpr('(?<= ref=")[^"]+', t, perl = TRUE))
+    
+      # Find new, unused table names by appending _n, where n=1,2,...
+      n <- 0
+      while (paste0(oldname, "_", n) %in% attr(tables, "tableName")) {
+          n <- n + 1
+      }
+      newname <- paste0(oldname, "_", n)
+      newdispname <- paste0(olddispname, "_", n)
+      newid <- as.character(length(tables) + 3L)
+      
+      # Use the table definition from the cloned sheet and simply replace the names
+      newt <- t
+      newt <- gsub(paste0(" name=\"", oldname, "\""), paste0(" name=\"", newname, "\""), newt)
+      newt <- gsub(paste0(" displayName=\"", olddispname, "\""), paste0(" displayName=\"", newdispname, "\""), newt)
+      newt <- gsub(paste0("(<table [^<]* id=\")", oldid, "\""), paste0("\\1", newid, "\""), newt)
+      
+      oldtables = tables
+      tables <<- c(oldtables, newt)
+      names(tables) <<- c(names(oldtables), ref)
+      attr(tables, "sheet")  <<- c(attr(oldtables, "sheet"), newSheetIndex)
+      attr(tables, "tableName") <<- c(attr(oldtables, "tableName"), newname)
+      
+      oldparts = worksheets[[newSheetIndex]]$tableParts
+      worksheets[[newSheetIndex]]$tableParts <<- c(oldparts, sprintf('<tablePart r:id="rId%s"/>', newid))
+      attr(worksheets[[newSheetIndex]]$tableParts, "tableName") <<- c(attr(oldparts, "tableName"), newname)
+      names(attr(worksheets[[newSheetIndex]]$tableParts, "tableName")) <<- c(names(attr(oldparts, "tableName")), ref)
+
+      Content_Types <<- c(Content_Types, sprintf('<Override PartName="/xl/tables/table%s.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/>', newid))
+      tables.xml.rels <<- append(tables.xml.rels, "")
+      
+      worksheets_rels[[newSheetIndex]] <<- c(worksheets_rels[[newSheetIndex]],
+                                     sprintf('<Relationship Id="rId%s" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table%s.xml"/>',  
+                                             newid,  newid))
+
+  }
+  
+  # TODO: The following items are currently NOT copied/duplicated for the cloned sheet:
+  #   - Comments
+  #   - Pivot tables
+
+  invisible(newSheetIndex)
+  
+})
+
+
 Workbook$methods(addChartSheet = function(sheetName, tabColour = NULL, zoom = 100){
   
   newSheetIndex <- length(worksheets) + 1L
@@ -2330,7 +2475,7 @@ Workbook$methods(show = function(){
     showText <- c(showText, "\nImages:\n", sprintf('Image %s: "%s"\n', 1:nImages, media))
   
   if(nCharts > 0)
-    showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nImages, media))
+    showText <- c(showText, "\nCharts:\n", sprintf('Chart %s: "%s"\n', 1:nCharts, charts))
   
   if(nSheets > 0)
     showText <- c(showText, sprintf("Worksheet write order: %s", paste(sheetOrder, collapse = ", ")))

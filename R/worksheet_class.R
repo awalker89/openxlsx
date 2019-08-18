@@ -7,15 +7,15 @@ WorkSheet$methods(initialize = function(showGridLines = TRUE,
                                         tabColour = NULL, 
                                         zoom = 100, 
                                         
-                                        oddHeader,
-                                        oddFooter,
-                                        evenHeader, 
-                                        evenFooter, 
-                                        firstHeader, 
-                                        firstFooter,
+                                        oddHeader = NULL,
+                                        oddFooter = NULL,
+                                        evenHeader = NULL,
+                                        evenFooter = NULL,
+                                        firstHeader = NULL,
+                                        firstFooter = NULL,
                                         
-                                        paperSize, 
-                                        orientation,
+                                        paperSize = 9, 
+                                        orientation = 'portrait',
                                         hdpi = 300,
                                         vdpi = 300){
   
