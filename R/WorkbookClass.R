@@ -541,7 +541,7 @@ Workbook$methods(saveWorkbook = function(){
   ## zip it
   setwd(dir = tmpDir)
   cl <- ifelse(!is.null(getOption("openxlsx.compresssionLevel")), getOption("openxlsx.compresssionLevel"), getOption("openxlsx.compresssionevel", 6))
-  zip::zip(zipfile = tmpFile, files = list.files(tmpDir, full.names = FALSE, recursive = TRUE, include.dirs = FALSE, all.files=TRUE), compression_level = cl)  
+  zip::zipr(zipfile = tmpFile, files = list.files(tmpDir, full.names = FALSE, recursive = TRUE, include.dirs = FALSE, all.files=TRUE), compression_level = cl)  
   
   ## reset styles - maintain any changes to base font
   baseFont <- styles$fonts[[1]]
