@@ -757,7 +757,7 @@ mergeCell2mapping <- function(x){
   refs <- regmatches(x, regexpr("(?<=ref=\")[A-Z0-9:]+", x, perl = TRUE))
   refs <- strsplit(refs, split = ":")
   rows <- lapply(refs, function(r) {
-    r <- as.integer(gsub("[A-Z]", "", r))
+    r <- as.integer(gsub(pattern = "[A-Z]", replacement = "", r, perl = TRUE))
     seq(from = r[1], to = r[2], by = 1)
   })
   
@@ -833,7 +833,7 @@ getFile <- function(xlsxFile){
   
 }
 
-
+                        
 #' @name get_worksheet_entries
 #' @title Get entries from workbook worksheet
 #' @description Get all entries from workbook worksheet without xml tags
@@ -947,4 +947,25 @@ auto_heights <- function(wb, sheet, selected, fontsize = NULL, factor = 1.0,
   })
   # return list of indices of columns with fixed widths and optimal row heights
   list(cols, heights)
+}
+  
+# Rotate the 15-bit integer by n bits to the 
+hashPassword <- function(password) {
+  # password limited to 15 characters
+  chars = head(strsplit(password, "")[[1]], 15)
+  # See OpenOffice's documentation of the Excel format: http://www.openoffice.org/sc/excelfileformat.pdf
+  # Start from the last character and for each character
+  # - XOR hash with the ASCII character code
+  # - rotate hash (16 bits) one bit to the left
+  # Finally, XOR hash with 0xCE4B and XOR with password length
+  # Output as hex (uppercase)
+  rotate16bit <- function(hash, n = 1) {
+    bitwOr(bitwAnd(bitwShiftR(hash, 15 - n), 0x01), bitwAnd(bitwShiftL(hash, n), 0x7fff));
+  }
+  hash = Reduce(function(char, h) {
+    h = bitwXor(h, as.integer(charToRaw(char)))
+    rotate16bit(h, 1)
+  }, chars, 0, right = TRUE)
+  hash = bitwXor(bitwXor(hash, length(chars)), 0xCE4B)
+  format(as.hexmode(hash), upper.case = TRUE)
 }

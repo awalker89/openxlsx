@@ -13,9 +13,9 @@ writeFormula(wb, sheet, x, startCol = 1, startRow = 1, xy = NULL)
 
 \item{x}{A character vector.}
 
-\item{startCol}{A vector specifiying the starting column to write to.}
+\item{startCol}{A vector specifying the starting column to write to.}
 
-\item{startRow}{A vector specifiying the starting row to write to.}
+\item{startRow}{A vector specifying the starting row to write to.}
 
 \item{xy}{An alternative to specifying \code{startCol} and
 \code{startRow} individually.  A vector of the form

@@ -17,10 +17,10 @@ openxlsxCoerce.default <- function(x, rowNames){
 
 
 openxlsxCoerce.data.frame <- function(x, rowNames){
-  
+
   ## cbind rownames to x
   if(rowNames){
-    x <- cbind(data.frame("row names" = rownames(x), stringsAsFactors = FALSE), x)
+    x <- cbind(data.frame("row names" = rownames(x), stringsAsFactors = FALSE), as.data.frame(x, stringsAsFactors = FALSE))
     names(x)[[1]] <- ""
   }
   

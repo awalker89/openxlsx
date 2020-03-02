@@ -24,7 +24,7 @@
 #' for examples
 #' 
 #' @details
-#' The openxlsx package uses global options to simplfy formatting:
+#' The openxlsx package uses global options to simplify formatting:
 #' 
 #' \itemize{
 #'    \item{\code{options("openxlsx.borderColour" = "black")}}

@@ -33,6 +33,8 @@ Style$methods(initialize = function(){
   numFmt <<- NULL
   fill <<- NULL
   wrapText <<- NULL
+  hidden <<- NULL
+  locked <<- NULL
   xfId <<- NULL
   
 })
@@ -126,6 +128,12 @@ mergeStyle = function(oldStyle, newStyle){
   if(!is.null(newStyle$wrapText))
     oldStyle$wrapText <- newStyle$wrapText
     
+  if(!is.null(newStyle$locked))
+    oldStyle$locked <- newStyle$locked
+  
+  if(!is.null(newStyle$hidden))
+    oldStyle$hidden <- newStyle$hidden
+  
   if(!is.null(newStyle$xfId))
     oldStyle$xfId <- newStyle$xfId
   
@@ -202,6 +210,11 @@ Style$methods(show = function(print = TRUE){
   if(length(bgFill) > 0)
     styleShow <- append(styleShow, sprintf("Cell fill background: %s \n", paste(paste0(names(bgFill),": ", sub("^FF", "#", bgFill)), collapse = ", ")))
   
+  if(!is.null(locked))
+    styleShow <- append(styleShow, sprintf("Cell protection: %s \n", locked))  ## Cell protection
+  if(!is.null(hidden))
+    styleShow <- append(styleShow, sprintf("Cell formula hidden: %s \n", hidden))  ## Cell formula hidden
+  
   styleShow <- append(styleShow, sprintf("wraptext: %s", wrapText))  ## wrap text
   
   styleShow <- c(styleShow, "\n\n")
@@ -243,6 +256,8 @@ Style$methods(as.list = function(){
   "fillFg" = fill$fillFg,
   "fillBg" = fill$fillBg,
   "wrapText" = wrapText,
+  "locked" = locked,
+  "hidden" = hidden,
   "xfId" = xfId
   )
   

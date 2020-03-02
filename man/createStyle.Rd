@@ -7,9 +7,10 @@
 createStyle(fontName = NULL, fontSize = NULL, fontColour = NULL,
   numFmt = "GENERAL", border = NULL,
   borderColour = getOption("openxlsx.borderColour", "black"),
-  borderStyle = getOption("openxlsx.borderStyle", "thin"), bgFill = NULL,
-  fgFill = NULL, halign = NULL, valign = NULL, textDecoration = NULL,
-  wrapText = FALSE, textRotation = NULL, indent = NULL)
+  borderStyle = getOption("openxlsx.borderStyle", "thin"),
+  bgFill = NULL, fgFill = NULL, halign = NULL, valign = NULL,
+  textDecoration = NULL, wrapText = FALSE, textRotation = NULL,
+  indent = NULL, locked = NULL, hidden = NULL)
 }
 \arguments{
 \item{fontName}{A name of a font. Note the font name is not validated. If fontName is NULL,
@@ -35,9 +36,9 @@ or one of colours(). If fontColour is NULL, the workbook base font colours is us
   \item{\bold{FRACTION}}
   \item{\bold{SCIENTIFIC}}
   \item{\bold{TEXT}}
-  \item{\bold{COMMA}{  for comma seperated thousands}}
+  \item{\bold{COMMA}{  for comma separated thousands}}
   \item{For date/datetime styling a combination of d, m, y and punctuation marks}
-  \item{For numeric rouding use "0.00" with the preferred number of decimal places}
+  \item{For numeric rounding use "0.00" with the preferred number of decimal places}
 }}
 
 \item{border}{Cell border. A vector of "top", "bottom", "left", "right" or a single string).
@@ -106,9 +107,13 @@ Vertical alignment of cell contents
 
 \item{wrapText}{Logical. If \code{TRUE} cell contents will wrap to fit in column.}
 
-\item{textRotation}{Rotation of text in degrees. 255 for vertial text.}
+\item{textRotation}{Rotation of text in degrees. 255 for vertical text.}
 
 \item{indent}{Horizontal indentation of cell contents.}
+
+\item{locked}{Whether cell contents are locked (if worksheet protection is turned on)}
+
+\item{hidden}{Whether the formula of the cell contents will be hidden (if worksheet protection is turned on)}
 }
 \value{
 A style object

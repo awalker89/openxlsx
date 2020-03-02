@@ -30,13 +30,13 @@
 #'   \item{\bold{gridLines}}{ A logical. If \code{FALSE}, the worksheet grid lines will be hidden.}
 #'   \item{\bold{tabColour}}{ Colour of the worksheet tab. A valid colour (belonging to colours()) 
 #'   or a valid hex colour beginning with "#".}
-#'   \item{\bold{zoom}}{ A numeric betwettn 10 and 400. Worksheet zoom level as a percentage.}
+#'   \item{\bold{zoom}}{ A numeric between 10 and 400. Worksheet zoom level as a percentage.}
 #' }
 #' 
 #' \bold{writeData/writeDataTable Parameters}
 #' \itemize{
-#'   \item{\bold{startCol}}{ A vector specifiying the starting column(s) to write df}
-#'   \item{\bold{startRow}}{ A vector specifiying the starting row(s) to write df}
+#'   \item{\bold{startCol}}{ A vector specifying the starting column(s) to write df}
+#'   \item{\bold{startRow}}{ A vector specifying the starting row(s) to write df}
 #'   \item{\bold{xy}}{ An alternative to specifying startCol and startRow individually. 
 #'  A vector of the form c(startCol, startRow)}
 #'   \item{\bold{colNames or col.names}}{ If \code{TRUE}, column names of x are written.}

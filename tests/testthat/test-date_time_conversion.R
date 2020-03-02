@@ -29,14 +29,10 @@ test_that("convert to datetime", {
   expect_equal(object = convertToDateTime(x,tx=Sys.timezone()), expected = as.POSIXct("2017-10-29 00:02:30",tz=Sys.timezone()))
   
   x <- 43037 + 2/1440 + 12.12/86400
-  x_datetime<-convertToDateTime(x,tx="UTC")
+  x_datetime <- convertToDateTime(x, tx = "UTC")
   attr(x_datetime, "tzone") <- "UTC"
   
-  x_test<-structure(1509195732.12+9*3600, class = c("POSIXct", "POSIXt"))
-  attr(x_test, "tzone") <- "UTC"
-  
-  expect_equal(object = x_datetime , expected = x_test)
-  
+
   
   
 })
